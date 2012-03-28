@@ -20,7 +20,8 @@
         private Traveler _traveler;
         private AgentInteraction _agentInteraction;
 
-        private DateTime _nextAction;
+        private DateTime _nextAction = DateTime.MinValue;
+        private DateTime _nextStoryLineAttempt = DateTime.MinValue;
 
         public Storyline()
         {
@@ -96,6 +97,7 @@
             var mission = Mission;
             if (mission == null)
             {
+                _nextStoryLineAttempt = DateTime.Now.AddMinutes(15);
                 State = StorylineState.Done;
                 Cache.Instance.MissionName = String.Empty;
                 return;
@@ -298,6 +300,10 @@
                     break;
 
                 case StorylineState.Done:
+                    if (DateTime.Now > _nextStoryLineAttempt)
+                    {
+                        State = StorylineState.Idle;
+                    }
                     break;
             }
         }
