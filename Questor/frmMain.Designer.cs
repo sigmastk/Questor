@@ -48,19 +48,19 @@
             this.buttonSettingsXML = new System.Windows.Forms.Button();
             this.buttonOpenMissionXML = new System.Windows.Forms.Button();
             this.buttonOpenLogDirectory = new System.Windows.Forms.Button();
-            this.LiveScheduling = new System.Windows.Forms.TabPage();
-            this.lblStartTime1 = new System.Windows.Forms.Label();
-            this.lblMaxRunTime1 = new System.Windows.Forms.Label();
-            this.dateTimePickerStartTime = new System.Windows.Forms.DateTimePicker();
-            this.textBoxMaxRunTime = new System.Windows.Forms.TextBox();
-            this.lblMaxRuntime2 = new System.Windows.Forms.Label();
-            this.lblStopTime = new System.Windows.Forms.Label();
-            this.dateTimePickerStopTime = new System.Windows.Forms.DateTimePicker();
+           // this.LiveScheduling = new System.Windows.Forms.TabPage();
+           // this.lblStartTime1 = new System.Windows.Forms.Label();
+           // this.lblMaxRunTime1 = new System.Windows.Forms.Label();
+           // this.dateTimePickerStartTime = new System.Windows.Forms.DateTimePicker();
+           // this.textBoxMaxRunTime = new System.Windows.Forms.TextBox();
+           // this.lblMaxRuntime2 = new System.Windows.Forms.Label();
+           // this.lblStopTime = new System.Windows.Forms.Label();
+           // this.dateTimePickerStopTime = new System.Windows.Forms.DateTimePicker();
             this.Console = new System.Windows.Forms.TabPage();
             this.txtExtConsole = new System.Windows.Forms.TextBox();
             this.txtComand = new System.Windows.Forms.TextBox();
             this.tabInterface1 = new System.Windows.Forms.TabControl();
-            this.LiveScheduling.SuspendLayout();
+            //this.LiveScheduling.SuspendLayout();
             this.Console.SuspendLayout();
             this.tabInterface1.SuspendLayout();
             this.SuspendLayout();
@@ -213,7 +213,7 @@
             // 
             // buttonQuestormanager
             // 
-            this.buttonQuestormanager.Location = new System.Drawing.Point(371, 4);
+            this.buttonQuestormanager.Location = new System.Drawing.Point(371, 28);
             this.buttonQuestormanager.Name = "buttonQuestormanager";
             this.buttonQuestormanager.Size = new System.Drawing.Size(109, 23);
             this.buttonQuestormanager.TabIndex = 107;
@@ -223,7 +223,7 @@
             // 
             // buttonQuestorStatistics
             // 
-            this.buttonQuestorStatistics.Location = new System.Drawing.Point(486, 4);
+            this.buttonQuestorStatistics.Location = new System.Drawing.Point(486, 29);
             this.buttonQuestorStatistics.Name = "buttonQuestorStatistics";
             this.buttonQuestorStatistics.Size = new System.Drawing.Size(109, 23);
             this.buttonQuestorStatistics.TabIndex = 108;
@@ -233,7 +233,7 @@
             // 
             // buttonSettingsXML
             // 
-            this.buttonSettingsXML.Location = new System.Drawing.Point(601, 4);
+            this.buttonSettingsXML.Location = new System.Drawing.Point(601, 30);
             this.buttonSettingsXML.Name = "buttonSettingsXML";
             this.buttonSettingsXML.Size = new System.Drawing.Size(109, 23);
             this.buttonSettingsXML.TabIndex = 110;
@@ -242,7 +242,7 @@
             // 
             // buttonOpenMissionXML
             // 
-            this.buttonOpenMissionXML.Location = new System.Drawing.Point(486, 30);
+            this.buttonOpenMissionXML.Location = new System.Drawing.Point(486, 55);
             this.buttonOpenMissionXML.Name = "buttonOpenMissionXML";
             this.buttonOpenMissionXML.Size = new System.Drawing.Size(224, 23);
             this.buttonOpenMissionXML.TabIndex = 118;
@@ -252,7 +252,7 @@
             // 
             // buttonOpenLogDirectory
             // 
-            this.buttonOpenLogDirectory.Location = new System.Drawing.Point(371, 30);
+            this.buttonOpenLogDirectory.Location = new System.Drawing.Point(371, 55);
             this.buttonOpenLogDirectory.Name = "buttonOpenLogDirectory";
             this.buttonOpenLogDirectory.Size = new System.Drawing.Size(109, 23);
             this.buttonOpenLogDirectory.TabIndex = 109;
@@ -262,83 +262,83 @@
             // 
             // LiveScheduling
             // 
-            this.LiveScheduling.Controls.Add(this.dateTimePickerStopTime);
-            this.LiveScheduling.Controls.Add(this.lblStopTime);
-            this.LiveScheduling.Controls.Add(this.lblMaxRuntime2);
-            this.LiveScheduling.Controls.Add(this.textBoxMaxRunTime);
-            this.LiveScheduling.Controls.Add(this.dateTimePickerStartTime);
-            this.LiveScheduling.Controls.Add(this.lblMaxRunTime1);
-            this.LiveScheduling.Controls.Add(this.lblStartTime1);
-            this.LiveScheduling.Location = new System.Drawing.Point(4, 22);
-            this.LiveScheduling.Name = "LiveScheduling";
-            this.LiveScheduling.Padding = new System.Windows.Forms.Padding(3);
-            this.LiveScheduling.Size = new System.Drawing.Size(769, 276);
-            this.LiveScheduling.TabIndex = 2;
-            this.LiveScheduling.Text = "LiveScheduling";
-            this.LiveScheduling.UseVisualStyleBackColor = true;
+            //this.LiveScheduling.Controls.Add(this.dateTimePickerStopTime);
+            //this.LiveScheduling.Controls.Add(this.lblStopTime);
+            //this.LiveScheduling.Controls.Add(this.lblMaxRuntime2);
+            //this.LiveScheduling.Controls.Add(this.textBoxMaxRunTime);
+            //this.LiveScheduling.Controls.Add(this.dateTimePickerStartTime);
+            //this.LiveScheduling.Controls.Add(this.lblMaxRunTime1);
+            //this.LiveScheduling.Controls.Add(this.lblStartTime1);
+            //this.LiveScheduling.Location = new System.Drawing.Point(4, 22);
+            //this.LiveScheduling.Name = "LiveScheduling";
+            //this.LiveScheduling.Padding = new System.Windows.Forms.Padding(3);
+            //this.LiveScheduling.Size = new System.Drawing.Size(769, 276);
+            //this.LiveScheduling.TabIndex = 2;
+            //this.LiveScheduling.Text = "LiveScheduling";
+            //this.LiveScheduling.UseVisualStyleBackColor = true;
             // 
             // lblStartTime1
             // 
-            this.lblStartTime1.AutoSize = true;
-            this.lblStartTime1.Location = new System.Drawing.Point(302, 109);
-            this.lblStartTime1.Name = "lblStartTime1";
-            this.lblStartTime1.Size = new System.Drawing.Size(52, 13);
-            this.lblStartTime1.TabIndex = 107;
-            this.lblStartTime1.Text = "StartTime";
+            //this.lblStartTime1.AutoSize = true;
+            //this.lblStartTime1.Location = new System.Drawing.Point(302, 109);
+            //this.lblStartTime1.Name = "lblStartTime1";
+            //this.lblStartTime1.Size = new System.Drawing.Size(52, 13);
+            //this.lblStartTime1.TabIndex = 107;
+            //this.lblStartTime1.Text = "StartTime";
             // 
             // lblMaxRunTime1
             // 
-            this.lblMaxRunTime1.AutoSize = true;
-            this.lblMaxRunTime1.Location = new System.Drawing.Point(288, 155);
-            this.lblMaxRunTime1.Name = "lblMaxRunTime1";
-            this.lblMaxRunTime1.Size = new System.Drawing.Size(66, 13);
-            this.lblMaxRunTime1.TabIndex = 108;
-            this.lblMaxRunTime1.Text = "MaxRuntime";
+            //this.lblMaxRunTime1.AutoSize = true;
+            //this.lblMaxRunTime1.Location = new System.Drawing.Point(288, 155);
+            //this.lblMaxRunTime1.Name = "lblMaxRunTime1";
+            //this.lblMaxRunTime1.Size = new System.Drawing.Size(66, 13);
+            //this.lblMaxRunTime1.TabIndex = 108;
+            //this.lblMaxRunTime1.Text = "MaxRuntime";
             // 
             // dateTimePickerStartTime
             // 
-            this.dateTimePickerStartTime.Enabled = false;
-            this.dateTimePickerStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time;
-            this.dateTimePickerStartTime.Location = new System.Drawing.Point(360, 105);
-            this.dateTimePickerStartTime.Name = "dateTimePickerStartTime";
-            this.dateTimePickerStartTime.ShowUpDown = true;
-            this.dateTimePickerStartTime.Size = new System.Drawing.Size(121, 20);
-            this.dateTimePickerStartTime.TabIndex = 109;
+            //this.dateTimePickerStartTime.Enabled = false;
+            //this.dateTimePickerStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            //this.dateTimePickerStartTime.Location = new System.Drawing.Point(360, 105);
+            //this.dateTimePickerStartTime.Name = "dateTimePickerStartTime";
+            //this.dateTimePickerStartTime.ShowUpDown = true;
+            //this.dateTimePickerStartTime.Size = new System.Drawing.Size(121, 20);
+            //this.dateTimePickerStartTime.TabIndex = 109;
             // 
             // textBoxMaxRunTime
             // 
-            this.textBoxMaxRunTime.Location = new System.Drawing.Point(360, 152);
-            this.textBoxMaxRunTime.Name = "textBoxMaxRunTime";
-            this.textBoxMaxRunTime.Size = new System.Drawing.Size(46, 20);
-            this.textBoxMaxRunTime.TabIndex = 110;
-            this.textBoxMaxRunTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            //this.textBoxMaxRunTime.Location = new System.Drawing.Point(360, 152);
+            //this.textBoxMaxRunTime.Name = "textBoxMaxRunTime";
+            //this.textBoxMaxRunTime.Size = new System.Drawing.Size(46, 20);
+            //this.textBoxMaxRunTime.TabIndex = 110;
+            //this.textBoxMaxRunTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // lblMaxRuntime2
             // 
-            this.lblMaxRuntime2.AutoSize = true;
-            this.lblMaxRuntime2.Location = new System.Drawing.Point(412, 155);
-            this.lblMaxRuntime2.Name = "lblMaxRuntime2";
-            this.lblMaxRuntime2.Size = new System.Drawing.Size(69, 13);
-            this.lblMaxRuntime2.TabIndex = 111;
-            this.lblMaxRuntime2.Text = "min from start";
+            //this.lblMaxRuntime2.AutoSize = true;
+            //this.lblMaxRuntime2.Location = new System.Drawing.Point(412, 155);
+            //this.lblMaxRuntime2.Name = "lblMaxRuntime2";
+            //this.lblMaxRuntime2.Size = new System.Drawing.Size(69, 13);
+            //this.lblMaxRuntime2.TabIndex = 111;
+            //this.lblMaxRuntime2.Text = "min from start";
             // 
             // lblStopTime
             // 
-            this.lblStopTime.AutoSize = true;
-            this.lblStopTime.Location = new System.Drawing.Point(302, 133);
-            this.lblStopTime.Name = "lblStopTime";
-            this.lblStopTime.Size = new System.Drawing.Size(52, 13);
-            this.lblStopTime.TabIndex = 112;
-            this.lblStopTime.Text = "StopTime";
+            //this.lblStopTime.AutoSize = true;
+            //this.lblStopTime.Location = new System.Drawing.Point(302, 133);
+            //this.lblStopTime.Name = "lblStopTime";
+            //this.lblStopTime.Size = new System.Drawing.Size(52, 13);
+            //this.lblStopTime.TabIndex = 112;
+            //this.lblStopTime.Text = "StopTime";
             // 
             // dateTimePickerStopTime
             // 
-            this.dateTimePickerStopTime.Format = System.Windows.Forms.DateTimePickerFormat.Time;
-            this.dateTimePickerStopTime.Location = new System.Drawing.Point(360, 129);
-            this.dateTimePickerStopTime.Name = "dateTimePickerStopTime";
-            this.dateTimePickerStopTime.ShowUpDown = true;
-            this.dateTimePickerStopTime.Size = new System.Drawing.Size(121, 20);
-            this.dateTimePickerStopTime.TabIndex = 113;
+            //this.dateTimePickerStopTime.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            //this.dateTimePickerStopTime.Location = new System.Drawing.Point(360, 129);
+            //this.dateTimePickerStopTime.Name = "dateTimePickerStopTime";
+            //this.dateTimePickerStopTime.ShowUpDown = true;
+            //this.dateTimePickerStopTime.Size = new System.Drawing.Size(121, 20);
+            //this.dateTimePickerStopTime.TabIndex = 113;
             // 
             // Console
             // 
@@ -373,7 +373,7 @@
             // tabInterface1
             // 
             this.tabInterface1.Controls.Add(this.Console);
-            this.tabInterface1.Controls.Add(this.LiveScheduling);
+            //this.tabInterface1.Controls.Add(this.LiveScheduling);
             this.tabInterface1.Location = new System.Drawing.Point(4, 101);
             this.tabInterface1.Name = "tabInterface1";
             this.tabInterface1.SelectedIndex = 0;
@@ -410,8 +410,8 @@
             this.Name = "frmMain";
             this.Text = "Questor";
             this.Load += new System.EventHandler(this.frmMain_Load);
-            this.LiveScheduling.ResumeLayout(false);
-            this.LiveScheduling.PerformLayout();
+            //this.LiveScheduling.ResumeLayout(false);
+            //this.LiveScheduling.PerformLayout();
             this.Console.ResumeLayout(false);
             this.Console.PerformLayout();
             this.tabInterface1.ResumeLayout(false);
@@ -442,14 +442,14 @@
         private System.Windows.Forms.Button buttonSettingsXML;
         private System.Windows.Forms.Button buttonOpenMissionXML;
         private System.Windows.Forms.Button buttonOpenLogDirectory;
-        private System.Windows.Forms.TabPage LiveScheduling;
-        private System.Windows.Forms.DateTimePicker dateTimePickerStopTime;
-        private System.Windows.Forms.Label lblStopTime;
-        private System.Windows.Forms.Label lblMaxRuntime2;
-        private System.Windows.Forms.TextBox textBoxMaxRunTime;
-        private System.Windows.Forms.DateTimePicker dateTimePickerStartTime;
-        private System.Windows.Forms.Label lblMaxRunTime1;
-        private System.Windows.Forms.Label lblStartTime1;
+        //private System.Windows.Forms.TabPage LiveScheduling;
+        //private System.Windows.Forms.DateTimePicker dateTimePickerStopTime;
+        //private System.Windows.Forms.Label lblStopTime;
+        //private System.Windows.Forms.Label lblMaxRuntime2;
+        //private System.Windows.Forms.TextBox textBoxMaxRunTime;
+        //private System.Windows.Forms.DateTimePicker dateTimePickerStartTime;
+        //private System.Windows.Forms.Label lblMaxRunTime1;
+        //private System.Windows.Forms.Label lblStartTime1;
         private System.Windows.Forms.TabPage Console;
         private System.Windows.Forms.TextBox txtComand;
         private System.Windows.Forms.TextBox txtExtConsole;

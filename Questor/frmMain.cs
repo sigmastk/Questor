@@ -231,47 +231,45 @@ namespace Questor
                     _lastlogmessage = DateTime.Now;
                 }
             }
-            if (Cache.Instance.MaxRuntime > 0 && Cache.Instance.MaxRuntime != Int32.MaxValue) //if runtime is specified, overrides stop time
-            {
-                if (DateTime.Now.Subtract(Program.startTime).TotalSeconds > 120)
-                {
-                    if (Cache.Instance.MaxRuntime.ToString() != textBoxMaxRunTime.Text)
-                    {
-                        textBoxMaxRunTime.Text = Cache.Instance.MaxRuntime.ToString();
-                    }
-                }
-            }
-            else
-            {
-                textBoxMaxRunTime.Text = string.Empty;
-            }
+            //if (Cache.Instance.MaxRuntime > 0 && Cache.Instance.MaxRuntime != Int32.MaxValue) //if runtime is specified, overrides stop time
+            //{
+            //    if (DateTime.Now.Subtract(Program.startTime).TotalSeconds > 120)
+            //    {
+            //        if (Cache.Instance.MaxRuntime.ToString() != textBoxMaxRunTime.Text)
+            //        {
+            //            textBoxMaxRunTime.Text = Cache.Instance.MaxRuntime.ToString();
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    textBoxMaxRunTime.Text = string.Empty;
+            //}
 
-            if (Cache.Instance.StartTime != null)
-            {
-                if (dateTimePickerStartTime.Value != Cache.Instance.StartTime)
-                {
-                    dateTimePickerStartTime.Value = Cache.Instance.StartTime;
-                }
-            }
+            //if (Cache.Instance.StartTime != null)
+            //{
+            //    if (dateTimePickerStartTime.Value != Cache.Instance.StartTime)
+            //    {
+            //        dateTimePickerStartTime.Value = Cache.Instance.StartTime;
+            //    }
+            //}
             
-            if (Cache.Instance.StopTimeSpecified)
-            {
-                if (dateTimePickerStopTime.Value == Cache.Instance.StartTime)
-                {
-                    dateTimePickerStopTime.Value = Cache.Instance.StopTime;
-                }
-            }
+            //if (Cache.Instance.StopTimeSpecified)
+           // {
+           //     if (dateTimePickerStopTime.Value == Cache.Instance.StartTime)
+           //     {
+           //         dateTimePickerStopTime.Value = Cache.Instance.StopTime;
+           //     }
+           // }
 
-            if (dateTimePickerStopTime.Value > Cache.Instance.StartTime.AddMinutes(5))
-            {
-                Cache.Instance.StopTimeSpecified = true;
-                Cache.Instance.StopTime = dateTimePickerStopTime.Value;
-            }
-            else
-            {
-                Cache.Instance.StopTimeSpecified = false;
-                dateTimePickerStopTime.Value = Cache.Instance.StartTime;
-            }
+            //if (dateTimePickerStopTime.Value > Cache.Instance.StartTime.AddMinutes(5))
+           // {
+           //     Cache.Instance.StopTime = dateTimePickerStopTime.Value;
+           // }
+           // else
+           // {
+           //     dateTimePickerStopTime.Value = Cache.Instance.StartTime;
+           // }
         }
 
 
@@ -342,27 +340,27 @@ namespace Questor
             ((HandledMouseEventArgs)e).Handled = true;
         }
 
-        private void textBoxMaxRunTime_TextChanged(object sender, EventArgs e)
-        {
-            int number2;
-            if (int.TryParse(textBoxMaxRunTime.Text, out number2))
-            {
-                Cache.Instance.MaxRuntime = number2;
-            }
-            else
-            {
-                textBoxMaxRunTime.Text = Cache.Instance.MaxRuntime.ToString();
-            }
-        }
+        //private void textBoxMaxRunTime_TextChanged(object sender, EventArgs e)
+        //{
+        //    int number2;
+        //    if (int.TryParse(textBoxMaxRunTime.Text, out number2))
+        //    {
+        //        Cache.Instance.MaxRuntime = number2;
+        //    }
+        //    else
+        //    {
+        //        textBoxMaxRunTime.Text = Cache.Instance.MaxRuntime.ToString();
+        //    }
+        //}
         
-        private void textBoxMaxRunTime_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsControl(e.KeyChar)
-                && !char.IsDigit(e.KeyChar))
-            {
-                e.Handled = true;
-            }
-        }
+        //private void textBoxMaxRunTime_KeyPress(object sender, KeyPressEventArgs e)
+       // {
+       //     if (!char.IsControl(e.KeyChar)
+       //         && !char.IsDigit(e.KeyChar))
+       //     {
+       //        e.Handled = true;
+       //     }
+        //}
 
         private void buttonQuestormanager_Click(object sender, EventArgs e)
         {
