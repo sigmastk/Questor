@@ -674,7 +674,7 @@ namespace Questor
                     Cache.Instance.OpenWrecks = false;
                     if (_agentInteraction.State == AgentInteractionState.Idle)
                     {
-                        if (Settings.Instance.CharacterMode == "salvage")
+                        if (Settings.Instance.CharacterMode.ToLower() == "salvage")
                         {
                             if (State == QuestorState.Start)
                             {
