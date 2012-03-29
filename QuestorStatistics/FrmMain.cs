@@ -33,7 +33,7 @@ namespace QuestorStatistics
             System.IO.DirectoryInfo o = new System.IO.DirectoryInfo(Localpath);
             System.IO.FileInfo[] myfiles = null;
 
-            myfiles = o.GetFiles("*.CustomDatedStatistics.log");
+            myfiles = o.GetFiles("*.CustomDatedStatistics.csv");
             for (int y = 0; y <= myfiles.Length - 1; y++)
             {
                 cmb1.Items.Add(myfiles[y].Name);
