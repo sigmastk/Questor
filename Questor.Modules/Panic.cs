@@ -41,7 +41,7 @@ namespace Questor.Modules
                         _lastDockedorJumping = DateTime.Now;
                     }
 
-                    if (DateTime.Now.AddSeconds(3) > _lastDockedorJumping)
+                    if (DateTime.Now.Subtract(_lastDockedorJumping).TotalSeconds > 5)
                     {
                         if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
                         {
@@ -49,6 +49,8 @@ namespace Questor.Modules
                             _lastNormalY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
                             _lastNormalZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
                         }
+                        if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+                            return;
 
                         if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
                         {
@@ -180,8 +182,8 @@ namespace Questor.Modules
                     var station = Cache.Instance.Stations.FirstOrDefault();
                     if (station != null)
                     {
-                        if (Cache.Instance.InWarp)
-                            break;
+                        //if (Cache.Instance.InWarp)
+                        //    break;
 
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
