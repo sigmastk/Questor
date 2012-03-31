@@ -87,6 +87,7 @@ namespace Questor.Modules
                         // No, command it to open
                         Logging.Log("Arm: Opening Ship Hangar");
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                        _nextArmAction = DateTime.Now.AddSeconds(3);
                         break;
                     }
 
@@ -361,12 +362,12 @@ namespace Questor.Modules
                     {
                         Logging.Log("Arm: Opening Fitting Manager");
                         Cache.Instance.DirectEve.OpenFitingManager();
+                        _nextArmAction = DateTime.Now.AddSeconds(5); //you should only have to issue this command once
                         State = ArmState.WaitForFittingWindow;
                     }
                     break;
 
                 case ArmState.WaitForFittingWindow:
-
                     var fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
 
                     if (DateTime.Now > _nextArmAction)
