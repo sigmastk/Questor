@@ -103,7 +103,10 @@ namespace QuestorManager.Module
                 entity.Dock();
             }
             else if (entity.Distance < 150000)
+            {
+                Logging.Log("QuestorManager.StationDestination: Approach [" + entity.Name + "]");
                 entity.Approach();
+            }
             else
             {
                 Logging.Log("QuestorManager.StationDestination: Warp to and dock at [" + entity.Name + "]");

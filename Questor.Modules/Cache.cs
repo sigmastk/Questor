@@ -277,6 +277,28 @@ namespace Questor.Modules
         private string AgentName = "";
 
         public DateTime _lastModuleActivation;
+        public DateTime _lastLoggingAction = DateTime.MinValue;
+        public DateTime _nextTargetAction = DateTime.MinValue;
+        public DateTime _nextWeaponAction = DateTime.MinValue;
+        public DateTime _nextWebAction = DateTime.MinValue;
+        public DateTime _nextNosAction = DateTime.MinValue;
+        public DateTime _nextPainterAction = DateTime.MinValue;
+        public DateTime _nextActivateAction = DateTime.Now;
+        public DateTime _nextApproachAction = DateTime.Now;
+        public DateTime _nextBookmarkPocketAttempt = DateTime.Now;
+        public DateTime _nextAlign = DateTime.Now;
+        public DateTime _nextOrbit = DateTime.Now;
+        public DateTime _nextReload = DateTime.Now;
+        
+        public DateTime _nextDock;
+        public DateTime _nextDroneRecall;
+        public DateTime _lastLocalWatchAction;
+        public DateTime _lastWalletCheck;
+        public DateTime _nextWarpTo;
+        public DateTime _lastupdateofSessionRunningTime;
+        public DateTime _lastDockedorJumping;
+        public DateTime _lastTimeCheckAction;
+
         public int panic_attempts_this_mission { get; set; }
         public double lowest_shield_percentage_this_pocket { get; set; }
         public double lowest_armor_percentage_this_pocket { get; set; }

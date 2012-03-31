@@ -30,7 +30,7 @@
 
             if (_traveler.State == TravelerState.AtDestination)
             {
-                Logging.Log("CourierMission: Final Destination");
+                Logging.Log("CourierMission: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
                 _traveler.Destination = null;
                 return true;
             }

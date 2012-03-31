@@ -17,6 +17,7 @@ namespace Questor.Modules
     {
         private TravelerDestination _destination;
         private DateTime _nextTravelerAction;
+        //private DateTime _lastDock;
 
         public TravelerState State { get; set; }
         public DirectBookmark UndockBookmark { get; set; }
@@ -27,7 +28,7 @@ namespace Questor.Modules
             set
             {
                 _destination = value;
-                State = TravelerState.Idle;
+                State = _destination == null ? TravelerState.AtDestination : TravelerState.Idle;
             }
         }
 
@@ -40,8 +41,8 @@ namespace Questor.Modules
             if (_nextTravelerAction > DateTime.Now)
                 return;
 
-			var undockBookmark = UndockBookmark;
-			UndockBookmark = undockBookmark;
+            var undockBookmark = UndockBookmark;
+            UndockBookmark = undockBookmark;
 
             var destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
             if (destination.Count == 0 || !destination.Any(d => d == solarSystemId))
@@ -75,10 +76,14 @@ namespace Questor.Modules
                     return;
                 }
 
+            // We are apparently not really in space yet...
+                if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+                return;
+
                 // Find the first waypoint
                 var waypoint = destination.First();
 
-                // Get the name of the next systems
+                // Get the name of the next system
                 var locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
 
                 // Find the stargate associated with it

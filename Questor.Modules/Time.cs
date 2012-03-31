@@ -17,6 +17,9 @@ namespace Questor.Modules
         RepModuleDelay_milliseconds = 1000,
         ApproachDelay_seconds = 2,
         TargetDelay_miliseconds = 1000,
+        OrbitDelay_seconds = 15,                                 // This is the delay between orbit commands, units: seconds. Default is 15
+        DockingDelay_seconds = 5,                                // This is the delay bwtween docking attempts, units: seconds. Default is 5
+        WarptoDelay_seconds = 5,                                 // This is the delay berween warpto commands, units: seconds. Default is 5
         WeaponDelay_miliseconds = 220,
         NosDelay_miliseconds = 220,
         WebDelay_miliseconds = 220,
@@ -37,7 +40,7 @@ namespace Questor.Modules
         ReloadWeaponDelayBeforeUsable_seconds = 22,              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 22
         BookmarkPocketRetryDelay_seconds = 20,                   // When checking to see if a bookmark needs to be made in a pocket for after mission salvaging this is the delay between retries, units: seconds. Default is 20
         ActivateAction_NoGateFound_delay = 30,                   // no gate found on grid when executing the activate action, wait this long to see if it appears (lag), units: seconds. Default is 30
-        LastAlignDelay_minutes = 2,                              // Delay between the last align command and the next, units: minutes. Default is 2 
+        AlignDelay_minutes = 2,                                  // Delay between the last align command and the next, units: minutes. Default is 2 
         DelayBetweenJetcans_seconds = 185,                       // Once you have made a jetcan you cannot make another for 3 minutes, units: seconds. Default is 185 (to account for lag)
         SalvageStackItemsDelayBeforeResuming_seconds = 5,        // When stacking items in cargohold delay before proceeding, units: seconds. Default is 5
         SalvageStackItems_seconds = 150,                         // When salvaging stack items in your cargo every x seconds, units: seconds. Default is 180

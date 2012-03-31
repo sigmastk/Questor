@@ -28,7 +28,7 @@ namespace Questor.Modules
         public const string Accept = "Accept";
         public const string Decline = "Decline";
         public const string Close = "Close";
-        private DateTime _lastJournalOpenRequest;
+        private DateTime _nextJournalOpenRequest;
         private DateTime _nextAgentAction;
         //private DateTime _waitingOnAgentResponse;
         private DateTime _waitingonmissiontimer = DateTime.Now;
@@ -223,10 +223,10 @@ namespace Questor.Modules
             var journalWindow = Cache.Instance.GetWindowByName("journal");
             if (journalWindow == null)
             {
-                if (DateTime.Now.Subtract(_lastJournalOpenRequest).TotalSeconds > 30)
+                if (DateTime.Now > _nextJournalOpenRequest)
                 {
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
-                    _lastJournalOpenRequest = DateTime.Now;
+                    _nextJournalOpenRequest = DateTime.Now.AddSeconds(30);
 
                 }
                 return;

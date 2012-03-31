@@ -21,8 +21,8 @@ namespace Questor.Modules
         private double _lastNormalZ;
 
         private DateTime _resumeTime;
-        private DateTime _lastDock = DateTime.MinValue;
-        private DateTime _lastWarpTo = DateTime.MinValue;
+        private DateTime _nextDock = DateTime.Now;
+        private DateTime _nextWarpTo = DateTime.Now;
         private DateTime _lastDockedorJumping;
         private DateTime _lastWarpScrambled = DateTime.MinValue;
         private bool _delayedResume;
@@ -58,7 +58,7 @@ namespace Questor.Modules
                         else if (InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
                         {
                             // Only check for cap-panic while in a mission, not while doing anything else
-                            Logging.Log("Panic: Start panicking, capacitor [" + Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]");
+                            Logging.Log("Panic: Start panicking, capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage,0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]");
                             //Questor.panic_attempts_this_mission;
                             Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                             Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
@@ -66,14 +66,14 @@ namespace Questor.Modules
                         }
                         else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
                         {
-                            Logging.Log("Panic: Start panicking, shield [" + Cache.Instance.DirectEve.ActiveShip.ShieldPercentage + "%] below [" + Settings.Instance.MinimumShieldPct + "%]");
+                            Logging.Log("Panic: Start panicking, shield [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage,0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%]");
                             Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                             Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
                             State = PanicState.StartPanicking;
                         }
                         else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
                         {
-                            Logging.Log("Panic: Start panicking, armor [" + Cache.Instance.DirectEve.ActiveShip.ArmorPercentage + "%] below [" + Settings.Instance.MinimumArmorPct + "%]");
+                            Logging.Log("Panic: Start panicking, armor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%]");
                             Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                             Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
                             State = PanicState.StartPanicking;
@@ -185,17 +185,23 @@ namespace Questor.Modules
 
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
-                            if (DateTime.Now.Subtract(_lastWarpTo).TotalSeconds > 5)
+                            if (DateTime.Now > _nextWarpTo)
                             {
                                 Logging.Log("Panic: Warping to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
                                 station.WarpTo();
-                                _lastWarpTo = DateTime.Now;
+                                _nextWarpTo = DateTime.Now.AddSeconds(5);
+                                _nextDock = DateTime.MinValue;
                             }
                         }
-                        else if (DateTime.Now.Subtract(_lastDock).TotalSeconds > 5)
+                        else if (DateTime.Now > _nextDock)
                         {
+                            Logging.Log("Panic: Docking with [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
                             station.Dock();
-                            _lastDock = DateTime.Now;
+                            _nextDock = DateTime.Now.AddSeconds(5);
+                        }
+                        else
+                        {
+                            Logging.Log("Panic: Docking has been delayed until [" + _nextDock + "]");
                         }
                         break;
                     }
@@ -214,14 +220,16 @@ namespace Questor.Modules
                             Logging.Log("Panic: We are still warp scrambled!"); //This runs every 'tick' so we should see it every 1.5 seconds or so
                             _lastWarpScrambled = DateTime.Now;
                         }
-                        else
-                            if (DateTime.Now.Subtract(_lastWarpTo).TotalSeconds > 5 | DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < 10) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                        else if (DateTime.Now > _nextWarpTo | DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < 10) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                         {
                             Logging.Log("Panic: Warping to [" + Cache.Instance.Star.Name + "] which is [" + Math.Round(Cache.Instance.Star.Distance/1000, 0) + "k away]");
                             Cache.Instance.Star.WarpTo();
-                            _lastWarpTo = DateTime.Now;
+                            _nextWarpTo = DateTime.Now.AddSeconds(5);
                         }
-                        
+                        else
+                        {
+                            Logging.Log("Panic: Warping has been delayed until [" + _nextWarpTo + "]");
+                        }
                     }
                     else
                     {

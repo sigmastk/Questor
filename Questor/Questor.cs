@@ -47,18 +47,8 @@ namespace Questor
         private Traveler _traveler;
         private UnloadLoot _unloadLoot;
 
-        private DateTime _lastAction;
-        private DateTime _lastDock;
-        private DateTime _lastDroneRecall;
-        private DateTime _lastOrbit;
-        private DateTime _lastLocalWatchAction;
-        private DateTime _lastWalletCheck;
-        private DateTime _lastupdateofSessionRunningTime;
-        private DateTime _lastDockedorJumping;
-        //private DateTime _lastCheckWindowsAction;
-        private DateTime _lastTimeCheckAction;
-        private DateTime _lastWarpTo;
         public DateTime _lastFrame;
+        public DateTime _lastAction;
         private DateTime _questorStarted;
         private Random _random;
         private int _randomDelay;
@@ -205,11 +195,11 @@ namespace Questor
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
-                _lastDockedorJumping = DateTime.Now;
+                Cache.Instance._lastDockedorJumping = DateTime.Now;
                 return;
             }
 
-            if (DateTime.Now.Subtract(_lastDockedorJumping).TotalSeconds < 6)
+            if (DateTime.Now.Subtract(Cache.Instance._lastDockedorJumping).TotalSeconds < 6)
                 return;
 
             // New frame, invalidate old cache
@@ -246,10 +236,10 @@ namespace Questor
             // Done
             // Cleanup State: ProcessState
 
-            if (DateTime.Now.Subtract(_lastupdateofSessionRunningTime).TotalSeconds < (int)Time.SessionRunningTimeUpdate_seconds)
+            if (DateTime.Now.Subtract(Cache.Instance._lastupdateofSessionRunningTime).TotalSeconds < (int)Time.SessionRunningTimeUpdate_seconds)
             {
                 Cache.Instance.SessionRunningTime = (int)DateTime.Now.Subtract(_questorStarted).TotalMinutes;
-                _lastupdateofSessionRunningTime = DateTime.Now;
+                Cache.Instance._lastupdateofSessionRunningTime = DateTime.Now;
             }
 
             if ((DateTime.Now.Subtract(_questorStarted).TotalSeconds > 10) && (DateTime.Now.Subtract(_questorStarted).TotalSeconds < 60))
@@ -312,9 +302,9 @@ namespace Questor
 
             if (!Paused)
             {
-                if (DateTime.Now.Subtract(_lastWalletCheck).TotalMinutes > (int)Time.WalletCheck_minutes)
+                if (DateTime.Now.Subtract(Cache.Instance._lastWalletCheck).TotalMinutes > (int)Time.WalletCheck_minutes)
                 {
-                    _lastWalletCheck = DateTime.Now;
+                    Cache.Instance._lastWalletCheck = DateTime.Now;
                     //Logging.Log("[Questor] Wallet Balance Debug Info: lastknowngoodconnectedtime = " + Settings.Instance.lastKnownGoodConnectedTime);
                     //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.Now - lastknowngoodconnectedtime = " + DateTime.Now.Subtract(Settings.Instance.lastKnownGoodConnectedTime).TotalSeconds);
                     if (Math.Round(DateTime.Now.Subtract(Cache.Instance.lastKnownGoodConnectedTime).TotalMinutes) > 1)
@@ -467,9 +457,9 @@ namespace Questor
                 case QuestorState.Idle:
 
                     // Every 5 min of idle check and make sure we aren't supposed to stop... 
-                    if (Math.Round(DateTime.Now.Subtract(_lastTimeCheckAction).TotalMinutes) > 5)
+                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance._lastTimeCheckAction).TotalMinutes) > 5)
                     {
-                        _lastTimeCheckAction = DateTime.Now;
+                        Cache.Instance._lastTimeCheckAction = DateTime.Now;
                         if (DateTime.Now.Subtract(_questorStarted).TotalMinutes > Cache.Instance.MaxRuntime)
                         {
                             // quit questor
@@ -856,7 +846,7 @@ namespace Questor
                 case QuestorState.LocalWatch:
                     if (Settings.Instance.UseLocalWatch)
                     {
-                        _lastLocalWatchAction = DateTime.Now; 
+                        Cache.Instance._lastLocalWatchAction = DateTime.Now; 
                         if (Cache.Instance.Local_safe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                         {
                             Logging.Log("Questor.LocalWatch: local is clear");
@@ -888,7 +878,7 @@ namespace Questor
                 case QuestorState.WaitingforBadGuytoGoAway:
                     Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                    if(DateTime.Now.Subtract(_lastLocalWatchAction).TotalMinutes < (int)Time.WaitforBadGuytoGoAway_minutes)
+                    if (DateTime.Now.Subtract(Cache.Instance._lastLocalWatchAction).TotalMinutes < (int)Time.WaitforBadGuytoGoAway_minutes)
                         break;
                     if (State == QuestorState.WaitingforBadGuytoGoAway)
                     {
@@ -1094,11 +1084,11 @@ namespace Questor
                     }
                     else if (Cache.Instance.InSpace && structure != null && structure.Distance < (int)Distance.TooCloseToStructure) //orbit structures if they are too close, so we have a better chance of not bumping into them at warp
                     {
-                        if ((DateTime.Now.Subtract(_lastOrbit).TotalSeconds > 15))
+                        if (DateTime.Now > Cache.Instance._nextOrbit)
                         {
                             structure.Orbit((int)Distance.SafeDistancefromStructure);
                             Logging.Log("Questor: GotoBase: We are too close! Initiating Orbit of [" + structure.Name + "] orbiting at [" + Cache.Instance.OrbitDistance + "] so that we don't get stuck on it");
-                            _lastOrbit = DateTime.Now;
+                            Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
                         }
                     }
                     else //if any scramblers have been cleared and we aren't too close to any structures, set destination and warp out 
@@ -1114,12 +1104,12 @@ namespace Questor
                         }
                         else
                         {
-                            if (Cache.Instance.InSpace && Cache.Instance.ActiveDrones.Count() > 0 && DateTime.Now.Subtract(_lastDroneRecall).TotalSeconds > 30)
+                            if (Cache.Instance.InSpace && Cache.Instance.ActiveDrones.Count() > 0 && DateTime.Now > Cache.Instance._nextDroneRecall)
                             {
                                 Logging.Log("GotoBase: We are not scrambled and will be warping soon: pulling drones");
                                 // Tell the drones module to retract drones
                                 Cache.Instance.IsMissionPocketDone = true;
-                                _lastDroneRecall = DateTime.Now;
+                                Cache.Instance._nextDroneRecall = DateTime.Now.AddSeconds(30);
                             }
                         }
                         _traveler.ProcessState();
@@ -1240,11 +1230,11 @@ namespace Questor
                     }
                     else if (structure2 != null && structure2.Distance < (int)Distance.TooCloseToStructure)
                     {
-                        if ((DateTime.Now.Subtract(_lastOrbit).TotalSeconds > 15))
+                        if (DateTime.Now > Cache.Instance._nextOrbit)
                         {
                             structure2.Orbit((int)Distance.SafeDistancefromStructure);
                             Logging.Log("Questor: GotoBase: initiating Orbit of [" + structure2.Name + "] orbiting at [" + Cache.Instance.OrbitDistance + "]");
-                            _lastOrbit = DateTime.Now;
+                            Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
                         }
                     }
                     var baseDestination2 = _traveler.Destination as StationDestination;
@@ -1469,6 +1459,7 @@ namespace Questor
                         if (cargoship.Window == null)
                         {
                             // No, command it to open
+                            Logging.Log("QuestorState: CompleteMission: Open CargoHold of Active Ship");
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                             break;
                         }
@@ -1746,14 +1737,22 @@ namespace Questor
                     {
                         if (closestWreck.Distance > (int)Distance.WarptoDistance)
                         {
-                            if (DateTime.Now.Subtract(_lastWarpTo).TotalSeconds > 10)
+                            if (DateTime.Now > Cache.Instance._nextWarpTo)
                             {
-                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance/1000,0) +"k away]");
+                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
                                 closestWreck.WarpTo();
+                                Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                             }
                         }
                         else
-                            closestWreck.Approach();
+                        {
+                            if (DateTime.Now > Cache.Instance._nextApproachAction)
+                            {
+                                Logging.Log("Salvage: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
+                                closestWreck.Approach();
+                                Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                            }
+                        }
                     }
                     else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
                     {
@@ -1920,11 +1919,11 @@ namespace Questor
                     else
                     {
                         // Probably never happens
-                        if (DateTime.Now.Subtract(_lastWarpTo).TotalSeconds > 10)
+                        if (DateTime.Now > Cache.Instance._nextWarpTo)
                         {
                             Logging.Log("Salvage: Warping to [" + closest.Name + "] which is [" + Math.Round(closest.Distance/1000, 0) + "k away]");
                             closest.WarpTo();
-                            _lastWarpTo = DateTime.Now;
+                            Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                         }
                     }
                     _lastPulse = DateTime.Now.AddSeconds(10);
@@ -2047,11 +2046,11 @@ namespace Questor
 
                     if (Cache.Instance.UnlootedContainers.Count() == 0)
                     {
-                        Logging.Log("Salvage: Finished salvaging the room");
+                        Logging.Log("SalvageOnly: Finished salvaging the room");
 
                         var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
 
-                        Logging.Log("Salvage: We have salvaged all bookmarks, waiting.");
+                        Logging.Log("SalvageOnly: We have salvaged all bookmarks, waiting.");
                         if (State == QuestorState.SalvageOnly)
                         {
                             State = QuestorState.Idle;
@@ -2065,19 +2064,24 @@ namespace Questor
                     if (closestWreck.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
                     {
                         if (closestWreck.Distance > (int)Distance.WarptoDistance)
-                            if (DateTime.Now.Subtract(_lastWarpTo).TotalSeconds > 10)
+                        {
+                            if (DateTime.Now > Cache.Instance._nextWarpTo)
                             {
-                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance, 0) + "] meters away");
+                                Logging.Log("SalvageOnly: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance, 0) + "] meters away");
                                 closestWreck.WarpTo();
-                                _lastWarpTo = DateTime.Now;
+                                Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                             }
+                        }
                         else
+                        {
+                            Logging.Log("SalvageOnly: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
                             closestWreck.Approach();
+                        }
                     }
                     else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                        Logging.Log("Questor: SalvageOnly: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
+                        Logging.Log("SalvageOnly: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
                     }
 
                     try
@@ -2171,14 +2175,19 @@ namespace Questor
                     if (closestWreck.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
                     {
                         if (closestWreck.Distance > (int)Distance.WarptoDistance)
-                            if (DateTime.Now.Subtract(_lastWarpTo).TotalSeconds > 10)
+                        {
+                            if (DateTime.Now > Cache.Instance._nextWarpTo)
                             {
-                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance/1000, 0) + "k away]");
+                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
                                 closestWreck.WarpTo();
-                                _lastWarpTo = DateTime.Now;
+                                Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
                             }
+                        }
                         else
+                        {
+                            Logging.Log("Salvage: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
                             closestWreck.Approach();
+                        }
                     }
                     else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
                     {
@@ -2274,6 +2283,7 @@ namespace Questor
                     {
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
+                            Logging.Log("Questor: GotoNearestStation [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
                             station.WarpToAndDock();
                             if (State == QuestorState.GotoNearestStation)
                             {
@@ -2285,10 +2295,11 @@ namespace Questor
                         {
                             if (station.Distance < 1900)
                             {
-                                if (DateTime.Now.Subtract(_lastDock).TotalSeconds > 5)
+                                if (DateTime.Now > Cache.Instance._nextDock)
                                 {
+                                    Logging.Log("Questor: GotoNearestStation [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
                                     station.Dock();
-                                    _lastDock = DateTime.Now;
+                                    Cache.Instance._nextDock = DateTime.Now.AddSeconds((int)Time.DockingDelay_seconds); 
                                 }
                             }
                             else
@@ -2296,9 +2307,16 @@ namespace Questor
                                 if (Cache.Instance.DirectEve.ActiveShip.Entity.Mode == 1)
                                 {
                                     if (Cache.Instance.Approaching.Id != station.Id)
+                                    {
+                                        Logging.Log("Questor.GotoNearestStation: Approach [" + station.Name + "]");
                                         station.Approach();
+                                    }
                                 }
-                                else station.Approach();
+                                else
+                                {
+                                    Logging.Log("Questor.GotoNearestStation: Approach [" + station.Name + "]");
+                                    station.Approach();
+                                }
                             }
                         }
                     }

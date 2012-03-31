@@ -98,16 +98,19 @@ namespace QuestorManager.Module
             var entity = entities.First();
             if (entity.Distance < 2500)
             {
-                Logging.Log("QuestorManager: Jumping to [" + locationName + "]");
+                Logging.Log("QuestorManager: Jumping to [" + locationName + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                 entity.Jump();
 
                 _nextAction = DateTime.Now.AddSeconds(15);
             }
             else if (entity.Distance < 150000)
+            {
+                Logging.Log("QuestorManager: Approaching [" + locationName + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                 entity.Approach();
+            }
             else
             {
-                Logging.Log("QuestorManager: Warping to [Stargate (" + locationName + ")]");
+                Logging.Log("QuestorManager: Warping to [Stargate (" + locationName + ")] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                 entity.WarpTo();
 
                 _nextAction = DateTime.Now.AddSeconds(5);

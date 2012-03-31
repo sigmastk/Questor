@@ -180,14 +180,17 @@ namespace Questor.Modules
 
             if (entity.Distance < (int)Distance.DockingRange)
             {
-                Logging.Log("TravelerDestination.StationDestination: Dock at [" + entity.Name + "]");
+                Logging.Log("TravelerDestination.StationDestination: Dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                 entity.Dock();
             }
             else if (entity.Distance < (int)Distance.WarptoDistance)
+            {
+                Logging.Log("TravelerDestintion.StationDestination: Approaching [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]"); 
                 entity.Approach();
+            }
             else
             {
-                Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "]");
+                Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                 entity.WarpTo();
             }
 

@@ -333,16 +333,20 @@ namespace QuestorManager
                     if (!shipHangar.IsReady)
                         break;
 
-                    var ships = DirectEve.Instance.GetShipHangar().Items;
-                    foreach (var ship in ships.Where(ship => ship.GivenName == txtNameShip.Text))
+                    
+                    if (DateTime.Now > _lastAction)
                     {
-                        Logging.Log("MakeShip: Making [" + ship.GivenName + "] active");
-                            
-                        ship.ActivateShip();
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.Now;
-                        State = State.NextAction;
-                        break;
+                        var ships = DirectEve.Instance.GetShipHangar().Items;
+                        foreach (var ship in ships.Where(ship => ship.GivenName == txtNameShip.Text))
+                        {
+                            Logging.Log("MakeShip: Making [" + ship.GivenName + "] active");
+
+                            ship.ActivateShip();
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.Now;
+                            State = State.NextAction;
+                            break;
+                        }
                     }
 
 

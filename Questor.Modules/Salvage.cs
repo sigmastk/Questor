@@ -21,7 +21,7 @@ namespace Questor.Modules
         public static HashSet<int> TractorBeams = new HashSet<int> { 24348, 24620, 24622, 24644, 4250 };
 
         private DateTime _lastJettison = DateTime.MinValue;
-        private DateTime _nextSalvageAction;
+        private DateTime _nextSalvageAction = DateTime.MinValue;
 
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
