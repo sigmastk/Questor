@@ -395,7 +395,7 @@ namespace Questor.Modules
             LootContainer = (string)xml.Element("lootContainer");
 
             CreateSalvageBookmarks = (bool?) xml.Element("createSalvageBookmarks") ?? false;
-            CreateSalvageBookmarksIn = (string)xml.Element("createSalvageBookmarksIn") ?? "Player";
+            CreateSalvageBookmarksIn = (string)xml.Element("createSalvageBookmarksIn") ?? "Player"; //other setting is "Corp"
             BookmarkPrefix = (string) xml.Element("bookmarkPrefix") ?? "Salvage:";
             MinimumWreckCount = (int?) xml.Element("minimumWreckCount") ?? 1;
             AfterMissionSalvaging = (bool?) xml.Element("afterMissionSalvaging") ?? false;

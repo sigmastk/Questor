@@ -992,7 +992,6 @@ namespace Questor.Modules
                 DirectEve.CorpBookmarkCurrentLocation(label, "", null);
             else
                 DirectEve.BookmarkCurrentLocation(label, "", null);
-            
         }
 
         /// <summary>

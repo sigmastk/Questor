@@ -144,6 +144,7 @@
        Warning: The bot could become slow with a lot of salvage-bookmarks, make sure that
                 after mission salvaging is enabled or that you manually delete bookmarks! -->
   <createSalvageBookmarks>True</createSalvageBookmarks>  <!-- default is true -->
+  <createSalvageBookmarksIn>Player</createSalvageBookmarksIn> <!-- default is "Player", other option is "Corp" -->
 
   <!-- All salvage bookmarks will be prefixed by this string, default: Salvage: -->
   <bookmarkPrefix>Salvage:</bookmarkPrefix>  <!-- default is salvage: -->
