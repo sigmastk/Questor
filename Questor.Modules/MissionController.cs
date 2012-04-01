@@ -264,13 +264,13 @@ namespace Questor.Modules
                     // Reload weapons and activate gate to move to the next pocket
                     if (DateTime.Now > Cache.Instance._nextReload)
                     {
-                        Logging.Log("MissionController: ReloadALL: Reload before moving to next pocket");
+                        Logging.Log("MissionController: Activate: Reload before moving to next pocket");
                         ReloadAll();
                         Cache.Instance._nextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                     }
                     if (DateTime.Now > Cache.Instance._nextActivateAction)
                     {
-                        Logging.Log("MissionController: closest.Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'");
+                        Logging.Log("MissionController: Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'");
                         closest.Activate();
 
                         // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
@@ -283,15 +283,15 @@ namespace Questor.Modules
             else if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
             {
                 // Move to the target
-                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                if (DateTime.Now > Cache.Instance._nextApproachAction)
                 {
-                    if (DateTime.Now > Cache.Instance._nextApproachAction)
-                    {
-                        Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                        closest.Approach();
-                        Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                    }
-
+                    Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
+                    closest.Approach();
+                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                }
+                else
+                {
+                    Logging.Log("MissionController.Activate: Unable to approach: Next Approach action is not allowed for another [" + Cache.Instance._nextApproachAction.Subtract(DateTime.Now).TotalSeconds + "] seconds");
                 }
             }
             else //we must be outside warpto distance, but we are likely in a deadspace so align to the target
@@ -303,9 +303,13 @@ namespace Questor.Modules
                 if (DateTime.Now > Cache.Instance._nextAlign)
                 {
                     // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
-                    Logging.Log("MissionController: closest.AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distance.CloseToGateActivationRange + "]");
+                    Logging.Log("MissionController.Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distance.CloseToGateActivationRange + "]");
                     closest.AlignTo();
                     Cache.Instance._nextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
+                }
+                else
+                {
+                    Logging.Log("MissionController.Activate: Unable to allign: Next Allign action is not allowed for another [" + Cache.Instance._nextAlign.Subtract(DateTime.Now).TotalSeconds + "] seconds");
                 }
             }
         }
@@ -551,15 +555,15 @@ namespace Questor.Modules
             var targets = Cache.Instance.EntitiesByName(target);
             if (targets == null || targets.Count() == 0)
             {
-                // Unlike activate, no target just means next action
+                Logging.Log("MissionController.MoveTo: no entities found named [" + target + "] proceeding to next action");
                 _currentAction++;
                 return;
             }
 
             var closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance < distancetoapp)
+            if (closest.Distance < distancetoapp) // if we are inside the range that we are supposed to approach assume we are done
             {
-                // We are close enough to whatever we needed to move to
+                Logging.Log("MissionController.MoveTo: We are [" + closest.Distance + "] from a [" + target + "] we dont need to go any further");
                 _currentAction++;
 
                 if (Cache.Instance.Approaching != null)
@@ -575,18 +579,15 @@ namespace Questor.Modules
                 //    Logging.Log("MissionController: MoveTo: Initiating orbit after reaching target")
                 //}
             }
-            else if (closest.Distance < (int)Distance.WarptoDistance)
+            else if (closest.Distance < (int)Distance.WarptoDistance) // if we are inside warptorange you need to approach (you cant warp from here)
             {
-                    // Move to the target
-                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
-                    {
-                        if (DateTime.Now > Cache.Instance._nextApproachAction)
-                        {
-                            Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                            closest.Approach();
-                            Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                        }
-                    }
+                // Move to the target
+                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                {
+                    Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
+                    closest.Approach();
+                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                }
             }
             else
             {
@@ -603,6 +604,7 @@ namespace Questor.Modules
                 if (DateTime.Now > Cache.Instance._nextAlign)
                 {
                     // Probably never happens
+                    Logging.Log("MissionController.Activate: Alligning to target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
                     closest.AlignTo();
                     Cache.Instance._nextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
                 }
