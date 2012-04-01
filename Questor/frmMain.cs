@@ -282,7 +282,7 @@ namespace Questor
         {
             _questor.State = (QuestorState)Enum.Parse(typeof(QuestorState), QuestorStateComboBox.Text);
             // If you are at the controls enough to change states... assume that panic needs to do nothing
-            _questor.panicstatereset = true;
+            //_questor.panicstatereset = true; //this cannot be reset when the index changes, as that happens during natural state changes, this needs to be a mouse event
         }
 
         private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e)
