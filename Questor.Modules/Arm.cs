@@ -81,195 +81,205 @@ namespace Questor.Modules
                 case ArmState.OpenShipHangar:
                 case ArmState.SwitchToTransportShip:
                 case ArmState.SwitchToSalvageShip:
-                    // Is the ship hangar open?
-                    if (shipHangar.Window == null)
+                    if (DateTime.Now > _nextArmAction) //default 10 seconds
                     {
-                        // No, command it to open
-                        Logging.Log("Arm: Opening Ship Hangar");
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                        _nextArmAction = DateTime.Now.AddSeconds(3);
-                        break;
-                    }
+                        // Is the ship hangar open?
+                        if (shipHangar.Window == null)
+                        {
+                            // No, command it to open
+                            Logging.Log("Arm: Opening Ship Hangar");
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                            _nextArmAction = DateTime.Now.AddSeconds(5);
+                            break;
+                        }
 
-                    if (!shipHangar.IsReady)
-                        break;
+                        if (!shipHangar.IsReady)
+                            break;
 
-                    if (State == ArmState.OpenShipHangar)
-                    {
-                        Logging.Log("Arm: Activating combat ship");
-                        State = ArmState.ActivateCombatShip;
-                    }
-                    else if (State == ArmState.SwitchToTransportShip)
-                    {
-                        Logging.Log("Arm: Activating transport ship");
-                        State = ArmState.ActivateTransportShip;
-                    }
-                    else
-                    {
-                        Logging.Log("Arm: Activating salvage ship");
-                        State = ArmState.ActivateSalvageShip;
+                        if (State == ArmState.OpenShipHangar)
+                        {
+                            Logging.Log("Arm: Activating combat ship");
+                            State = ArmState.ActivateCombatShip;
+                        }
+                        else if (State == ArmState.SwitchToTransportShip)
+                        {
+                            Logging.Log("Arm: Activating transport ship");
+                            State = ArmState.ActivateTransportShip;
+                        }
+                        else
+                        {
+                            Logging.Log("Arm: Activating salvage ship");
+                            State = ArmState.ActivateSalvageShip;
+                        }
+                        break;
                     }
                     break;
 
                 case ArmState.ActivateTransportShip:
                     string transportshipName = Settings.Instance.TransportShipName.ToLower();
-
-                    if (string.IsNullOrEmpty(transportshipName))
+                    
+                    if (DateTime.Now > _nextArmAction) //default 10 seconds
                     {
-                        State = ArmState.NotEnoughAmmo;
-                        Logging.Log("Arm.ActivateTransportShip: Could not find transportshipName: " + transportshipName + " in settings!");
-                        return;
-                    }
-                    else if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
-                    {
-                        if (DateTime.Now > _nextArmAction) //default 10 seconds
+                        if (string.IsNullOrEmpty(transportshipName))
                         {
+                            State = ArmState.NotEnoughAmmo;
+                            Logging.Log("Arm.ActivateTransportShip: Could not find transportshipName: " + transportshipName + " in settings!");
+                            return;
+                        }
+                        else if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
+                        {
+                            
                             var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
                             foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == transportshipName))
                             {
                                 Logging.Log("Arm: Making [" + ship.GivenName + "] active");
-
                                 ship.ActivateShip();
                                 _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
                             }
                             return;
                         }
-                        return;
-                    }
-                    else if (DateTime.Now > _nextArmAction) //default 7 seconds
-                    {
-                        if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == transportshipName)
+                        else if (DateTime.Now > _nextArmAction) //default 7 seconds
                         {
-                            Logging.Log("Arm.ActivateTransportShip: Done");
-                            State = ArmState.Done;
-                            return;
+
+                            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == transportshipName)
+                            {
+                                Logging.Log("Arm.ActivateTransportShip: Done");
+                                State = ArmState.Done;
+                                return;
+                            }
                         }
+                        break;
                     }
                     break;
                     
                 case ArmState.ActivateSalvageShip:
                     var salvageshipName = Settings.Instance.SalvageShipName.ToLower();
-
-                    if (string.IsNullOrEmpty(salvageshipName))
+                    
+                    if (DateTime.Now > _nextArmAction) //default 10 seconds
                     {
-                        State = ArmState.NotEnoughAmmo;
-                        Logging.Log("Arm.ActivateSalvageShip: Could not find salvageshipName: " + salvageshipName + " in settings!");
-                        return;
-                    }
-
-                    if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
-                    {
-                        if (DateTime.Now > _nextArmAction)
+                        if (string.IsNullOrEmpty(salvageshipName))
                         {
-                            var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                            foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == salvageshipName))
-                            {
-                                Logging.Log("Arm: Making [" + ship.GivenName + "] active");
+                            State = ArmState.NotEnoughAmmo;
+                            Logging.Log("Arm.ActivateSalvageShip: Could not find salvageshipName: " + salvageshipName + " in settings!");
+                            return;
+                        }
 
-                                ship.ActivateShip();
-                                _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                        if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
+                        {
+                            if (DateTime.Now > _nextArmAction)
+                            {
+                                var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
+                                foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == salvageshipName))
+                                {
+                                    Logging.Log("Arm: Making [" + ship.GivenName + "] active");
+                                    ship.ActivateShip();
+                                    _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                                }
+                                return;
                             }
                             return;
                         }
-                        return;
-                    }
-                    if (DateTime.Now > _nextArmAction && (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
-                    {
-                        State = ArmState.OpenShipHangar;
-                        break;
-                    }
-                    if (DateTime.Now > _nextArmAction)
-                    {
-                        Logging.Log("Arm: Done");
-                        State = ArmState.Done;
-                        return;
+                        if (DateTime.Now > _nextArmAction && (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
+                        {
+                            State = ArmState.OpenShipHangar;
+                            break;
+                        }
+                        if (DateTime.Now > _nextArmAction)
+                        {
+                            Logging.Log("Arm: Done");
+                            State = ArmState.Done;
+                            return;
+                        }
                     }
                     break;
 
                 case ArmState.ActivateCombatShip:
                     var shipName = Settings.Instance.CombatShipName.ToLower();
 
-                    if (string.IsNullOrEmpty(shipName))
+                    if (DateTime.Now > _nextArmAction) //default 10 seconds
                     {
-                        State = ArmState.NotEnoughAmmo;
-                        Logging.Log("Arm.ActivateCombatShip: Could not find CombatShipName: " + shipName + " in settings!");
-                        return;
-                    }
-                    if (!Cache.Instance.ArmLoadedCache)
-                    {
-                        _missionItemMoved = false;
-                        Cache.Instance.RefreshMissionItems(AgentId);
-                        Cache.Instance.ArmLoadedCache = true;
-                    }
-                    // If we've got a mission-specific ship defined, switch to it
-                    if ((State == ArmState.ActivateCombatShip) && !(Cache.Instance.MissionShip == "" || Cache.Instance.MissionShip == null) && TryMissionShip)
-                        shipName = Cache.Instance.MissionShip.ToLower();
-
-                    if (Settings.Instance.CombatShipName.ToLower() == shipName) // if the mission specific ship is our default combat ship, no need to do anything special
-                        TryMissionShip = false;
-
-                    if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
-                    {
-                        if (DateTime.Now > _nextArmAction)
+                        if (string.IsNullOrEmpty(shipName))
                         {
-                            var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                            foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == shipName))
-                            {
-                                Logging.Log("Arm: Making [" + ship.GivenName + "] active");
-
-                                ship.ActivateShip();
-                                _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
-                                if (TryMissionShip)
-                                    UseMissionShip = true;
-                                return;
-                            }
-
-                            if (TryMissionShip && !UseMissionShip)
-                            {
-                                Logging.Log("Arm: Unable to find the ship specified in the missionfitting.  Using default combat ship and default fitting.");
-                                TryMissionShip = false;
-                                Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
-                                return;
-                            }
-
                             State = ArmState.NotEnoughAmmo;
-                            Logging.Log("Arm: Found the following ships:");
-                            foreach (var ship in ships)
-                            {
-                                Logging.Log("Arm: [" + ship.GivenName + "]");
-                            }
-                            Logging.Log("Arm: Could not find [" + shipName + "] ship!");
+                            Logging.Log("Arm.ActivateCombatShip: Could not find CombatShipName: " + shipName + " in settings!");
                             return;
                         }
-                        return;
-                    }
+                        if (!Cache.Instance.ArmLoadedCache)
+                        {
+                            _missionItemMoved = false;
+                            Cache.Instance.RefreshMissionItems(AgentId);
+                            Cache.Instance.ArmLoadedCache = true;
+                        }
+                        // If we've got a mission-specific ship defined, switch to it
+                        if ((State == ArmState.ActivateCombatShip) && !(Cache.Instance.MissionShip == "" || Cache.Instance.MissionShip == null) && TryMissionShip)
+                            shipName = Cache.Instance.MissionShip.ToLower();
 
-                    if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
-                    {
-                        State = ArmState.OpenShipHangar;
+                        if (Settings.Instance.CombatShipName.ToLower() == shipName) // if the mission specific ship is our default combat ship, no need to do anything special
+                            TryMissionShip = false;
+
+                        if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
+                        {
+                            if (DateTime.Now > _nextArmAction)
+                            {
+                                var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
+                                foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == shipName))
+                                {
+                                    Logging.Log("Arm: Making [" + ship.GivenName + "] active");
+                                    ship.ActivateShip();
+                                    _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                                    if (TryMissionShip)
+                                        UseMissionShip = true;
+                                    return;
+                                }
+
+                                if (TryMissionShip && !UseMissionShip)
+                                {
+                                    Logging.Log("Arm: Unable to find the ship specified in the missionfitting.  Using default combat ship and default fitting.");
+                                    TryMissionShip = false;
+                                    Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
+                                    return;
+                                }
+
+                                State = ArmState.NotEnoughAmmo;
+                                Logging.Log("Arm: Found the following ships:");
+                                foreach (var ship in ships)
+                                {
+                                    Logging.Log("Arm: [" + ship.GivenName + "]");
+                                }
+                                Logging.Log("Arm: Could not find [" + shipName + "] ship!");
+                                return;
+                            }
+                            return;
+                        }
+
+                        if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
+                        {
+                            State = ArmState.OpenShipHangar;
+                            break;
+                        }
+                        else if (TryMissionShip)
+                            UseMissionShip = true;
+
+                        //if (State == ArmState.ActivateSalvageShip)
+                        //{
+                        //    Logging.Log("Arm: Done");
+                        //    State = ArmState.Done;
+                        //    return;
+                        //}
+
+                        //_missionItemMoved = false;
+                        //Cache.Instance.RefreshMissionItems(AgentId);
+                        if (AmmoToLoad.Count == 0 && string.IsNullOrEmpty(Cache.Instance.BringMissionItem))
+                        {
+                            Logging.Log("Arm: Done");
+                            State = ArmState.Done;
+                        }
+                        else
+                        {
+                            Logging.Log("Arm: Opening item hangar");
+                            State = ArmState.OpenItemHangar;
+                        }
                         break;
-                    }
-                    else if (TryMissionShip)
-                        UseMissionShip = true;
-
-                    //if (State == ArmState.ActivateSalvageShip)
-                    //{
-                    //    Logging.Log("Arm: Done");
-                    //    State = ArmState.Done;
-                    //    return;
-                    //}
-
-                    //_missionItemMoved = false;
-                    //Cache.Instance.RefreshMissionItems(AgentId);
-                    if (AmmoToLoad.Count == 0 && string.IsNullOrEmpty(Cache.Instance.BringMissionItem))
-                    {
-                        Logging.Log("Arm: Done");
-                        State = ArmState.Done;
-                    }
-                    else
-                    {
-                        Logging.Log("Arm: Opening item hangar");
-                        State = ArmState.OpenItemHangar;
                     }
                     break;
 
@@ -307,12 +317,16 @@ namespace Questor.Modules
                     // Is the hangar open?
                     if (corpHangar != null)
                     {
-                        if (corpHangar.Window == null)
+                        if (DateTime.Now > _nextArmAction)
                         {
-                            // No, command it to open
-                            Logging.Log("Arm: Opening Corporate Hangar");
-                            Cache.Instance.DirectEve.OpenCorporationHangar();
-                            break;
+                            if (corpHangar.Window == null)
+                            {
+                                // No, command it to open
+                                Logging.Log("Arm: Opening Corporate Hangar");
+                                Cache.Instance.DirectEve.OpenCorporationHangar();
+                                _nextArmAction = DateTime.Now.AddSeconds(5);
+                                break;
+                            }
                         }
 
                         if (!corpHangar.IsReady)
@@ -325,12 +339,16 @@ namespace Questor.Modules
 
                 case ArmState.OpenCargo:
                     // Is cargo open?
-                    if (cargo.Window == null)
+                    if (DateTime.Now > _nextArmAction)
                     {
-                        // No, command it to open
-                        Logging.Log("Arm: Cargohold of active ship");
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                        break;
+                        if (cargo.Window == null)
+                        {
+                            // No, command it to open
+                            Logging.Log("Arm: Cargohold of active ship");
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                            _nextArmAction = DateTime.Now.AddSeconds(5);
+                            break;
+                        }
                     }
 
                     if (!cargo.IsReady)
@@ -360,10 +378,13 @@ namespace Questor.Modules
                     }
                     else
                     {
-                        Logging.Log("Arm: Opening Fitting Manager");
-                        Cache.Instance.DirectEve.OpenFitingManager();
-                        _nextArmAction = DateTime.Now.AddSeconds(5); //you should only have to issue this command once
-                        State = ArmState.WaitForFittingWindow;
+                        if (DateTime.Now > _nextArmAction)
+                        {
+                            Logging.Log("Arm: Opening Fitting Manager");
+                            Cache.Instance.DirectEve.OpenFitingManager();
+                            _nextArmAction = DateTime.Now.AddSeconds(5); //you should only have to issue this command once
+                            State = ArmState.WaitForFittingWindow;
+                        }
                     }
                     break;
 
