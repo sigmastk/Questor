@@ -283,7 +283,7 @@ namespace Questor.Modules
             else if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
             {
                 // Move to the target
-                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                if (DateTime.Now > Cache.Instance._nextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                 {
                     Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
                     closest.Approach();
@@ -591,7 +591,7 @@ namespace Questor.Modules
             else if (closest.Distance < (int)Distance.WarptoDistance) // if we are inside warptorange you need to approach (you cant warp from here)
             {
                 // Move to the target
-                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                if (DateTime.Now > Cache.Instance._nextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                 {
                     Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
                     closest.Approach();
@@ -1292,7 +1292,7 @@ namespace Questor.Modules
             var closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
             if (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
             {
-                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                if (DateTime.Now > Cache.Instance._nextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                 {
                     Logging.Log("MissionController.LootItem: Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]");
                     closest.Approach();
