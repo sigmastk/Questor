@@ -14,12 +14,12 @@ namespace Questor.Modules
         QuestorPulse_milliseconds = 1000,                         // Used to delay the next pulse, units: milliseconds. Default is 1500
         DefenceDelay_milliseconds = 500,
         AfterburnerDelay_milliseconds = 1000,
-        RepModuleDelay_milliseconds = 1000,
+        RepModuleDelay_milliseconds = 2500,
         ApproachDelay_seconds = 2,
         TargetDelay_miliseconds = 1000,
         OrbitDelay_seconds = 15,                                 // This is the delay between orbit commands, units: seconds. Default is 15
-        DockingDelay_seconds = 5,                                // This is the delay bwtween docking attempts, units: seconds. Default is 5
-        WarptoDelay_seconds = 5,                                 // This is the delay berween warpto commands, units: seconds. Default is 5
+        DockingDelay_seconds = 5,                                // This is the delay between docking attempts, units: seconds. Default is 5
+        WarptoDelay_seconds = 5,                                 // This is the delay between warpto commands, units: seconds. Default is 5
         WeaponDelay_miliseconds = 220,
         NosDelay_miliseconds = 220,
         WebDelay_miliseconds = 220,

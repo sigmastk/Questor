@@ -163,6 +163,7 @@ namespace Questor.Modules
         }
 
         public bool DoNotBreakInvul = false;
+        public bool UseDrones = true;
 
         public bool LootAlreadyUnloaded = false;
 
@@ -276,6 +277,7 @@ namespace Questor.Modules
         public bool IsAgentLoop { get; set; }
         private string AgentName = "";
 
+        public DateTime _lastDefence;
         public DateTime _lastModuleActivation;
         public DateTime _lastLoggingAction = DateTime.MinValue;
         public DateTime _nextTargetAction = DateTime.MinValue;
@@ -289,6 +291,7 @@ namespace Questor.Modules
         public DateTime _nextAlign = DateTime.Now;
         public DateTime _nextOrbit = DateTime.Now;
         public DateTime _nextReload = DateTime.Now;
+        public DateTime _nextUndockAction = DateTime.Now;
         
         public DateTime _nextDock;
         public DateTime _nextDroneRecall;
@@ -364,7 +367,7 @@ namespace Questor.Modules
         {
             get
             {
-				_agent = DirectEve.GetAgentByName(CurrentAgent);
+                _agent = DirectEve.GetAgentByName(CurrentAgent);
                 _agentId = _agent.AgentId;
 
                 if (_agent == null)
@@ -400,11 +403,7 @@ namespace Questor.Modules
             get
             {
                 if (_containers == null)
-				
-				//
-				// edit 12-18-2011
-				//
-                    _containers = Entities.Where(e => e.IsContainer && e.HaveLootRights && (e.GroupId != (int) Group.Wreck || !e.IsWreckEmpty) && (e.Name != (String) "Abandoned Container")).ToList();
+                    _containers = Entities.Where(e => e.IsContainer && e.HaveLootRights && (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) && (e.Name != (String)"Abandoned Container")).ToList();
 
                 return _containers;
             }
@@ -623,7 +622,6 @@ namespace Questor.Modules
         public bool ArmLoadedCache { get; set; } // flags whether arm has already loaded the mission
         public bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
         public bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
-                                                            // fitting from being loaded in arm.cs
         public List<Ammo> missionAmmo;
         public int MissionWeaponGroupId = 0;
         public bool? MissionUseDrones;
@@ -811,23 +809,22 @@ namespace Questor.Modules
                     if (pocket.Element("damagetype") != null)
                         DamageType = (DamageType) Enum.Parse(typeof (DamageType), (string) pocket.Element("damagetype"), true);
 
-					if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
+                    if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
                     {
                         
                         OrbitDistance = (int) pocket.Element("orbitdistance");
                         Logging.Log(string.Format("Cache: Using Mission Orbit distance {0}",OrbitDistance));
                     }
-					else											//Otherwise, use value defined in charname.xml file
+                    else //Otherwise, use value defined in charname.xml file
                     {
-						OrbitDistance = Settings.Instance.OrbitDistance;
+                        OrbitDistance = Settings.Instance.OrbitDistance;
                         Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}",OrbitDistance));
                     }
-					if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
+                    if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
                     {
-    					afterMissionSalvaging = (bool)pocket.Element("afterMissionSalvaging");
-					}
+                        afterMissionSalvaging = (bool)pocket.Element("afterMissionSalvaging");
+                    }
 
-						
                     var actions = new List<Action>();
                     var elements = pocket.Element("actions");
                     if (elements != null)
@@ -991,7 +988,11 @@ namespace Questor.Modules
         /// <param name = "label"></param>
         public void CreateBookmark(string label)
         {
-            DirectEve.BookmarkCurrentLocation(label, "", null);
+            if (Settings.Instance.CreateSalvageBookmarksIn=="Corp")
+                DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+            else
+                DirectEve.BookmarkCurrentLocation(label, "", null);
+            
         }
 
         /// <summary>

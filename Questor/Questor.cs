@@ -199,7 +199,7 @@ namespace Questor
                 return;
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance._lastDockedorJumping).TotalSeconds < 6)
+            if (DateTime.Now.Subtract(Cache.Instance._lastDockedorJumping).TotalSeconds < 10)
                 return;
 
             // New frame, invalidate old cache
