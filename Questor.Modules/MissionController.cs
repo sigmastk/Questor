@@ -447,7 +447,10 @@ namespace Questor.Modules
             if (DateTime.Now < _clearPocketTimeout.Value)
                 return;
 
-            // We have cleared the Pocket, perform the next action \o/
+            // We have cleared the Pocket, perform the next action \o/ - reset the timers that we had set for actions...
+            Cache.Instance._nextApproachAction = DateTime.Now;
+            Cache.Instance._nextOrbit = DateTime.Now;
+            Cache.Instance._nextAlign = DateTime.Now;
             _currentAction++;
 
             // Reset timeout
@@ -556,6 +559,9 @@ namespace Questor.Modules
             if (targets == null || targets.Count() == 0)
             {
                 Logging.Log("MissionController.MoveTo: no entities found named [" + target + "] proceeding to next action");
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -564,6 +570,9 @@ namespace Questor.Modules
             if (closest.Distance < distancetoapp) // if we are inside the range that we are supposed to approach assume we are done
             {
                 Logging.Log("MissionController.MoveTo: We are [" + closest.Distance + "] from a [" + target + "] we dont need to go any further");
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
 
                 if (Cache.Instance.Approaching != null)
@@ -638,6 +647,9 @@ namespace Questor.Modules
 
                 // Nothing has targeted us in the specified timeout
                 _waiting = false;
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -673,7 +685,9 @@ namespace Questor.Modules
             if (targetNames.Count == 0)
             {
                 Logging.Log("MissionController.AggroOnly: No targets defined!");
-
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -684,6 +698,9 @@ namespace Questor.Modules
                 Logging.Log("MissionController.AggroOnly: All targets gone " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
 
                 // We killed it/them !?!?!? :)
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -700,6 +717,9 @@ namespace Questor.Modules
                     target.UnlockTarget();
 
                 }
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -751,7 +771,9 @@ namespace Questor.Modules
             if (targetNames.Count == 0)
             {
                 Logging.Log("MissionController.Kill: No targets defined!");
-
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -764,6 +786,9 @@ namespace Questor.Modules
                 Logging.Log("MissionController.Kill: All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
 
                 // We killed it/them !?!?!? :)
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -914,6 +939,9 @@ namespace Questor.Modules
                 {
                     Logging.Log("MissionController.KillOnce: No targets defined!");
 
+                    Cache.Instance._nextApproachAction = DateTime.Now;
+                    Cache.Instance._nextOrbit = DateTime.Now;
+                    Cache.Instance._nextAlign = DateTime.Now;
                     _currentAction++;
                     return;
             }
@@ -943,7 +971,10 @@ namespace Questor.Modules
                 //    Logging.Log("MissionController.KillOnce: The target is dead, not valid anymore ");
                 //
                 //    // We killed it/them !?!?!? :)
-                //    _currentAction++;
+                //                Cache.Instance._nextApproachAction = DateTime.Now;
+                //                Cache.Instance._nextOrbit = DateTime.Now;
+                //                Cache.Instance._nextAlign = DateTime.Now;
+                //                _currentAction++;
                 //    return;
                 //}
 
@@ -1013,7 +1044,9 @@ namespace Questor.Modules
                 Logging.Log("MissionController.UseDrones: Enable launch of drones");
                 Cache.Instance.UseDrones = true;
             }
-
+            Cache.Instance._nextApproachAction = DateTime.Now;
+            Cache.Instance._nextOrbit = DateTime.Now;
+            Cache.Instance._nextAlign = DateTime.Now;
             _currentAction++;
             return;
         }
@@ -1034,7 +1067,9 @@ namespace Questor.Modules
             if (targetNames.Count == 0)
             {
                 Logging.Log("MissionController.AttackClosestByName: No targets defined!");
-
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -1049,6 +1084,9 @@ namespace Questor.Modules
                 Logging.Log("MissionController.AttackClosestByName: All targets killed, not valid anymore ");
 
                 // We killed it/them !?!?!? :)
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -1123,7 +1161,9 @@ namespace Questor.Modules
             if (targetNames.Count == 0)
             {
                 Logging.Log("MissionController.AttackClosest: No targets defined!");
-
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -1137,6 +1177,9 @@ namespace Questor.Modules
                 Logging.Log("MissionController.AttackClosest: All targets killed, not valid anymore ");
 
                 // We killed it/them !?!?!? :)
+                Cache.Instance._nextApproachAction = DateTime.Now;
+                Cache.Instance._nextOrbit = DateTime.Now;
+                Cache.Instance._nextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
