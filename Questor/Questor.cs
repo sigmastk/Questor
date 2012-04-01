@@ -672,17 +672,7 @@ namespace Questor
                             }
                             break;
                         }
-                        if (Settings.Instance.EnableStorylines && _storyline.HasStoryline())
-                        {
-                            Logging.Log("Questor: Storyline detected, doing storyline.");
 
-                            _storyline.Reset();
-                            if (State == QuestorState.Start)
-                            {
-                                State = QuestorState.Storyline;
-                            }
-                            break;
-                        }
                         Logging.Log("AgentInteraction: Start conversation [Start Mission]");
 
                         _agentInteraction.State = AgentInteractionState.StartConversation;
@@ -710,6 +700,19 @@ namespace Questor
                         Cache.Instance.TimeSpentInMission_seconds = 0;   // from landing on grid (loading mission actions) to going to base (changing to gotobase state)
                         Cache.Instance.TimeSpentInMissionInRange = 0;    // time spent totally out of range, no targets
                         Cache.Instance.TimeSpentInMissionOutOfRange = 0; // time spent in range - with targets to kill (or no targets?!)
+                        if (Settings.Instance.EnableStorylines && _storyline.HasStoryline())
+                        {
+                            Logging.Log("Questor: Storyline detected, doing storyline.");
+                            _storyline.Reset();
+                            if (State == QuestorState.Start)
+                            {
+                                State = QuestorState.Storyline;
+                            }
+                            break;
+                        }
+                        Logging.Log("AgentInteraction: Start conversation [Start Mission]");
+                        _agentInteraction.State = AgentInteractionState.StartConversation;
+                        _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
                     }
 
                     _agentInteraction.ProcessState();
