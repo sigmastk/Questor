@@ -130,6 +130,9 @@
                     }
                     if (!string.IsNullOrEmpty(Cache.Instance.MissionName) && (Cache.Instance.mission == null || (Cache.Instance.mission.State != (int)MissionState.Accepted)))
                     {
+                        // Seeing as we completed a mission, we will have loyalty points for this agent
+                        if (Cache.Instance.Agent.LoyaltyPoints == -1)
+                            return;
                         Statistics.Instance.MissionsThisSession = Statistics.Instance.MissionsThisSession + 1;
                         if (Statistics.Instance.DebugMissionStatistics) Logging.Log("We jumped through all the hoops: now do the mission logging");
                         Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
@@ -194,7 +197,7 @@
                             // Build the line
                             var line3 = DateTime.Now + ";";                                                                          // Date
                             line3 += Cache.Instance.MissionName + ";";                                                               // Mission
-                            line3 += ((int)Statistics.Instance.FinishedMission.Subtract(StartedMission).TotalMinutes) + ";";         // TimeMission
+                            line3 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
                             line3 += ((long)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                     // Isk
                             line3 += ((long)Statistics.Instance.LootValue) + ";";                                                    // Loot
                             line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - LoyaltyPoints) + ";";                               // LP
@@ -207,7 +210,7 @@
                             line3 += ((int)Cache.Instance.lowest_capacitor_percentage_this_mission) + ";";                           // Lowest Capacitor %
                             line3 += ((int)Cache.Instance.repair_cycle_time_this_mission) + ";";                                     // repair Cycle Time
                             line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";"; // After Mission Salvaging Time
-                            line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ((int)FinishedMission.Subtract(StartedMission).TotalMinutes) + ";\r\n"; // Total Time, Mission + After Mission Salvaging (if any)
+                            line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ((int)FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";\r\n"; // Total Time, Mission + After Mission Salvaging (if any)
 
                             // The mission is finished
                             Logging.Log("Questor: writing mission log3 to  [ " + Settings.Instance.MissionStats3LogFile);
