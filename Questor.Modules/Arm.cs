@@ -618,7 +618,7 @@ namespace Questor.Modules
 
                 case ArmState.WaitForItems:
                     // Wait 5 seconds after moving
-                    if (DateTime.Now > _nextArmAction)
+                    if (DateTime.Now < _nextArmAction)
                         break;
 
                     if (cargo.Items.Count == 0)
