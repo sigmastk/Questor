@@ -89,7 +89,7 @@ namespace Questor.Modules
                             // No, command it to open
                             Logging.Log("Arm: Opening Ship Hangar");
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                            _nextArmAction = DateTime.Now.AddSeconds(5);
+                            _nextArmAction = DateTime.Now.AddSeconds(3);
                             break;
                         }
 
@@ -293,7 +293,7 @@ namespace Questor.Modules
                             // No, command it to open
                             Logging.Log("Arm: Opening Item Hangar");
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                            _nextArmAction = DateTime.Now.AddSeconds(5);
+                            _nextArmAction = DateTime.Now.AddSeconds(3);
                             break;
                         }
                     }
@@ -324,7 +324,7 @@ namespace Questor.Modules
                                 // No, command it to open
                                 Logging.Log("Arm: Opening Corporate Hangar");
                                 Cache.Instance.DirectEve.OpenCorporationHangar();
-                                _nextArmAction = DateTime.Now.AddSeconds(5);
+                                _nextArmAction = DateTime.Now.AddSeconds(3);
                                 break;
                             }
                         }
@@ -381,8 +381,8 @@ namespace Questor.Modules
                         if (DateTime.Now > _nextArmAction)
                         {
                             Logging.Log("Arm: Opening Fitting Manager");
-                            Cache.Instance.DirectEve.OpenFitingManager();
-                            _nextArmAction = DateTime.Now.AddSeconds(5); //you should only have to issue this command once
+                            Cache.Instance.DirectEve.OpenFitingManager(); //you should only have to issue this command once
+                            _nextArmAction = DateTime.Now.AddSeconds(5); 
                             State = ArmState.WaitForFittingWindow;
                         }
                     }
@@ -397,12 +397,11 @@ namespace Questor.Modules
                         if (fittingMgr == null)
                         {
                             Logging.Log("Arm: Opening fitting manager");
-                            Cache.Instance.DirectEve.OpenFitingManager();
-                            _nextArmAction = DateTime.Now.AddSeconds(5); //you should only have to issue this command once
+                            Cache.Instance.DirectEve.OpenFitingManager(); //you should only have to issue this command once
+                            _nextArmAction = DateTime.Now.AddSeconds(5); 
                         }
                     }
-                    //check if it's ready
-                    else if (fittingMgr.IsReady)
+                    if (fittingMgr.IsReady) //check if it's ready
                     {
                         State = ArmState.ChoseFitting;
                     }
@@ -472,7 +471,7 @@ namespace Questor.Modules
                         }
                     }
                     State = ArmState.MoveItems;
-                    Logging.Log("Arm: Closing Fiting Manager");
+                    Logging.Log("Arm: Closing Fitting Manager");
                     fittingMgr.Close();
                     break;
 
@@ -539,7 +538,7 @@ namespace Questor.Modules
                     }
 
                     // Move needed drones
-                    Logging.Log("Arm: Move" + (int)Math.Min(neededDrones, drone.Stacksize) + " Drones into dronebay" );
+                    Logging.Log("Arm: Move" + (int)Math.Min(neededDrones, drone.Stacksize) + " Drones into drone bay" );
                     droneBay.Add(drone, (int)Math.Min(neededDrones, drone.Stacksize));
                     break;
 
