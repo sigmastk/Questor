@@ -995,6 +995,27 @@ namespace Questor.Modules
             }
         }
 
+        private void UseDrones(Action action)
+        {
+            bool usedrones;
+            if (!bool.TryParse(action.GetParameterValue("use"), out usedrones))
+                usedrones = true;
+
+            if (!usedrones)
+            {
+                Logging.Log("MissionController.UseDrones: Disable launch of drones");
+                Cache.Instance.UseDrones = false;
+            }
+            else
+            {
+                Logging.Log("MissionController.UseDrones: Enable launch of drones");
+                Cache.Instance.UseDrones = true;
+            }
+
+            _currentAction++;
+            return;
+        }
+
         private void AttackClosestByNameAction(Action action)
         {
             bool nottheclosest;
@@ -1335,6 +1356,7 @@ namespace Questor.Modules
                 case ActionState.Done:
                     // Tell the drones module to retract drones
                     Cache.Instance.IsMissionPocketDone = true;
+                    Cache.Instance.UseDrones = true;
 
                     // We do not switch to "done" status if we still have drones out
                     if (Cache.Instance.ActiveDrones.Count() > 0)
@@ -1363,6 +1385,10 @@ namespace Questor.Modules
                     KillOnceAction(action);
                     break;
 
+                case ActionState.UseDrones:
+                    UseDrones(action);
+                    break;
+
                 case ActionState.AttackClosestByName:
                     AttackClosestByNameAction(action);
                     break;
@@ -1378,7 +1404,7 @@ namespace Questor.Modules
                 case ActionState.MoveToBackground:
                     MoveToBackgroundAction(action);
                     break;
-                
+
                 case ActionState.ClearWithinWeaponsRangeOnly:
                     ClearWithinWeaponsRangeOnlyAction(action);
                     break;
