@@ -23,7 +23,7 @@ namespace Questor.Modules
         private DateTime _resumeTime;
         private DateTime _nextDock = DateTime.Now;
         private DateTime _nextWarpTo = DateTime.Now;
-        private DateTime _lastDockedorJumping;
+        //private DateTime _lastDockedorJumping;
         private DateTime _lastWarpScrambled = DateTime.MinValue;
         private bool _delayedResume;
         private int _randomDelay;
@@ -38,10 +38,10 @@ namespace Questor.Modules
                 case PanicState.Normal:
                     if (!Cache.Instance.InSpace)
                     {
-                        _lastDockedorJumping = DateTime.Now;
+                        Cache.Instance._lastDockedorJumping = DateTime.Now;
                     }
 
-                    if (DateTime.Now.Subtract(_lastDockedorJumping).TotalSeconds > 5)
+                    if (DateTime.Now.Subtract(Cache.Instance._lastDockedorJumping).TotalSeconds > 5)
                     {
                         if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
                         {
@@ -182,15 +182,15 @@ namespace Questor.Modules
                     var station = Cache.Instance.Stations.FirstOrDefault();
                     if (station != null)
                     {
-                        //if (Cache.Instance.InWarp)
-                        //    break;
+                        if (Cache.Instance.InWarp)
+                            break;
 
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
                             if (DateTime.Now > _nextWarpTo)
                             {
                                 Logging.Log("Panic: Warping to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
-                                station.WarpTo();
+                                station.WarpToAndDock();
                                 _nextWarpTo = DateTime.Now.AddSeconds(5);
                                 _nextDock = DateTime.MinValue;
                             }
@@ -206,6 +206,13 @@ namespace Questor.Modules
                             Logging.Log("Panic: Docking has been delayed until [" + _nextDock + "]");
                         }
                         break;
+                    }
+                    else
+                    {
+                        if (DateTime.Now.Subtract(Cache.Instance._lastLoggingAction).TotalSeconds > 15)
+                        {
+                            Logging.Log("No station found in local?");
+                        }
                     }
 
                     // What is this you say?  No star?
