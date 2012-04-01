@@ -1989,7 +1989,7 @@ namespace Questor
                         _courier.State = CourierMissionState.Idle;
                         Cache.Instance.CourierMission = false;
 
-                        if (State == QuestorState.SalvageNextPocket)
+                        if (State == QuestorState.CourierMission)
                         {
                             State = QuestorState.GotoBase;
                         }
