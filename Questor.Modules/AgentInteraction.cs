@@ -95,13 +95,10 @@ namespace Questor.Modules
             {
                 if (DateTime.Now.Subtract(_waitingonagentwindowtimer2).TotalSeconds > 30)
                 {
-                    Logging.Log("AgentInteraction: ReplyToAgent: agentWindow == null : waiting");
-                    if (DateTime.Now.Subtract(_waitingonagentwindowtimer2).TotalSeconds > 60)
-                    {
-                        Logging.Log("AgentInteraction: ReplyToAgent: agentWindow == null : trying to close the agent window");
-                        agentWindow.Close();
-                        _waitingonagentwindowtimer = DateTime.Now;
-                    }
+                    Logging.Log("AgentInteraction: ReplyToAgent: agentWindow == null : trying to close the agent window");
+                    agentWindow.Close();
+                    _waitingonagentwindowtimer = DateTime.Now;
+                    
                 }
                 return;
             }
