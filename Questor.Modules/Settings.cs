@@ -25,11 +25,21 @@ namespace Questor.Modules
 
         public string _characterName;
         private DateTime _lastModifiedDate;
-        private Random ramdom = new Random();
+        private Random random = new Random();
 
-        public int ramdom_number()
+        public int random_number5_15()
         {
-            return ramdom.Next(10, 35);
+            return random.Next(5, 15);
+        }
+
+        public int random_number5_10()
+        {
+            return random.Next(5, 10);
+        }
+
+        public int random_number3_7()
+        {
+            return random.Next(3, 7);
         }
 
         public Settings()
