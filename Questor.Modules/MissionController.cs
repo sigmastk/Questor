@@ -289,7 +289,7 @@ namespace Questor.Modules
                     closest.Approach();
                     Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                 }
-                else
+                else if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
                 {
                     Logging.Log("MissionController.Activate: Unable to approach: Next Approach action is not allowed for another [" + Cache.Instance._nextApproachAction.Subtract(DateTime.Now).TotalSeconds + "] seconds");
                 }
