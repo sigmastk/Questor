@@ -553,7 +553,7 @@ namespace Questor.Modules
 
             int distancetoapp;
             if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
-                distancetoapp = (int)Distance.GateActivationRange;
+                distancetoapp = 1000;
 
             var targets = Cache.Instance.EntitiesByName(target);
             if (targets == null || targets.Count() == 0)
@@ -567,7 +567,7 @@ namespace Questor.Modules
             }
 
             var closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance < distancetoapp) // if we are inside the range that we are supposed to approach assume we are done
+            if (closest.Distance <= distancetoapp) // if we are inside the range that we are supposed to approach assume we are done
             {
                 Logging.Log("MissionController.MoveTo: We are [" + closest.Distance + "] from a [" + target + "] we dont need to go any further");
                 Cache.Instance._nextApproachAction = DateTime.Now;
@@ -587,6 +587,7 @@ namespace Questor.Modules
                 //    closest.Orbit(Cache.Instance.OrbitDistance);
                 //    Logging.Log("MissionController: MoveTo: Initiating orbit after reaching target")
                 //}
+                return;
             }
             else if (closest.Distance < (int)Distance.WarptoDistance) // if we are inside warptorange you need to approach (you cant warp from here)
             {
@@ -597,8 +598,9 @@ namespace Questor.Modules
                     closest.Approach();
                     Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                 }
+                return;
             }
-            else
+            else // if we are outside warpto distance (presumably inside a deadspace where we cant warp) align to the target
             {
                 //// Move to the target
                 //if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
@@ -617,7 +619,24 @@ namespace Questor.Modules
                     closest.AlignTo();
                     Cache.Instance._nextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
                 }
+                return;
             }
+            //
+            // this can never be executed due to the return statements above
+            //
+            //if (closest.Distance <= 2300 && (closest.Name == "Acceleration Gate" || closest.Name == "Navigational Beacon"))
+            //{
+            //    Logging.Log("MissionController.MoveTo Finished Action");
+            //    _currentAction++;
+            //    return;
+            //}
+            //else if (DateTime.Now > Cache.Instance._nextApproachAction && (closest.Name == "Acceleration Gate" || closest.Name == "Navigational Beacon"))
+            //{
+            //    Logging.Log("MissionController.MoveTo: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
+            //    closest.Approach();
+            //    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+            //}
+
         }
 
         private void WaitUntilTargeted(Action action)
@@ -843,7 +862,7 @@ namespace Questor.Modules
 
             //if optimalrange is setup and distance to target is less than 80% of optimalrange and we aren't speedtanking
             if (Settings.Instance.OptimalRange > 0 && (closest.Distance < (Settings.Instance.OptimalRange * 0.8d)) && !Settings.Instance.SpeedTank)
-            {  
+            {
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                 Cache.Instance.Approaching = null;
                 Logging.Log("MissionController.Kill: Stop ship, target is in optimalRange");
@@ -1055,7 +1074,7 @@ namespace Questor.Modules
         {
             bool nottheclosest;
             if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
-                nottheclosest = false; 
+                nottheclosest = false;
             
             if (Cache.Instance.NormalApproch)
                 Cache.Instance.NormalApproch = false;
