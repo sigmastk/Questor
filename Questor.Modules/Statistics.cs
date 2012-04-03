@@ -131,8 +131,9 @@
                     if (!string.IsNullOrEmpty(Cache.Instance.MissionName) && (Cache.Instance.mission == null || (Cache.Instance.mission.State != (int)MissionState.Accepted)))
                     {
                         // Seeing as we completed a mission, we will have loyalty points for this agent
-                        if (Cache.Instance.Agent.LoyaltyPoints == -1)
-                            return;
+                        //if (Cache.Instance.Agent.LoyaltyPoints == -1)
+                        //    return;
+
                         Statistics.Instance.MissionsThisSession = Statistics.Instance.MissionsThisSession + 1;
                         if (Statistics.Instance.DebugMissionStatistics) Logging.Log("We jumped through all the hoops: now do the mission logging");
                         Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
