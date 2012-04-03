@@ -203,7 +203,7 @@ namespace Questor.Modules
                         }
                         else
                         {
-                            Logging.Log("Panic: Docking has been delayed until [" + _nextDock + "]");
+                            Logging.Log("Panic: Docking has been delayed until [" + _nextDock.ToString("HH:mm:ss") + "]");
                         }
                         break;
                     }
@@ -237,7 +237,7 @@ namespace Questor.Modules
                         }
                         else
                         {
-                            Logging.Log("Panic: Warping has been delayed until [" + _nextWarpTo + "]");
+                            Logging.Log("Panic: Warping has been delayed until [" + _nextWarpTo.ToString("HH:mm:ss") + "]");
                         }
                     }
                     else
