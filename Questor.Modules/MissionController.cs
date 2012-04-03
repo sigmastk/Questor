@@ -624,19 +624,18 @@ namespace Questor.Modules
             //
             // this can never be executed due to the return statements above
             //
-            //if (closest.Distance <= 2300 && (closest.Name == "Acceleration Gate" || closest.Name == "Navigational Beacon"))
-            //{
-            //    Logging.Log("MissionController.MoveTo Finished Action");
-            //    _currentAction++;
-            //    return;
-            //}
-            //else if (DateTime.Now > Cache.Instance._nextApproachAction && (closest.Name == "Acceleration Gate" || closest.Name == "Navigational Beacon"))
-            //{
-            //    Logging.Log("MissionController.MoveTo: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-            //    closest.Approach();
-            //    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-            //}
-
+            if (closest.Distance <= 2300 && (closest.Name == "Acceleration Gate" || closest.Name == "Navigational Beacon"))
+            {
+                Logging.Log("MissionController.MoveTo Finished Action");
+                _currentAction++;
+                return;
+            }
+            else if (DateTime.Now > Cache.Instance._nextApproachAction && (closest.Name == "Acceleration Gate" || closest.Name == "Navigational Beacon"))
+            {
+                Logging.Log("MissionController.MoveTo: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
+                closest.Approach();
+                Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+            }
         }
 
         private void WaitUntilTargeted(Action action)
