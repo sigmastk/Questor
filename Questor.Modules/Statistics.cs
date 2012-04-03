@@ -137,7 +137,7 @@
                         if (Statistics.Instance.DebugMissionStatistics) Logging.Log("We jumped through all the hoops: now do the mission logging");
                         Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
                         Cache.Instance.SessionLootGenerated = (Cache.Instance.SessionLootGenerated + (int)LootValue);
-                        Cache.Instance.SessionLPGenerated = (Cache.Instance.SessionLPGenerated + (Cache.Instance.Agent.LoyaltyPoints - LoyaltyPoints));
+                        Cache.Instance.SessionLPGenerated = (Cache.Instance.SessionLPGenerated + (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints));
                         if (Settings.Instance.MissionStats1Log)
                         {
                             if (!Directory.Exists(Settings.Instance.MissionStats1LogPath))
@@ -148,18 +148,20 @@
                                 File.AppendAllText(Settings.Instance.MissionStats1LogFile, "Date;Mission;TimeMission;TimeSalvage;TotalTime;Isk;Loot;LP;\r\n");
 
                             // Build the line
-                            var line = DateTime.Now + ";";                                                      // Date
+                            var line = DateTime.Now + ";";                                                                          // Date
                             line += Cache.Instance.MissionName + ";";                                                               // Mission
-                            line += ((int)Statistics.Instance.FinishedMission.Subtract(StartedMission).TotalMinutes) + ";";         // TimeMission
+                            line += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
                             line += ((int)DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes) + ";";           // Time Doing After Mission Salvaging
                             line += ((int)DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";            // Total Time doing Mission
                             line += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                      // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
                             line += ((int)Statistics.Instance.LootValue) + ";";                                                     // Loot
-                            line += (Cache.Instance.Agent.LoyaltyPoints - LoyaltyPoints) + ";\r\n";                                 // LP
+                            line += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";\r\n";                                 // LP
 
                             // The mission is finished
                             File.AppendAllText(Settings.Instance.MissionStats1LogFile, line);
                             Logging.Log("Questor: writing mission log1 to  [ " + Settings.Instance.MissionStats1LogFile);
+                            Logging.Log("Date;Mission;TimeMission;TimeSalvage;TotalTime;Isk;Loot;LP;\r\n");
+                            Logging.Log(line);
                         }
                         if (Settings.Instance.MissionStats2Log)
                         {
@@ -173,10 +175,10 @@
                             // Build the line
                             var line2 = string.Format("{0:MM/dd/yyyy HH:mm:ss}", DateTime.Now) + ";";                               // Date
                             line2 += Cache.Instance.MissionName + ";";                                                              // Mission
-                            line2 += ((int)Statistics.Instance.FinishedMission.Subtract(StartedMission).TotalMinutes) + ";";        // TimeMission
+                            line2 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";        // TimeMission
                             line2 += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                     // Isk
                             line2 += ((int)Statistics.Instance.LootValue) + ";";                                                    // Loot
-                            line2 += (Cache.Instance.Agent.LoyaltyPoints - LoyaltyPoints) + ";";                                    // LP
+                            line2 += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                                    // LP
                             line2 += ((int)Statistics.Instance.LostDrones) + ";";                                                   // Lost Drones
                             line2 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                              // Ammo Consumption
                             line2 += ((int)Statistics.Instance.AmmoValue) + ";\r\n";                                                // Ammo Value
@@ -184,6 +186,8 @@
                             // The mission is finished
                             Logging.Log("Questor: writing mission log2 to [ " + Settings.Instance.MissionStats2LogFile);
                             File.AppendAllText(Settings.Instance.MissionStats2LogFile, line2);
+                            Logging.Log("Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue\r\n");
+                            Logging.Log(line2);
                         }
                         if (Settings.Instance.MissionStats3Log)
                         {
@@ -200,7 +204,7 @@
                             line3 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
                             line3 += ((long)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                     // Isk
                             line3 += ((long)Statistics.Instance.LootValue) + ";";                                                    // Loot
-                            line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - LoyaltyPoints) + ";";                               // LP
+                            line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                               // LP
                             line3 += ((int)Statistics.Instance.LostDrones) + ";";                                                    // Lost Drones
                             line3 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                               // Ammo Consumption
                             line3 += ((int)Statistics.Instance.AmmoValue) + ";";                                                     // Ammo Value
@@ -215,6 +219,8 @@
                             // The mission is finished
                             Logging.Log("Questor: writing mission log3 to  [ " + Settings.Instance.MissionStats3LogFile);
                             File.AppendAllText(Settings.Instance.MissionStats3LogFile, line3);
+                            Logging.Log("Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles\r\n");
+                            Logging.Log(line3);
                         }
                         // Disable next log line
                         Cache.Instance.MissionName = null;
