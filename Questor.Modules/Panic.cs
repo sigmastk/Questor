@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 // 
@@ -58,6 +58,7 @@ namespace Questor.Modules
                             //Questor.panic_attempts_this_mission;
                             Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                             Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                            //Cache.Instance.IsMissionPocketDone = true;
                             State = PanicState.StartPanicking;
                         }
                         else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
@@ -65,6 +66,7 @@ namespace Questor.Modules
                             Logging.Log("Panic: Start panicking, shield [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage,0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%]");
                             Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                             Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                            //Cache.Instance.IsMissionPocketDone = true;
                             State = PanicState.StartPanicking;
                         }
                         else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
@@ -72,6 +74,7 @@ namespace Questor.Modules
                             Logging.Log("Panic: Start panicking, armor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%]");
                             Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                             Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                            //Cache.Instance.IsMissionPocketDone = true;
                             State = PanicState.StartPanicking;
                         }
 
@@ -89,6 +92,7 @@ namespace Questor.Modules
 
                                 Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                                 Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                                Cache.Instance.IsMissionPocketDone = true;
                                 State = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + frigates + "] frigates");
                             }
@@ -99,6 +103,7 @@ namespace Questor.Modules
 
                                 Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                                 Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                                Cache.Instance.IsMissionPocketDone = true;
                                 State = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + cruisers + "] cruisers");
                             }
@@ -109,6 +114,7 @@ namespace Questor.Modules
 
                                 Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                                 Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                                Cache.Instance.IsMissionPocketDone = true;
                                 State = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + battlecruisers + "] battlecruisers");
                             }
@@ -119,6 +125,7 @@ namespace Questor.Modules
 
                                 Cache.Instance.panic_attempts_this_mission = (Cache.Instance.panic_attempts_this_mission + 1);
                                 Cache.Instance.panic_attempts_this_pocket = (Cache.Instance.panic_attempts_this_pocket + 1);
+                                Cache.Instance.IsMissionPocketDone = true;
                                 State = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + battleships + "] battleships");
                             }
@@ -257,12 +264,14 @@ namespace Questor.Modules
                     if (isSafe)
                     {
                         Logging.Log("Panic: We've recovered, resume mission");
+                        Cache.Instance.IsMissionPocketDone = false;
                         State = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }
 
                     if (State == PanicState.DelayedResume)
                     {
                         Logging.Log("Panic: Delaying resume for " + _randomDelay + " seconds");
+                        Cache.Instance.IsMissionPocketDone = false;
                         _resumeTime = DateTime.Now.AddSeconds(_randomDelay);
                     }
                     break;
