@@ -31,10 +31,10 @@ namespace Questor.Modules
         DelayedGotoBase_seconds = 15,                            // Delay before going back to base, usually after a disconnect / reconnect. units: seconds. Default is 15
         WaitforBadGuytoGoAway_minutes = 5,                       // Stay docked for this amount of time before checking local again, units: minutes. Default is 5
         CloseQuestorDelayBeforeExit_seconds = 20,                // Delay before closing eve, units: seconds. Default is 20
-        QuestorBeforeLoginPulseDelay_milliseconds = 20,          // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule
+        QuestorBeforeLoginPulseDelay_milliseconds = 60,          // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule
         SwitchShipsDelay_seconds = 10,                           // Switch Ships Delay before retrying, units: seconds. Default is 10
-        SwitchShipsCheck_seconds = 7,                            // Switch Ships Check to see if ship is correct, units: seconds. Default is 7
-        FittingWindowLoadFittingDelay_seconds = 10,              // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
+        SwitchShipsCheck_seconds = 5,                            // Switch Ships Check to see if ship is correct, units: seconds. Default is 7
+        FittingWindowLoadFittingDelay_seconds = 7,               // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
         Armstate_WaitforItemstoMove_seconds = 5,                 // Arm state: wait for items to move, units: seconds. Default is 5
         LocalWatch_CheckLocalDelay_seconds = 5,                  // Local Check for bad standings pilots, delay between checks, units: seconds. Default is 5
         ReloadWeaponDelayBeforeUsable_seconds = 22,              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 22

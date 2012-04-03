@@ -299,7 +299,7 @@ namespace Questor.Modules
         public DateTime _lastWalletCheck;
         public DateTime _nextWarpTo;
         public DateTime _lastupdateofSessionRunningTime;
-        public DateTime _lastDockedorJumping;
+        public DateTime _nextInSpaceorInStation;
         public DateTime _lastTimeCheckAction;
 
         public int panic_attempts_this_mission { get; set; }

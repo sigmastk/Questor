@@ -36,10 +36,20 @@ namespace Questor.Modules
         {
             return random.Next(5, 10);
         }
+        
+        public int random_number5_7()
+        {
+            return random.Next(5, 7);
+        }
 
         public int random_number3_7()
         {
             return random.Next(3, 7);
+        }
+
+        public int random_number3_5()
+        {
+            return random.Next(3, 5);
         }
 
         public Settings()

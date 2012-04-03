@@ -195,11 +195,11 @@ namespace Questor
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
-                Cache.Instance._lastDockedorJumping = DateTime.Now;
+                Cache.Instance._nextInSpaceorInStation = DateTime.Now.AddSeconds(7);
                 return;
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance._lastDockedorJumping).TotalSeconds < 10)
+            if (DateTime.Now < Cache.Instance._nextInSpaceorInStation)
                 return;
 
             // New frame, invalidate old cache
@@ -355,7 +355,6 @@ namespace Questor
                     }
                 }
             }
-
 
             // We always check our defense state if we're in space, regardless of questor state
             // We also always check panic
@@ -672,12 +671,6 @@ namespace Questor
                             }
                             break;
                         }
-
-                        Logging.Log("AgentInteraction: Start conversation [Start Mission]");
-
-                        _agentInteraction.State = AgentInteractionState.StartConversation;
-                        _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-
                         // Update statistic values - these should be cleared in statistics.cs!!!!!!!!!!!!
                         Cache.Instance.Wealth = Cache.Instance.DirectEve.Me.Wealth;
                         Statistics.Instance.LootValue = 0;
