@@ -119,10 +119,8 @@ namespace Questor.Modules
                         if (!corpHangar.IsReady)
                             break;
                     }
-                    else
-                    {
-                        State = UnloadLootState.MoveCommonMissionCompletionitems;
-                    }
+                    Logging.Log("UnloadLoot: Moving CommonMissionCompletionitems");
+                    State = UnloadLootState.MoveCommonMissionCompletionitems;
                     break;
 
                 case UnloadLootState.MoveCommonMissionCompletionitems:
