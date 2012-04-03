@@ -36,13 +36,7 @@ namespace Questor.Modules
             switch (State)
             {
                 case PanicState.Normal:
-                    if (!Cache.Instance.InSpace)
-                    {
-                        Cache.Instance._lastDockedorJumping = DateTime.Now;
-                    }
 
-                    if (DateTime.Now.Subtract(Cache.Instance._lastDockedorJumping).TotalSeconds > 5)
-                    {
                         if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
                         {
                             _lastNormalX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
@@ -147,8 +141,7 @@ namespace Questor.Modules
                         Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), Priority.Dampening);
                         if (Cache.Instance.Modules.Any(m => m.IsTurret))
                             Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe), Priority.TrackingDisrupting);
-                    }
-                    break;
+                        break;
 
                 // NOTE: The difference between Panicking and StartPanicking is that the bot will move to "Panic" state once in warp & Panicking 
                 //       and the bot wont go into Panic mode while still "StartPanicking"
