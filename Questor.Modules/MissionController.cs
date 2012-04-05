@@ -223,7 +223,7 @@ namespace Questor.Modules
             
             //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
             var closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance < (int)Distance.GateActivationRange)
+            if (closest.Distance < (int)Distance.GateActivationRange + 5000)
             {
                 // Tell the drones module to retract drones
                 Cache.Instance.IsMissionPocketDone = true;
@@ -245,6 +245,7 @@ namespace Questor.Modules
                         Logging.Log("MissionController: Activate: We are too close to [" + closest.Name + "] Initiating orbit");
                         Cache.Instance._nextOrbit = DateTime.Now.AddSeconds(15);
                     }
+                    return;
                 }
                 //Logging.Log("MissionController: distance " + closest.Distance);
                 //if ((closest.Distance <= (int)Distance.TooCloseToStructure) && (DateTime.Now.Subtract(_lastOrbit).TotalSeconds > 30)) //-10100 meters (inside docking ring) - so close that we may get tangled in the structure on activation - move away
@@ -278,6 +279,7 @@ namespace Questor.Modules
                         _moveToNextPocket = DateTime.Now;
                         State = MissionControllerState.NextPocket;
                     }
+                    return;
                 }
             }
             else if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
@@ -293,12 +295,13 @@ namespace Questor.Modules
                 {
                     Logging.Log("MissionController.Activate: Unable to approach: Next Approach action is not allowed for another [" + Cache.Instance._nextApproachAction.Subtract(DateTime.Now).TotalSeconds + "] seconds");
                 }
+                return;
             }
-            else //we must be outside warpto distance, but we are likely in a deadspace so align to the target
+            else if (closest.Distance > (int)Distance.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
             {
-                // We cant warp if we have drones out
-                if (Cache.Instance.ActiveDrones.Count() > 0)
-                    return;
+                // We cant warp if we have drones out - but we are aligning not warping so we dont care
+                //if (Cache.Instance.ActiveDrones.Count() > 0)
+                //    return;
 
                 if (DateTime.Now > Cache.Instance._nextAlign)
                 {
@@ -311,6 +314,12 @@ namespace Questor.Modules
                 {
                     Logging.Log("MissionController.Activate: Unable to allign: Next Allign action is not allowed for another [" + Cache.Instance._nextAlign.Subtract(DateTime.Now).TotalSeconds + "] seconds");
                 }
+                return;
+            }
+            else //how in the world would we ever get here?
+            {
+                Logging.Log("MissionController.Activate: Error: [" + closest.Name + "] at [" + closest.Distance + "] is not within jump distance, within warpable distance or outside warpable distance, (!!!), retrying action.");
+                return;
             }
         }
 
@@ -517,7 +526,7 @@ namespace Questor.Modules
 
             int distancetoapp;
             if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
-                distancetoapp = (int)Distance.GateActivationRange;
+                distancetoapp = 1000;
 
             var target = action.GetParameterValue("target");
 
