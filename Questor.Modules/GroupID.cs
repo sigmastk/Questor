@@ -14,6 +14,7 @@ namespace Questor.Modules
         Star = 6,
         Station = 15,
         Stargate = 10,
+        AsteroidBelt = 9,
 
         Capsule = 29,
 
