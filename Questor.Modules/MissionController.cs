@@ -577,7 +577,7 @@ namespace Questor.Modules
             }
 
             var closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance <= distancetoapp) // if we are inside the range that we are supposed to approach assume we are done
+            if (closest.Distance <= distancetoapp + 5000) // if we are inside the range that we are supposed to approach assume we are done
             {
                 Logging.Log("MissionController.MoveTo: We are [" + closest.Distance + "] from a [" + target + "] we dont need to go any further");
                 Cache.Instance._nextApproachAction = DateTime.Now;
