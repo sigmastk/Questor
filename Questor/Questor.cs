@@ -523,6 +523,12 @@ namespace Questor
                     {
                         if (!Statistics.Instance.MissionLoggingCompleted)
                         {
+                            Cache.Instance.mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                            if (Cache.Instance.Agent.LoyaltyPoints == -1) //if this agent has no loyalty points associated then you didn't complete a mission yet.
+                            {
+                                Logging.Log("We do not have loyalty points with the current agent yet, still -1");
+                                return;
+                            }
                             Statistics.Instance.MissionLoggingStarted = false;
                             if (State == QuestorState.Idle)
                             {
