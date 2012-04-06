@@ -510,6 +510,16 @@ namespace Questor.Modules
             }
         }
 
+        public bool IsEntityIShouldLeaveAlone
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.Merchant;    // Merchant, Convoy?
+                return result;
+            }
+        }
+
         public void LockTarget()
         {
             // If the bad idea is attacking, attack back

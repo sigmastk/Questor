@@ -72,6 +72,7 @@ namespace Questor.Modules
         ConcordDrone = 301,
         CustomsOfficial = 446,
         Billboard = 323,
+        Merchant = 297,
 
         Frigate = 25,
         AssaultShip = 324,
