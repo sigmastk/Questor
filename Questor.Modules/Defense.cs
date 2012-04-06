@@ -69,7 +69,6 @@ namespace Questor.Modules
                 module.Click();
                 _nextActivateAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
                 Logging.Log("Defense: Defensive module activated: [ " + module.ItemId + "] next Activation delayed until [" + _nextActivateAction.ToString("HH:mm:ss") + "]");
-                    
                 return;
             }
         }
@@ -189,16 +188,12 @@ namespace Questor.Modules
 
                 if (activate)
                 {
-                    //More human behavior
-                    //System.Threading.Thread.Sleep(333); 
                     module.Click();
                     _nextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
                     return;
                 }
                 else if (deactivate && module.IsActive)
                 {
-                    //More human behavior
-                    //System.Threading.Thread.Sleep(333); 
                     module.Click();
                     _nextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
                     return;
