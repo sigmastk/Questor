@@ -113,7 +113,7 @@ namespace Questor.Modules
             if (Cache.Instance.InStation)
             {
                 // We are in a station, but not the correct station!
-                if (nextAction < DateTime.Now)
+                if (Cache.Instance._nextUndockAction < DateTime.Now)
                 {
                     Logging.Log("TravelerDestination.StationDestination: We're docked in the wrong station, undocking from [" + Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0) + "]");
 
@@ -137,7 +137,7 @@ namespace Questor.Modules
                     //}
                     //else Logging.Log("TravelerDestination.StationDestination: UndockPrefix is not configured");
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    nextAction = DateTime.Now.AddSeconds((int)Time.TravelerExitStationAmIInSpaceYet_seconds);
+                    Cache.Instance._nextUndockAction = DateTime.Now.AddSeconds((int)Time.TravelerExitStationAmIInSpaceYet_seconds);
                 }
 
                 // We are not there yet
@@ -165,7 +165,6 @@ namespace Questor.Modules
                     Logging.Log("TravelerDestination.BookmarkDestination: Warping to undock bookmark [" + localundockBookmark.Title + "]");
                     localundockBookmark.WarpTo();
                     nextAction = DateTime.Now.AddSeconds(10);
-                    //nextAction = DateTime.Now.AddSeconds(Settings.Instance.UndockDelay);
                     return false;
                 }
             }
@@ -180,18 +179,30 @@ namespace Questor.Modules
 
             if (entity.Distance < (int)Distance.DockingRange)
             {
-                Logging.Log("TravelerDestination.StationDestination: Dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
-                entity.Dock();
+                if (DateTime.Now > Cache.Instance._nextDock)
+                {
+                    Logging.Log("TravelerDestination.StationDestination: Dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
+                    entity.Dock();
+                    Cache.Instance._nextDock.AddSeconds((int)Time.DockingDelay_seconds);
+                }
             }
             else if (entity.Distance < (int)Distance.WarptoDistance)
             {
-                Logging.Log("TravelerDestintion.StationDestination: Approaching [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]"); 
-                entity.Approach();
+                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                {
+                    Logging.Log("TravelerDestintion.StationDestination: Approaching [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
+                    entity.Approach();
+                    Cache.Instance._nextApproachAction.AddSeconds((int)Time.ApproachDelay_seconds);
+                }
             }
             else
             {
-                Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
-                entity.WarpTo();
+                if (DateTime.Now > Cache.Instance._nextDock)
+                {
+                    Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
+                    entity.WarpTo();
+                    Cache.Instance._nextDock.AddSeconds((int)Time.WarptoDelay_seconds);
+                }
             }
 
             nextAction = DateTime.Now.AddSeconds(20);
@@ -315,7 +326,6 @@ namespace Questor.Modules
                     Logging.Log("TravelerDestination.BookmarkDestination: Warping to undock bookmark [" + undockBookmark.Title + "]");
                     undockBookmark.WarpTo();
                     nextAction = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
-                    //nextAction = DateTime.Now.AddSeconds(Settings.Instance.UndockDelay);
                     return false;
                 }
             }

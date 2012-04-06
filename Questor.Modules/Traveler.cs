@@ -59,7 +59,6 @@ namespace Questor.Modules
                     Logging.Log("Traveler: Error setting solar system destination [" + solarSystemId + "]");
                     State = TravelerState.Error;
                 }
-
                 return;
             }
             else
@@ -76,7 +75,7 @@ namespace Questor.Modules
                     return;
                 }
 
-            // We are apparently not really in space yet...
+                // We are apparently not really in space yet...
                 if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
                 return;
 
@@ -102,17 +101,25 @@ namespace Questor.Modules
                 {
                     Logging.Log("Traveler: Jumping to [" + locationName + "]");
                     entity.Jump();
-
+                    Cache.Instance._nextInSpaceorInStation = DateTime.Now;
                     _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerJumpedGateNextCommandDelay_seconds);
                 }
                 else if (entity.Distance < (int)Distance.WarptoDistance)
-                    entity.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
-                   
+                {
+                    if (DateTime.Now > Cache.Instance._nextApproachAction)
+                    {
+                        entity.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
+                        Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    }
+                }
                 else
                 {
-                    Logging.Log("Traveler: Warping to [Stargate (" + locationName + ")]");
-                    entity.WarpTo();
-                    _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
+                    if (DateTime.Now > Cache.Instance._nextWarpTo)
+                    {
+                        Logging.Log("Traveler: Warping to [Stargate (" + locationName + ")]");
+                        entity.WarpTo();
+                        Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                    }
                 }
             }
         }
