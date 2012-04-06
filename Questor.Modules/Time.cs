@@ -15,7 +15,7 @@ namespace Questor.Modules
         DefenceDelay_milliseconds = 500,
         AfterburnerDelay_milliseconds = 1000,
         RepModuleDelay_milliseconds = 2500,
-        ApproachDelay_seconds = 2,
+        ApproachDelay_seconds = 10,
         TargetDelay_miliseconds = 1000,
         OrbitDelay_seconds = 15,                                 // This is the delay between orbit commands, units: seconds. Default is 15
         DockingDelay_seconds = 5,                                // This is the delay between docking attempts, units: seconds. Default is 5
