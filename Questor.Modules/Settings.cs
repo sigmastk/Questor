@@ -285,6 +285,7 @@ namespace Questor.Modules
         public int LongRangeDroneRecallShieldPct { get; set; }
         public int LongRangeDroneRecallArmorPct { get; set; }
         public int LongRangeDroneRecallCapacitorPct { get; set; }
+        public bool DronesKillHighValueTargets {get; set;}
 
         public int MaterialsForWarOreID { get; set; }
         public int MaterialsForWarOreQty { get; set; }
@@ -424,6 +425,7 @@ namespace Questor.Modules
                 DroneMinimumCapacitorPct = 0;
                 DroneRecallCapacitorPct = 0;
                 LongRangeDroneRecallCapacitorPct = 0;
+                DronesKillHighValueTargets = false;
                 //
                 // Clear the Blacklist
                 //
@@ -620,6 +622,7 @@ namespace Questor.Modules
             LongRangeDroneRecallShieldPct = (int?)xml.Element("longRangeDroneRecallShieldPct") ?? 0;
             LongRangeDroneRecallArmorPct = (int?)xml.Element("longRangeDroneRecallArmorPct") ?? 0;
             LongRangeDroneRecallCapacitorPct = (int?)xml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
+            DronesKillHighValueTargets = (bool?)xml.Element("dronesKillHighValueTargets") ?? false;
             
             //
             // Ammo settings

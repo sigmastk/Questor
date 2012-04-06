@@ -75,8 +75,16 @@ namespace Questor.Modules
             // Find the first active weapon's target
             var droneTarget = Cache.Instance.EntityById(_lastTarget);
 
-            // Return best possible target
-            return Cache.Instance.GetBestTarget(droneTarget, Settings.Instance.DroneControlRange, true);
+            if (Cache.Instance.DronesKillHighValueTargets)
+            {
+                // Return best possible high value target
+                return Cache.Instance.GetBestTarget(droneTarget, Settings.Instance.DroneControlRange, false);
+            }
+            else
+            {
+                // Return best possible low value target
+                return Cache.Instance.GetBestTarget(droneTarget, Settings.Instance.DroneControlRange, true);
+            }
         }
 
         /// <summary>

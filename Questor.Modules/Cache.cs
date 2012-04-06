@@ -184,6 +184,7 @@ namespace Questor.Modules
         public int TimeSpentInMissionOutOfRange = 0;
         public DirectAgentMission mission;
         public bool DroneStatsWritten { get; set; }
+        public bool DronesKillHighValueTargets { get; set; }
 
         public bool Local_safe(int max_bad, double stand)
         {
@@ -796,7 +797,9 @@ namespace Questor.Modules
                 afterMissionSalvaging = Settings.Instance.AfterMissionSalvaging;
                 return new Action[0];
             }
-
+            //
+            // this loads the settings from each pocket... but NOT any settings global to the mission
+            //
             try
             {
                 var xdoc = XDocument.Load(missionXmlPath);
@@ -824,7 +827,15 @@ namespace Questor.Modules
                     {
                         afterMissionSalvaging = (bool)pocket.Element("afterMissionSalvaging");
                     }
-
+                    if (pocket.Element("dronesKillHighValueTargets") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
+                    {
+                        DronesKillHighValueTargets = (bool)pocket.Element("dronesKillHighValueTargets");
+                    }
+                    else //Otherwise, use value defined in charname.xml file
+                    {
+                        DronesKillHighValueTargets = Settings.Instance.DronesKillHighValueTargets;
+                        Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+                    }
                     var actions = new List<Action>();
                     var elements = pocket.Element("actions");
                     if (elements != null)
