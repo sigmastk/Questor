@@ -1061,7 +1061,7 @@ namespace Questor.Modules
             // Get the closest high value target
             var highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue.Value).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
             // Get the closest low value target
-            var lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(t => t.TargetValue.Value).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+            var lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
             
             if (lowValueFirst && lowValueTarget != null)
                 return lowValueTarget;
