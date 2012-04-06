@@ -22,7 +22,7 @@ namespace Questor.Modules
         private DateTime _lastUnloadAction = DateTime.MinValue;
 
         public UnloadLootState State { get; set; }
-        public double LootValue { get; set; }
+        //public double LootValue { get; set; }
 
         public void ProcessState()
         {
@@ -55,7 +55,7 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.Begin:
-                    if (cargo.Items.Count == 0)
+                    if (cargo.Items.Count == 0 && cargo.Items.Count != null)
                         State = UnloadLootState.Done;
                     else
                         State = UnloadLootState.OpenItemHangar;
@@ -140,19 +140,18 @@ namespace Questor.Modules
                 case UnloadLootState.MoveLoot:
                     var lootHangar = corpLootHangar ?? lootContainer ?? itemshangar;
                     var lootToMove = cargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() != Cache.Instance.BringMissionItem && !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId));
-                    LootValue = 0;
                     foreach (var item in lootToMove)
                     {
                         if (!Cache.Instance.InvTypesById.ContainsKey(item.TypeId))
                             continue;
 
                         var invType = Cache.Instance.InvTypesById[item.TypeId];
-                        LootValue += (invType.MedianBuy ?? 0)*Math.Max(item.Quantity, 1);
+                        Statistics.Instance.LootValue += (int)(invType.MedianBuy ?? 0)*Math.Max(item.Quantity, 1);
                     }
 
                     // Move loot to the loot hangar
                     lootHangar.Add(lootToMove);
-                    Logging.Log("UnloadLoot: Loot was worth an estimated [" + LootValue.ToString("#,##0") + "] isk in buy-orders");
+                    Logging.Log("UnloadLoot: Loot was worth an estimated [" + Statistics.Instance.LootValue.ToString("#,##0") + "] isk in buy-orders");
 
                     //Move bookmarks to the bookmarks hangar
                     if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar) && Settings.Instance.CreateSalvageBookmarks == true)

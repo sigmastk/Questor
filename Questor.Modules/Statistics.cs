@@ -137,7 +137,7 @@
                         Statistics.Instance.MissionsThisSession = Statistics.Instance.MissionsThisSession + 1;
                         if (Statistics.Instance.DebugMissionStatistics) Logging.Log("We jumped through all the hoops: now do the mission logging");
                         Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
-                        Cache.Instance.SessionLootGenerated = (Cache.Instance.SessionLootGenerated + (int)LootValue);
+                        Cache.Instance.SessionLootGenerated = (Cache.Instance.SessionLootGenerated + Statistics.Instance.LootValue);
                         Cache.Instance.SessionLPGenerated = (Cache.Instance.SessionLPGenerated + (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints));
                         if (Settings.Instance.MissionStats1Log)
                         {
@@ -152,7 +152,7 @@
                             var line = DateTime.Now + ";";                                                                          // Date
                             line += Cache.Instance.MissionName + ";";                                                               // Mission
                             line += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
-                            line += ((int)DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes) + ";";           // Time Doing After Mission Salvaging
+                            line += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";           // Time Doing After Mission Salvaging
                             line += ((int)DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";            // Total Time doing Mission
                             line += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                      // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
                             line += ((int)Statistics.Instance.LootValue) + ";";                                                     // Loot
@@ -226,6 +226,26 @@
                         // Disable next log line
                         Cache.Instance.MissionName = null;
                         Statistics.Instance.MissionLoggingCompleted = true;
+                        Statistics.Instance.LootValue = 0;
+                        Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
+                        Statistics.Instance.StartedMission = DateTime.Now; //this especially should be moved to statistics.cs as currently it resets the mission timer even if we could not and did not finish the mission
+                        Statistics.Instance.FinishedMission = DateTime.MinValue;
+                        Cache.Instance.MissionName = string.Empty;
+                        Statistics.Instance.LostDrones = 0;
+                        Statistics.Instance.AmmoConsumption = 0;
+                        Statistics.Instance.AmmoValue = 0;
+                        Statistics.Instance.MissionLoggingCompleted = false;
+                        Cache.Instance.DroneStatsWritten = false;
+
+                        Cache.Instance.panic_attempts_this_mission = 0;
+                        Cache.Instance.lowest_shield_percentage_this_mission = 101;
+                        Cache.Instance.lowest_armor_percentage_this_mission = 101;
+                        Cache.Instance.lowest_capacitor_percentage_this_mission = 101;
+                        Cache.Instance.repair_cycle_time_this_mission = 0;
+                        Cache.Instance.TimeSpentReloading_seconds = 0;   // this will need to be added to whenever we reload or switch ammo
+                        Cache.Instance.TimeSpentInMission_seconds = 0;   // from landing on grid (loading mission actions) to going to base (changing to gotobase state)
+                        Cache.Instance.TimeSpentInMissionInRange = 0;    // time spent totally out of range, no targets
+                        Cache.Instance.TimeSpentInMissionOutOfRange = 0; // time spent in range - with targets to kill (or no targets?!)
                     }
                     State = StatisticsState.Idle;
                     break;
