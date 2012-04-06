@@ -67,32 +67,58 @@ namespace Questor.Modules
         }
 
         public bool AtLoginScreen { get; set; }
-        
+        //
+        // Debug Variables
+        //
         public bool DebugStates { get; set; }
         public bool DebugPerformance { get; set; }
 
+        //
+        // Misc Settings
+        //
         public string CharacterMode { get; set; }
 
         public bool AutoStart { get; set; }
 
-        public bool SaveConsoleLog { get; set; }
-
-        public int maxLineConsole { get; set; }
-
-		public bool waitDecline { get; set; }
 
         public bool Disable3D { get; set; }
 
         public int MinimumDelay { get; set; }
 
         public int RandomDelay { get; set; }
-		public float minStandings { get; set; }
-        public bool UseGatesInSalvage { get; set; }
 
+        //
+        // Console Log Settings
+        //
+        public bool SaveConsoleLog { get; set; }
+        public int maxLineConsole { get; set; }
+        
+        //
+        // Enable / Disable Major Features that dont have categories of their own below
+        //
+        public bool EnableStorylines { get; set; }
         public bool UseLocalWatch { get; set; }
+        public bool UseFittingManager { get; set; }
+        
+        //
+        // Agent and mission settings
+        //
+        public string missionName { get; set; }
+        public float minStandings { get; set; }
+        public string MissionsPath { get; set; }
+        public bool LowSecMissions { get; set; }
+        public bool waitDecline { get; set; }
+        public bool MultiAgentSupport { get; private set; }
+        
+        //
+        // Local Watch settings - if enabled
+        //
         public int LocalBadStandingPilotsToTolerate { get; set; }
         public double LocalBadStandingLevelToConsiderBad { get; set; }
 
+        //
+        // Invastion Settings
+        //
         public int BattleshipInvasionLimit { get; set; }
         public int BattlecruiserInvasionLimit { get; set; }
         public int CruiserInvasionLimit { get; set; }
@@ -100,18 +126,24 @@ namespace Questor.Modules
         public int InvasionMinimumDelay { get; set; }
         public int InvasionRandomDelay { get; set; }
 
-        public bool EnableStorylines { get; set; }
-
+        //
+        // Ship Names
+        //
         public string CombatShipName { get; set; }
         public string SalvageShipName { get; set; }
         public string TransportShipName { get; set; }
-        public bool MultiAgentSupport { get; private set; }
-
+        //public string MaterialShipName { get; set; }
+        
+        //
+        // Storage location for loot, ammo, and bookmarks
+        //
         public string LootHangar { get; set; }
         public string AmmoHangar { get; set; }
         public string BookmarkHangar { get; set; }
 		public string LootContainer { get; set; }
-
+        //
+        // Salvage and Loot settings
+        //
         public bool CreateSalvageBookmarks { get; set; }
         public string CreateSalvageBookmarksIn { get; set; }
         public bool SalvageMultpleMissionsinOnePass { get; set; }
@@ -121,13 +153,19 @@ namespace Questor.Modules
         public int MinimumWreckCount { get; set; }
         public bool AfterMissionSalvaging { get; set; }
         public bool UnloadLootAtStation { get; set; }
+        public bool UseGatesInSalvage { get; set; }
+        public bool LootEverything { get; set; }
+        public int ReserveCargoCapacity { get; set; }
+        public int MaximumWreckTargets { get; set; }
 
-        //public string AgentName { get; set; }
-
+        //
+        // undocking settings
+        //
         public string bookmarkWarpOut { get; set; }
-
-        public string MissionsPath { get; set; }
-        public bool LowSecMissions { get; set; }
+        
+        //
+        // EVE Process Memory Ceiling and EVE wallet ballance Change setttings
+        //
 
         public int walletbalancechangelogoffdelay { get; set; }
         public string walletbalancechangelogoffdelayLogofforExit { get; set; }
@@ -137,15 +175,10 @@ namespace Questor.Modules
 
         public bool CloseQuestorCMDUplinkInnerspaceProfile { get; set; }
         public bool CloseQuestorCMDUplinkIsboxerCharacterSet { get; set; }
-        public bool DontShootFrigatesWithSiegeorAutoCannons { get; set; }
 
         //public int missionbookmarktoagentloops { get; set; }  //not yet used - although it is likely a good ide to fix it so it is used - it would eliminate going back and fourth to the same mission over and over
-        public string missionName { get; set; }
+        
 
-        public int MaximumHighValueTargets { get; set; }
-        public int MaximumLowValueTargets { get; set; }
-
-        public List<Ammo> Ammo { get; private set; }
         public List<int> ItemsBlackList { get; set; }
         public List<int> WreckBlackList { get; set; }
         public bool WreckBlackListSmallWrecks { get; set; }
@@ -179,30 +212,41 @@ namespace Questor.Modules
         public string PocketStatisticsFile { get; set; }
         public bool PocketStatsUseIndividualFilesPerPocket = true;
 
+        //
+        // Fitting Settings - if enabled
+        //
         public List<FactionFitting> FactionFitting { get; private set; }
         public List<AgentsList> AgentsList { get; set; }
         public List<MissionFitting> MissionFitting { get; private set; }
-        public bool UseFittingManager { get; set; }
         public FactionFitting DefaultFitting { get; set; }
 
-        public int MinimumAmmoCharges { get; set; }
-
+        //
+        // Weapon Settings
+        //
+        public bool DontShootFrigatesWithSiegeorAutoCannons { get; set; }
         public int WeaponGroupId { get; set; }
+        public int MaximumHighValueTargets { get; set; }
+        public int MaximumLowValueTargets { get; set; }
+        public int MinimumAmmoCharges { get; set; }
+        public List<Ammo> Ammo { get; private set; }
 
-        public int ReserveCargoCapacity { get; set; }
-
-        public int MaximumWreckTargets { get; set; }
-
+        //
+        // Speed and Movement Settings
+        //
         public bool SpeedTank { get; set; }
         public int OrbitDistance { get; set; }
         public int OptimalRange { get; set; }
         public int NosDistance { get; set; }
         public int MinimumPropulsionModuleDistance { get; set; }
         public int MinimumPropulsionModuleCapacitor { get; set; }
-
+        //
+        // Tank Settings
+        //
         public int ActivateRepairModules { get; set; }
         public int DeactivateRepairModules { get; set; }
-
+        //
+        // Panic Settings
+        //
         public int MinimumShieldPct { get; set; }
         public int MinimumArmorPct { get; set; }
         public int MinimumCapacitorPct { get; set; }
@@ -210,9 +254,11 @@ namespace Questor.Modules
         public int SafeArmorPct { get; set; }
         public int SafeCapacitorPct { get; set; }
         
-        public bool LootEverything { get; set; }
         public double IskPerLP { get; set; }
 
+        //
+        // Drone Settings
+        //
         private bool _UseDrones;
 
         public bool UseDrones
@@ -242,13 +288,20 @@ namespace Questor.Modules
 
         public int MaterialsForWarOreID { get; set; }
         public int MaterialsForWarOreQty { get; set; }
-
+        //
+        // Mission Blacklist Settings 
+        //
         public List<string> Blacklist { get; private set; }
         public List<string> FactionBlacklist { get; private set; }
-
+        //
+        // Questor GUI location settings
+        //
         public int? WindowXPosition { get; set; }
         public int? WindowYPosition { get; set; }
 
+        //
+        // path information - used to load the XML and used in other modules
+        //
         public string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         public string characterName { get; private set; }
         public string settingsPath { get; private set; }
@@ -270,76 +323,99 @@ namespace Questor.Modules
 
             if (!File.Exists(Settings.Instance.settingsPath)) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
             {
-                // Clear settings
-                //AgentName = string.Empty;
-
+                //
+                // Misc Settings
+                //
                 CharacterMode = "Combat Missions";
 
                 AutoStart = false;
 
-                SaveConsoleLog = true;
 
-                maxLineConsole = 1000;
 
-                waitDecline = false;
 
                 Disable3D = false;
 
                 RandomDelay = 0;
-
+                //
+                // Console Log Settings
+                //
+                SaveConsoleLog = true;
+                maxLineConsole = 1000;
+                //
+                // Agent and mission settings
+                //
+                MissionsPath = Path.Combine(path, "Missions");
                 minStandings = 10;
 
                 MinimumDelay = 0;
 
                 minStandings = 10;
-
+                waitDecline = false;
+                //
+                // Questor GUI Window Position
+                //
                 WindowXPosition = null;
                 WindowYPosition = null;
-
+                //
+                // Salvage and loot settings
+                //
+                ReserveCargoCapacity = 0;
+                MaximumWreckTargets = 0;
+                
+                //
+                // Storage Location for Loot, Ammo, Bookmarks, default is local hangar
+                //
                 LootHangar = string.Empty;
                 AmmoHangar = string.Empty;
                 BookmarkHangar = string.Empty;
                 LootContainer = string.Empty;
 
-                MissionsPath = Path.Combine(path, "Missions");
-
-                bookmarkWarpOut = string.Empty;
-
                 MaximumHighValueTargets = 0;
                 MaximumLowValueTargets = 0;
 
+                //
+                // Clear various lists
+                //
                 Ammo.Clear();
                 ItemsBlackList.Clear();
                 WreckBlackList.Clear();
                 FactionFitting.Clear();
                 AgentsList.Clear();
                 MissionFitting.Clear();
-
+                //
+                // Weapon Settings
+                //
                 MinimumAmmoCharges = 0;
 
                 WeaponGroupId = 0;
+                //
+                // Speed and movement settings
+                //
 
-                ReserveCargoCapacity = 0;
-
-                MaximumWreckTargets = 0;
 
                 SpeedTank = false;
                 OrbitDistance = 0;
                 OptimalRange = 0;
                 NosDistance = 38000;
-                MinimumPropulsionModuleDistance = 3000;
-                MinimumPropulsionModuleCapacitor = 35;
-
+                MinimumPropulsionModuleDistance = 5000;
+                MinimumPropulsionModuleCapacitor = 0;
+                //
+                // Tank Settings
+                //
                 ActivateRepairModules = 0;
                 DeactivateRepairModules = 0;
-
+                //
+                // Panic Settings
+                //
                 MinimumShieldPct = 0;
                 MinimumArmorPct = 0;
                 MinimumCapacitorPct = 0;
                 SafeShieldPct = 0;
                 SafeArmorPct = 0;
                 SafeCapacitorPct = 0;
-
+                //
+                // Drone Settings
+                //
                 UseDrones = false;
                 DroneTypeId = 0;
                 DroneControlRange = 0;
@@ -348,9 +424,9 @@ namespace Questor.Modules
                 DroneMinimumCapacitorPct = 0;
                 DroneRecallCapacitorPct = 0;
                 LongRangeDroneRecallCapacitorPct = 0;
-
-                UseGatesInSalvage = false;
-
+                //
+                // Clear the Blacklist
+                //
                 Blacklist.Clear();
                 FactionBlacklist.Clear();
 
@@ -363,9 +439,15 @@ namespace Questor.Modules
             //
             // these are listed by feature and should likely be re-ordered to reflect that
             //
+
+            //
+            // Debug Settings
+            //
             DebugStates = (bool?) xml.Element("debugStates") ?? false;                                           //enables more console logging having to do with the sub-states within each state
             DebugPerformance = (bool?) xml.Element("debugPerformance") ?? false;                                 //enabled more console logging having to do with the time it takes to execute each state
-
+            //
+            // Misc Settings
+            //
             CharacterMode = (string) xml.Element("characterMode") ?? "Combat Missions";                          //other option is "salvage"
             if (Settings.Instance.CharacterMode.ToLower() == "dps")
             {
@@ -374,22 +456,37 @@ namespace Questor.Modules
             AutoStart = (bool?) xml.Element("autoStart") ?? false;                                               // auto Start enabled or disabled by default?
 
             SaveConsoleLog = (bool?)xml.Element("saveLog") ?? true;                                              // save the console log to file
-            maxLineConsole = (int?)xml.Element("maxLineConsole") ?? 1000;                                        // maximum console log lines to show in the GUI
-                        
+            maxLineConsole = (int?)xml.Element("maxLineConsole") ?? 1000;                                        // maximum console log lines to show in the GUI      
             Disable3D = (bool?)xml.Element("disable3D") ?? false;                                                // Disable3d graphics while in space
 
             RandomDelay = (int?) xml.Element("randomDelay") ?? 0;
             MinimumDelay = (int?)xml.Element("minimumDelay") ?? 0;
-
+            //
+            // Enable / Disable Major Features that dont have categories of their own below
+            //
+            UseFittingManager = (bool?)xml.Element("UseFittingManager") ?? true;
+            EnableStorylines = (bool?)xml.Element("enableStorylines") ?? false;
+            UseLocalWatch = (bool?)xml.Element("UseLocalWatch") ?? true;
+            
+            //
+            // Agent Standings and Mission Settings
+            //
             minStandings = (float?) xml.Element("minStandings") ?? 10;
             waitDecline = (bool?)xml.Element("waitDecline") ?? false;
+            var missionsPath = (string)xml.Element("missionsPath");
+            MissionsPath = !string.IsNullOrEmpty(missionsPath) ? Path.Combine(path, missionsPath) : Path.Combine(path, "Missions");
+            LowSecMissions = (bool?)xml.Element("LowSecMissions") ?? false;
+            MaterialsForWarOreID = (int?)xml.Element("MaterialsForWarOreID") ?? 20;
+            MaterialsForWarOreQty = (int?)xml.Element("MaterialsForWarOreQty") ?? 8000;
 
-            UseGatesInSalvage = (bool?)xml.Element("useGatesInSalvage") ?? false;                               // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
-
-            UseLocalWatch = (bool?)xml.Element("UseLocalWatch") ?? true;
+            //
+            // Local Watch Settings - if enabled
+            //
             LocalBadStandingPilotsToTolerate = (int?)xml.Element("LocalBadStandingPilotsToTolerate") ?? 1;
             LocalBadStandingLevelToConsiderBad = (double?)xml.Element("LocalBadStandingLevelToConsiderBad") ?? -0.1;
-
+            //
+            // Invasion Settings
+            //
             BattleshipInvasionLimit = (int?)xml.Element("battleshipInvasionLimit") ?? 0;                        // if this number of battleships lands on grid while in a mission we will enter panic
             BattlecruiserInvasionLimit = (int?)xml.Element("battlecruiserInvasionLimit") ?? 0;                  // if this number of battlecruisers lands on grid while in a mission we will enter panic
             CruiserInvasionLimit = (int?)xml.Element("cruiserInvasionLimit") ?? 0;                              // if this number of cruisers lands on grid while in a mission we will enter panic
@@ -397,23 +494,45 @@ namespace Questor.Modules
             InvasionRandomDelay = (int?)xml.Element("invasionRandomDelay") ?? 0;                                // random relay to stay docked
             InvasionMinimumDelay = (int?)xml.Element("invasionMinimumDelay") ?? 0;                              // minimum delay to stay docked
 
-            EnableStorylines = (bool?) xml.Element("enableStorylines") ?? false; 
+            //
+            // Value - Used in calculations
+            //
             IskPerLP = (double?)xml.Element("IskPerLP") ?? 600;                                                 //used in value calculations
 
+            //
+            // Undock settings
+            //
             UndockDelay = (int?)xml.Element("undockdelay") ?? 10;                                               //Delay when undocking - not in use
             UndockPrefix = (string) xml.Element("undockprefix") ?? "Insta";                                     //Undock bookmark prefix - used by traveler - not in use
+            bookmarkWarpOut = (string)xml.Element("bookmarkWarpOut") ?? "";
+            
+            //
+            // Location of the Questor GUI on startup (default is off the screen)
+            //
             WindowXPosition = (int?) xml.Element("windowXPosition") ?? 1600;                                    //windows position (needs to be changed, default is off screen)
             WindowYPosition = (int?)xml.Element("windowYPosition") ?? 1050;                                     //windows position (needs to be changed, default is off screen)
-
+            
+            //
+            // Ship Names
+            //
             CombatShipName = (string) xml.Element("combatShipName") ?? "";
             SalvageShipName = (string) xml.Element("salvageShipName") ?? "";
             TransportShipName = (string)xml.Element("transportShipName") ?? "";
-
+            //MaterialShipName = (string)xml.Element("materialShipName") ?? "";
+            
+            //
+            // Storage Location for Loot, Ammo, Bookmarks
+            //
             LootHangar = (string) xml.Element("lootHangar");
             AmmoHangar = (string) xml.Element("ammoHangar");
             BookmarkHangar = (string)xml.Element("bookmarkHangar");
             LootContainer = (string)xml.Element("lootContainer");
-
+            
+            //
+            // Loot and Salvage Settings
+            //
+            LootEverything = (bool?)xml.Element("lootEverything") ?? true;
+            UseGatesInSalvage = (bool?)xml.Element("useGatesInSalvage") ?? false;                               // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
             CreateSalvageBookmarks = (bool?) xml.Element("createSalvageBookmarks") ?? false;
             CreateSalvageBookmarksIn = (string)xml.Element("createSalvageBookmarksIn") ?? "Player"; //other setting is "Corp"
             BookmarkPrefix = (string) xml.Element("bookmarkPrefix") ?? "Salvage:";
@@ -421,23 +540,28 @@ namespace Questor.Modules
             AfterMissionSalvaging = (bool?) xml.Element("afterMissionSalvaging") ?? false;
             SalvageMultpleMissionsinOnePass = (bool?)xml.Element("salvageMultpleMissionsinOnePass") ?? false;
             UnloadLootAtStation = (bool?) xml.Element("unloadLootAtStation") ?? false;
+            ReserveCargoCapacity = (int?)xml.Element("reserveCargoCapacity") ?? 0;
+            MaximumWreckTargets = (int?)xml.Element("maximumWreckTargets") ?? 0;
+            WreckBlackListSmallWrecks = (bool?)xml.Element("WreckBlackListSmallWrecks") ?? false;
+            WreckBlackListMediumWrecks = (bool?)xml.Element("WreckBlackListMediumWrecks") ?? false;
 
-            //AgentName = (string) xml.Element("agentName");
-
-            bookmarkWarpOut = (string)xml.Element("bookmarkWarpOut") ?? "";
+            //
+            // at what memory usage do we need to restart this session?
+            //
 
             EVEProcessMemoryCeiling = (int?)xml.Element("EVEProcessMemoryCeiling") ?? 900;
             EVEProcessMemoryCeilingLogofforExit = (string)xml.Element("EVEProcessMemoryCeilingLogofforExit") ?? "exit";
 
-            DontShootFrigatesWithSiegeorAutoCannons = (bool?)xml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
-            //Assume InnerspaceProfile
             CloseQuestorCMDUplinkInnerspaceProfile = (bool?)xml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
             CloseQuestorCMDUplinkIsboxerCharacterSet = (bool?)xml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
 
 
             walletbalancechangelogoffdelay = (int?)xml.Element("walletbalancechangelogoffdelay") ?? 30;
             walletbalancechangelogoffdelayLogofforExit = (string)xml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
-
+            
+            //
+            // Enable / Disable the different types of logging that are available
+            //
             SessionsLog = (bool?)xml.Element("SessionsLog") ?? true;
             DroneStatsLog = (bool?)xml.Element("DroneStatsLog") ?? true;
             WreckLootStatistics = (bool?)xml.Element("WreckLootStatistics") ?? true;
@@ -447,13 +571,59 @@ namespace Questor.Modules
             PocketStatistics = (bool?)xml.Element("PocketStatistics") ?? true;
             PocketStatsUseIndividualFilesPerPocket = (bool?)xml.Element("PocketStatsUseIndividualFilesPerPocket") ?? true;
 
-            var missionsPath = (string) xml.Element("missionsPath");
-            MissionsPath = !string.IsNullOrEmpty(missionsPath) ? Path.Combine(path, missionsPath) : Path.Combine(path, "Missions");
-            LowSecMissions = (bool?)xml.Element("LowSecMissions") ?? false;
+            //
+            // Weapon and targeting Settings
+            //
+            WeaponGroupId = (int?)xml.Element("weaponGroupId") ?? 0;
+            DontShootFrigatesWithSiegeorAutoCannons = (bool?)xml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
+            MaximumHighValueTargets = (int?)xml.Element("maximumHighValueTargets") ?? 2;
+            MaximumLowValueTargets = (int?)xml.Element("maximumLowValueTargets") ?? 2;
 
-            MaximumHighValueTargets = (int?) xml.Element("maximumHighValueTargets") ?? 2;
-            MaximumLowValueTargets = (int?) xml.Element("maximumLowValueTargets") ?? 2;
+            //
+            // Speed and Movement Settings
+            //
+            SpeedTank = (bool?)xml.Element("speedTank") ?? false;
+            OrbitDistance = (int?)xml.Element("orbitDistance") ?? 0;
+            OptimalRange = (int?)xml.Element("optimalRange") ?? 0;
+            NosDistance = (int?)xml.Element("NosDistance") ?? 38000;
+            MinimumPropulsionModuleDistance = (int?)xml.Element("minimumPropulsionModuleDistance") ?? 5000;
+            MinimumPropulsionModuleCapacitor = (int?)xml.Element("minimumPropulsionModuleCapacitor") ?? 0;
 
+            //
+            // Tanking Settings
+            //
+            ActivateRepairModules = (int?)xml.Element("activateRepairModules") ?? 65;
+            DeactivateRepairModules = (int?)xml.Element("deactivateRepairModules") ?? 95;
+            
+            //
+            // Panic Settings
+            //
+            MinimumShieldPct = (int?)xml.Element("minimumShieldPct") ?? 100;
+            MinimumArmorPct = (int?)xml.Element("minimumArmorPct") ?? 100;
+            MinimumCapacitorPct = (int?)xml.Element("minimumCapacitorPct") ?? 50;
+            SafeShieldPct = (int?)xml.Element("safeShieldPct") ?? 0;
+            SafeArmorPct = (int?)xml.Element("safeArmorPct") ?? 0;
+            SafeCapacitorPct = (int?)xml.Element("safeCapacitorPct") ?? 0;
+
+            //
+            // Drone Settings
+            //
+            UseDrones = (bool?)xml.Element("useDrones") ?? true;
+            DroneTypeId = (int?)xml.Element("droneTypeId") ?? 0;
+            DroneControlRange = (int?)xml.Element("droneControlRange") ?? 0;
+            DroneMinimumShieldPct = (int?)xml.Element("droneMinimumShieldPct") ?? 50;
+            DroneMinimumArmorPct = (int?)xml.Element("droneMinimumArmorPct") ?? 50;
+            DroneMinimumCapacitorPct = (int?)xml.Element("droneMinimumCapacitorPct") ?? 0;
+            DroneRecallShieldPct = (int?)xml.Element("droneRecallShieldPct") ?? 0;
+            DroneRecallArmorPct = (int?)xml.Element("droneRecallArmorPct") ?? 0;
+            DroneRecallCapacitorPct = (int?)xml.Element("droneRecallCapacitorPct") ?? 0;
+            LongRangeDroneRecallShieldPct = (int?)xml.Element("longRangeDroneRecallShieldPct") ?? 0;
+            LongRangeDroneRecallArmorPct = (int?)xml.Element("longRangeDroneRecallArmorPct") ?? 0;
+            LongRangeDroneRecallCapacitorPct = (int?)xml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
+            
+            //
+            // Ammo settings
+            //
             Ammo.Clear();
             var ammoTypes = xml.Element("ammoTypes");
             if (ammoTypes != null)
@@ -461,9 +631,10 @@ namespace Questor.Modules
                     Ammo.Add(new Ammo(ammo));
 
             MinimumAmmoCharges = (int?) xml.Element("minimumAmmoCharges") ?? 0;
-
-            UseFittingManager = (bool?)xml.Element("UseFittingManager") ?? true;
-            //agent list
+            
+            //
+            // List of Agents we should use
+            //
             AgentsList.Clear();
             var agentList = xml.Element("agentsList");
             if(agentList != null)
@@ -495,10 +666,13 @@ namespace Questor.Modules
             }
             else
                 Logging.Log("Settings: Error! No Agents List specified.");
-
+            
+            //
+            // Fittings chosen based on the faction of the mission
+            //
             FactionFitting.Clear();
             var factionFittings = xml.Element("factionfittings");
-            if (UseFittingManager)
+            if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
             {
                 if (factionFittings != null)
                 {
@@ -526,73 +700,37 @@ namespace Questor.Modules
                     Logging.Log("Settings: No faction fittings specified.  Fitting manager will not be used.");
                 }
             }
-
+            //
+            // Fitting based on the name of the mission
+            //
             MissionFitting.Clear();
             var missionFittings = xml.Element("missionfittings");
-            if (UseFittingManager)
+            if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
             {
                 if (missionFittings != null)
                     foreach (var missionfitting in missionFittings.Elements("missionfitting"))
                         MissionFitting.Add(new MissionFitting(missionfitting));
             }
-            WeaponGroupId = (int?) xml.Element("weaponGroupId") ?? 0;
 
-            ReserveCargoCapacity = (int?) xml.Element("reserveCargoCapacity") ?? 0;
-
-            MaximumWreckTargets = (int?) xml.Element("maximumWreckTargets") ?? 0;
-
-            SpeedTank = (bool?) xml.Element("speedTank") ?? false;
-            OrbitDistance = (int?) xml.Element("orbitDistance") ?? 0;
-            OptimalRange = (int?)xml.Element("optimalRange") ?? 0;
-            NosDistance = (int?)xml.Element("NosDistance") ?? 38000;
-            MinimumPropulsionModuleDistance = (int?) xml.Element("minimumPropulsionModuleDistance") ?? 5000;
-            MinimumPropulsionModuleCapacitor = (int?)xml.Element("minimumPropulsionModuleCapacitor") ?? 0;
-
-            ActivateRepairModules = (int?) xml.Element("activateRepairModules") ?? 65;
-            DeactivateRepairModules = (int?) xml.Element("deactivateRepairModules") ?? 95;
-
-            MinimumShieldPct = (int?) xml.Element("minimumShieldPct") ?? 100;
-            MinimumArmorPct = (int?) xml.Element("minimumArmorPct") ?? 100;
-            MinimumCapacitorPct = (int?) xml.Element("minimumCapacitorPct") ?? 50;
-            SafeShieldPct = (int?)xml.Element("safeShieldPct") ?? 0;
-            SafeArmorPct = (int?)xml.Element("safeArmorPct") ?? 0;
-            SafeCapacitorPct = (int?)xml.Element("safeCapacitorPct") ?? 0;
-
-            LootEverything = (bool?) xml.Element("lootEverything") ?? true;
-
-            UseDrones = (bool?) xml.Element("useDrones") ?? true;
-            DroneTypeId = (int?) xml.Element("droneTypeId") ?? 0;
-            DroneControlRange = (int?) xml.Element("droneControlRange") ?? 0;
-            DroneMinimumShieldPct = (int?) xml.Element("droneMinimumShieldPct") ?? 50;
-            DroneMinimumArmorPct = (int?) xml.Element("droneMinimumArmorPct") ?? 50;
-            DroneMinimumCapacitorPct = (int?) xml.Element("droneMinimumCapacitorPct") ?? 0;
-            DroneRecallShieldPct = (int?) xml.Element("droneRecallShieldPct") ?? 0;
-            DroneRecallArmorPct = (int?) xml.Element("droneRecallArmorPct") ?? 0;
-            DroneRecallCapacitorPct = (int?) xml.Element("droneRecallCapacitorPct") ?? 0;
-            LongRangeDroneRecallShieldPct = (int?) xml.Element("longRangeDroneRecallShieldPct") ?? 0;
-            LongRangeDroneRecallArmorPct = (int?) xml.Element("longRangeDroneRecallArmorPct") ?? 0;
-            LongRangeDroneRecallCapacitorPct = (int?) xml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
-
-            MaterialsForWarOreID = (int?)xml.Element("MaterialsForWarOreID") ?? 20;
-            MaterialsForWarOreQty = (int?)xml.Element("MaterialsForWarOreQty") ?? 8000;
-
+            //
+            // Mission Blacklist
+            //
             Blacklist.Clear();
             var blacklist = xml.Element("blacklist");
             if (blacklist != null)
                 foreach (var mission in blacklist.Elements("mission"))
                     Blacklist.Add((string) mission);
-
+            //
+            // Faction Blacklist
+            //
             FactionBlacklist.Clear();
             var factionblacklist = xml.Element("factionblacklist");
             if (factionblacklist != null)
                 foreach (var faction in factionblacklist.Elements("faction"))
                     FactionBlacklist.Add((string) faction);
-            WreckBlackListSmallWrecks = (bool?) xml.Element("WreckBlackListSmallWrecks") ?? false;
-            WreckBlackListMediumWrecks = (bool?) xml.Element("WreckBlackListMediumWrecks") ?? false;
-
 
             //
-            // if enabled the following would keep you from looting (or salvaging?) small wrecks
+            // if enabled the following would keep you from looting or salvaging small wrecks
             //
             //list of small wreck
             if (WreckBlackListSmallWrecks)
@@ -614,7 +752,7 @@ namespace Questor.Modules
             }
 
             //
-            // if enabled the following would keep you from looting (or salvaging?) medium wrecks
+            // if enabled the following would keep you from looting or salvaging medium wrecks
             //
             //list of medium wreck
             if (WreckBlackListMediumWrecks)
@@ -629,6 +767,9 @@ namespace Questor.Modules
                 WreckBlackList.Add(26934);
             }
 
+            //
+            // Log location and log names defined here
+            //
             logpath = (Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + Cache.Instance.DirectEve.Me.Name + "\\");
             //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
             ConsoleLogPath = Path.Combine(logpath + "Console\\");
