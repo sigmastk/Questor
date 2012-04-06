@@ -57,7 +57,7 @@ namespace Questor.Modules
                         if (DateTime.Now.Subtract(_lastSwitchShipAction).TotalSeconds > (int)Time.SwitchShipsDelay_seconds)
                         {
                             var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                            foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == shipName))
+                            foreach (var ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
                             {
                                 Logging.Log("Arm: Making [" + ship.GivenName + "] active");
 

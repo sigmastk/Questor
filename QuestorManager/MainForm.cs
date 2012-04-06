@@ -337,7 +337,7 @@ namespace QuestorManager
                     if (DateTime.Now > _lastAction)
                     {
                         var ships = DirectEve.Instance.GetShipHangar().Items;
-                        foreach (var ship in ships.Where(ship => ship.GivenName == txtNameShip.Text))
+                        foreach (var ship in ships.Where(ship => ship.GivenName != null && ship.GivenName == txtNameShip.Text))
                         {
                             Logging.Log("MakeShip: Making [" + ship.GivenName + "] active");
 

@@ -131,7 +131,7 @@ namespace Questor.Modules
                         {
                             
                             var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                            foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == transportshipName))
+                            foreach (var ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
                             {
                                 Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                                 ship.ActivateShip();
@@ -170,7 +170,7 @@ namespace Questor.Modules
                             if (DateTime.Now > _nextArmAction)
                             {
                                 var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                                foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == salvageshipName))
+                                foreach (var ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName))
                                 {
                                     Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                                     ship.ActivateShip();
@@ -223,7 +223,7 @@ namespace Questor.Modules
                             if (DateTime.Now > _nextArmAction)
                             {
                                 var ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                                foreach (var ship in ships.Where(ship => ship.GivenName.ToLower() == shipName))
+                                foreach (var ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
                                 {
                                     Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                                     ship.ActivateShip();
