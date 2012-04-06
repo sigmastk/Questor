@@ -276,6 +276,9 @@
   <!-- Recall drones if below this capacitor percentage and further away then half the drone control range -->
   <longRangeDroneRecallCapacitorPct>30</longRangeDroneRecallCapacitorPct>
   
+  <!-- Drones normally kill low value targets (frigates) first. If you would prefer your drones to kill high value targets first set this to true -->
+  <dronesKillHighValueTargets>false</dronesKillHighValueTargets>
+  
   <!--                                                                                                                                                   -->
   <!--      Logging Options: All logs are in ./.Net Programs/Logs/<CharacterName>/<optionalsubdirectory> -->
   <!--                                                                                                                                                   -->
