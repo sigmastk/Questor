@@ -537,7 +537,7 @@ namespace Questor.Modules
                 var seconds = DateTime.Now.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 45)
                 {
-                    Logging.Log("EntityCache: LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + (45 - seconds) + "]");
+                    Logging.Log("EntityCache: LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds,0) + "]");
                     return;
                 }
             }
