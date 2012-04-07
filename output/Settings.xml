@@ -1,14 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <settings>
-
-  <!-- DEBUG SETTINGS -->
+  <!--                                                -->
+  <!--         DEBUG SETTINGS         -->
+  <!--                                                -->
   
   <!-- debugStates: creates more verbose logging: use for debugging purposes only -->
   <debugStates>false</debugStates>  <!-- default is false -->
   <!-- debugPerformance: creates more verbose logging: use for debugging purposes only -->
   <debugPerformance>false</debugPerformance>  <!-- default is false -->
   
-  <!-- MISC SETTINGS -->
+  <!--                                                -->
+  <!--          MISC SETTINGS          -->
+  <!--                                                -->
   
   <!-- Character Mode is either dps or salvage for combat mode or dedicated salvager mode -->
   <CharacterMode>dps</CharacterMode><!-- default is dps -->
@@ -20,15 +23,20 @@
   <minimumDelay>20</minimumDelay><!-- default is 20 -->
   <!-- RandomDelay is a number and is a random amount of seconds it will wait between getting missions in station added with minimumdelay or by itself -->
   <randomDelay>45</randomDelay><!-- default is 45 -->
-
-  <!-- CONSOLE LOG SETTINGS -->
+  
+  <!--                                                -->
+  <!--   CONSOLE LOG SETTINGS   -->
+  <!--                                                -->
   
   <!-- Enable or Disable the SessionsLog that tracks Logins / Logoffs and overall session stats for questor -->
   <saveLog>true</saveLog><!-- default is true -->
   <!-- Maximum number of lines in the external console -->
   <maxLineConsole>1000</maxLineConsole><!-- default is 1000 -->
-
-  <!-- MAJOR FEATURES -->
+  
+  <!--                                                -->
+  <!--       MAJOR FEATURES          -->
+  <!--                                                -->
+  
   <!-- EnableStoryLines is either true or false and enables questor to run storyline missions -->
   <enableStorylines>false</enableStorylines><!-- default is false -->
   <MaterialsForWarOreID>20</MaterialsForWarOreID>
@@ -37,8 +45,10 @@
   <UseLocalWatch>true</UseLocalWatch><!-- if false all local watching for bad standings pilots is disabled -->
   <!-- UseFittingManager is either true of false and allows questor to use the IN GAME EVE fitting manager to change your fits per faction/mission -->
   <UseFittingManager>true</UseFittingManager><!-- default is true -->
-
+  
+  <!--                                                         -->
   <!-- AGENT AND MISSION SETTINGS -->
+  <!--                                                         -->
   
   <!-- Wait for mission decline timer to expire before declining again -->
   <waitDecline>true</waitDecline>
@@ -56,14 +66,18 @@
     <!-- <agentList name="" priority="3" /> -->
   </agentsList>
   
-  <!-- LOCAL WATCH SETTINGS -->
+  <!--                                                -->
+  <!--   LOCAL WATCH SETTINGS   -->
+  <!--                                                -->
   
   <!-- LocalBadStandingsPilotsToTolerate is a number and is used for UseLocalWatch, this tells questor how many bad standings pilots for questor to ignore -->
   <LocalBadStandingPilotsToTolerate>1</LocalBadStandingPilotsToTolerate><!--  minimum is 1 -->
   <!-- LocalBadStandingLevelToConsiderBad is a number and is used for UseLocalWatch, this tells questor how bad of a standing you want to tolerate in other corps -->
   <LocalBadStandingLevelToConsiderBad>-0.1</LocalBadStandingLevelToConsiderBad><!--  from -10 to 10, I recommend -0.1 so that all negative standings will cause alarm -->
-
-  <!-- INVASION SETTINGS -->
+  
+  <!--                                                -->
+  <!--      INVASION SETTINGS     -->
+  <!--                                                -->
   
   <!-- Invasion limits, panic if these number of ships enter your mission pocket in case of possible gank! -->
   <frigateInvasionLimit>10</frigateInvasionLimit>
@@ -74,7 +88,9 @@
   <invasionRandomDelay>300</invasionRandomDelay>
   <invasionMinimumDelay>15</invasionMinimumDelay>  
   
-  <!-- SHIP NAMES -->
+  <!--                                                -->
+  <!--              SHIP NAMES             -->
+  <!--                                                -->
   <!-- Ship used for combat missions, empty means current ship  -->
   <combatShipName></combatShipName><!-- needs to be customized -->
   <!-- Ship used for after mission salvaging, empty means current ship -->
@@ -82,8 +98,11 @@
   <!-- Ship used for Enemy Abound 2of5 -->
   <transportShipName></transportShipName><!-- needs to be customized-->
 
-  <!-- STORAGE LOCATION FOR LOOT, AMNMO AND BOOKMARKS -->
   
+  <!--                                                                                                     -->
+  <!-- STORAGE LOCATION FOR LOOT, AMNMO AND BOOKMARKS -->
+  <!--                                                                                                     -->
+
   <!-- Corporation hangar to use for loot (empty is personal hangar) -->
   <lootHangar></lootHangar><!-- default is no value -->
   <!-- Corporation hangar to use for ammo (empty is personal hangar) -->
@@ -93,7 +112,9 @@
   <!-- container to use for Loot (empty would not use a container at all) : this ONLY works with General Freight Containers at the moment-->
   <lootContainer></lootContainer>
   
+  <!--                                                      -->
   <!-- SALVAGE AND LOOT SETTINGS -->
+  <!--                                                      -->
 
   <!-- Create salvage bookmarks once a pocket has been cleared and there are wrecks/cans left
        Note: All salvage bookmarks will be in this naming format:  BookmarkPrefix [time]
@@ -126,7 +147,9 @@
        on then the bot will loot all wrecks/cans before finishing the loot-action -->
   <lootEverything>true</lootEverything>
 
-  <!-- UNDOCKING SETTINGS -->
+  <!--                                                -->
+  <!--    UNDOCKING SETTINGS     -->
+  <!--                                                -->
   
   <!-- prefix for undock bookmarks -->
   <undockprefix>Insta</undockprefix>
@@ -134,8 +157,10 @@
   <!-- undock delay -->
   <undockdelay>11</undockdelay>
   
-  <!-- EVE PROCESS AND WALLET SETTINGS-->
-  
+  <!--                                                                 -->
+  <!-- EVE PROCESS AND WALLET SETTINGS -->
+  <!--                                                                 -->
+
   <!-- walletbalancechangelogoffdelay: If your characters wallet ballance does not change within this many minutes exit eve, the assumption is your toon is stuck or disconnected -->
   <walletbalancechangelogoffdelay>40</walletbalancechangelogoffdelay><!-- default is 40 -->
   <!-- EVEProcessMemoryCieling: If this instance of EVE consumes more than the stated MB of Memory close eve when in station between missions-->
@@ -146,15 +171,19 @@
   <CloseQuestorCMDUplinkInnerspaceProfile>true</CloseQuestorCMDUplinkInnerspaceProfile>  <!-- default is: true -->
   <CloseQuestorCMDUplinkIsboxerCharacterSet>false</CloseQuestorCMDUplinkIsboxerCharacterSet>  <!-- default is: false -->
 
-  <!-- WRECKS SETTINGS -->
-  
+  <!--                                                -->
+  <!--        WRECKS SETTINGS        -->
+  <!--                                                -->
+
   <!-- If enabled this would blacklist all Small wrecks from being salvaged or looted -->
   <WreckBlackListSmallWrecks>false</WreckBlackListSmallWrecks><!-- default is false -->
   <!-- If enabled this would blacklist all Medium wrecks from being salvaged or looted -->
   <WreckBlackListMediumWrecks>false</WreckBlackListMediumWrecks><!-- default is false -->
 
-  <!-- LOGGING SETTINGS -->
-  
+  <!--                                                -->
+  <!--       LOGGING SETTINGS       -->
+  <!--                                                -->
+
   <!--                                                                                                                                                   -->
   <!--      Logging Options: All logs are in ./.Net Programs/Logs/<CharacterName>/<optionalsubdirectory> -->
   <!--                                                                                                                                                   -->
@@ -173,7 +202,10 @@
   <!-- Enable of Disable the PocketStatistics logs: each and every pocket of missions will generate a seperate log with completion times and other statistics for your XML tuning pleasure -->
   <PocketStatistics>true</PocketStatistics><!-- default is: true -->
 
-  <!-- FITTING SETTINGS -->
+  <!--                                                -->
+  <!--       FITTING SETTINGS        -->
+  <!--                                                -->
+
   <!-- Faction specific fittings listed here -->
   <factionfittings>
     <factionfitting faction="Default" fitting="default" />
@@ -183,8 +215,10 @@
     <!-- <missionfitting mission="Cargo Delivery" fitting="cargo" dronetype="2185" /> -->
   </missionfittings>
 
-  <!-- WEAPON SETTINGS -->
-  
+  <!--                                                -->
+  <!--      WEAPON SETTINGS         -->
+  <!--                                                -->
+
   <!-- When defining ammo here, do NOT define them by the damage that the ammo does 
        but define them based on the ammo you want to use when the bot faces rats weak 
        to the damageType, each damage type HAS to be present at least once! -->
@@ -209,7 +243,9 @@
   <maximumHighValueTargets>4</maximumHighValueTargets><!-- default is 4 -->
   <maximumLowValueTargets>3</maximumLowValueTargets><!-- default is 3 -->
 
-  <!-- MOVEMENT SETTINGS -->
+  <!--                                                -->
+  <!--      MOVEMENT SETTINGS    -->
+  <!--                                                -->
 
   <!-- When SpeedTank is enabled, Combat-module will try to orbit ships at orbitDistance -->
   <speedTank>false</speedTank>
@@ -221,14 +257,18 @@
   <!-- if you are not speed tanking then this value is used to determine where you are 'in range' if it is set. If you want your maximum range to be 'in range' leave this at 0: if you are in a gunboat you probably want this set to your optimal range-->
   <optimalRange>0</optimalRange>
   
-  <!-- TANK SETTINGS -->
+  <!--                                                -->
+  <!--          TANK SETTINGS          -->
+  <!--                                                -->
 
   <!-- Activate shield booster or armor rep when shields/armor drop below this percentage -->
   <activateRepairModules>65</activateRepairModules>
   <!-- Deactivate shield booster or armor rep when shields/armor are above this percentage -->
   <deactivateRepairModules>95</deactivateRepairModules>
   
-  <!-- PANIC SETTINGS -->
+  <!--                                                -->
+  <!--          PANIC SETTINGS         -->
+  <!--                                                -->
 
   <!-- Minimum amount of shields before the bot panics and warps to safety -->
   <minimumShieldPct>50</minimumShieldPct>
@@ -243,8 +283,10 @@
   <!-- Amount of capacitor that is seen as "safe" to return to the mission -->
   <safeCapacitorPct>65</safeCapacitorPct>
 
-  <!-- DRONE SETTINGS -->
-
+  <!--                                                -->
+  <!--        DRONE SETTINGS          -->
+  <!--                                                -->
+  
   <!-- Use drones, disable on ships without a drone bay! -->
   <useDrones>true</useDrones>
   <!-- Drone type id to load (set to 0 to not reload drones) -->
@@ -272,8 +314,10 @@
   <!-- Drones normally kill low value targets (frigates) first. If you would prefer your drones to kill high value targets first set this to true -->
   <dronesKillHighValueTargets>false</dronesKillHighValueTargets>
 
+  <!--                                                        -->
   <!-- MISSION BLACKLIST SETTINGS -->
-  
+  <!--                                                        -->
+
     <!-- List of factions which the bot will try to avoid -->
   <factionblacklist>
 	<faction>Caldari State</faction>
@@ -289,9 +333,11 @@
   <blacklist>
     <mission>Enemies Abound (1 of 5)</mission>
   </blacklist>
-
-  <!-- GUI SETTINGS -->
-
+  
+  <!--                                                -->
+  <!--            GUI SETTINGS           -->
+  <!--                                                -->
+  
   <!-- X Position of Questor Window -->
   <windowXPosition>1600</windowXPosition><!-- needs to be customized -->
   <!-- Y Position of Questor Window -->
