@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <settings>
   <!--                                                -->
   <!--         DEBUG SETTINGS         -->
@@ -124,8 +124,8 @@
   <createSalvageBookmarks>True</createSalvageBookmarks><!-- default is true -->
   <!-- CreateSalvageBookmarksIn is used for salvaging, Player is only needed for non-dedicated, and Corp is used for dedicated (character mode: dps is non-dedicated, salvage is -->
   <createSalvageBookmarksIn>Player</createSalvageBookmarksIn><!-- default is "Player", other option is "Corp" -->
-  <!-- Used when using dedicated salvager -->
-  <salvageMultpleMissionsinOnePass>true</salvageMultpleMissionsinOnePass>
+  <!-- Setting allow you to complete multiple missions before doing after mission salvaging -->
+  <salvageMultpleMissionsinOnePass>false</salvageMultpleMissionsinOnePass>
   <!-- Unload loot at station when doing after-mission salvaging (*only* when doing after-mission salvaging)
        Note: If this is disabled then the bot will use the isk/m3 algorithm used in missions to dump low-value loot -->
   <unloadLootAtStation>false</unloadLootAtStation><!-- default is false -->
