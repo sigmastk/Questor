@@ -173,7 +173,6 @@ namespace Questor
         private void OnFrame(object sender, EventArgs e)
         {
             var watch = new Stopwatch();
-            _lastFrame = DateTime.Now;
             // Only pulse state changes every 1.5s
             if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
                 return;

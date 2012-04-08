@@ -185,7 +185,7 @@
             switch(_state)
             {
                 case GenericCombatStorylineState.WarpOutStation:
-                    var _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).FirstOrDefault();
+                    var _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).FirstOrDefault();
                     var _solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (_bookmark == null)
