@@ -279,14 +279,6 @@ namespace Questor.Modules
                 // Get the container
                 EntityCache containerEntity = Cache.Instance.EntityById(window.ItemId);
 
-                // Does it no longer exist or is it out of transfer range or its looted
-                if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
-                {
-                    Logging.Log("Salvage: Closing loot window [" + window.ItemId + "]");
-                    window.Close();
-                    continue;
-                }
-
                 // Get the container that is associated with the cargo container
                 DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.ItemId);
 
@@ -311,6 +303,15 @@ namespace Questor.Modules
                     }
                     File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, ";" + "\n");
                 }
+                
+                // Does it no longer exist or is it out of transfer range or its looted
+                if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
+                {
+                   Logging.Log("Salvage: Closing loot window [" + window.ItemId + "]");
+                   window.Close();
+                   continue;
+                }
+
                 //if (freeCargoCapacity < 1000) //this should allow BSs to dump scrapmetal but haulers and noctus' to hold onto it
                 //{
                 //	// Dump scrap metal if we have any
@@ -496,7 +497,16 @@ namespace Questor.Modules
         {
             // Nothing to salvage in stations
             if (Cache.Instance.InStation)
-                return;
+            {
+               if (Settings.Instance.CharacterMode.ToLower() == "salvage" && (DateTime.Now > _nextPeopleandPlacesrefresh))
+               {
+                  _nextPeopleandPlacesrefresh = DateTime.Now.AddMinutes(Settings.Instance.RandomNumber5To15());
+                  Logging.Log("Salvage: Refreshing People and Places Window: Next refresh in [ " + Math.Round(DateTime.Now.Subtract(_nextPeopleandPlacesrefresh).TotalMinutes,0) + " min]");
+                  Cache.Instance.DirectEve.RefreshPnPWindow();
+               }
+               return;
+            }
+                
 
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (State)

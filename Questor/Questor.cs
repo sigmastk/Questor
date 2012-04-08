@@ -173,6 +173,7 @@ namespace Questor
         private void OnFrame(object sender, EventArgs e)
         {
             var watch = new Stopwatch();
+            LastFrame = DateTime.Now;
             // Only pulse state changes every 1.5s
             if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
                 return;
@@ -224,8 +225,27 @@ namespace Questor
             watch.Stop();
             if (Settings.Instance.DebugPerformance)
                 Logging.Log("Cleanup.ProcessState took " + watch.ElapsedMilliseconds + "ms");
+            
+            if (Settings.Instance.DebugStates)
+                Logging.Log("Cleanup.State = " + _cleanup.State);
             // Done
             // Cleanup State: ProcessState
+            
+            // Start _salvage.ProcessState
+            // Description: salvages, and watches for bookmarks in people and places, a no-op if you are in station and aren't set with characterMode=salvage
+            //
+            watch.Reset();
+            watch.Start();
+            _salvage.ProcessState();
+            watch.Stop();
+            // Done
+            // Salvage State: ProcessState
+            //
+            if (Settings.Instance.DebugPerformance)
+                Logging.Log("Salvage.ProcessState took " + watch.ElapsedMilliseconds + "ms");
+
+            if (Settings.Instance.DebugStates)
+                Logging.Log("Salvage.State = " + _salvage.State);
 
             if (DateTime.Now.Subtract(Cache.Instance._lastupdateofSessionRunningTime).TotalSeconds < (int)Time.SessionRunningTimeUpdate_seconds)
             {
@@ -670,6 +690,7 @@ namespace Questor
                     {
                         if (State == QuestorState.Start)
                         {
+                            Logging.Log("Questor: Start After Mission Salvaging");
                             State = QuestorState.BeginAfterMissionSalvaging;
                         }
                         break;
@@ -1579,7 +1600,7 @@ namespace Questor
                     break;
 
                 case QuestorState.BeginAfterMissionSalvaging:
-                    Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation> 
+                  Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation> 
                     _gatesPresent = false;
                     Cache.Instance.OpenWrecks = true;
                     if (_arm.State == ArmState.Idle)
