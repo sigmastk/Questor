@@ -7,6 +7,9 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
+
+using System.Collections.Generic;
+
 namespace Questor.Modules
 {
     using System;
@@ -41,14 +44,14 @@ namespace Questor.Modules
             if (_nextTravelerAction > DateTime.Now)
                 return;
 
-            var undockBookmark = UndockBookmark;
+            DirectBookmark undockBookmark = UndockBookmark;
             UndockBookmark = undockBookmark;
 
-            var destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
+            List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
             if (destination.Count == 0 || !destination.Any(d => d == solarSystemId))
             {
                 // We do not have the destination set
-                var location = Cache.Instance.DirectEve.Navigation.GetLocation(solarSystemId);
+                DirectLocation location = Cache.Instance.DirectEve.Navigation.GetLocation(solarSystemId);
                 if (location.IsValid)
                 {
                     Logging.Log("Traveler: Setting destination to [" + location.Name + "]");
@@ -80,14 +83,14 @@ namespace Questor.Modules
                 return;
 
                 // Find the first waypoint
-                var waypoint = destination.First();
+                long waypoint = destination.First();
 
                 // Get the name of the next system
-                var locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
+                string locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
 
                 // Find the stargate associated with it
-                var entities = Cache.Instance.EntitiesByName(locationName).Where(e => e.GroupId == (int)Group.Stargate);
-                if (entities.Count() == 0)
+                IEnumerable<EntityCache> entities = Cache.Instance.EntitiesByName(locationName).Where(e => e.GroupId == (int)Group.Stargate);
+                if (!entities.Any())
                 {
                     // not found, that cant be true?!?!?!?!
                     Logging.Log("Traveler: Error [Stargate (" + locationName + ")] not found, most likely lag waiting 15 seconds.");
@@ -96,7 +99,7 @@ namespace Questor.Modules
                 }
 
                 // Warp to, approach or jump the stargate
-                var entity = entities.First();
+                EntityCache entity = entities.First();
                 if (entity.Distance < (int)Distance.DecloakRange)
                 {
                     Logging.Log("Traveler: Jumping to [" + locationName + "]");

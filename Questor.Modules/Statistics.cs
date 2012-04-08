@@ -1,14 +1,14 @@
 ﻿namespace Questor.Modules
 {
     using System;
-    using System.Linq;
-    using DirectEve;
+    //using System.Linq;
+    //using DirectEve;
     using System.IO; 
 
     public class Statistics
     {
         public StatisticsState State { get; set; }
-        private DateTime _lastStatisticsAction;
+        //private DateTime _lastStatisticsAction;
         public DateTime MissionLoggingStartedTimestamp { get; set; }
 
         public DateTime StartedMission = DateTime.Now;
@@ -100,13 +100,13 @@
                             Logging.Log("1 Mission is: " + Cache.Instance.MissionName);
 
 
-                            if (Cache.Instance.mission != null) //condition 2
+                            if (Cache.Instance.Mission != null) //condition 2
                             {
-                                Logging.Log("2 Cache.Instance.mission is: " + Cache.Instance.mission);
-                                Logging.Log("2 Cache.Instance.mission.Name is: " + Cache.Instance.mission.Name);
-                                Logging.Log("2 Cache.Instance.mission.State is: " + Cache.Instance.mission.State);
+                                Logging.Log("2 Cache.Instance.mission is: " + Cache.Instance.Mission);
+                                Logging.Log("2 Cache.Instance.mission.Name is: " + Cache.Instance.Mission.Name);
+                                Logging.Log("2 Cache.Instance.mission.State is: " + Cache.Instance.Mission.State);
 
-                                if (Cache.Instance.mission.State != (int)MissionState.Accepted) //condition 3
+                                if (Cache.Instance.Mission.State != (int)MissionState.Accepted) //condition 3
                                 {
                                     Logging.Log("MissionState is NOT Accepted: which is correct if we want to do logging");
                                 }
@@ -128,7 +128,7 @@
                             Statistics.Instance.MissionLoggingCompleted = true; //if if it isn't true - this means we shouldn't be trying to log mission stats atm
                         }
                     }
-                    if (!string.IsNullOrEmpty(Cache.Instance.MissionName) && (Cache.Instance.mission == null || (Cache.Instance.mission.State != (int)MissionState.Accepted)))
+                    if (!string.IsNullOrEmpty(Cache.Instance.MissionName) && (Cache.Instance.Mission == null || (Cache.Instance.Mission.State != (int)MissionState.Accepted)))
                     {
                         // Seeing as we completed a mission, we will have loyalty points for this agent
                         //if (Cache.Instance.Agent.LoyaltyPoints == -1)
@@ -149,13 +149,13 @@
                                 File.AppendAllText(Settings.Instance.MissionStats1LogFile, "Date;Mission;TimeMission;TimeSalvage;TotalTime;Isk;Loot;LP;\r\n");
 
                             // Build the line
-                            var line = DateTime.Now + ";";                                                                          // Date
-                            line += Cache.Instance.MissionName + ";";                                                               // Mission
+                            string line = DateTime.Now + ";";                                                                                           // Date
+                            line += Cache.Instance.MissionName + ";";                                                                                   // Mission
                             line += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
-                            line += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";           // Time Doing After Mission Salvaging
-                            line += ((int)DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";            // Total Time doing Mission
-                            line += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                      // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
-                            line += ((int)Statistics.Instance.LootValue) + ";";                                                     // Loot
+                            line += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";     // Time Doing After Mission Salvaging
+                            line += ((int)DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";                                // Total Time doing Mission
+                            line += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                                          // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
+                            line += ((int)Statistics.Instance.LootValue) + ";";                                                                         // Loot
                             line += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";\r\n";                                 // LP
 
                             // The mission is finished
@@ -174,15 +174,15 @@
                                 File.AppendAllText(Settings.Instance.MissionStats2LogFile, "Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue\r\n");
 
                             // Build the line
-                            var line2 = string.Format("{0:MM/dd/yyyy HH:mm:ss}", DateTime.Now) + ";";                               // Date
-                            line2 += Cache.Instance.MissionName + ";";                                                              // Mission
+                            string line2 = string.Format("{0:MM/dd/yyyy HH:mm:ss}", DateTime.Now) + ";";                                                // Date
+                            line2 += Cache.Instance.MissionName + ";";                                                                                  // Mission
                             line2 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";        // TimeMission
-                            line2 += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                     // Isk
-                            line2 += ((int)Statistics.Instance.LootValue) + ";";                                                    // Loot
+                            line2 += ((int)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                                         // Isk
+                            line2 += ((int)Statistics.Instance.LootValue) + ";";                                                                        // Loot
                             line2 += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                                    // LP
-                            line2 += ((int)Statistics.Instance.LostDrones) + ";";                                                   // Lost Drones
-                            line2 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                              // Ammo Consumption
-                            line2 += ((int)Statistics.Instance.AmmoValue) + ";\r\n";                                                // Ammo Value
+                            line2 += ((int)Statistics.Instance.LostDrones) + ";";                                                                       // Lost Drones
+                            line2 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                                                  // Ammo Consumption
+                            line2 += ((int)Statistics.Instance.AmmoValue) + ";\r\n";                                                                    // Ammo Value
 
                             // The mission is finished
                             Logging.Log("Questor: writing mission log2 to [ " + Settings.Instance.MissionStats2LogFile);
@@ -197,30 +197,30 @@
 
                             // Write the header
                             if (!File.Exists(Settings.Instance.MissionStats3LogFile))
-                                File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles\r\n");
+                                File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;\r\n");
 
                             // Build the line
-                            var line3 = DateTime.Now + ";";                                                                          // Date
-                            line3 += Cache.Instance.MissionName + ";";                                                               // Mission
+                            string line3 = DateTime.Now + ";";                                                                                           // Date
+                            line3 += Cache.Instance.MissionName + ";";                                                                                   // Mission
                             line3 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
-                            line3 += ((long)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                     // Isk
-                            line3 += ((long)Statistics.Instance.LootValue) + ";";                                                    // Loot
+                            line3 += ((long)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                                         // Isk
+                            line3 += ((long)Statistics.Instance.LootValue) + ";";                                                                        // Loot
                             line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                               // LP
-                            line3 += ((int)Statistics.Instance.LostDrones) + ";";                                                    // Lost Drones
-                            line3 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                               // Ammo Consumption
-                            line3 += ((int)Statistics.Instance.AmmoValue) + ";";                                                     // Ammo Value
-                            line3 += ((int)Cache.Instance.panic_attempts_this_mission) + ";";                                        // Panics
-                            line3 += ((int)Cache.Instance.lowest_shield_percentage_this_mission) + ";";                              // Lowest Shield %
-                            line3 += ((int)Cache.Instance.lowest_armor_percentage_this_mission) + ";";                               // Lowest Armor %
-                            line3 += ((int)Cache.Instance.lowest_capacitor_percentage_this_mission) + ";";                           // Lowest Capacitor %
-                            line3 += ((int)Cache.Instance.repair_cycle_time_this_mission) + ";";                                     // repair Cycle Time
-                            line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";"; // After Mission Salvaging Time
+                            line3 += ((int)Statistics.Instance.LostDrones) + ";";                                                                        // Lost Drones
+                            line3 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                                                   // Ammo Consumption
+                            line3 += ((int)Statistics.Instance.AmmoValue) + ";";                                                                         // Ammo Value
+                            line3 += ((int)Cache.Instance.PanicAttemptsThisMission) + ";";                                                               // Panics
+                            line3 += ((int)Cache.Instance.LowestShieldPercentageThisMission) + ";";                                                      // Lowest Shield %
+                            line3 += ((int)Cache.Instance.LowestArmorPercentageThisMission) + ";";                                                       // Lowest Armor %
+                            line3 += ((int)Cache.Instance.LowestCapacitorPercentageThisMission) + ";";                                                   // Lowest Capacitor %
+                            line3 += ((int)Cache.Instance.RepairCycleTimeThisMission) + ";";                                                             // repair Cycle Time
+                            line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";     // After Mission Salvaging Time
                             line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ((int)FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";\r\n"; // Total Time, Mission + After Mission Salvaging (if any)
 
                             // The mission is finished
                             Logging.Log("Questor: writing mission log3 to  [ " + Settings.Instance.MissionStats3LogFile);
                             File.AppendAllText(Settings.Instance.MissionStats3LogFile, line3);
-                            Logging.Log("Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles\r\n");
+                            Logging.Log("Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;\r\n");
                             Logging.Log(line3);
                         }
                         // Disable next log line
@@ -228,7 +228,7 @@
                         Statistics.Instance.MissionLoggingCompleted = true;
                         Statistics.Instance.LootValue = 0;
                         Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
-                        Statistics.Instance.StartedMission = DateTime.Now; //this especially should be moved to statistics.cs as currently it resets the mission timer even if we could not and did not finish the mission
+                        Statistics.Instance.StartedMission = DateTime.Now; 
                         Statistics.Instance.FinishedMission = DateTime.MinValue;
                         Cache.Instance.MissionName = string.Empty;
                         Statistics.Instance.LostDrones = 0;
@@ -237,15 +237,15 @@
                         Statistics.Instance.MissionLoggingCompleted = false;
                         Cache.Instance.DroneStatsWritten = false;
 
-                        Cache.Instance.panic_attempts_this_mission = 0;
-                        Cache.Instance.lowest_shield_percentage_this_mission = 101;
-                        Cache.Instance.lowest_armor_percentage_this_mission = 101;
-                        Cache.Instance.lowest_capacitor_percentage_this_mission = 101;
-                        Cache.Instance.repair_cycle_time_this_mission = 0;
-                        Cache.Instance.TimeSpentReloading_seconds = 0;   // this will need to be added to whenever we reload or switch ammo
-                        Cache.Instance.TimeSpentInMission_seconds = 0;   // from landing on grid (loading mission actions) to going to base (changing to gotobase state)
-                        Cache.Instance.TimeSpentInMissionInRange = 0;    // time spent totally out of range, no targets
-                        Cache.Instance.TimeSpentInMissionOutOfRange = 0; // time spent in range - with targets to kill (or no targets?!)
+                        Cache.Instance.PanicAttemptsThisMission = 0;
+                        Cache.Instance.LowestShieldPercentageThisMission = 101;
+                        Cache.Instance.LowestArmorPercentageThisMission = 101;
+                        Cache.Instance.LowestCapacitorPercentageThisMission = 101;
+                        Cache.Instance.RepairCycleTimeThisMission = 0;
+                        Cache.Instance.TimeSpentReloading_seconds = 0;             // this will need to be added to whenever we reload or switch ammo
+                        Cache.Instance.TimeSpentInMission_seconds = 0;             // from landing on grid (loading mission actions) to going to base (changing to gotobase state)
+                        Cache.Instance.TimeSpentInMissionInRange = 0;              // time spent totally out of range, no targets
+                        Cache.Instance.TimeSpentInMissionOutOfRange = 0;           // time spent in range - with targets to kill (or no targets?!)
                     }
                     State = StatisticsState.Idle;
                     break;
@@ -259,7 +259,7 @@
                     break;
 
                 case StatisticsState.Done:
-                    _lastStatisticsAction = DateTime.Now;
+                    //_lastStatisticsAction = DateTime.Now;
                     State = StatisticsState.Idle;
                     break;
 

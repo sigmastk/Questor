@@ -14,11 +14,11 @@ namespace Questor.Modules
         {
             Name = (string)agentList.Attribute("name") ?? "";
             Priorit = (int)agentList.Attribute("priority");
-            Decline_timer = DateTime.Now;
+            DeclineTimer = DateTime.Now;
         }
 
         public string Name { get; private set; }
         public int Priorit { get; private set; }
-        public DateTime Decline_timer { get; set; }
+        public DateTime DeclineTimer { get; set; }
     }
 }

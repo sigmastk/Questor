@@ -25,12 +25,12 @@ namespace Questor.Modules
             if (DateTime.Now < _nextActivateAction) //if we just did something wait a fraction of a second
                 return;
 
-            foreach (var module in Cache.Instance.Modules)
+            foreach (ModuleCache module in Cache.Instance.Modules)
             {
                 if (!module.IsActivatable)
                     continue;
 
-                var activate = false;
+                bool activate = false;
                 activate |= module.GroupId == (int)Group.CloakingDevice;
                 activate |= module.GroupId == (int)Group.ShieldHardeners;
                 activate |= module.GroupId == (int)Group.DamageControl;
@@ -53,10 +53,10 @@ namespace Questor.Modules
                     {
                         continue;
                     }
-                    var StuffThatMayDecloakMe = Cache.Instance.Entities.Where(t => t.Name != Cache.Instance.DirectEve.Me.Name || t.IsBadIdea || t.IsContainer || t.IsNpc || t.IsPlayer).OrderBy(t => t.Distance).FirstOrDefault();
-                    if (StuffThatMayDecloakMe != null || StuffThatMayDecloakMe.Distance <= (int)Distance.SafeToCloakDistance) //if their is anything within 2300m do not attempt to cloak
+                    EntityCache stuffThatMayDecloakMe = Cache.Instance.Entities.Where(t => t.Name != Cache.Instance.DirectEve.Me.Name || t.IsBadIdea || t.IsContainer || t.IsNpc || t.IsPlayer).OrderBy(t => t.Distance).FirstOrDefault();
+                    if (stuffThatMayDecloakMe != null && (stuffThatMayDecloakMe.Distance <= (int)Distance.SafeToCloakDistance)) //if their is anything within 2300m do not attempt to cloak
                     {
-                        if (StuffThatMayDecloakMe.Distance != 0)
+                        if (stuffThatMayDecloakMe.Distance != 0)
                         {
                             //Logging.Log(StuffThatMayDecloakMe.Name + " is very close at: " + StuffThatMayDecloakMe.Distance + " meters");
                             continue;
@@ -79,7 +79,7 @@ namespace Questor.Modules
             if (DateTime.Now < _nextRepModuleAction) //if we just did something wait a fraction of a second
                 return;
 
-            foreach (var module in Cache.Instance.Modules)
+            foreach (ModuleCache module in Cache.Instance.Modules)
             {
                 if (module.InLimboState)
                     continue;
@@ -96,40 +96,40 @@ namespace Questor.Modules
                 else
                     continue;
 
-                var inCombat = Cache.Instance.TargetedBy.Count() > 0;
+                bool inCombat = Cache.Instance.TargetedBy.Any();
                 if (!module.IsActive && ((inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct)))
                 {
-                    if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.lowest_shield_percentage_this_pocket)
+                    if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
                     {
-                        Cache.Instance.lowest_shield_percentage_this_pocket = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                        Cache.Instance.lowest_shield_percentage_this_mission = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Cache.Instance.lowest_armor_percentage_this_pocket)
+                    if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
                     {
-                        Cache.Instance.lowest_armor_percentage_this_pocket = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                        Cache.Instance.lowest_armor_percentage_this_mission = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Cache.Instance.lowest_capacitor_percentage_this_pocket)
+                    if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
                     {
-                        Cache.Instance.lowest_capacitor_percentage_this_pocket = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
-                        Cache.Instance.lowest_capacitor_percentage_this_mission = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                        Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     }
                     //More human behavior
                     //System.Threading.Thread.Sleep(333);
                     module.Click();
                     Cache.Instance.StartedBoosting = DateTime.Now;
                     _nextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
-                    Logging.Log("Defense: RepModule activated: [ " + module.ItemId + "] next Activation delayed until [" + _nextRepModuleAction.ToString("HH:mm:ss") + "]");
-                    return;
+                    Logging.Log("Defense: RepModule   activated: [ " + module.ItemId + "]");
                     //Logging.Log("LowestShieldPercentage(pocket) [ " + Cache.Instance.lowest_shield_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestArmorPercentage(pocket) [ " + Cache.Instance.lowest_armor_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestCapacitorPercentage(pocket) [ " + Cache.Instance.lowest_capacitor_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestShieldPercentage(mission) [ " + Cache.Instance.lowest_shield_percentage_this_mission + " ] ");
                     //Logging.Log("LowestArmorPercentage(mission) [ " + Cache.Instance.lowest_armor_percentage_this_mission + " ] ");
                     //Logging.Log("LowestCapacitorPercentage(mission) [ " + Cache.Instance.lowest_capacitor_percentage_this_mission + " ] ");
+                    return;
                 }
                 else if (module.IsActive && perc >= Settings.Instance.DeactivateRepairModules)
                 {
@@ -137,13 +137,14 @@ namespace Questor.Modules
                     //System.Threading.Thread.Sleep(333);
                     module.Click();
                     Cache.Instance._lastModuleActivation = DateTime.Now;
-                    Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
-                    Cache.Instance.repair_cycle_time_this_mission = Cache.Instance.repair_cycle_time_this_mission + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
-                    Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
-                    Logging.Log("Defense: RepModule deactivated: [ " + module.ItemId + "]");
-                    return;
+                    Cache.Instance.RepairCycleTimeThisPocket = Cache.Instance.RepairCycleTimeThisPocket + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
+                    Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                    _nextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                    Logging.Log("Defense: RepModule deactivated: [ " + module.ItemId + "][" + Math.Round(DateTime.Now.Subtract(_nextRepModuleAction).TotalSeconds, 0) + "] sec reactivation delay");
                     //Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)watch.Elapsed);
                     //Cache.Instance.repair_cycle_time_this_mission = Cache.Instance.repair_cycle_time_this_mission + watch.Elapsed.TotalMinutes;
+                    return;
                 }
             }
         }
@@ -153,7 +154,7 @@ namespace Questor.Modules
             if (DateTime.Now < _nextAfterburnerAction) //if we just did something wait a fraction of a second
                 return; 
             
-            foreach (var module in Cache.Instance.Modules)
+            foreach (ModuleCache module in Cache.Instance.Modules)
             {
                 if (module.GroupId != (int)Group.Afterburner)
                     continue;
@@ -162,12 +163,12 @@ namespace Questor.Modules
                     continue;
 
                 // Should we activate the module
-                var activate = Cache.Instance.Approaching != null;
+                bool activate = Cache.Instance.Approaching != null;
                 activate &= !module.IsActive;
                 activate &= !module.IsDeactivating;
 
                 // Should we deactivate the module?
-                var deactivate = Cache.Instance.Approaching == null;
+                bool deactivate = Cache.Instance.Approaching == null;
                 deactivate &= module.IsActive;
                 deactivate &= !module.IsDeactivating;
                 deactivate &= (!Cache.Instance.Entities.Any(e => e.IsAttacking) || !Settings.Instance.SpeedTank);
@@ -233,7 +234,7 @@ namespace Questor.Modules
                 return;
 
             // Cap is SO low that we shouldn't care about hardeners/boosters as we aren't being targeted anyhow
-            if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < 10 && Cache.Instance.TargetedBy.Count() == 0)
+            if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
                 return;
 
             ActivateOnce();

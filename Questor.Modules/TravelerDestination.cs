@@ -64,7 +64,7 @@ namespace Questor.Modules
 
         public StationDestination(long stationId)
         {
-            var station = Cache.Instance.DirectEve.Navigation.GetLocation(stationId);
+            DirectLocation station = Cache.Instance.DirectEve.Navigation.GetLocation(stationId);
             if (station == null || !station.ItemId.HasValue || !station.SolarSystemId.HasValue)
             {
                 Logging.Log("TravelerDestination.StationDestination: Invalid station id [" + stationId + "]");
@@ -96,8 +96,8 @@ namespace Questor.Modules
 
         public override bool PerformFinalDestinationTask()
         {
-            var localundockBookmark = UndockBookmark;
-            var arrived = PerformFinalDestinationTask(StationId, StationName, ref _nextStationAction, ref localundockBookmark);
+            DirectBookmark localundockBookmark = UndockBookmark;
+            bool arrived = PerformFinalDestinationTask(StationId, StationName, ref _nextStationAction, ref localundockBookmark);
             UndockBookmark = localundockBookmark;
             return arrived;
         }
@@ -170,7 +170,7 @@ namespace Questor.Modules
             }
             //else Logging.Log("TravelerDestination.BookmarkDestination: undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
 
-            var entity = Cache.Instance.EntitiesByName(stationName).FirstOrDefault();
+            EntityCache entity = Cache.Instance.EntitiesByName(stationName).FirstOrDefault();
             if (entity == null)
             {
                 // We are there but no station? Wait a bit
@@ -239,9 +239,9 @@ namespace Questor.Modules
 
         public override bool PerformFinalDestinationTask()
         {
-            var bookmark = Cache.Instance.BookmarkById(BookmarkId);
-            var undockBookmark = UndockBookmark;
-            var arrived = PerformFinalDestinationTask(bookmark, 150000, ref _nextBookmarkAction, ref undockBookmark);
+            DirectBookmark bookmark = Cache.Instance.BookmarkById(BookmarkId);
+            DirectBookmark undockBookmark = UndockBookmark;
+            bool arrived = PerformFinalDestinationTask(bookmark, 150000, ref _nextBookmarkAction, ref undockBookmark);
             UndockBookmark = undockBookmark;
             return arrived;
         }
@@ -286,7 +286,7 @@ namespace Questor.Modules
             // Is this a station bookmark?
             if (bookmark.Entity != null && bookmark.Entity.GroupId == (int)Group.Station)
             {
-                var arrived = StationDestination.PerformFinalDestinationTask(bookmark.Entity.Id, bookmark.Entity.Name, ref nextAction, ref undockBookmark);
+                bool arrived = StationDestination.PerformFinalDestinationTask(bookmark.Entity.Id, bookmark.Entity.Name, ref nextAction, ref undockBookmark);
                 if (arrived)
                     Logging.Log("TravelerDestination.BookmarkDestination: Arrived at bookmark [" + bookmark.Title + "]");
                 return arrived;
@@ -337,7 +337,7 @@ namespace Questor.Modules
                 return true;
             }
 
-            var distance = Cache.Instance.DistanceFromMe(bookmark.X ?? 0, bookmark.Y ?? 0, bookmark.Z ?? 0);
+            double distance = Cache.Instance.DistanceFromMe(bookmark.X ?? 0, bookmark.Y ?? 0, bookmark.Z ?? 0);
             if (distance < warpDistance)
             {
                 Logging.Log("TravelerDestination.BookmarkDestination: Arrived at the bookmark [" + bookmark.Title + "]");
@@ -377,10 +377,13 @@ namespace Questor.Modules
                 Cache.Instance.SessionState = "Quitting";
             }
 
-            Logging.Log("TravelerDestination.MissionBookmarkDestination: Destination set to mission bookmark [" + bookmark.Title + "]");
-            AgentId = bookmark.AgentId ?? -1;
-            Title = bookmark.Title;
-            SolarSystemId = bookmark.SolarSystemId ?? -1;
+           if (bookmark != null)
+           {
+              Logging.Log("TravelerDestination.MissionBookmarkDestination: Destination set to mission bookmark [" + bookmark.Title + "]");
+              AgentId = bookmark.AgentId ?? -1;
+              Title = bookmark.Title;
+              SolarSystemId = bookmark.SolarSystemId ?? -1;
+           }
         }
 
         public MissionBookmarkDestination(int agentId, string title)
@@ -393,7 +396,7 @@ namespace Questor.Modules
 
         private static DirectAgentMissionBookmark GetMissionBookmark(long agentId, string title)
         {
-            var mission = Cache.Instance.GetAgentMission(agentId);
+            DirectAgentMission mission = Cache.Instance.GetAgentMission(agentId);
             if (mission == null)
                 return null;
 
@@ -402,8 +405,8 @@ namespace Questor.Modules
 
         public override bool PerformFinalDestinationTask()
         {
-            var undockBookmark = UndockBookmark;
-            var arrived = BookmarkDestination.PerformFinalDestinationTask(GetMissionBookmark(AgentId, Title), (int)Distance.MissionWarpLimit, ref _nextMissionBookmarkAction, ref undockBookmark);
+            DirectBookmark undockBookmark = UndockBookmark;
+            bool arrived = BookmarkDestination.PerformFinalDestinationTask(GetMissionBookmark(AgentId, Title), (int)Distance.MissionWarpLimit, ref _nextMissionBookmarkAction, ref undockBookmark);
             UndockBookmark = undockBookmark;
             return arrived;// Mission bookmarks have a 1.000.000 distance warp-to limit (changed it to 150.000.000 as there are some bugged missions around)  
         }

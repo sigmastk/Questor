@@ -33,23 +33,24 @@ namespace Questor.Modules
 
         private void ReloadAll()
         {
-            var weapons = Cache.Instance.Weapons;
-            var cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            var correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
+            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
+            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
             correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId));
 
-            if (correctAmmo1.Count() == 0)
+            if (!correctAmmo1.Any())
                 return;
 
-            var ammo = correctAmmo1.Where(a => a.Range > 1).OrderBy(a => a.Range).FirstOrDefault();
-            var charge = cargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId);
+            Ammo ammo = correctAmmo1.Where(a => a.Range > 1).OrderBy(a => a.Range).FirstOrDefault();
 
             if (ammo == null)
-                return;
+                return; 
+            
+            DirectItem charge = cargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId);
 
             Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
 
-            foreach (var weapon in weapons)
+            foreach (ModuleCache weapon in weapons)
             {
 
                 if (weapon.CurrentCharges >= weapon.MaxCharges)
@@ -79,7 +80,7 @@ namespace Questor.Modules
             // Nothing to loot
             if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
             {
-                // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
+               // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
                 // This scenario only happens when all wrecks are within tractor range and you have a salvager 
                 // (typically only with a Golem).  Check to see if there are any cargo containers in space.  Cap 
                 // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.  
@@ -88,16 +89,16 @@ namespace Questor.Modules
                     Logging.Log("AnomalyController: No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]");
                     return;
                 }
-                else if(Settings.Instance.LootEverything)
+                if(Settings.Instance.LootEverything)
                 {
                     Logging.Log("AnomalyController: No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]");
                     return;
                 }
             }
 
-            // Do we already have a bookmark?
-            var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-            var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.BookmarksOnGridWithMe);
+           // Do we already have a bookmark?
+            List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+            DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
             if (bookmark != null)
             {
                 Logging.Log("AnomalyController: Pocket already bookmarked for salvaging [" + bookmark.Title + "]");
@@ -105,35 +106,35 @@ namespace Questor.Modules
             }
 
             // No, create a bookmark
-            var label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
+            string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
             Logging.Log("AnomalyController: Bookmarking pocket for salvaging [" + label + "]");
             Cache.Instance.CreateBookmark(label);
         }
 
         private void ActivateAction(Action action)
         {
-            var target = action.GetParameterValue("target");
+            string target = action.GetParameterValue("target");
 
             // No parameter? Although we shouldnt really allow it, assume its the acceleration gate :)
             if (string.IsNullOrEmpty(target))
                 target = "Acceleration Gate";
 
-            var targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || targets.Count() == 0)
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+            if (targets == null || !targets.Any())
             {
                 Logging.Log("AnomalyController.Activate: Can't find [" + target + "] to activate! Stopping Questor!");
                 State = AnomalyControllerState.Error;
                 return;
             }
 
-            var closest = targets.OrderBy(t => t.Distance).First();
+            EntityCache closest = targets.OrderBy(t => t.Distance).First();
             if (closest.Distance < (int)Distance.GateActivationRange)
             {
                 // Tell the drones module to retract drones
                 Cache.Instance.IsMissionPocketDone = true;
 
                 // We cant activate if we have drones out
-                if (Cache.Instance.ActiveDrones.Count() > 0)
+                if (Cache.Instance.ActiveDrones.Any())
                     return;
 
                 if (closest.Distance < (int)Distance.WayTooClose)
@@ -175,7 +176,7 @@ namespace Questor.Modules
             else
             {
                 // We cant warp if we have drones out
-                if (Cache.Instance.ActiveDrones.Count() > 0)
+                if (Cache.Instance.ActiveDrones.Any())
                     return;
                     
                 if (DateTime.Now.Subtract(_lastAlign ).TotalMinutes > 2)
@@ -194,7 +195,7 @@ namespace Questor.Modules
             activeTargets.AddRange(Cache.Instance.Targeting);
 
             // Get lowest range
-            var range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+            double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
 
             // We are obviously still killing stuff that's in range
             if (activeTargets.Count(t => t.Distance < range && t.IsNpc && t.CategoryId == (int) CategoryID.Entity) > 0)
@@ -211,7 +212,7 @@ namespace Questor.Modules
             }
 
             // Is there a priority target out of range?
-            var target = Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).Where(t => (!Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) || Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe))).FirstOrDefault();
+            EntityCache target = Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => (!Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) || Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe)));
             // Or is there a target out of range that is targeting us?
             target = target ?? Cache.Instance.TargetedBy.Where(t => !t.IsSentry && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) || Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe)).OrderBy(t => t.Distance).FirstOrDefault();
             // Or is there any target out of range?
@@ -230,11 +231,8 @@ namespace Questor.Modules
                         {
                             return;
                         }
-                        else
-                        {
-                            Logging.Log("AnomalyController.ClearPocket: Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away]");
-                            target.LockTarget();
-                        }
+                       Logging.Log("AnomalyController.ClearPocket: Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away]");
+                       target.LockTarget();
                     }
                     return;
                 }
@@ -286,21 +284,21 @@ namespace Questor.Modules
 
         private void MoveToAction(Action action)
         {
-            var target = action.GetParameterValue("target");
+            string target = action.GetParameterValue("target");
 
             // No parameter? Although we shouldnt really allow it, assume its the acceleration gate :)
             if (string.IsNullOrEmpty(target))
                 target = "Acceleration Gate";
 
-            var targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || targets.Count() == 0)
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+            if (targets == null || !targets.Any())
             {
                 // Unlike activate, no target just means next action
                 _currentAction++;
                 return;
             }
 
-            var closest = targets.OrderBy(t => t.Distance).First();
+            EntityCache closest = targets.OrderBy(t => t.Distance).First();
             if (closest.Distance < (int)Distance.GateActivationRange)
             {
                 // We are close enough to whatever we needed to move to
@@ -325,7 +323,7 @@ namespace Questor.Modules
             else
             {
                 // We cant warp if we have drones out
-                if (Cache.Instance.ActiveDrones.Count() > 0)
+                if (Cache.Instance.ActiveDrones.Any())
                     return;
 
                 if (DateTime.Now.Subtract(_lastAlign ).TotalMinutes > 2)
@@ -339,8 +337,8 @@ namespace Questor.Modules
 
         private void WaitUntilTargeted(Action action)
         {
-            var targetedBy = Cache.Instance.TargetedBy;
-            if (targetedBy != null && targetedBy.Count() > 0)
+            IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
+            if (targetedBy != null && targetedBy.Any())
             {
                 Logging.Log("AnomalyController.WaitUntilTargeted: We have been targeted!");
 
@@ -383,7 +381,7 @@ namespace Questor.Modules
             if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
                 breakOnAttackers = false;
 
-            var targetNames = action.GetParameterValues("target");
+            List<string> targetNames = action.GetParameterValues("target");
             // No parameter? Ignore kill action
             if (targetNames.Count == 0)
             {
@@ -393,8 +391,8 @@ namespace Questor.Modules
                 return;
             }
 
-            var targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
-            if (targets.Count() == 0)
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
+            if (!targets.Any())
             {
                 Logging.Log("AnomalyController.Kill: All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
 
@@ -409,7 +407,7 @@ namespace Questor.Modules
                 if (Cache.Instance.RemovePriorityTargets(targets))
                     Logging.Log("AnomalyController.Kill: Breaking off kill order, new spawn has arrived!");
 
-                foreach (var target in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
+                foreach (EntityCache target in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
                 {
                     Logging.Log("AnomalyController.Kill: Unlocking [" + target.Name + "][ID: " + target.Id + "] due to kill order being put on hold");
                     target.UnlockTarget();
@@ -421,12 +419,12 @@ namespace Questor.Modules
             if (!ignoreAttackers || breakOnAttackers)
             {
                 // Apparently we are busy, wait for combat to clear attackers first
-                var targetedBy = Cache.Instance.TargetedBy;
+                IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
                 if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
                     return;
             }
 
-            var closest = targets.OrderBy(t => t.Distance).First();
+            EntityCache closest = targets.OrderBy(t => t.Distance).First();
             if (closest.Distance < Cache.Instance.WeaponRange)
             {
                 if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == closest.Id))
@@ -470,13 +468,13 @@ namespace Questor.Modules
 
         private void LootItemAction(Action action)
         {
-            var items = action.GetParameterValues("item");
-            var targetNames = action.GetParameterValues("target");
+            List<string> items = action.GetParameterValues("item");
+            List<string> targetNames = action.GetParameterValues("target");
 
-            var done = items.Count == 0;
+            bool done = items.Count == 0;
             if (!done)
             {
-                var cargo = Cache.Instance.DirectEve.GetShipsCargo();
+                DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
                 // We assume that the ship's cargo will be opened somewhere else
                 if (cargo.IsReady)
                     done |= cargo.Items.Any(i => items.Contains(i.TypeName));
@@ -489,8 +487,8 @@ namespace Questor.Modules
                 return;
             }
 
-            var containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-            if (containers.Count() == 0)
+            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+            if (!containers.Any())
             {
                 Logging.Log("AnomalyController.LootItem: We are done looting");
 
@@ -498,7 +496,7 @@ namespace Questor.Modules
                 return;
             }
 
-            var closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
+            EntityCache closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
             if (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
             {
                 Logging.Log("AnomalyController.LootItem: Approaching target [" + closest.Name + "][ID: " + closest.Id + "]");
@@ -508,15 +506,15 @@ namespace Questor.Modules
 
         private void LootAction(Action action)
         {
-            var items = action.GetParameterValues("item");
-            var targetNames = action.GetParameterValues("target");
+            List<string> items = action.GetParameterValues("item");
+            List<string> targetNames = action.GetParameterValues("target");
 
             if (!Settings.Instance.LootEverything)
             {
-                var done = items.Count == 0;
+                bool done = items.Count == 0;
                 if (!done)
                 {
-                    var cargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
                     // We assume that the ship's cargo will be opened somewhere else
                     if (cargo.IsReady)
                         done |= cargo.Items.Any(i => items.Contains(i.TypeName));
@@ -532,8 +530,8 @@ namespace Questor.Modules
             // unlock targets count
             Cache.Instance.MissionLoot = true;
 
-            var containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-            if (containers.Count() == 0)
+            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+            if (!containers.Any())
             {
                 // lock targets count
                 Cache.Instance.MissionLoot = false;
@@ -542,7 +540,7 @@ namespace Questor.Modules
                 return;
             }
 
-            var closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
+            EntityCache closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
             if (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
             {
                 Logging.Log("AnomalyController.Loot: Approaching target [" + closest.Name + "][ID: " + closest.Id + "]");
@@ -552,8 +550,8 @@ namespace Questor.Modules
 
         private void IgnoreAction(Action action)
         {
-            var add = action.GetParameterValues("add");
-            var remove = action.GetParameterValues("remove");
+            List<string> add = action.GetParameterValues("add");
+            List<string> remove = action.GetParameterValues("remove");
 
             add.ForEach(a => Cache.Instance.IgnoreTargets.Add(a.Trim()));
             remove.ForEach(a => Cache.Instance.IgnoreTargets.Remove(a.Trim()));
@@ -589,7 +587,7 @@ namespace Questor.Modules
                     Cache.Instance.IsMissionPocketDone = true;
 
                     // We do not switch to "done" status if we still have drones out
-                    if (Cache.Instance.ActiveDrones.Count() > 0)
+                    if (Cache.Instance.ActiveDrones.Any())
                         return;
 
                     // Add bookmark (before we're done)
@@ -669,8 +667,8 @@ namespace Questor.Modules
                         _pocketActions.Add(new Action {State = ActionState.ClearPocket});
 
                         // Is there a gate?
-                        var gates = Cache.Instance.EntitiesByName("Acceleration Gate");
-                        if (gates != null && gates.Count() > 0)
+                        IEnumerable<EntityCache> gates = Cache.Instance.EntitiesByName("Acceleration Gate");
+                        if (gates.Any())
                         {
                             // Activate it (Activate action also moves to the gate)
                             _pocketActions.Add(new Action {State = ActionState.Activate});
@@ -684,12 +682,12 @@ namespace Questor.Modules
                     }
 
                     Logging.Log("AnomalyController: Pocket loaded, executing the following actions");
-                    foreach (var a in _pocketActions)
+                    foreach (Action a in _pocketActions)
                         Logging.Log("AnomalyController: Action." + a);
-					
-					if (Cache.Instance.OrbitDistance != Settings.Instance.OrbitDistance)
-						Logging.Log("AnomalyController: Using custom orbit distance: " + Cache.Instance.OrbitDistance);
-						
+
+                    if (Cache.Instance.OrbitDistance != Settings.Instance.OrbitDistance)
+                        Logging.Log("AnomalyController: Using custom orbit distance: " + Cache.Instance.OrbitDistance);
+
                     // Reset pocket information
                     _currentAction = 0;
                     Cache.Instance.IsMissionPocketDone = false;
@@ -708,8 +706,8 @@ namespace Questor.Modules
                         break;
                     }
 
-                    var action = _pocketActions[_currentAction];
-                    var currentAction = _currentAction;
+                    Action action = _pocketActions[_currentAction];
+                    int currentAction = _currentAction;
                     PerformAction(action);
 
                     if (currentAction != _currentAction)
@@ -728,7 +726,7 @@ namespace Questor.Modules
                     break;
 
                 case AnomalyControllerState.NextPocket:
-                    var distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
+                    double distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
                     if (distance > (int)Distance.NextPocketDistance)
                     {
                         Logging.Log("AnomalyController: We've moved to the next Pocket [" + Math.Round(distance/1000,0) + "k away]");
@@ -747,9 +745,9 @@ namespace Questor.Modules
                     break;
             }
 
-            var newX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
-            var newY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
-            var newZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
+            double newX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
+            double newY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
+            double newZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
             // For some reason x/y/z returned 0 sometimes
             if (newX != 0 && newY != 0 && newZ != 0)

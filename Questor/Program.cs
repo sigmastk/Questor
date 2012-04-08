@@ -8,10 +8,11 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.XPath;
 using System.Reflection;
 using System.Xml.Linq;
 using System.IO;
@@ -21,7 +22,6 @@ using Mono.Options;
 namespace Questor
 {
     using global::Questor.Modules;
-    using LavishScriptAPI;
     using DirectEve;
 
     static class Program
@@ -41,17 +41,16 @@ namespace Questor
         private static int _maxRuntime;
         private static bool _chantlingScheduler;
 
-        public static DateTime _stopTime;
-        private static DateTime _scheduledstartTime;
-        public static DateTime _scheduledstopTime;
-        private static double minutesToStart;
+        public static DateTime StopTime;
+        public static DateTime ScheduledstopTime;
+        private static double _minutesToStart;
         private static bool _readyToStarta;
         private static bool _readyToStart;
 
-        static System.Timers.Timer _timer = new System.Timers.Timer();
-        private static int _randStartDelay = 30; //Random startup delay in minutes
-        private static Random _r = new Random();
-        public static bool stopTimeSpecified = false;
+        static readonly System.Timers.Timer Timer = new System.Timers.Timer();
+        private const int RandStartDelay = 30; //Random startup delay in minutes
+        private static readonly Random R = new Random();
+        public static bool StopTimeSpecified = false;
 
         private static DateTime _lastPulse;
         private static DateTime _startTime;
@@ -79,28 +78,21 @@ namespace Questor
         static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
-            var p = new OptionSet() {
+            var p = new OptionSet
+            {
                 "Usage: questor [OPTIONS]",
                 "Run missions and make uber ISK.",
                 "",
                 "Options:",
-                { "u|user=", "the {USER} we are logging in as.",
-                v => _username = v },
-                { "p|password=", "the user's {PASSWORD}.",
-                v => _password = v },
-                { "c|character=", "the {CHARACTER} to use.",
-                v => _character = v },
-                { "s|script=", "a {SCRIPT} file to execute before login.",
-                v => _scriptFile = v },
-                { "l|login", "login only and exit.",
-                v => _loginOnly = v != null },
-                { "r|runtime=", "Quit Questor after {RUNTIME} minutes.",
-                v => _maxRuntime = Int32.Parse(v) },
-                { "x|chantling", "use chantling's scheduler",
-                v => _chantlingScheduler = v != null },
-                { "h|help", "show this message and exit",
-                v => _showHelp = v != null },
-                };
+                {"u|user=", "the {USER} we are logging in as.", v => _username = v},
+                {"p|password=", "the user's {PASSWORD}.", v => _password = v},
+                {"c|character=", "the {CHARACTER} to use.", v => _character = v},
+                {"s|script=", "a {SCRIPT} file to execute before login.", v => _scriptFile = v},
+                {"l|login", "login only and exit.", v => _loginOnly = v != null},
+                {"r|runtime=", "Quit Questor after {RUNTIME} minutes.", v => _maxRuntime = Int32.Parse(v)},
+                {"x|chantling", "use chantling's scheduler", v => _chantlingScheduler = v != null},
+                {"h|help", "show this message and exit", v => _showHelp = v != null}
+            };
 
             List<string> extra;
             try
@@ -119,7 +111,7 @@ namespace Questor
 
             if (_showHelp)
             {
-                System.IO.StringWriter sw = new System.IO.StringWriter();
+                var sw = new StringWriter();
                 p.WriteOptionDescriptions(sw);
                 Logging.Log(sw.ToString());
                 return;
@@ -133,41 +125,41 @@ namespace Questor
 
             if (_chantlingScheduler && !string.IsNullOrEmpty(_character))
             {
-                var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 _character = _character.Replace("\"", "");  // strip quotation marks if any are present
 
                 CharSchedules = new List<CharSchedule>();
-                var values = XDocument.Load(Path.Combine(path, "Schedules.xml"));
-                foreach (var value in values.Root.Elements("char"))
-                    CharSchedules.Add(new CharSchedule(value));
+                XDocument values = XDocument.Load(Path.Combine(path, "Schedules.xml"));
+                if (values.Root != null)
+                    foreach (XElement value in values.Root.Elements("char"))
+                        CharSchedules.Add(new CharSchedule(value));
 
-                var _schedule = CharSchedules.FirstOrDefault(v => v.Name == _character);
-                if (_schedule == null)
+                CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.Name == _character);
+                if (schedule == null)
                 {
                     Logging.Log("[Startup] Error - character not found!");
                     return;
                 }
                 else
                 {
-                    Logging.Log("[Startup] User: " + _schedule.User + " PW: " + _schedule.PW + " Name: " + _schedule.Name + " Start: " + _schedule.Start + " Stop: " +
-                             _schedule.Stop + " RunTime: " + _schedule.RunTime);
-                    if (_schedule.User == null || _schedule.PW == null)
+                    Logging.Log("[Startup] User: " + schedule.User + " PW: " + schedule.PW + " Name: " + schedule.Name + " Start: " + schedule.Start + " Stop: " +
+                             schedule.Stop + " RunTime: " + schedule.RunTime);
+                    if (schedule.User == null || schedule.PW == null)
                     {
                         Logging.Log("[Startup] Error - Login details not specified in Schedules.xml!");
                         return;
                     }
                     else
                     {
-                        _username = _schedule.User;
-                        _password = _schedule.PW;
+                        _username = schedule.User;
+                        _password = schedule.PW;
                     }
-                    _startTime = _schedule.Start;
+                    _startTime = schedule.Start;
 
-                    if (_schedule.startTimeSpecified )
-                        _startTime = _startTime.AddSeconds((double)(_r.Next(0, (_randStartDelay * 60))));
-                        _scheduledstartTime = _schedule.Start;
-                        _scheduledstopTime = _schedule.Stop;
-                        _stopTime = _schedule.Stop;
+                    if (schedule.StartTimeSpecified )
+                        _startTime = _startTime.AddSeconds(R.Next(0, (RandStartDelay * 60)));
+                        ScheduledstopTime = schedule.Stop;
+                        StopTime = schedule.Stop;
 
                         //if ((DateTime.Now > _scheduledstopTime))
                         //{
@@ -175,55 +167,53 @@ namespace Questor
                         //	_readyToStarta = false;
                         //}
                         if ((DateTime.Now > _startTime))
-						{
-							if ((DateTime.Now.Subtract( _startTime).TotalMinutes < 1200 )) //if we're less than x hours past start time, start now
-							{
-								_startTime = DateTime.Now;
-								_readyToStarta = true;
-							}
-							else
-								_startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
-						}
-						else
-							if ((_startTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
-							{
-								_startTime = DateTime.Now;
-								_readyToStarta = true;
-							}
+                        {
+                            if ((DateTime.Now.Subtract( _startTime).TotalMinutes < 1200 )) //if we're less than x hours past start time, start now
+                            {
+                                _startTime = DateTime.Now;
+                                _readyToStarta = true;
+                            }
+                            else
+                                _startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
+                        }
+                        else
+                            if ((_startTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
+                            {
+                                _startTime = DateTime.Now;
+                                _readyToStarta = true;
+                            }
 
-						if (_stopTime < _startTime)
-							_stopTime = _stopTime.AddDays(1);
+                        if (StopTime < _startTime)
+                            StopTime = StopTime.AddDays(1);
 
-						if (_schedule.RunTime > 0) //if runtime is specified, overrides stop time
-							_stopTime = _startTime.AddHours(_schedule.RunTime);
+                        if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
+                            StopTime = _startTime.AddHours(schedule.RunTime);
 
-						string _stopTimeText = "No stop time specified";
-						stopTimeSpecified = _schedule.stopTimeSpecified;
-						if (stopTimeSpecified)
-							_stopTimeText = _stopTime.ToString();
+                        string stopTimeText = "No stop time specified";
+                        StopTimeSpecified = schedule.StopTimeSpecified;
+                        if (StopTimeSpecified)
+                            stopTimeText = StopTime.ToString(CultureInfo.InvariantCulture);
 
-						Logging.Log("[Startup] Start Time: " + _startTime + " - Stop Time: " + _stopTimeText);
+                        Logging.Log("[Startup] Start Time: " + _startTime + " - Stop Time: " + stopTimeText);
 
-						if (!_readyToStarta)
-						{
-							minutesToStart = _startTime.Subtract(DateTime.Now).TotalMinutes;
-							Logging.Log("[Startup] Starting at " + _startTime + ". " + String.Format("{0:0.##}", minutesToStart) + " minutes to go.");
-							_timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
-							if (minutesToStart > 0)
-								_timer.Interval = (int)(minutesToStart * 60000);
-							else
-								_timer.Interval = 1000;
-							_timer.Enabled = true;
-							_timer.Start();
-
-						}
-						else
-						{
-							_readyToStart = true;
-							Logging.Log("[Startup] Already passed start time.  Starting in 15 seconds.");
+                        if (!_readyToStarta)
+                        {
+                            _minutesToStart = _startTime.Subtract(DateTime.Now).TotalMinutes;
+                            Logging.Log("[Startup] Starting at " + _startTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.");
+                            Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
+                            if (_minutesToStart > 0)
+                                Timer.Interval = (int)(_minutesToStart * 60000);
+                            else
+                                Timer.Interval = 1000;
+                            Timer.Enabled = true;
+                            Timer.Start();
+                        }
+                        else
+                        {
+                            _readyToStart = true;
+                            Logging.Log("[Startup] Already passed start time.  Starting in 15 seconds.");
                             System.Threading.Thread.Sleep(15000);
-						}
-					
+                        }
                 }
 
                 _directEve = new DirectEve();
@@ -244,8 +234,6 @@ namespace Questor
                 _directEve = new DirectEve();
                 _directEve.OnFrame += OnFrame;
 
-                var started = DateTime.Now;
-
                 // Sleep until we're done
                 while (!_done)
                 {
@@ -263,19 +251,28 @@ namespace Questor
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            Application.Run(new QuestorfrmMain());
         }
 
         static void OnFrame(object sender, EventArgs e)
         {
             if (!_readyToStart)
+            {
+                //Logging.Log("if (!_readyToStart) then return");
                 return;
+            }
 
             if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta)
+            {
+                //Logging.Log("if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return");
                 return;
+            }
 
             if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay)
+            {
+                //Logging.Log("if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
                 return;
+            }
 
             _lastPulse = DateTime.Now;
 
@@ -426,7 +423,7 @@ namespace Questor
 
             if (_directEve.Login.AtLogin)
             {
-                if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 60)
+                if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 30)
                 {
                     Logging.Log("[Startup] Login account [" + _username + "]");
                     _directEve.Login.Login(_username, _password);
@@ -438,12 +435,12 @@ namespace Questor
 
             if (_directEve.Login.AtCharacterSelection && _directEve.Login.IsCharacterSelectionReady)
             {
-                if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 90)
+                if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 45)
                 {
-                    foreach (var slot in _directEve.Login.CharacterSlots)
+                    foreach (DirectLoginSlot slot in _directEve.Login.CharacterSlots)
                     {
-                        if (slot.CharId.ToString() != _character && string.Compare(slot.CharName, _character, true) != 0)
-                            continue;
+                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != _character && String.Compare(slot.CharName, _character, System.StringComparison.OrdinalIgnoreCase) != 0)
+                                continue;
 
                         Logging.Log("[Startup] Activating character [" + slot.CharName + "]");
                         slot.Activate();
@@ -456,7 +453,7 @@ namespace Questor
 
         static void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
         {
-            _timer.Stop();
+            Timer.Stop();
             Logging.Log("[Startup] Timer elapsed.  Starting now.");
             _readyToStart = true;
             _readyToStarta = true;

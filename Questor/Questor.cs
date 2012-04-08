@@ -7,62 +7,66 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
+
+using System.Collections.Generic;
+using System.Globalization;
+
 namespace Questor
 {
     using System;
-    using System.Collections.Generic;
+    //using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
+    //using System.Reflection;
     using DirectEve;
     using global::Questor.Modules;
     using global::Questor.Storylines;
     using LavishScriptAPI;
-    using System.Windows.Forms;
+    //using System.Windows.Forms;
 
     public class Questor
     {
-        private frmMain m_Parent;
-        private AgentInteraction _agentInteraction;
-        private Arm _arm;
-        private SwitchShip _switch;
-        private Combat _combat;
-        private CourierMission _courier;
-        private LocalWatch _localwatch;
-        private ScanInteraction _scanInteraction;
-        private Defense _defense;
-        private DirectEve _directEve;
-        private Drones _drones;
+        private readonly QuestorfrmMain m_Parent;
+        private readonly AgentInteraction _agentInteraction;
+        private readonly Arm _arm;
+        private readonly SwitchShip _switch;
+        private readonly Combat _combat;
+        private readonly CourierMission _courier;
+        private readonly LocalWatch _localwatch;
+        private readonly ScanInteraction _scanInteraction;
+        private readonly Defense _defense;
+        private readonly DirectEve _directEve;
+        private readonly Drones _drones;
 
         private DateTime _lastPulse;
-        private MissionController _missionController;
-        private Panic _panic;
-        private Storyline _storyline;
-        private Cleanup _cleanup;
-        private Statistics _statistics;
+        private readonly MissionController _missionController;
+        private readonly Panic _panic;
+        private readonly Storyline _storyline;
+        private readonly Cleanup _cleanup;
+        private readonly Statistics _statistics;
 
         //private Scoop _scoop;
-        private Salvage _salvage;
-        private Traveler _traveler;
-        private UnloadLoot _unloadLoot;
+        private readonly Salvage _salvage;
+        private readonly Traveler _traveler;
+        private readonly UnloadLoot _unloadLoot;
 
-        public DateTime _lastFrame;
-        public DateTime _lastAction;
-        private DateTime _questorStarted;
-        private Random _random;
+        public DateTime LastFrame;
+        public DateTime LastAction;
+        private readonly DateTime _questorStarted;
+        private readonly Random _random;
         private int _randomDelay;
 
         private double _lastX;
         private double _lastY;
         private double _lastZ;
-        private bool _GatesPresent;
-        private bool first_start = true;
-        public  bool panicstatereset = false;
+        private bool _gatesPresent;
+        private bool _firstStart = true;
+        public  bool Panicstatereset = false;
 
-        DateTime nextAction = DateTime.Now;
+        //DateTime _nextAction = DateTime.Now;
 
-        public Questor(frmMain form1)
+        public Questor(QuestorfrmMain form1)
         {
             m_Parent = form1;
             _lastPulse = DateTime.MinValue;
@@ -96,9 +100,9 @@ namespace Questor
             _directEve = new DirectEve();
             Cache.Instance.DirectEve = _directEve;
 
-            Cache.Instance.StopTimeSpecified = Program.stopTimeSpecified;
+            Cache.Instance.StopTimeSpecified = Program.StopTimeSpecified;
             Cache.Instance.MaxRuntime = Program.maxRuntime;
-            Cache.Instance.StopTime = Program._stopTime;
+            Cache.Instance.StopTime = Program.StopTime;
             Cache.Instance.StartTime = Program.startTime;
             _questorStarted = DateTime.Now;
 
@@ -108,28 +112,16 @@ namespace Questor
         public QuestorState State { get; set; }
 
         public bool Paused { get; set; }
-        public bool ValidSettings { get; set; }
+        private bool ValidSettings { get; set; }
         public bool ExitWhenIdle { get; set; }
         //public bool LogPathsNotSetupYet = true;
-        public bool CloseQuestorCMDUplink = true;
+        private bool _closeQuestorCMDUplink = true;
         public bool CloseQuestorflag = true;
-        public DateTime _CloseQuestorDelay { get; set; }
-        private bool CloseQuestor10SecWarningDone = false;
+        private DateTime CloseQuestorDelay { get; set; }
+        private bool _closeQuestor10SecWarningDone = false;
 
         public string CharacterName { get; set; }
 
-        // Statistics information
-        //public DateTime StartedMission { get; set; }
-        //public DateTime FinishedMission { get; set; }
-        //public DateTime StartedSalvaging { get; set; }
-        //public DateTime FinishedSalvaging { get; set; }
-
-        //public string Mission { get; set; }
-        //public double LootValue { get; set; }
-        //public int LoyaltyPoints { get; set; }
-        //public int LostDrones { get; set; }
-        //public double AmmoValue { get; set; }
-        //public double AmmoConsumption { get; set; }
 
         public void SettingsLoaded(object sender, EventArgs e)
         {
@@ -155,7 +147,7 @@ namespace Questor
                 ValidSettings = false;
             }
 
-            var agent = Cache.Instance.DirectEve.GetAgentByName(Cache.Instance.CurrentAgent);
+            DirectAgent agent = Cache.Instance.DirectEve.GetAgentByName(Cache.Instance.CurrentAgent);
 
             if (agent == null || !agent.IsValid)
             {
@@ -216,10 +208,10 @@ namespace Questor
             // Invalid settings, quit while we're ahead
             if (!ValidSettings)
             {
-                if (DateTime.Now.Subtract(_lastAction).TotalSeconds < (int)Time.ValidateSettings_seconds) //default is a 15 second interval
+                if (DateTime.Now.Subtract(LastAction).TotalSeconds < (int)Time.ValidateSettings_seconds) //default is a 15 second interval
                 {
                     ValidateSettings();
-                    _lastAction = DateTime.Now;
+                    LastAction = DateTime.Now;
                 }
                 return;
             }
@@ -253,8 +245,8 @@ namespace Questor
                     Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
                     // get the physical mem usage
-                    Cache.Instance.totalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
-                    Logging.Log("Questor: EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.totalMegaBytesOfMemoryUsed + " MB");
+                    Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+                    Logging.Log("Questor: EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB");
                     Cache.Instance.SessionIskGenerated = 0;
                     Cache.Instance.SessionLootGenerated = 0;
                     Cache.Instance.SessionLPGenerated = 0;
@@ -280,7 +272,7 @@ namespace Questor
                             line += Cache.Instance.SessionState + ";";               //SessionState
                             line += "" + ";";                                        //LastMission
                             line += Cache.Instance.DirectEve.Me.Wealth + ";";        //WalletBalance
-                            line += Cache.Instance.totalMegaBytesOfMemoryUsed + ";"; //MemoryUsage
+                            line += Cache.Instance.TotalMegaBytesOfMemoryUsed + ";"; //MemoryUsage
                             line += "Starting" + ";";                                //Reason
                             line += ";";                                             //IskGenerated
                             line += ";";                                             //LootGenerated
@@ -307,25 +299,25 @@ namespace Questor
                     Cache.Instance._lastWalletCheck = DateTime.Now;
                     //Logging.Log("[Questor] Wallet Balance Debug Info: lastknowngoodconnectedtime = " + Settings.Instance.lastKnownGoodConnectedTime);
                     //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.Now - lastknowngoodconnectedtime = " + DateTime.Now.Subtract(Settings.Instance.lastKnownGoodConnectedTime).TotalSeconds);
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.lastKnownGoodConnectedTime).TotalMinutes) > 1)
+                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
                     {
-                        Logging.Log(String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes.", Math.Round(DateTime.Now.Subtract(Cache.Instance.lastKnownGoodConnectedTime).TotalMinutes, 0)));
+                        Logging.Log(String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes.", Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)));
                     }
 
                     //Settings.Instance.walletbalancechangelogoffdelay = 2;  //used for debugging purposes
                     //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.lastKnownGoodConnectedTime);
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.lastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.walletbalancechangelogoffdelay)
+                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.Walletbalancechangelogoffdelay)
                     {
                         if (State == QuestorState.Salvage)
                         {
-                            Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                            Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         }
                         else
                         {
                             if (Cache.Instance.MyWalletBalance != Cache.Instance.DirectEve.Me.Wealth)
                             {
-                                Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                                Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                             }
                         }
@@ -333,19 +325,19 @@ namespace Questor
                     else
                     {
 
-                        Logging.Log(String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.Now.Subtract(Cache.Instance.lastKnownGoodConnectedTime).TotalMinutes, 0)));
-                        Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.walletbalancechangelogoffdelay + "min";
+                        Logging.Log(String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)));
+                        Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.Walletbalancechangelogoffdelay + "min";
 
-                        if (Settings.Instance.walletbalancechangelogoffdelayLogofforExit == "logoff")
+                        if (Settings.Instance.WalletbalancechangelogoffdelayLogofforExit == "logoff")
                         {
-                            Logging.Log("Questor: walletbalancechangelogoffdelayLogofforExit is set to: " + Settings.Instance.walletbalancechangelogoffdelayLogofforExit);
+                            Logging.Log("Questor: walletbalancechangelogoffdelayLogofforExit is set to: " + Settings.Instance.WalletbalancechangelogoffdelayLogofforExit);
                             Cache.Instance.CloseQuestorCMDLogoff = true;
                             Cache.Instance.CloseQuestorCMDExitGame = false;
                             Cache.Instance.SessionState = "LoggingOff";
                         }
-                        if (Settings.Instance.walletbalancechangelogoffdelayLogofforExit == "exit")
+                        if (Settings.Instance.WalletbalancechangelogoffdelayLogofforExit == "exit")
                         {
-                            Logging.Log("Questor: walletbalancechangelogoffdelayLogofforExit is set to: " + Settings.Instance.walletbalancechangelogoffdelayLogofforExit);
+                            Logging.Log("Questor: walletbalancechangelogoffdelayLogofforExit is set to: " + Settings.Instance.WalletbalancechangelogoffdelayLogofforExit);
                             Cache.Instance.CloseQuestorCMDLogoff = false;
                             Cache.Instance.CloseQuestorCMDExitGame = true;
                             Cache.Instance.SessionState = "Exiting";
@@ -371,7 +363,7 @@ namespace Questor
             }
             if (Paused)
             {
-                Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 Cache.Instance.GotoBaseNow = false;
                 Cache.Instance.SessionState = string.Empty;
@@ -385,7 +377,7 @@ namespace Questor
                     State = QuestorState.CloseQuestor;
                 }
             }
-            if (Cache.Instance.GotoBaseNow == true)
+            if (Cache.Instance.GotoBaseNow)
             {
                 if (State != QuestorState.GotoBase)
                 {
@@ -414,10 +406,10 @@ namespace Questor
 
                 if (Settings.Instance.DebugStates)
                     Logging.Log("State = " + State);
-                if (panicstatereset)
+                if (Panicstatereset)
                 {
                     _panic.State = PanicState.Normal;
-                    panicstatereset = false;
+                    Panicstatereset = false;
                 }
             }
             else if (_panic.State == PanicState.Resume)
@@ -511,52 +503,61 @@ namespace Questor
                     {
                         // Questor does not handle in space starts very well, head back to base to try again
                         Logging.Log("Questor: Started questor while in space, heading back to base in 15 seconds");
-                        _lastAction = DateTime.Now;
+                        LastAction = DateTime.Now;
                         if (State == QuestorState.Idle)
                         {
                             State = QuestorState.DelayedGotoBase;
                         }
                         break;
                     }
-                    // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
-                    if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
+
+                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions") || (Settings.Instance.CharacterMode.ToLower() == "dps")) //only write combat mission logs is we are actually doing missions
                     {
-                        if (!Statistics.Instance.MissionLoggingCompleted)
+                        // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
+                        if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
                         {
-                            Cache.Instance.mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
-                            if (Cache.Instance.Agent.LoyaltyPoints == -1) //if this agent has no loyalty points associated then you didn't complete a mission yet.
+                            if (!Statistics.Instance.MissionLoggingCompleted)
                             {
-                                Logging.Log("We do not have loyalty points with the current agent yet, still -1");
-                                return;
+                                Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                                if (Cache.Instance.Agent.LoyaltyPoints == -1) //if this agent has no loyalty points associated then you didn't complete a mission yet.
+                                {
+                                    Logging.Log("We do not have loyalty points with the current agent yet, still -1");
+                                    return;
+                                }
+                                Statistics.Instance.MissionLoggingStarted = false;
+                                if (State == QuestorState.Idle)
+                                {
+                                    State = QuestorState.MissionStatistics;
+                                }
+                                break;
                             }
-                            Statistics.Instance.MissionLoggingStarted = false;
-                            if (State == QuestorState.Idle)
-                            {
-                                State = QuestorState.MissionStatistics;
-                            }
-                            break;
                         }
                     }
+                    else
+                    {
+                        Logging.Log("Character Mode is [" + Settings.Instance.CharacterMode + "] no need to write any mission stats");
+                    }
+
 
                     if (Settings.Instance.AutoStart)
                     {
-                        // Don't start missions hour before downtime
+                        // Don't start a new action an hour before downtime
                         if (DateTime.UtcNow.Hour == 10)
                             break;
 
-                        // Don't start missions in downtime
+                        // Don't start a new action near downtime
                         if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute < 15)
                             break;
 
                         if (Settings.Instance.RandomDelay > 0 || Settings.Instance.MinimumDelay > 0)
                         {
                             _randomDelay = (Settings.Instance.RandomDelay > 0 ? _random.Next(Settings.Instance.RandomDelay) : 0) + Settings.Instance.MinimumDelay;
-                            _lastAction = DateTime.Now;
+                            LastAction = DateTime.Now;
                             if (State == QuestorState.Idle)
                             {
                                 State = QuestorState.DelayedStart;
                             }
-                            Logging.Log("Questor: Random mission start delay of [" + _randomDelay + "] seconds");
+                            Logging.Log("Questor: Random start delay of [" + _randomDelay + "] seconds");
                             return;
                         }
                         else
@@ -571,7 +572,7 @@ namespace Questor
                     break;
 
                 case QuestorState.DelayedStart:
-                    if (DateTime.Now.Subtract(_lastAction).TotalSeconds < _randomDelay)
+                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < _randomDelay)
                         break;
 
                     _storyline.Reset();
@@ -582,45 +583,55 @@ namespace Questor
                     break;
 
                 case QuestorState.MissionStatistics:
-                    
-                    // Start _statistics.ProcessState
-                    // Description: Writes the mission log(s), when necessary. 
-                    //
-                    watch.Reset();
-                    watch.Start();
-                    _statistics.State = StatisticsState.MissionLog;
-                    if (Settings.Instance.DebugStates | Statistics.Instance.DebugMissionStatistics)
-                        Logging.Log("statistics.State = " + _statistics.State);
-                    _statistics.ProcessState();
-                    watch.Stop();
-                    if (Settings.Instance.DebugPerformance | Statistics.Instance.DebugMissionStatistics)
-                        Logging.Log("statistics.ProcessState took " + watch.ElapsedMilliseconds + "ms");
-                    if (Settings.Instance.DebugStates | Statistics.Instance.DebugMissionStatistics)
-                        Logging.Log("statistics.State = " + _statistics.State);
-                    // Done
-                    // Statistics State: ProcessState
-                    if (DateTime.Now.Subtract(Statistics.Instance.MissionLoggingStartedTimestamp).TotalSeconds > 30)
+                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions") || (Settings.Instance.CharacterMode.ToLower() == "dps")) //only write combat mission logs is we are actually doing missions
                     {
-                        Statistics.Instance.MissionLoggingCompleted = true; //not technically true but if we waited this long it isn't going to happen
-                        Logging.Log("Questor: statistics: Mission Logging took too long to complete, over [ " + "30" + " ] seconds: aborting logging.");
+                        // Start _statistics.ProcessState
+                        // Description: Writes the mission log(s), when necessary. 
+                        //
+                        watch.Reset();
+                        watch.Start();
+                        _statistics.State = StatisticsState.MissionLog;
+                        if (Settings.Instance.DebugStates | Statistics.Instance.DebugMissionStatistics)
+                            Logging.Log("statistics.State = " + _statistics.State);
+                        _statistics.ProcessState();
+                        watch.Stop();
+                        if (Settings.Instance.DebugPerformance | Statistics.Instance.DebugMissionStatistics)
+                            Logging.Log("statistics.ProcessState took " + watch.ElapsedMilliseconds + "ms");
+                        if (Settings.Instance.DebugStates | Statistics.Instance.DebugMissionStatistics)
+                            Logging.Log("statistics.State = " + _statistics.State);
+                        // Done
+                        // Statistics State: ProcessState
+                        if (DateTime.Now.Subtract(Statistics.Instance.MissionLoggingStartedTimestamp).TotalSeconds > 30)
+                        {
+                            Statistics.Instance.MissionLoggingCompleted = true; //not technically true but if we waited this long it isn't going to happen
+                            Logging.Log("Questor: statistics: Mission Logging took too long to complete, over [ " + "30" + " ] seconds: aborting logging.");
+                            if (State == QuestorState.MissionStatistics)
+                            {
+                                State = QuestorState.Idle;
+                            }
+                        }
+
+                        if (Statistics.Instance.MissionLoggingCompleted)
+                        {
+                            if (State == QuestorState.MissionStatistics)
+                            {
+                                State = QuestorState.Idle;
+                            }
+                        }
+                    }
+                    else
+                    {
                         if (State == QuestorState.MissionStatistics)
                         {
+                            Statistics.Instance.MissionLoggingCompleted = true; //not technically true but if we waited this long it isn't going to happen
+                            Logging.Log("Character Mode is [" + Settings.Instance.CharacterMode + "] no need to write any mission stats");
                             State = QuestorState.Idle;
                         }
                     }
-
-                    if (Statistics.Instance.MissionLoggingCompleted)
-                    {
-                        if (State == QuestorState.MissionStatistics)
-                        {
-                            State = QuestorState.Idle;
-                        }
-                    }
-
                     break;
 
                 case QuestorState.DelayedGotoBase:
-                    if (DateTime.Now.Subtract(_lastAction).TotalSeconds < (int)Time.DelayedGotoBase_seconds)
+                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < (int)Time.DelayedGotoBase_seconds)
                         break;
 
                     Logging.Log("Questor: Heading back to base");
@@ -655,27 +666,27 @@ namespace Questor
                     }
 
                 case QuestorState.Start:
-                    if (first_start && Settings.Instance.MultiAgentSupport)
+                    if (Settings.Instance.CharacterMode.ToLower() == "salvage")
+                    {
+                        if (State == QuestorState.Start)
+                        {
+                            State = QuestorState.BeginAfterMissionSalvaging;
+                        }
+                        break;
+                    }
+                    if (_firstStart && Settings.Instance.MultiAgentSupport)
                     {
                         //if you are in wrong station and is not first agent
                         if (State == QuestorState.Start)
                         {
                             State = QuestorState.Switch;
                         }
-                        first_start = false;
+                        _firstStart = false;
                         break;
                     }
                     Cache.Instance.OpenWrecks = false;
                     if (_agentInteraction.State == AgentInteractionState.Idle)
                     {
-                        if (Settings.Instance.CharacterMode.ToLower() == "salvage")
-                        {
-                            if (State == QuestorState.Start)
-                            {
-                                State = QuestorState.BeginAfterMissionSalvaging;
-                            }
-                            break;
-                        }
                         Cache.Instance.Wealth = Cache.Instance.DirectEve.Me.Wealth;
                         
                         if (Settings.Instance.EnableStorylines && _storyline.HasStoryline())
@@ -700,12 +711,12 @@ namespace Questor
 
                     if (_agentInteraction.State == AgentInteractionState.Done)
                     {
-                        Cache.Instance.mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
-                        if (Cache.Instance.mission != null)
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                        if (Cache.Instance.Mission != null)
                         {
                             // Update loyalty points again (the first time might return -1)
                             Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
-                            Cache.Instance.MissionName = Cache.Instance.mission.Name;
+                            Cache.Instance.MissionName = Cache.Instance.Mission.Name;
                         }
 
                         _agentInteraction.State = AgentInteractionState.Idle;
@@ -774,7 +785,7 @@ namespace Questor
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm: Armstate.NotEnoughAmmo");
                         _arm.State = ArmState.Idle;
@@ -788,7 +799,7 @@ namespace Questor
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm: Armstate.NotEnoughDrones");
                         _arm.State = ArmState.Idle;
@@ -801,7 +812,7 @@ namespace Questor
                     if (_arm.State == ArmState.Done)
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _arm.State = ArmState.Idle;
                         _drones.State = DroneState.WaitingForTargets;
@@ -827,8 +838,8 @@ namespace Questor
                 case QuestorState.LocalWatch:
                     if (Settings.Instance.UseLocalWatch)
                     {
-                        Cache.Instance._lastLocalWatchAction = DateTime.Now; 
-                        if (Cache.Instance.Local_safe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
+                        Cache.Instance._lastLocalWatchAction = DateTime.Now;
+                        if (Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                         {
                             Logging.Log("Questor.LocalWatch: local is clear");
                             if (State == QuestorState.LocalWatch)
@@ -843,7 +854,7 @@ namespace Questor
                             {
                                 State = QuestorState.WaitingforBadGuytoGoAway;
                             } 
-                            Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                            Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         }
                     }
@@ -857,7 +868,7 @@ namespace Questor
                     break;
 
                 case QuestorState.WaitingforBadGuytoGoAway:
-                    Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     if (DateTime.Now.Subtract(Cache.Instance._lastLocalWatchAction).TotalMinutes < (int)Time.WaitforBadGuytoGoAway_minutes)
                         break;
@@ -868,11 +879,11 @@ namespace Questor
                     break;
 
                 case QuestorState.WarpOutStation:
-                    var _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).FirstOrDefault();
-                    //var _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
-                    var _solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
+                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    //DirectBookmark _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
+                    long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
-                    if (_bookmark == null)
+                    if (warpOutBookmark == null)
                     {
                         Logging.Log("WarpOut: No Bookmark");
                         if (State == QuestorState.WarpOutStation)
@@ -880,12 +891,12 @@ namespace Questor
                             State = QuestorState.GotoMission;
                         }
                     }
-                    else if (_bookmark.LocationId == _solarid)
+                    else if (warpOutBookmark.LocationId == solarid)
                     {
                         if (_traveler.Destination == null)
                         {
-                            Logging.Log("WarpOut: Warp at " + _bookmark.Title);
-                            _traveler.Destination = new BookmarkDestination(_bookmark);
+                            Logging.Log("WarpOut: Warp at " + warpOutBookmark.Title);
+                            _traveler.Destination = new BookmarkDestination(warpOutBookmark);
                             Cache.Instance.DoNotBreakInvul = true;
                         }
 
@@ -945,7 +956,7 @@ namespace Questor
                     break;
 
                 case QuestorState.CombatHelper:
-                    Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     _combat.ProcessState();
                     _drones.ProcessState();
@@ -963,8 +974,8 @@ namespace Questor
                     */
                     break;
 
-                case QuestorState.CombatHelper_anomaly:
-                    Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                case QuestorState.CombatHelperAnomaly:
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     _combat.ProcessState();
                     _drones.ProcessState();
@@ -1057,7 +1068,7 @@ namespace Questor
 
                 case QuestorState.GotoBase:
                     // anti bump
-                    var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
                     if (Cache.Instance.InSpace && Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe)) //Clear Warp Scramblers (if any)
                     {
                         _combat.ProcessState();
@@ -1068,13 +1079,12 @@ namespace Questor
                         if (DateTime.Now > Cache.Instance._nextOrbit)
                         {
                             structure.Orbit((int)Distance.SafeDistancefromStructure);
-                            Logging.Log("Questor: GotoBase: We are too close! Initiating Orbit of [" + structure.Name + "] orbiting at [" + Cache.Instance.OrbitDistance + "] so that we don't get stuck on it");
+                            Logging.Log("Questor: GotoBase: We are too close! Initiating Orbit of [" + structure.Name + "] orbiting at [" + (int)Distance.SafeDistancefromStructure + "] so that we don't get stuck on it");
                             Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
                         }
                     }
                     else //if any scramblers have been cleared and we aren't too close to any structures, set destination and warp out 
                     {
-
                         var baseDestination = _traveler.Destination as StationDestination;
                         if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
                             _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
@@ -1085,7 +1095,7 @@ namespace Questor
                         }
                         else
                         {
-                            if (Cache.Instance.InSpace && Cache.Instance.ActiveDrones.Count() > 0 && DateTime.Now > Cache.Instance._nextDroneRecall)
+                            if (Cache.Instance.InSpace && Cache.Instance.ActiveDrones.Any() && DateTime.Now > Cache.Instance._nextDroneRecall)
                             {
                                 Logging.Log("GotoBase: We are not scrambled and will be warping soon: pulling drones");
                                 // Tell the drones module to retract drones
@@ -1101,7 +1111,7 @@ namespace Questor
                         if (_traveler.State == TravelerState.AtDestination)
                         {
                             Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                            Cache.Instance.mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
 
                             if (_missionController.State == MissionControllerState.Error)
                             {
@@ -1110,7 +1120,7 @@ namespace Questor
                                     State = QuestorState.Error;
                                 } 
                             }
-                            else if (_combat.State != CombatState.OutOfAmmo && Cache.Instance.mission != null && Cache.Instance.mission.State == (int)MissionState.Accepted)
+                            else if (_combat.State != CombatState.OutOfAmmo && Cache.Instance.Mission != null && Cache.Instance.Mission.State == (int)MissionState.Accepted)
                             {
                                 if (State == QuestorState.GotoBase)
                                 {
@@ -1135,8 +1145,8 @@ namespace Questor
                     Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
                     // get the physical mem usage (this only runs between missions)
-                    Cache.Instance.totalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
-                    Logging.Log("Questor: EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.totalMegaBytesOfMemoryUsed + " MB");
+                    Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+                    Logging.Log("Questor: EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB");
 
                     // If Questor window not visible, schedule a restart of questor in the uplink so that the GUI will start normally
                     if (!m_Parent.Visible && CloseQuestorflag) //GUI isn't visible and CloseQuestorflag is true, so that his code block only runs once
@@ -1154,10 +1164,10 @@ namespace Questor
                         }
                         return;
                     }
-                    else if (Cache.Instance.totalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) && Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
+                    else if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) && Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
                     {
-                        Logging.Log("Questor: Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.totalMegaBytesOfMemoryUsed + " MB");
-                        Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.totalMegaBytesOfMemoryUsed + " MB";
+                        Logging.Log("Questor: Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB");
+                        Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
                         if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "logoff")
                         {
                             Cache.Instance.CloseQuestorCMDLogoff = true;
@@ -1203,7 +1213,7 @@ namespace Questor
                         Logging.Log("QuestorState.CloseQuestor: Entered Traveler - making sure we will be docked at Home Station");
                     }
                     // anti bump
-                    var structure2 = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.GroupId == (int)Group.SpawnContainer).FirstOrDefault();
+                    EntityCache structure2 = Cache.Instance.Entities.FirstOrDefault(i => i.GroupId == (int)Group.LargeCollidableStructure || i.GroupId == (int)Group.SpawnContainer);
                     if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
                         _combat.ProcessState();
@@ -1261,7 +1271,7 @@ namespace Questor
                             line += Cache.Instance.SessionState + ";";                      // SessionState
                             line += Cache.Instance.MissionName + ";";                                          // LastMission
                             line += ((int)Cache.Instance.DirectEve.Me.Wealth + ";");        // WalletBalance
-                            line += ((int)Cache.Instance.totalMegaBytesOfMemoryUsed + ";"); // MemoryUsage
+                            line += ((int)Cache.Instance.TotalMegaBytesOfMemoryUsed + ";"); // MemoryUsage
                             line += Cache.Instance.ReasonToStopQuestor + ";";               // Reason to Stop Questor
                             line += Cache.Instance.SessionIskGenerated + ";";               // Isk Generated This Session
                             line += Cache.Instance.SessionLootGenerated + ";";              // Loot Generated This Session
@@ -1291,13 +1301,13 @@ namespace Questor
                                     Logging.Log("Questor: you can change this option by setting the wallet and eveprocessmemoryceiling options to use exit instead of logoff: see the settings.xml file");
                                     Logging.Log("Questor: Logging Off eve in 15 seconds.");
                                     CloseQuestorflag = false;
-                                    _CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
+                                    CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
                                 }
-                                if (_CloseQuestorDelay.AddSeconds(-10) < DateTime.Now)
+                                if (CloseQuestorDelay.AddSeconds(-10) < DateTime.Now)
                                 {
                                     Logging.Log("Questor: Exiting eve in 10 seconds");
                                 }
-                                if (_CloseQuestorDelay < DateTime.Now)
+                                if (CloseQuestorDelay < DateTime.Now)
                                 {
                                     Logging.Log("Questor: Exiting eve now.");
                                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdLogOff);
@@ -1317,22 +1327,22 @@ namespace Questor
                                     if (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile) //if configured as true we will use the innerspace profile to restart this session
                                     {
                                         //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkInnerspaceProfile is true");
-                                        if (CloseQuestorCMDUplink)
+                                        if (_closeQuestorCMDUplink)
                                         {
                                             Logging.Log("Questor: We are in station: Starting a timer in the innerspace uplink to restart this innerspace profile session");
                                             LavishScript.ExecuteCommand("uplink exec timedcommand 350 open \\\"${Game}\\\" \\\"${Profile}\\\"");
                                             Logging.Log("Questor: Done: quitting this session so the new innerspace session can take over");
                                             Logging.Log("Questor: Exiting eve in 15 seconds.");
-                                            CloseQuestorCMDUplink = false;
-                                            _CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
+                                            _closeQuestorCMDUplink = false;
+                                            CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
                                         }
-                                        if ((_CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!CloseQuestor10SecWarningDone))
+                                        if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
                                         {
-                                            CloseQuestor10SecWarningDone = true;
+                                            _closeQuestor10SecWarningDone = true;
                                             Logging.Log("Questor: Exiting eve in 10 seconds");
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                         }
-                                        if (_CloseQuestorDelay < DateTime.Now)
+                                        if (CloseQuestorDelay < DateTime.Now)
                                         {
                                             Logging.Log("Questor: Exiting eve now.");
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
@@ -1342,22 +1352,22 @@ namespace Questor
                                     else if (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet) //if configured as true we will use isboxer to restart this session
                                     {
                                         //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkIsboxerProfile is true");
-                                        if (CloseQuestorCMDUplink)
+                                        if (_closeQuestorCMDUplink)
                                         {
                                             Logging.Log("Questor: We are in station: Starting a timer in the innerspace uplink to restart this isboxer character set");
                                             LavishScript.ExecuteCommand("uplink timedcommand 350 runscript isboxer -launch \\\"${ISBoxerCharacterSet}\\\"");
                                             Logging.Log("Questor: Done: quitting this session so the new isboxer session can take over");
                                             Logging.Log("Questor: We are in station: Exiting eve.");
-                                            CloseQuestorCMDUplink = false;
-                                            _CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
+                                            _closeQuestorCMDUplink = false;
+                                            CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
                                         }
-                                        if ((_CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!CloseQuestor10SecWarningDone))
+                                        if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
                                         {
-                                            CloseQuestor10SecWarningDone = true;
+                                            _closeQuestor10SecWarningDone = true;
                                             Logging.Log("Questor: Exiting eve in 10 seconds");
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                         }
-                                        if (_CloseQuestorDelay < DateTime.Now)
+                                        if (CloseQuestorDelay < DateTime.Now)
                                         {
                                             Logging.Log("Questor: Exiting eve now.");
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
@@ -1367,18 +1377,18 @@ namespace Questor
                                     else if (!Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile && !Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet)
                                     {
                                         Logging.Log("Questor: CloseQuestorCMDUplinkInnerspaceProfile and CloseQuestorCMDUplinkIsboxerProfile both false");
-                                        if (CloseQuestorCMDUplink)
+                                        if (_closeQuestorCMDUplink)
                                         {
-                                            CloseQuestorCMDUplink = false;
-                                            _CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
+                                            _closeQuestorCMDUplink = false;
+                                            CloseQuestorDelay = DateTime.Now.AddSeconds((int)Time.CloseQuestorDelayBeforeExit_seconds);
                                         }
-                                        if ((_CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!CloseQuestor10SecWarningDone))
+                                        if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
                                         {
-                                            CloseQuestor10SecWarningDone = true;
+                                            _closeQuestor10SecWarningDone = true;
                                             Logging.Log("Questor: Exiting eve in 10 seconds");
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                         }
-                                        if (_CloseQuestorDelay < DateTime.Now)
+                                        if (CloseQuestorDelay < DateTime.Now)
                                         {
                                             Logging.Log("Questor: Exiting eve now.");
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
@@ -1405,7 +1415,7 @@ namespace Questor
                             // (inelegantly located here so as to avoid the necessity to switch to a combat ship after salvaging)
                             if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                             {
-                                var droneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+                                DirectContainer droneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
                                 if (droneBay.Window == null)
                                 {
                                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
@@ -1415,14 +1425,14 @@ namespace Questor
                                     break;
                                 if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
                                 {
-                                    var drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
+                                    InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
                                     Statistics.Instance.LostDrones = (int)Math.Floor((droneBay.Capacity - droneBay.UsedCapacity) / drone.Volume);
-                                    Logging.Log("DroneStats: Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString());
+                                    Logging.Log("DroneStats: Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString(CultureInfo.InvariantCulture));
 
                                     if (!File.Exists(Settings.Instance.DroneStatslogFile))
                                         File.AppendAllText(Settings.Instance.DroneStatslogFile, "Mission;Number of lost drones\r\n");
-                                    var droneline = Cache.Instance.MissionName + ";";
-                                    droneline += ((int)Statistics.Instance.LostDrones) + ";\r\n";
+                                    string droneline = Cache.Instance.MissionName + ";";
+                                    droneline += Statistics.Instance.LostDrones + ";\r\n";
                                     File.AppendAllText(Settings.Instance.DroneStatslogFile, droneline);
                                     Cache.Instance.DroneStatsWritten = true;
                                 }
@@ -1436,7 +1446,7 @@ namespace Questor
 
                         // Ammo Consumption statistics
                         // Is cargo open?
-                        var cargoship = Cache.Instance.DirectEve.GetShipsCargo();
+                        DirectContainer cargoship = Cache.Instance.DirectEve.GetShipsCargo();
                         if (cargoship.Window == null)
                         {
                             // No, command it to open
@@ -1448,14 +1458,14 @@ namespace Questor
                         if (!cargoship.IsReady)
                             break;
 
-                        var correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
-                        var AmmoCargo = cargoship.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
-                        foreach (var item in AmmoCargo)
+                        IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+                        IEnumerable<DirectItem> ammoCargo = cargoship.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
+                        foreach (DirectItem item in ammoCargo)
                         {
-                            var Ammo1 = Settings.Instance.Ammo.Where(a => a.TypeId == item.TypeId).FirstOrDefault();
-                            var AmmoType = Cache.Instance.InvTypesById[item.TypeId];
-                            Statistics.Instance.AmmoConsumption = (Ammo1.Quantity - item.Quantity);
-                            Statistics.Instance.AmmoValue = ((int?)AmmoType.MedianSell ?? 0) * (int)Statistics.Instance.AmmoConsumption;
+                            Ammo ammo1 = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == item.TypeId);
+                            InvType ammoType = Cache.Instance.InvTypesById[item.TypeId];
+                            Statistics.Instance.AmmoConsumption = (ammo1.Quantity - item.Quantity);
+                            Statistics.Instance.AmmoValue = ((int?)ammoType.MedianSell ?? 0) * Statistics.Instance.AmmoConsumption;
                         }
                         Logging.Log("AgentInteraction: Start Conversation [Complete Mission]");
 
@@ -1510,8 +1520,8 @@ namespace Questor
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _unloadLoot.State = UnloadLootState.Idle;
 
-                        Cache.Instance.mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
-                        if (_combat.State != CombatState.OutOfAmmo && Settings.Instance.AfterMissionSalvaging && Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count > 0 && (Cache.Instance.mission == null || Cache.Instance.mission.State == (int)MissionState.Offered))
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                        if (_combat.State != CombatState.OutOfAmmo && Settings.Instance.AfterMissionSalvaging && Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count > 0 && (Cache.Instance.Mission == null || Cache.Instance.Mission.State == (int)MissionState.Offered))
                         {
                             Statistics.Instance.FinishedMission = DateTime.Now;
                             if (Settings.Instance.SalvageMultpleMissionsinOnePass) // Salvage only after multiple missions have been completed
@@ -1570,7 +1580,7 @@ namespace Questor
 
                 case QuestorState.BeginAfterMissionSalvaging:
                     Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation> 
-                    _GatesPresent = false;
+                    _gatesPresent = false;
                     Cache.Instance.OpenWrecks = true;
                     if (_arm.State == ArmState.Idle)
                         _arm.State = ArmState.SwitchToSalvageShip;
@@ -1580,7 +1590,7 @@ namespace Questor
                     {
                         _arm.State = ArmState.Idle;
 
-                        var bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
+                        DirectBookmark bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
                         if (bookmark == null)
                         {
                             if (State == QuestorState.BeginAfterMissionSalvaging)
@@ -1602,11 +1612,12 @@ namespace Questor
                 case QuestorState.GotoSalvageBookmark:
                     _traveler.ProcessState();
                     string target = "Acceleration Gate";
-                    var targets = Cache.Instance.EntitiesByName(target);
+                    IEnumerable<EntityCache> targets;
+                    Cache.Instance.EntitiesByName(target);
                     if (_traveler.State == TravelerState.AtDestination || GateInSalvage())
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         if (State == QuestorState.GotoSalvageBookmark)
@@ -1622,52 +1633,35 @@ namespace Questor
                     break;
 
                 case QuestorState.Salvage:
-                    var SalvageCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    DirectContainer salvageCargo = Cache.Instance.DirectEve.GetShipsCargo();
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
-                    // Is our cargo window open?
-                    if (SalvageCargo.Window == null)
-                    {
-                        // No, command it to open
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                        break;
-                    }
+                    const int distancetoccheck = (int)Distance.OnGridWithMe;
+                    // is there any NPCs within distancetoconsidertargets?
+                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < distancetoccheck && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
 
-                    if (Settings.Instance.UnloadLootAtStation && SalvageCargo.IsReady && (SalvageCargo.Capacity - SalvageCargo.UsedCapacity) < 100)
+                    if (deadlyNPC != null)
                     {
-                        Logging.Log("Salvage: We are full, go to base to unload");
-                        if (State == QuestorState.Salvage)
-                        {
-                            State = QuestorState.GotoBase;
-                        }
-                        break;
-                    }
-
-                    if (Cache.Instance.UnlootedContainers.Count() == 0)
-                    {
-                        Logging.Log("Salvage: Finished salvaging the room");
-
-                        bool GatesInRoom = GateInSalvage();
-                        var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        // found NPCs that will likely kill out fragile salvage boat!
+                        List<DirectBookmark> missionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        Logging.Log("Salvage: could not be completed because of NPCs left in the mission: deleting salvage bookmarks");
                         do
                         {
                             // Remove all bookmarks from address book
-                            var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.BookmarksOnGridWithMe);
-                            if (!GatesInRoom && _GatesPresent) // if there were gates, but we've gone through them all, delete all bookmarks
-                                bookmark = bookmarks.FirstOrDefault();
-                            else if (GatesInRoom)
+                            DirectBookmark pocketSalvageBookmark = missionSalvageBookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.DirectionalScannerCloseRange);
+                            if (pocketSalvageBookmark == null)
                                 break;
-                            if (bookmark == null)
-                                break;
-
-                            bookmark.Delete();
-                            bookmarks.Remove(bookmark);
+                            else
+                            { 
+                                pocketSalvageBookmark.Delete();
+                                missionSalvageBookmarks.Remove(pocketSalvageBookmark);
+                            }
                         } while (true);
 
-                        if (bookmarks.Count == 0 && !GatesInRoom)
+                        if (!missionSalvageBookmarks.Any())
                         {
-                            Logging.Log("Salvage: We have salvaged all bookmarks, go to base");
+                            Logging.Log("Salvage: could not be completed because of NPCs left in the mission: salvage bookmarks deleted");
                             Cache.Instance.SalvageAll = false;
                             if (State == QuestorState.Salvage)
                             {
@@ -1676,81 +1670,135 @@ namespace Questor
                             }
                             return;
                         }
-                        else
+                    }
+                    else
+                    {
+                        // Is our cargo window open?
+                        if (salvageCargo.Window == null)
                         {
+                            // No, command it to open
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                            break;
+                        }
 
-                            if (!GatesInRoom)
+                        if (Settings.Instance.UnloadLootAtStation && salvageCargo.IsReady && (salvageCargo.Capacity - salvageCargo.UsedCapacity) < 100)
+                        {
+                            Logging.Log("Salvage: We are full, go to base to unload");
+                            if (State == QuestorState.Salvage)
                             {
-                                Logging.Log("Salvage: Go to the next salvage bookmark");
-                                if (State == QuestorState.Salvage)
-                                {
-                                    State = QuestorState.GotoSalvageBookmark;
-                                }
-                                _traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
+                                State = QuestorState.GotoBase;
                             }
-                            else if (Settings.Instance.UseGatesInSalvage)
+                            break;
+                        }
+
+                        if (!Cache.Instance.UnlootedContainers.Any())
+                        {
+                            Logging.Log("Salvage: Finished salvaging the room");
+
+                            bool gatesInRoom = GateInSalvage();
+                            List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                            do
                             {
-                                Logging.Log("Salvage: Acceleration gate found - moving to next pocket");
-                                if (State == QuestorState.Salvage)
-                                {
-                                    State = QuestorState.SalvageUseGate;
-                                }
-                            }
-                            else
+                                // Remove all bookmarks from address book
+                                var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
+                                if (!gatesInRoom && _gatesPresent) // if there were gates, but we've gone through them all, delete all bookmarks
+                                    bookmark = bookmarks.FirstOrDefault();
+                                else if (gatesInRoom)
+                                    break;
+                                if (bookmark == null)
+                                    break;
+
+                                bookmark.Delete();
+                                bookmarks.Remove(bookmark);
+                            } while (true);
+
+                            if (bookmarks.Count == 0 && !gatesInRoom)
                             {
-                                Logging.Log("Salvage: Acceleration gate found, useGatesInSalvage set to false - Returning to base");
+                                Logging.Log("Salvage: We have salvaged all bookmarks, go to base");
+                                Cache.Instance.SalvageAll = false;
                                 if (State == QuestorState.Salvage)
                                 {
                                     Statistics.Instance.FinishedSalvaging = DateTime.Now;
                                     State = QuestorState.GotoBase;
                                 }
-                                _traveler.Destination = null;
+                                return;
                             }
-                        }
-                        break;
-                    }
+                            else
+                            {
 
-                    var closestWreck = Cache.Instance.UnlootedContainers.First();
-                    if (Math.Round(closestWreck.Distance,0) > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
-                    {
-                        if (closestWreck.Distance > (int)Distance.WarptoDistance)
+                                if (!gatesInRoom)
+                                {
+                                    Logging.Log("Salvage: Go to the next salvage bookmark");
+                                    if (State == QuestorState.Salvage)
+                                    {
+                                        State = QuestorState.GotoSalvageBookmark;
+                                    }
+                                    _traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
+                                }
+                                else if (Settings.Instance.UseGatesInSalvage)
+                                {
+                                    Logging.Log("Salvage: Acceleration gate found - moving to next pocket");
+                                    if (State == QuestorState.Salvage)
+                                    {
+                                        State = QuestorState.SalvageUseGate;
+                                    }
+                                }
+                                else
+                                {
+                                    Logging.Log("Salvage: Acceleration gate found, useGatesInSalvage set to false - Returning to base");
+                                    if (State == QuestorState.Salvage)
+                                    {
+                                        Statistics.Instance.FinishedSalvaging = DateTime.Now;
+                                        State = QuestorState.GotoBase;
+                                    }
+                                    _traveler.Destination = null;
+                                }
+                            }
+                            break;
+                        }
+
+                        EntityCache closestWreck = Cache.Instance.UnlootedContainers.First();
+                        if (Math.Round(closestWreck.Distance, 0) > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
                         {
-                            if (DateTime.Now > Cache.Instance._nextWarpTo)
+                            if (closestWreck.Distance > (int)Distance.WarptoDistance)
                             {
-                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                                closestWreck.WarpTo();
-                                Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                                if (DateTime.Now > Cache.Instance._nextWarpTo)
+                                {
+                                    Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
+                                    closestWreck.WarpTo();
+                                    Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                                }
+                            }
+                            else
+                            {
+                                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                                {
+                                    Logging.Log("Salvage: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
+                                    closestWreck.Approach();
+                                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                                }
                             }
                         }
-                        else
+                        else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
                         {
-                            if (DateTime.Now > Cache.Instance._nextApproachAction)
-                            {
-                                Logging.Log("Salvage: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                                closestWreck.Approach();
-                                Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                            }
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                            Logging.Log("Questor: Salvage: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
                         }
-                    }
-                    else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
-                    {
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                        Logging.Log("Questor: Salvage: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
-                    }
-                    try
-                    {
-                        // Overwrite settings, as the 'normal' settings do not apply
-                        _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                        _salvage.ReserveCargoCapacity = 80;
-                        _salvage.LootEverything = true;
-                        _salvage.ProcessState();
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
-                        //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                        //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
-                    }
-                    finally
-                    {
-                        ApplySettings();
+                        try
+                        {
+                            // Overwrite settings, as the 'normal' settings do not apply
+                            _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
+                            _salvage.ReserveCargoCapacity = 80;
+                            _salvage.LootEverything = true;
+                            _salvage.ProcessState();
+                            //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                            //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
+                            //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
+                        }
+                        finally
+                        {
+                            ApplySettings();
+                        }
                     }
                     break;
 
@@ -1852,9 +1900,8 @@ namespace Questor
                     Cache.Instance.OpenWrecks = true;
 
                     target = "Acceleration Gate";
-
                     targets = Cache.Instance.EntitiesByName(target);
-                    if (targets == null || targets.Count() == 0)
+                    if (targets == null || !targets.Any())
                     {
                         if (State == QuestorState.SalvageUseGate)
                         {
@@ -1867,7 +1914,7 @@ namespace Questor
                     _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
                     _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
-                    var closest = targets.OrderBy(t => t.Distance).First();
+                    EntityCache closest = targets.OrderBy(t => t.Distance).First();
                     if (closest.Distance < (int)Distance.DecloakRange)
                     {
                         Logging.Log("Salvage: Acceleration gate found - GroupID=" + closest.GroupId);
@@ -1909,11 +1956,11 @@ namespace Questor
 
                 case QuestorState.SalvageNextPocket:
                     Cache.Instance.OpenWrecks = true;
-                    var distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
+                    double distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
                     if (distance > (int)Distance.NextPocketDistance)
                     {
                         //we know we are connected here...
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         Logging.Log("Salvage: We've moved to the next Pocket [" + Math.Round(distance/1000,0) + "k away]");
@@ -1971,15 +2018,15 @@ namespace Questor
                     }
                     break;
 
-                case QuestorState.Debug_CloseQuestor:
+                case QuestorState.DebugCloseQuestor:
                     //Logging.Log("ISBoxerCharacterSet: " + Settings.Instance.Lavish_ISBoxerCharacterSet);
                     //Logging.Log("Profile: " + Settings.Instance.Lavish_InnerspaceProfile);
                     //Logging.Log("Game: " + Settings.Instance.Lavish_Game);
                     Logging.Log("CloseQuestorCMDUplinkInnerspaceProfile: " + Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile);
                     Logging.Log("CloseQuestorCMDUplinkISboxerCharacterSet: " + Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet);
-                    Logging.Log("walletbalancechangelogoffdelay: " + Settings.Instance.walletbalancechangelogoffdelay);
-                    Logging.Log("walletbalancechangelogoffdelayLogofforExit: " + Settings.Instance.walletbalancechangelogoffdelayLogofforExit);
-                    Logging.Log("walletbalancechangelogoffdelayLogofforExit: " + Settings.Instance.walletbalancechangelogoffdelayLogofforExit);
+                    Logging.Log("walletbalancechangelogoffdelay: " + Settings.Instance.Walletbalancechangelogoffdelay);
+                    Logging.Log("walletbalancechangelogoffdelayLogofforExit: " + Settings.Instance.WalletbalancechangelogoffdelayLogofforExit);
+                    Logging.Log("walletbalancechangelogoffdelayLogofforExit: " + Settings.Instance.WalletbalancechangelogoffdelayLogofforExit);
                     Logging.Log("EVEProcessMemoryCeiling: " + Settings.Instance.EVEProcessMemoryCeiling);
                     Logging.Log("EVEProcessMemoryCielingLogofforExit: " + Settings.Instance.EVEProcessMemoryCeilingLogofforExit);
                     if (State == QuestorState.SalvageNextPocket)
@@ -1989,22 +2036,22 @@ namespace Questor
                     return;
                     
                     
-               case QuestorState.Debug_Windows:
-                    var windows = Cache.Instance.Windows;
+               case QuestorState.DebugWindows:
+                    List<DirectWindow> windows = Cache.Instance.Windows;
             
-                    foreach (var window in windows)
+                    foreach (DirectWindow window in windows)
                     {
                         Logging.Log("Debug_Questor_WindowNames: [" + window.Name + "]");              
                     }
-                    foreach (var window in windows)
+                    foreach (DirectWindow window in windows)
                     {
                         Logging.Log("Debug_Windowcaptions: [" + window.Name + window.Caption + "]");              
                     }
-                    foreach (var window in windows)
+                    foreach (DirectWindow window in windows)
                     {
                         Logging.Log("Debug_WindowTypes: [" + window.Name + window.Type + "]");
                     }
-                    if (State == QuestorState.Debug_Windows)
+                    if (State == QuestorState.DebugWindows)
                     {
                         State = QuestorState.Error;
                     }
@@ -2012,21 +2059,21 @@ namespace Questor
 
                 case QuestorState.SalvageOnly:
                     Cache.Instance.OpenWrecks = true;
-                    var SalvageOnlyCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    DirectContainer salvageOnlyCargo = Cache.Instance.DirectEve.GetShipsCargo();
 
                     // Is our cargo window open?
-                    if (SalvageOnlyCargo.Window == null)
+                    if (salvageOnlyCargo.Window == null)
                     {
                         // No, command it to open
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                         break;
                     }
 
-                    if (Cache.Instance.UnlootedContainers.Count() == 0)
+                    if (!Cache.Instance.UnlootedContainers.Any())
                     {
                         Logging.Log("SalvageOnly: Finished salvaging the room");
 
-                        var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
 
                         Logging.Log("SalvageOnly: We have salvaged all bookmarks, waiting.");
                         if (State == QuestorState.SalvageOnly)
@@ -2038,28 +2085,28 @@ namespace Questor
                         return;
                     }
 
-                    closestWreck = Cache.Instance.UnlootedContainers.First();
-                    if (closestWreck.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
+                    EntityCache closestWreck2 = Cache.Instance.UnlootedContainers.First();
+                    if (closestWreck2.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck2.Id))
                     {
-                        if (closestWreck.Distance > (int)Distance.WarptoDistance)
+                        if (closestWreck2.Distance > (int)Distance.WarptoDistance)
                         {
                             if (DateTime.Now > Cache.Instance._nextWarpTo)
                             {
-                                Logging.Log("SalvageOnly: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance, 0) + "] meters away");
-                                closestWreck.WarpTo();
+                                Logging.Log("SalvageOnly: Warping to [" + closestWreck2.Name + "] which is [" + Math.Round(closestWreck2.Distance, 0) + "] meters away");
+                                closestWreck2.WarpTo();
                                 Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                             }
                         }
                         else
                         {
-                            Logging.Log("SalvageOnly: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                            closestWreck.Approach();
+                            Logging.Log("SalvageOnly: Warping to [" + closestWreck2.Name + "] which is [" + Math.Round(closestWreck2.Distance / 1000, 0) + "k away]");
+                            closestWreck2.Approach();
                         }
                     }
-                    else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
+                    else if (closestWreck2.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                        Logging.Log("SalvageOnly: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
+                        Logging.Log("SalvageOnly: Stop ship, ClosestWreck [" + Math.Round(closestWreck2.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
                     }
 
                     try
@@ -2069,7 +2116,7 @@ namespace Questor
                         _salvage.ReserveCargoCapacity = 80;
                         _salvage.LootEverything = true;
                         _salvage.ProcessState();
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     }
                     finally
@@ -2078,13 +2125,13 @@ namespace Questor
                     }
                     break;
 
-                case QuestorState.GotoSalvageOnlyBookmark:
+                case QuestorState.GotoSalvageOnlyBookmarinLocal:
                     _traveler.ProcessState();
                     if (_traveler.State == TravelerState.AtDestination)
                     {
-                        if (State == QuestorState.GotoSalvageOnlyBookmark)
+                        if (State == QuestorState.GotoSalvageOnlyBookmarinLocal)
                         {
-                            State = QuestorState.SalvageOnlyBookmarks;
+                            State = QuestorState.SalvageOnlyBookmarksinLocal;
                         }
                         _traveler.Destination = null;
                     }
@@ -2092,8 +2139,8 @@ namespace Questor
                         Logging.Log("Traveler.State = " + _traveler.State);
                     break;
 
-                case QuestorState.SalvageOnlyBookmarks:
-                    var SalvageOnlyBookmarksCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                case QuestorState.SalvageOnlyBookmarksinLocal:
+                    DirectContainer salvageOnlyBookmarksCargo = Cache.Instance.DirectEve.GetShipsCargo();
                     if (Cache.Instance.InStation)
                     {
                         // We are in a station,
@@ -2101,29 +2148,29 @@ namespace Questor
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
                     }
                     // Is our cargo window open?
-                    if (SalvageOnlyBookmarksCargo.Window == null)
+                    if (salvageOnlyBookmarksCargo.Window == null)
                     {
                         // No, command it to open
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                         break;
                     }
-                    if (Settings.Instance.UnloadLootAtStation && SalvageOnlyBookmarksCargo.IsReady && (SalvageOnlyBookmarksCargo.Capacity - SalvageOnlyBookmarksCargo.UsedCapacity) < 100)
+                    if (Settings.Instance.UnloadLootAtStation && salvageOnlyBookmarksCargo.IsReady && (salvageOnlyBookmarksCargo.Capacity - salvageOnlyBookmarksCargo.UsedCapacity) < 100)
                     {
                         Logging.Log("Salvage: We are full");
-                        if (State == QuestorState.SalvageOnlyBookmarks)
+                        if (State == QuestorState.SalvageOnlyBookmarksinLocal)
                         {
                             State = QuestorState.Error;
                         }
                         return;
                     }
-                    if (Cache.Instance.UnlootedContainers.Count() == 0)
+                    if (!Cache.Instance.UnlootedContainers.Any())
                     {
                         Logging.Log("Salvage: Finished salvaging the room");
-                        var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                         do
                         {
                             // Remove all bookmarks from address book
-                            var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.BookmarksOnGridWithMe);
+                            DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
                             if (bookmark == null)
                                 break;
                             bookmark.Delete();
@@ -2132,45 +2179,45 @@ namespace Questor
                         if (bookmarks.Count == 0)
                         {
                             Logging.Log("Salvage: We have salvaged all bookmarks. Going to nearest station. ");
-                            if (State == QuestorState.SalvageOnlyBookmarks)
+                            if (State == QuestorState.SalvageOnlyBookmarksinLocal)
                             {
-                                State = QuestorState.GotoNearestStation;
+                                State = QuestorState.GotoBase;
                             } 
                         }
                         else
                         {
                             Logging.Log("Salvage: Go to the next salvage bookmark");
                             _traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
-                            if (State == QuestorState.SalvageOnlyBookmarks)
+                            if (State == QuestorState.SalvageOnlyBookmarksinLocal)
                             {
-                                State = QuestorState.GotoSalvageOnlyBookmark;
+                                State = QuestorState.GotoSalvageOnlyBookmarinLocal;
                             } 
                             return;
                         }
                         break;
                     }
-                    closestWreck = Cache.Instance.UnlootedContainers.First();
-                    if (closestWreck.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
+                    EntityCache closestWreck3 = Cache.Instance.UnlootedContainers.First();
+                    if (closestWreck3.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck3.Id))
                     {
-                        if (closestWreck.Distance > (int)Distance.WarptoDistance)
+                        if (closestWreck3.Distance > (int)Distance.WarptoDistance)
                         {
                             if (DateTime.Now > Cache.Instance._nextWarpTo)
                             {
-                                Logging.Log("Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                                closestWreck.WarpTo();
+                                Logging.Log("Salvage: Warping to [" + closestWreck3.Name + "] which is [" + Math.Round(closestWreck3.Distance / 1000, 0) + "k away]");
+                                closestWreck3.WarpTo();
                                 Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
                             }
                         }
                         else
                         {
-                            Logging.Log("Salvage: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                            closestWreck.Approach();
+                            Logging.Log("Salvage: Approaching [" + closestWreck3.Name + "] which is [" + Math.Round(closestWreck3.Distance / 1000, 0) + "k away]");
+                            closestWreck3.Approach();
                         }
                     }
-                    else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
+                    else if (closestWreck3.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                        Logging.Log("Questor: SalvageOnlyBookmarks: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
+                        Logging.Log("Questor: SalvageOnlyBookmarks: Stop ship, ClosestWreck [" + Math.Round(closestWreck3.Distance,0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
                     }
 
                     try
@@ -2190,7 +2237,7 @@ namespace Questor
 
                 case QuestorState.Traveler:
                     Cache.Instance.OpenWrecks = false;
-                    var destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
+                    List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
                         // should never happen, but still...
@@ -2206,8 +2253,8 @@ namespace Questor
                             destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                     if (_traveler.Destination == null || _traveler.Destination.SolarSystemId != destination.Last())
                     {
-                        var bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last());
-                        if (bookmarks != null && bookmarks.Count() > 0)
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last());
+                        if (bookmarks != null && bookmarks.Any())
                             _traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
                         else
                         {
@@ -2220,7 +2267,7 @@ namespace Questor
                         _traveler.ProcessState();
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                        Cache.Instance.lastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         if (_traveler.State == TravelerState.AtDestination)
@@ -2311,12 +2358,12 @@ namespace Questor
 
         private bool GateInSalvage()
         {
-            string target = "Acceleration Gate";
+            const string target = "Acceleration Gate";
 
             var targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || targets.Count() == 0)
+            if (targets == null || !targets.Any())
                 return false;
-            _GatesPresent = true;
+            _gatesPresent = true;
             return true;
         }
     }

@@ -13,7 +13,7 @@ namespace Questor.Modules
 
     public class ItemCache
     {
-        private DirectItem _directItem;
+        private readonly DirectItem _directItem;
 
         public ItemCache(DirectItem item)
         {
@@ -194,6 +194,27 @@ namespace Questor.Modules
                 else
                 {
                     return InvType.MedianBuy/InvType.Volume;
+                }
+            }
+        }
+        public double? Value
+        {
+            get
+            {
+                if (InvType.MaxBuy == null)
+                {
+                    if (InvType.MinSell == null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return InvType.MedianSell;
+                    }
+                }
+                else
+                {
+                    return InvType.MedianBuy;
                 }
             }
         }

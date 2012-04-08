@@ -1,7 +1,7 @@
 ﻿namespace Questor.Modules
 {
     using System;
-    using System.Linq;
+    //using System.Linq;
 
     public class LocalWatch
     {
@@ -15,7 +15,7 @@
             {
                 case LocalWatchState.Start:
                     //checking local every 5 second
-                    if(DateTime.Now.Subtract(_lastAction).TotalSeconds < (int)Time.LocalWatch_CheckLocalDelay_seconds)
+                    if(DateTime.Now.Subtract(_lastAction).TotalSeconds < (int)Time.CheckLocalDelay_seconds)
                         break;
 
                     State = LocalWatchState.CheckLocal;
@@ -26,7 +26,7 @@
                     // this ought to cache the name of the system, and the number of ppl in local (or similar)
                     // and only query everyone in local for standings changes if something has changed...
                     //
-                    Cache.Instance.Local_safe(Settings.Instance.LocalBadStandingPilotsToTolerate,Settings.Instance.LocalBadStandingLevelToConsiderBad);
+                    Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate,Settings.Instance.LocalBadStandingLevelToConsiderBad);
                     State = LocalWatchState.Done;
                     break;
 

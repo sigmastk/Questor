@@ -7,7 +7,7 @@
     public class CourierMission
     {
         private DateTime _nextCourierAction;
-        private Traveler _traveler;
+        private readonly Traveler _traveler;
         public CourierMissionState State { get; set; }
 
         /// <summary>
@@ -30,8 +30,13 @@
 
             if (_traveler.State == TravelerState.AtDestination)
             {
-                Logging.Log("CourierMission: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
-                _traveler.Destination = null;
+               if (destination != null)
+                  Logging.Log("CourierMission: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
+               else
+               {
+                  Logging.Log("CourierMission: destination is null"); //how would this occur exactly?
+               }
+               _traveler.Destination = null;
                 return true;
             }
 
@@ -40,10 +45,10 @@
 
         private bool MoveItem(bool pickup)
         {
-            var directEve = Cache.Instance.DirectEve;
+            DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            var hangar = directEve.GetItemHangar();
+            DirectContainer hangar = directEve.GetItemHangar();
             if (hangar.Window == null)
             {
                 _nextCourierAction = DateTime.Now.AddSeconds(8);
@@ -56,7 +61,7 @@
             if (!hangar.IsReady)
                 return false;
 
-            var cargo = directEve.GetShipsCargo();
+            DirectContainer cargo = directEve.GetShipsCargo();
             if (cargo.Window == null)
             {
                 _nextCourierAction = DateTime.Now.AddSeconds(8);
@@ -68,7 +73,7 @@
             if (!cargo.IsReady)
                 return false;
 
-            string missionItem = "Encoded Data Chip";
+            const string missionItem = "Encoded Data Chip";
             Logging.Log("CourierMission: mission item is: " + missionItem);
             DirectContainer from = pickup ? hangar : cargo;
             DirectContainer to = pickup ? cargo : hangar;
@@ -81,7 +86,7 @@
                 return false;
 
             // Move items
-            foreach (var item in from.Items.Where(i => i.TypeName == missionItem))
+            foreach (DirectItem item in from.Items.Where(i => i.TypeName == missionItem))
             {
                 Logging.Log("CourierMissionState: Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"));
                 to.Add(item);
@@ -90,17 +95,16 @@
             return false;
         }
 
-        /// <summary>
-        ///   Goto the pickup location
-        ///   Pickup the item
-        ///   Goto drop off location
-        ///   Drop the item
-        ///   Goto Agent
-        ///   Complete mission
-        /// </summary>
-        /// <param name="storyline"></param>
-        /// <returns></returns>
-        public void ProcessState()
+       /// <summary>
+       ///   Goto the pickup location
+       ///   Pickup the item
+       ///   Goto drop off location
+       ///   Drop the item
+       ///   Goto Agent
+       ///   Complete mission
+       /// </summary>
+       /// <returns></returns>
+       public void ProcessState()
         {
             switch (State)
             {

@@ -21,55 +21,55 @@ namespace Questor.Modules
     {
         public CharSchedule(XElement element)
         {
-            CultureInfo enUS = new CultureInfo("en-US"); 
+            var enUS = new CultureInfo("en-US"); 
             User = (string)element.Attribute("user");
             PW = (string)element.Attribute("pw");
             Name = (string)element.Attribute("name");
 
-            stopTimeSpecified = false;
-            startTimeSpecified = false;
-            string _start = (string)element.Attribute("start");
-            string _stop = (string)element.Attribute("stop");
-            DateTime _startTime = new DateTime();
-            DateTime _stopTime = new DateTime();
-            if (_start != null)
+            StopTimeSpecified = false;
+            StartTimeSpecified = false;
+            var start = (string)element.Attribute("start");
+            var stop = (string)element.Attribute("stop");
+            DateTime startTime;
+            DateTime stopTime;
+            if (start != null)
             {
-                if (!DateTime.TryParseExact(_start, "HH:mm", enUS, DateTimeStyles.None, out _startTime))
+                if (!DateTime.TryParseExact(start, "HH:mm", enUS, DateTimeStyles.None, out startTime))
                 {
                     Logging.Log("[CharSchedule] " + Name + ": Couldn't parse starttime.");
-                    _startTime = DateTime.Now.AddSeconds(20);
+                    startTime = DateTime.Now.AddSeconds(20);
                 }
                 else
-                    startTimeSpecified = true;
+                    StartTimeSpecified = true;
             }
             else
             {
                 Logging.Log("[CharSchedule] No start time specified. Starting now.");
-                _startTime = DateTime.Now.AddSeconds(20);
+                startTime = DateTime.Now.AddSeconds(20);
             }
-            Start = _startTime;
+            Start = startTime;
 
-            if (_stop != null)
+            if (stop != null)
             {
-                if (!DateTime.TryParseExact(_stop, "HH:mm", enUS, DateTimeStyles.None, out _stopTime))
+                if (!DateTime.TryParseExact(stop, "HH:mm", enUS, DateTimeStyles.None, out stopTime))
                 {
                     Logging.Log("[CharSchedule] " + Name + ": Couldn't parse stoptime.");
-                    _stopTime = DateTime.Now.AddHours(24);
+                    stopTime = DateTime.Now.AddHours(24);
                 }
                 else
-                    stopTimeSpecified = true;
+                    StopTimeSpecified = true;
             }
             else
             {
                 Logging.Log("[CharSchedule] No stop time specified.");
-                _stopTime = DateTime.Now.AddHours(24);
+                stopTime = DateTime.Now.AddHours(24);
             }
-            Stop = _stopTime;
+            Stop = stopTime;
 
             if ((string)element.Attribute("runtime") != null)
             {
                 RunTime = (double)element.Attribute("runtime");
-                stopTimeSpecified = true;
+                StopTimeSpecified = true;
             }
             else
                 RunTime = -1;
@@ -83,7 +83,7 @@ namespace Questor.Modules
         public DateTime Start { get; set; }
         public DateTime Stop { get; set; }
         public double RunTime { get; set; }
-        public bool stopTimeSpecified { get; set; }
-        public bool startTimeSpecified { get; set; }
+        public bool StopTimeSpecified { get; set; }
+        public bool StartTimeSpecified { get; set; }
     }
 }

@@ -38,61 +38,7 @@ namespace Questor.Modules
 
         public ScoopState State { get; set; }
 
-        /// <summary>
-        ///   Activates tractorbeam on targeted wrecks
-        /// </summary>
-        private void ActivateTractorBeams()
-        {
-            // We are not in space yet, wait...
-            if (!Cache.Instance.InSpace)
-                return; 
-            
-            var tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
-            if (tractorBeams.Count == 0)
-                return;
-
-            var tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
-
-            var wrecks = Cache.Instance.Targets.Where(t => (t.GroupId == (int) Group.Wreck || t.GroupId == (int) Group.CargoContainer) && t.Distance < tractorBeamRange).ToList();
-
-            for (var i = tractorBeams.Count - 1; i >= 0; i--)
-            {
-                var tractorBeam = tractorBeams[i];
-                if (!tractorBeam.IsActive && !tractorBeam.IsDeactivating)
-                    continue;
-
-                var wreck = wrecks.FirstOrDefault(w => w.Id == tractorBeam.TargetId);
-                // If the wreck no longer exists, or its within loot range then disable the tractor beam
-                if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
-                    tractorBeam.Deactivate();
-
-                // Remove the tractor beam as a possible beam to activate
-                tractorBeams.RemoveAt(i);
-                wrecks.RemoveAll(w => w.Id == tractorBeam.TargetId);
-            }
-
-            foreach (var wreck in wrecks)
-            {
-                // This velocity check solves some bugs where velocity showed up as 150000000m/s
-                if (wreck.Velocity != 0 && wreck.Velocity < (int)Distance.SafeScoopRange)
-                    continue;
-
-                // Is this wreck within range?
-                if (wreck.Distance <= (int)Distance.SafeScoopRange)
-                    continue;
-
-                if (tractorBeams.Count == 0)
-                    return;
-
-                var tractorBeam = tractorBeams[0];
-                tractorBeams.RemoveAt(0);
-                tractorBeam.Activate(wreck.Id);
-
-                Logging.Log("Salvage: Activating tractorbeam [" + tractorBeam.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
-            }
-        }
-
-        /// <summary>
+       /// <summary>
         ///   Activate salvagers on targeted wreck
         /// </summary>
         private void ActivateSalvagers()
@@ -101,23 +47,23 @@ namespace Questor.Modules
             if (!Cache.Instance.InSpace)
                 return;
 
-            var salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
+            List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
             if (salvagers.Count == 0)
                 return;
 
-            var salvagerRange = salvagers.Min(s => s.OptimalRange);
+            double salvagerRange = salvagers.Min(s => s.OptimalRange);
 
-            var wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int) Group.Wreck && t.Distance < salvagerRange).ToList();
+            List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int) Group.Wreck && t.Distance < salvagerRange).ToList();
             if (wrecks.Count == 0)
                 return;
 
-            foreach (var salvager in salvagers)
+            foreach (ModuleCache salvager in salvagers)
             {
                 if (salvager.IsActive || salvager.IsDeactivating)
                     continue;
 
                 // Spread the salvagers around
-                var wreck = wrecks.OrderBy(w => salvagers.Count(s => s.LastTargetId == w.Id)).First();
+                EntityCache wreck = wrecks.OrderBy(w => salvagers.Count(s => s.LastTargetId == w.Id)).First();
                 if (wreck == null)
                     return;
 
@@ -143,11 +89,11 @@ namespace Questor.Modules
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
 
-            var hasSalvagers = Cache.Instance.Modules.Any(m => Salvagers.Contains(m.TypeId));
-            var wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck) && t.CategoryId == (int)CategoryID.Celestial).ToList();
+            bool hasSalvagers = Cache.Instance.Modules.Any(m => Salvagers.Contains(m.TypeId));
+            List<EntityCache> wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck) && t.CategoryId == (int)CategoryID.Celestial).ToList();
 
             // Check for cargo containers
-            foreach (var wreck in wreckTargets)
+            foreach (EntityCache wreck in wreckTargets)
             {
                 if (Cache.Instance.IgnoreTargets.Contains(wreck.Name))
                 {
@@ -170,13 +116,13 @@ namespace Questor.Modules
             if (wreckTargets.Count >= MaximumWreckTargets)
                 return;
 
-            var tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
-            var tractorBeamRange = 0d;
+            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
+            double tractorBeamRange = 0d;
             if (tractorBeams.Count > 0)
                 tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
 
-            var wrecks = Cache.Instance.UnlootedContainers;
-            foreach (var wreck in wrecks.Where(w => !Cache.Instance.IgnoreTargets.Contains(w.Name.Trim())))
+            IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
+            foreach (EntityCache wreck in wrecks.Where(w => !Cache.Instance.IgnoreTargets.Contains(w.Name.Trim())))
             {
                 // Its already a target, ignore it
                 if (wreck.IsTarget || wreck.IsTargeting)
@@ -225,7 +171,7 @@ namespace Questor.Modules
             if (!Cache.Instance.InSpace)
                 return;
 
-            var cargo = Cache.Instance.DirectEve.GetShipsCargo();
+            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             if (cargo.Window == null)
             {
                 // No, command it to open
@@ -237,17 +183,17 @@ namespace Questor.Modules
             if (!cargo.IsReady)
                 return;
 
-            var shipsCargo = cargo.Items.Select(i => new ItemCache(i)).ToList();
-            var freeCargoCapacity = cargo.Capacity - cargo.UsedCapacity;
-            var lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => !string.IsNullOrEmpty(w.Name) && w.Name.StartsWith("loot_"));
-            foreach (var window in lootWindows)
+            List<ItemCache> shipsCargo = cargo.Items.Select(i => new ItemCache(i)).ToList();
+            double freeCargoCapacity = cargo.Capacity - cargo.UsedCapacity;
+            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => !string.IsNullOrEmpty(w.Name) && w.Name.StartsWith("loot_"));
+            foreach (DirectContainerWindow window in lootWindows)
             {
                 // The window is not ready, then continue
                 if (!window.IsReady)
                     continue;
 
                 // Get the container
-                var containerEntity = Cache.Instance.EntityById(window.ItemId);
+                EntityCache containerEntity = Cache.Instance.EntityById(window.ItemId);
 
                 // Does it no longer exist or is it out of transfer range or its looted
                 if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
@@ -259,10 +205,10 @@ namespace Questor.Modules
 
                 
                 // Get the container that is associated with the cargo container
-                var container = Cache.Instance.DirectEve.GetContainer(window.ItemId);
+                DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.ItemId);
 
                 // List its items
-                var items = container.Items.Select(i => new ItemCache(i));
+                IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i));
 
                 // Build a list of items to loot
                 var lootItems = new List<ItemCache>();
@@ -273,7 +219,7 @@ namespace Questor.Modules
                 //
 
                 // Walk through the list of items ordered by highest value item first
-                foreach (var item in items) //.OrderByDescending(i => i.IskPerM3))
+                foreach (ItemCache item in items) //.OrderByDescending(i => i.IskPerM3))
                 {
                     // We never want to pick up Bookmarks
                     if (item.IsBookmark)
@@ -300,7 +246,7 @@ namespace Questor.Modules
                         continue;
 
                     // We pick up loot depending on isk per m3
-                    var isMissionItem = Cache.Instance.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
+                    bool isMissionItem = Cache.Instance.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
 
                     // We are at our max, either make room or skip the item
                     if ((freeCargoCapacity - item.TotalVolume) <= (isMissionItem ? 0 : ReserveCargoCapacity))
@@ -310,8 +256,7 @@ namespace Questor.Modules
                             continue;
 
                         // Make a list of items which are worth less
-                        List<ItemCache> worthLess;
-                        worthLess = shipsCargo;
+                        List<ItemCache> worthLess = shipsCargo;
                         if (item.IskPerM3.HasValue)
                             worthLess = shipsCargo.Where(sc => sc.IskPerM3.HasValue && sc.IskPerM3 < item.IskPerM3).ToList();
                         else
@@ -323,7 +268,7 @@ namespace Questor.Modules
 
 
                         // Nothing is worth less then the current item
-                        if (worthLess.Count() == 0)
+                        if (!worthLess.Any())
                             continue;
 
                         // Not enough space even if we dumped the crap
@@ -337,7 +282,7 @@ namespace Questor.Modules
 
                         // Start clearing out items that are worth less
                         var moveTheseItems = new List<DirectItem>();
-                        foreach (var wl in worthLess.OrderBy(wl => wl.IskPerM3.HasValue ? wl.IskPerM3.Value : double.MaxValue).ThenByDescending(wl => wl.TotalVolume))
+                        foreach (ItemCache wl in worthLess.OrderBy(wl => wl.IskPerM3.HasValue ? wl.IskPerM3.Value : double.MaxValue).ThenByDescending(wl => wl.TotalVolume))
                         {
                             // Mark this item as moved
                             moveTheseItems.Add(wl.DirectItem);
@@ -397,7 +342,7 @@ namespace Questor.Modules
             }
 
             // Open a container in range
-            foreach (var containerEntity in Cache.Instance.UnlootedWrecksAndSecureCans.Where(e => e.Distance <= (int)Distance.SafeScoopRange))
+            foreach (EntityCache containerEntity in Cache.Instance.UnlootedWrecksAndSecureCans.Where(e => e.Distance <= (int)Distance.SafeScoopRange))
             {
                 // Emptry wreck, ignore
                 if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
@@ -408,7 +353,7 @@ namespace Questor.Modules
                     continue;
 
                 // We already opened the loot window
-                var window = lootWindows.FirstOrDefault(w => w.ItemId == containerEntity.Id);
+                DirectContainerWindow window = lootWindows.FirstOrDefault(w => w.ItemId == containerEntity.Id);
                 if (window != null)
                     continue;
 
@@ -429,7 +374,7 @@ namespace Questor.Modules
             if (Cache.Instance.InStation)
                 return;
 
-            var cargo = Cache.Instance.DirectEve.GetShipsCargo();
+            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (State)
             {
                 case ScoopState.TargetHostileWrecks:

@@ -1,7 +1,9 @@
-﻿namespace Questor.Modules
+﻿using DirectEve;
+
+namespace Questor.Modules
 {
     using System;
-    using System.Linq;
+    //using System.Linq;
 
     public class Cleanup
     {
@@ -25,7 +27,7 @@
                     //
                     // go through *every* window
                     //
-                    foreach (var window in Cache.Instance.Windows)
+                    foreach (DirectWindow window in Cache.Instance.Windows)
                     {
                         // Telecom messages are generally mission info messages: close them
                         if (window.Name == "telecom")

@@ -15,7 +15,7 @@ namespace Questor.Modules
 
     public class EntityCache
     {
-        private DirectEntity _directEntity;
+        private readonly DirectEntity _directEntity;
 
         public EntityCache(DirectEntity entity)
         {
@@ -358,7 +358,7 @@ namespace Questor.Modules
 
                 if (_directEntity != null)
                 {
-                    var haveLootRights = false;
+                    bool haveLootRights = false;
                     if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
                     {
                         haveLootRights |= _directEntity.CorpId == Cache.Instance.DirectEve.ActiveShip.Entity.CorpId;
@@ -376,7 +376,7 @@ namespace Questor.Modules
         {
             get
             {
-                var value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                ShipTargetValue value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
                 if (value == null)
                     return null;
 
@@ -531,11 +531,11 @@ namespace Questor.Modules
 
             if (Cache.Instance.TargetingIDs.ContainsKey(Id))
             {
-                var lastTargeted = Cache.Instance.TargetingIDs[Id];
+                DateTime lastTargeted = Cache.Instance.TargetingIDs[Id];
 
                 // Ignore targeting request
-                var seconds = DateTime.Now.Subtract(lastTargeted).TotalSeconds;
-                if (seconds < 45)
+                double seconds = DateTime.Now.Subtract(lastTargeted).TotalSeconds;
+                if (seconds < 20)
                 {
                     Logging.Log("EntityCache: LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds,0) + "]");
                     return;

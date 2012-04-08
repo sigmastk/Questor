@@ -110,16 +110,16 @@ namespace Questor.Modules
 
         public Cache()
         {
-            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             ShipTargetValues = new List<ShipTargetValue>();
-            var values = XDocument.Load(Path.Combine(path, "ShipTargetValues.xml"));
-            foreach (var value in values.Root.Elements("ship"))
+            XDocument values = XDocument.Load(Path.Combine(path, "ShipTargetValues.xml"));
+            foreach (XElement value in values.Root.Elements("ship"))
                 ShipTargetValues.Add(new ShipTargetValue(value));
 
             InvTypesById = new Dictionary<int, InvType>();
-            var invTypes = XDocument.Load(Path.Combine(path, "InvTypes.xml"));
-            foreach (var element in invTypes.Root.Elements("invtype"))
+            XDocument invTypes = XDocument.Load(Path.Combine(path, "InvTypes.xml"));
+            foreach (XElement element in invTypes.Root.Elements("invtype"))
                 InvTypesById.Add((int) element.Attribute("id"), new InvType(element));
 
             _priorityTargets = new List<PriorityTarget>();
@@ -133,18 +133,18 @@ namespace Questor.Modules
             ChangeMissionShipFittings = false;
             UseMissionShip = false;
             ArmLoadedCache = false;
-            missionAmmo = new List<Ammo>();
+            MissionAmmo = new List<Ammo>();
             MissionUseDrones = null;
 
-            panic_attempts_this_pocket = 0;
-            lowest_shield_percentage_this_pocket = 100;
-            lowest_armor_percentage_this_pocket = 100;
-            lowest_capacitor_percentage_this_pocket = 100;
-            panic_attempts_this_mission = 0;
-            lowest_shield_percentage_this_mission = 100;
-            lowest_armor_percentage_this_mission = 100;
-            lowest_capacitor_percentage_this_mission = 100;
-            lastKnownGoodConnectedTime = DateTime.Now;
+            PanicAttemptsThisPocket = 0;
+            LowestShieldPercentageThisPocket = 100;
+            LowestArmorPercentageThisPocket = 100;
+            LowestCapacitorPercentageThisPocket = 100;
+            PanicAttemptsThisMission = 0;
+            LowestShieldPercentageThisMission = 100;
+            LowestArmorPercentageThisMission = 100;
+            LowestCapacitorPercentageThisMission = 100;
+            LastKnownGoodConnectedTime = DateTime.Now;
         }
 
         /// <summary>
@@ -182,26 +182,26 @@ namespace Questor.Modules
         public int TimeSpentInMission_seconds = 0;
         public int TimeSpentInMissionInRange = 0;
         public int TimeSpentInMissionOutOfRange = 0;
-        public DirectAgentMission mission;
+        public DirectAgentMission Mission;
         public bool DroneStatsWritten { get; set; }
         public bool DronesKillHighValueTargets { get; set; }
 
-        public bool Local_safe(int max_bad, double stand)
+        public bool LocalSafe(int maxBad, double stand)
         {
             int number = 0;
-            DirectChatWindow Local = (DirectChatWindow)GetWindowByName("Local");
-            foreach(var LocalMember in Local.Members)
+            var local = (DirectChatWindow)GetWindowByName("Local");
+            foreach(DirectCharacter localMember in local.Members)
             {
-                float[] alliance = {DirectEve.Standings.GetPersonalRelationship(LocalMember.AllianceId), DirectEve.Standings.GetCorporationRelationship(LocalMember.AllianceId), DirectEve.Standings.GetAllianceRelationship(LocalMember.AllianceId)};
-                float[] corporation = {DirectEve.Standings.GetPersonalRelationship(LocalMember.CorporationId), DirectEve.Standings.GetCorporationRelationship(LocalMember.CorporationId), DirectEve.Standings.GetAllianceRelationship(LocalMember.CorporationId)};
-                float[] personal = {DirectEve.Standings.GetPersonalRelationship(LocalMember.CharacterId), DirectEve.Standings.GetCorporationRelationship(LocalMember.CharacterId), DirectEve.Standings.GetAllianceRelationship(LocalMember.CharacterId)};
+                float[] alliance = {DirectEve.Standings.GetPersonalRelationship(localMember.AllianceId), DirectEve.Standings.GetCorporationRelationship(localMember.AllianceId), DirectEve.Standings.GetAllianceRelationship(localMember.AllianceId)};
+                float[] corporation = {DirectEve.Standings.GetPersonalRelationship(localMember.CorporationId), DirectEve.Standings.GetCorporationRelationship(localMember.CorporationId), DirectEve.Standings.GetAllianceRelationship(localMember.CorporationId)};
+                float[] personal = {DirectEve.Standings.GetPersonalRelationship(localMember.CharacterId), DirectEve.Standings.GetCorporationRelationship(localMember.CharacterId), DirectEve.Standings.GetAllianceRelationship(localMember.CharacterId)};
 
                 if(alliance.Min() <= stand || corporation.Min() <= stand || personal.Min() <= stand)
                 {
-                    Logging.Log("Cache.WatchLocal: Bad Standing Pilot Detected: [ " + LocalMember.Name + "] " + " [ " + number + " ] so far... of [ " + max_bad + " ] allowed");
+                    Logging.Log("Cache.WatchLocal: Bad Standing Pilot Detected: [ " + localMember.Name + "] " + " [ " + number + " ] so far... of [ " + maxBad + " ] allowed");
                     number++;
                 }
-                if(number > max_bad)
+                if(number > maxBad)
                 {
                     Logging.Log("Cache.WatchLocal: [" + number + "] Bad Standing pilots in local, We should stay in station");
                     return false;
@@ -232,7 +232,7 @@ namespace Questor.Modules
 		/// <summary>
         ///   Force Salvaging after mission
         /// </summary>
-        public bool afterMissionSalvaging { get; set; }
+        public bool AfterMissionSalvaging { get; set; }
 
 		
 		/// <summary>
@@ -243,15 +243,15 @@ namespace Questor.Modules
             get
             {
                 // Get ammmo based on current damage type
-                var ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType);
+                IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType);
 
                 // Is our ship's cargo available?
-                var cargo = DirectEve.GetShipsCargo();
+                DirectContainer cargo = DirectEve.GetShipsCargo();
                 if (cargo.IsReady)
                     ammo = ammo.Where(a => cargo.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
 
                 // Return ship range if there's no ammo left
-                if (ammo.Count() == 0)
+                if (!ammo.Any())
                     return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
 
                 // Return max range
@@ -276,7 +276,7 @@ namespace Questor.Modules
         public string ExtConsole { get; set; }
         public string ConsoleLog { get; set; }
         public bool IsAgentLoop { get; set; }
-        private string AgentName = "";
+        private string _agentName = "";
 
         public DateTime _lastDefence;
         public DateTime _lastModuleActivation;
@@ -303,36 +303,36 @@ namespace Questor.Modules
         public DateTime _nextInSpaceorInStation;
         public DateTime _lastTimeCheckAction;
 
-        public int panic_attempts_this_mission { get; set; }
-        public double lowest_shield_percentage_this_pocket { get; set; }
-        public double lowest_armor_percentage_this_pocket { get; set; }
-        public double lowest_capacitor_percentage_this_pocket { get; set; }
-        public int repair_cycle_time_this_pocket { get; set; }
-        public int panic_attempts_this_pocket { get; set; }
-        public double lowest_shield_percentage_this_mission { get; set; }
-        public double lowest_armor_percentage_this_mission { get; set; }
-        public double lowest_capacitor_percentage_this_mission { get; set; }
+        public int PanicAttemptsThisMission { get; set; }
+        public double LowestShieldPercentageThisPocket { get; set; }
+        public double LowestArmorPercentageThisPocket { get; set; }
+        public double LowestCapacitorPercentageThisPocket { get; set; }
+        public int RepairCycleTimeThisPocket { get; set; }
+        public int PanicAttemptsThisPocket { get; set; }
+        public double LowestShieldPercentageThisMission { get; set; }
+        public double LowestArmorPercentageThisMission { get; set; }
+        public double LowestCapacitorPercentageThisMission { get; set; }
         public DateTime StartedBoosting { get; set; }
-        public int repair_cycle_time_this_mission { get; set; }
-        public DateTime lastKnownGoodConnectedTime { get; set; }
-        public long totalMegaBytesOfMemoryUsed { get; set; }
+        public int RepairCycleTimeThisMission { get; set; }
+        public DateTime LastKnownGoodConnectedTime { get; set; }
+        public long TotalMegaBytesOfMemoryUsed { get; set; }
         public double MyWalletBalance { get; set; }
         public string CurrentPocketAction { get; set; }
         public string CurrentAgent
         {
             get
             {
-                if(AgentName == "")
+                if(_agentName == "")
                 {
-                    AgentName = SwitchAgent;
+                    _agentName = SwitchAgent;
                     Logging.Log("Cache.CurrentAgent is null set first agent: " + CurrentAgent);
                 }
 
-                return AgentName;
+                return _agentName;
             }
             set
             {
-                AgentName = value;
+                _agentName = value;
             }
         }
 
@@ -340,7 +340,7 @@ namespace Questor.Modules
         {
             get
             {
-                var agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.Now >= i.Decline_timer);
+                AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.Now >= i.DeclineTimer);
                 if(agent == null)
                 {
                     agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
@@ -453,7 +453,7 @@ namespace Questor.Modules
                     _targets = Entities.Where(e => e.IsTarget).ToList();
 
                 // Remove the target info (its been targeted)
-                foreach (var target in _targets.Where(t => TargetingIDs.ContainsKey(t.Id)))
+                foreach (EntityCache target in _targets.Where(t => TargetingIDs.ContainsKey(t.Id)))
                     TargetingIDs.Remove(target.Id);
 
                 return _targets;
@@ -570,7 +570,7 @@ namespace Questor.Modules
             {
                 if (_approaching == null)
                 {
-                    var ship = DirectEve.ActiveShip.Entity;
+                    DirectEntity ship = DirectEve.ActiveShip.Entity;
                     if (ship != null && ship.IsValid)
                         _approaching = EntityById(ship.FollowId);
                 }
@@ -617,13 +617,13 @@ namespace Questor.Modules
         public string Fitting { get; set; } // stores name of the final fitting we want to use
         public string MissionShip { get; set; } //stores name of mission specific ship
         public string DefaultFitting { get; set; } //stores name of the default fitting
-        public string currentFit { get; set; }
-        public string factionFit { get; set; }
-        public string factionName { get; set; }
+        public string CurrentFit { get; set; }
+        public string FactionFit { get; set; }
+        public string FactionName { get; set; }
         public bool ArmLoadedCache { get; set; } // flags whether arm has already loaded the mission
         public bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
         public bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
-        public List<Ammo> missionAmmo;
+        public List<Ammo> MissionAmmo;
         public int MissionWeaponGroupId = 0;
         public bool? MissionUseDrones;
         public bool StopTimeSpecified { get; set; }
@@ -670,6 +670,15 @@ namespace Questor.Modules
         }
 
         /// <summary>
+        ///   Return entities that contain the name
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<EntityCache> EntitiesThatContainTheName(string label)
+        {
+            return Entities.Where(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains(label)).ToList();
+        }
+
+        /// <summary>
         ///   Return a cached entity by Id
         /// </summary>
         /// <param name = "id"></param>
@@ -679,7 +688,7 @@ namespace Questor.Modules
             if (_entitiesById.ContainsKey(id))
                 return _entitiesById[id];
 
-            var entity = Entities.FirstOrDefault(e => e.Id == id);
+            EntityCache entity = Entities.FirstOrDefault(e => e.Id == id);
             _entitiesById[id] = entity;
             return entity;
         }
@@ -691,15 +700,15 @@ namespace Questor.Modules
         public DirectAgentMissionBookmark GetMissionBookmark(long agentId, string startsWith)
         {
             // Get the missions
-            var mission = GetAgentMission(agentId);
-            if (mission == null)
+            DirectAgentMission missionforbookmarkinfo = GetAgentMission(agentId);
+            if (missionforbookmarkinfo == null)
                 return null;
 
             // Did we accept this mission?
-            if (mission.State != (int) MissionState.Accepted || mission.AgentId != agentId)
+            if (missionforbookmarkinfo.State != (int) MissionState.Accepted || missionforbookmarkinfo.AgentId != agentId)
                 return null;
 
-            return mission.Bookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));
+            return missionforbookmarkinfo.Bookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));
         }
 
         /// <summary>
@@ -771,7 +780,7 @@ namespace Questor.Modules
             path = path.Replace("<", "");
             path = path.Replace(".", "");
             path = path.Replace(",", "");
-            while (path.IndexOf("  ") >= 0)
+            while (path.IndexOf("  ", System.StringComparison.Ordinal) >= 0)
                 path = path.Replace("  ", " ");
             return path.Trim();
         }
@@ -779,97 +788,123 @@ namespace Questor.Modules
         /// <summary>
         ///   Loads mission objectives from XML file
         /// </summary>
-        /// <param name = "agentId"></param>
-        /// <param name = "pocketId"></param>
+        /// <param name = "agentId"> </param>
+        /// <param name = "pocketId"> </param>
+        /// <param name = "missionMode"> </param>
         /// <returns></returns>
-        public IEnumerable<Action> LoadMissionActions(long agentId, int pocketId, bool mission_mode)
+        public IEnumerable<Action> LoadMissionActions(long agentId, int pocketId, bool missionMode)
         {
-            var mission = GetAgentMission(agentId);
-            if(mission == null && mission_mode)
+            DirectAgentMission missiondetails = GetAgentMission(agentId);
+            if(missiondetails == null && missionMode)
                 return new Action[0];
 
-            var missionName = FilterPath(mission.Name);
-            var missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
-            if (!File.Exists(missionXmlPath))
+            if (missiondetails != null)
             {
-                //No mission file but we need to set some cache settings
-                OrbitDistance = Settings.Instance.OrbitDistance;
-                afterMissionSalvaging = Settings.Instance.AfterMissionSalvaging;
-                return new Action[0];
-            }
-            //
-            // this loads the settings from each pocket... but NOT any settings global to the mission
-            //
-            try
-            {
-                var xdoc = XDocument.Load(missionXmlPath);
-                var pockets = xdoc.Root.Element("pockets").Elements("pocket");
-                foreach (var pocket in pockets)
+                string missionName = FilterPath(missiondetails.Name);
+                string missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+                if (!File.Exists(missionXmlPath))
                 {
-                    if ((int) pocket.Attribute("id") != pocketId)
-                        continue;
-
-                    if (pocket.Element("damagetype") != null)
-                        DamageType = (DamageType) Enum.Parse(typeof (DamageType), (string) pocket.Element("damagetype"), true);
-
-                    if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
-                    {
-                        
-                        OrbitDistance = (int) pocket.Element("orbitdistance");
-                        Logging.Log(string.Format("Cache: Using Mission Orbit distance {0}",OrbitDistance));
-                    }
-                    else //Otherwise, use value defined in charname.xml file
-                    {
-                        OrbitDistance = Settings.Instance.OrbitDistance;
-                        Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}",OrbitDistance));
-                    }
-                    if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
-                    {
-                        afterMissionSalvaging = (bool)pocket.Element("afterMissionSalvaging");
-                    }
-                    if (pocket.Element("dronesKillHighValueTargets") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
-                    {
-                        DronesKillHighValueTargets = (bool)pocket.Element("dronesKillHighValueTargets");
-                    }
-                    else //Otherwise, use value defined in charname.xml file
-                    {
-                        DronesKillHighValueTargets = Settings.Instance.DronesKillHighValueTargets;
-                        Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
-                    }
-                    var actions = new List<Action>();
-                    var elements = pocket.Element("actions");
-                    if (elements != null)
-                    {
-                        foreach (var element in elements.Elements("action"))
-                        {
-                            var action = new Action();
-                            action.State = (ActionState) Enum.Parse(typeof (ActionState), (string) element.Attribute("name"), true);
-                            if ((string)element.Attribute("name").Value == "ClearPocket")
-                            {
-                                action.AddParameter("", "");
-                            }
-                            else
-                            {
-                            foreach (var parameter in element.Elements("parameter"))
-                                action.AddParameter((string) parameter.Attribute("name"), (string) parameter.Attribute("value"));
-                            }
-                            actions.Add(action);
-                        }
-                    }
-                    return actions;
+                    //No mission file but we need to set some cache settings
+                    OrbitDistance = Settings.Instance.OrbitDistance;
+                    AfterMissionSalvaging = Settings.Instance.AfterMissionSalvaging;
+                    return new Action[0];
                 }
+                //
+                // this loads the settings from each pocket... but NOT any settings global to the mission
+                //
+                try
+                {
+                    XDocument xdoc = XDocument.Load(missionXmlPath);
+                    if (xdoc.Root != null)
+                    {
+                        XElement xElement = xdoc.Root.Element("pockets");
+                        if (xElement != null)
+                        {
+                            IEnumerable<XElement> pockets = xElement.Elements("pocket");
+                            foreach (XElement pocket in pockets)
+                            {
+                                if ((int) pocket.Attribute("id") != pocketId)
+                                    continue;
 
-                // if we reach this code there is no mission XML file, so we set some things -- Assail
+                                if (pocket.Element("damagetype") != null)
+                                    DamageType = (DamageType) Enum.Parse(typeof (DamageType), (string) pocket.Element("damagetype"), true);
 
-                OrbitDistance = Settings.Instance.OrbitDistance;
-                Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+                                if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
+                                {
+                        
+                                    OrbitDistance = (int) pocket.Element("orbitdistance");
+                                    Logging.Log(string.Format("Cache: Using Mission Orbit distance {0}",OrbitDistance));
+                                }
+                                else //Otherwise, use value defined in charname.xml file
+                                {
+                                    OrbitDistance = Settings.Instance.OrbitDistance;
+                                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}",OrbitDistance));
+                                }
+                                if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
+                                {
+                                    AfterMissionSalvaging = (bool)pocket.Element("afterMissionSalvaging");
+                                }
+                                if (pocket.Element("dronesKillHighValueTargets") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
+                                {
+                                    DronesKillHighValueTargets = (bool)pocket.Element("dronesKillHighValueTargets");
+                                }
+                                else //Otherwise, use value defined in charname.xml file
+                                {
+                                    DronesKillHighValueTargets = Settings.Instance.DronesKillHighValueTargets;
+                                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+                                }
+                                var actions = new List<Action>();
+                                XElement elements = pocket.Element("actions");
+                                if (elements != null)
+                                {
+                                    foreach (XElement element in elements.Elements("action"))
+                                    {
+                                        var action = new Action();
+                                        action.State = (ActionState) Enum.Parse(typeof (ActionState), (string) element.Attribute("name"), true);
+                                        XAttribute xAttribute = element.Attribute("name");
+                                        if (xAttribute != null && (string)xAttribute.Value == "ClearPocket")
+                                        {
+                                            action.AddParameter("", "");
+                                        }
+                                        else
+                                        {
+                                            foreach (XElement parameter in element.Elements("parameter"))
+                                                action.AddParameter((string) parameter.Attribute("name"), (string) parameter.Attribute("value"));
+                                        }
+                                        actions.Add(action);
+                                    }
+                                }
+                                return actions;
+                            }
+                            //actions.Add(action);
+                        }
+                        else
+                        {
+                            return new Action[0];
+                        }
+                        
+                    }
+                    else
+                    {
+                        { return new Action[0]; }
+                    }
 
-                return new Action[0];
+                    // if we reach this code there is no mission XML file, so we set some things -- Assail
+
+                    OrbitDistance = Settings.Instance.OrbitDistance;
+                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+
+                    return new Action[0];
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Error loading mission XML file [" + ex.Message + "]");
+                    return new Action[0];
+                }
             }
-            catch (Exception ex)
+            else
             {
-                Logging.Log("Error loading mission XML file [" + ex.Message + "]");
-                return new Action[0];
+                { return new Action[0]; }
             }
         }
 
@@ -882,63 +917,61 @@ namespace Questor.Modules
             MissionItems.Clear();
             BringMissionItem = string.Empty;
 
-            var mission = GetAgentMission(agentId);
-            if (mission == null)
+            DirectAgentMission missiondetailsformittionitems = GetAgentMission(agentId);
+            if (missiondetailsformittionitems == null)
                 return;
-            if (factionName == null || factionName == "")
-                factionName = "Default";
+            if (string.IsNullOrEmpty(FactionName))
+                FactionName = "Default";
 
             if (Settings.Instance.UseFittingManager)
             {
                 //Set fitting to default
-                DefaultFitting = (string)Settings.Instance.DefaultFitting.Fitting;
+                DefaultFitting = Settings.Instance.DefaultFitting.Fitting;
                 Fitting = DefaultFitting;
                 MissionShip = "";
                 ChangeMissionShipFittings = false;
-                if (Settings.Instance.MissionFitting.Any(m => m.Mission.ToLower() == mission.Name.ToLower())) //priority goes to mission-specific fittings
+                if (Settings.Instance.MissionFitting.Any(m => m.Mission.ToLower() == missiondetailsformittionitems.Name.ToLower())) //priority goes to mission-specific fittings
                 {
-                    string _missionFit;
-                    string _missionShip;
-                    MissionFitting _missionFitting;
+                   MissionFitting missionFitting;
 
                     // if we've got multiple copies of the same mission, find the one with the matching faction
-                    if (Settings.Instance.MissionFitting.Any(m => m.Faction.ToLower() == factionName.ToLower() && (m.Mission.ToLower() == mission.Name.ToLower())))
-                        _missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Faction.ToLower() == factionName.ToLower() && (m.Mission.ToLower() == mission.Name.ToLower()));
+                    if (Settings.Instance.MissionFitting.Any(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missiondetailsformittionitems.Name.ToLower())))
+                        missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missiondetailsformittionitems.Name.ToLower()));
                     else //otherwise just use the first copy of that mission
-                        _missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Mission.ToLower() == mission.Name.ToLower());
+                        missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Mission.ToLower() == missiondetailsformittionitems.Name.ToLower());
 
-                    _missionFit = (string)_missionFitting.Fitting;
-                    _missionShip = (string)_missionFitting.Ship;
-                    if (!(_missionFit == "" && !(_missionShip == ""))) // if we've both specified a mission specific ship and a fitting, then apply that fitting to the ship
+                    var missionFit = (string)missionFitting.Fitting;
+                    var missionShip = (string)missionFitting.Ship;
+                    if (!(missionFit == "" && missionShip != "")) // if we've both specified a mission specific ship and a fitting, then apply that fitting to the ship
                     {
                         ChangeMissionShipFittings = true;
-                        Fitting = _missionFit;
+                        Fitting = missionFit;
                     }
-                    else if (!((factionFit == null) || (factionFit == "")))
-                        Fitting = factionFit;
-                    Logging.Log("Cache: Mission: " + _missionFitting.Mission + " - Faction: " + factionName + " - Fitting: " + _missionFit + " - Ship: " + _missionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings);
-                    MissionShip = _missionShip;
+                    else if (!string.IsNullOrEmpty(FactionFit))
+                        Fitting = FactionFit;
+                    Logging.Log("Cache: Mission: " + missionFitting.Mission + " - Faction: " + FactionName + " - Fitting: " + missionFit + " - Ship: " + missionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings);
+                    MissionShip = missionShip;
                 }
-                else if (!((factionFit == null) || (factionFit == ""))) // if no mission fittings defined, try to match by faction
-                    Fitting = factionFit;
+                else if (!string.IsNullOrEmpty(FactionFit)) // if no mission fittings defined, try to match by faction
+                    Fitting = FactionFit;
 
                 if (Fitting == "") // otherwise use the default
                     Fitting = DefaultFitting;
             }
 
-            var missionName = FilterPath(mission.Name);
-            var missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+            string missionName = FilterPath(missiondetailsformittionitems.Name);
+            string missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
             if (!File.Exists(missionXmlPath))
                 return;
 
             try
             {
-                var xdoc = XDocument.Load(missionXmlPath);
-                var items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
+                XDocument xdoc = XDocument.Load(missionXmlPath);
+                IEnumerable<string> items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
                 MissionItems.AddRange(items);
 
-                BringMissionItem = (string) xdoc.Root.Element("bring") ?? string.Empty;
-                BringMissionItem = BringMissionItem.ToLower();
+               if (xdoc.Root != null) BringMissionItem = (string) xdoc.Root.Element("bring") ?? string.Empty;
+               BringMissionItem = BringMissionItem.ToLower();
 
                 //load fitting setting from the mission file
                 //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";  
@@ -965,7 +998,7 @@ namespace Questor.Modules
         /// <param name = "priority"></param>
         public void AddPriorityTargets(IEnumerable<EntityCache> targets, Priority priority)
         {
-            foreach (var target in targets)
+            foreach (EntityCache target in targets)
             {
                 if (_priorityTargets.Any(pt => pt.EntityID == target.Id))
                     continue;
@@ -986,9 +1019,9 @@ namespace Questor.Modules
             if (DirectEve.ActiveShip.Entity == null)
                 return double.MaxValue;
 
-            var curX = DirectEve.ActiveShip.Entity.X;
-            var curY = DirectEve.ActiveShip.Entity.Y;
-            var curZ = DirectEve.ActiveShip.Entity.Z;
+            double curX = DirectEve.ActiveShip.Entity.X;
+            double curY = DirectEve.ActiveShip.Entity.Y;
+            double curZ = DirectEve.ActiveShip.Entity.Z;
 
             return Math.Sqrt((curX - x)*(curX - x) + (curY - y)*(curY - y) + (curZ - z)*(curZ - z));
         }
@@ -1005,11 +1038,10 @@ namespace Questor.Modules
                 DirectEve.BookmarkCurrentLocation(label, "", null);
         }
 
-        /// <summary>
-        ///   Create a bookmark of the closest wreck
-        /// </summary>
-        /// <param name = "label"></param>
-        //public void CreateBookmarkofWreck(IEnumerable<EntityCache> containers, string label)
+       /// <summary>
+       ///   Create a bookmark of the closest wreck
+       /// </summary>
+       //public void CreateBookmarkofWreck(IEnumerable<EntityCache> containers, string label)
         //{
         //    DirectEve.BookmarkEntity(Cache.Instance.Containers.FirstOrDefault, "a", "a", null);
         //}
@@ -1038,7 +1070,7 @@ namespace Questor.Modules
                 return currentTarget;
 
             // Get the closest warp scrambling priority target
-            var target = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWarpScramblingMe && pt.IsTarget);
+            EntityCache target = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWarpScramblingMe && pt.IsTarget);
             if (target != null)
                 return target;
 
@@ -1056,12 +1088,12 @@ namespace Questor.Modules
                 return currentTarget;
 
             // Get all entity targets
-            var targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure);
+            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure);
 
             // Get the closest high value target
-            var highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue.Value).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+            EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
             // Get the closest low value target
-            var lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+            EntityCache lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
             
             if (lowValueFirst && lowValueTarget != null)
                 return lowValueTarget;

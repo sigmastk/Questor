@@ -11,11 +11,11 @@ namespace Questor.Modules
 {
     public enum DebugModuleState
     {
-        Debug_Windows,
-        Debug_Local,
-        Debug_Entities_All,
-        Debug_Entities_Ships,
-        Debug_Entities_Players,
+        DebugWindows,
+        DebugLocal,
+        DebugEntitiesAll,
+        DebugEntitiesShips,
+        DebugEntitiesPlayers,
         Paused,
         Error,
         Done

@@ -9,9 +9,9 @@
 // -------------------------------------------------------------------------------
 namespace Questor.Modules
 {
-    using System;
+    //using System;
     using System.Collections.Generic;
-    using System.Linq;
+    //using System.Linq;
     using DirectEve;
 
     public class DebugModule
@@ -19,18 +19,6 @@ namespace Questor.Modules
         public static HashSet<int> Salvagers = new HashSet<int> { 25861, 26983, 30836 };
         public static HashSet<int> TractorBeams = new HashSet<int> { 24348, 24620, 24622, 24644 };
 
-        private DateTime _lastJettison = DateTime.MinValue;
-        //private DateTime _nextAction;
-
-        /// <summary>
-        ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
-        /// </summary>
-        private Dictionary<long, DateTime> _openedContainers;
-
-        public DebugModule()
-        {
-            _openedContainers = new Dictionary<long, DateTime>();
-        }
 
         public int MaximumWreckTargets { get; set; }
         public int ReserveCargoCapacity { get; set; }
@@ -47,7 +35,7 @@ namespace Questor.Modules
 
             var windows = new List<DirectWindow>();
             
-            foreach (var window in windows)
+            foreach (DirectWindow window in windows)
             {
                 Logging.Log("DebugModule: Debug_Windows: [" + window.Name + "]");              
                 
@@ -72,10 +60,10 @@ namespace Questor.Modules
             //if (Cache.Instance.InStation)
             //    return;
 
-            //var cargo = Cache.Instance.DirectEve.GetShipsCargo();
+            //DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (State)
             {
-                case DebugModuleState.Debug_Windows:
+                case DebugModuleState.DebugWindows:
                     Debug_Windows();
 
                     // Next state
@@ -99,7 +87,7 @@ namespace Questor.Modules
 
                 default:
                     // Unknown state, goto first state
-                    State = DebugModuleState.Debug_Windows;
+                    State = DebugModuleState.DebugWindows;
                     break;
             }
         }

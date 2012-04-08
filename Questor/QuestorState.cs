@@ -44,11 +44,11 @@ namespace Questor
         Storyline,
         StorylinePanic,
         CombatHelper,
-        CombatHelper_anomaly,
+        CombatHelperAnomaly,
         SalvageOnly,
-        SalvageOnlyBookmarks,
-        GotoSalvageOnlyBookmark,
-        Debug_Windows,
-        Debug_CloseQuestor,
+        SalvageOnlyBookmarksinLocal,
+        GotoSalvageOnlyBookmarinLocal,
+        DebugWindows,
+        DebugCloseQuestor,
     }
 }

@@ -14,7 +14,7 @@ namespace Questor.Modules
 
     public class ModuleCache
     {
-        private DirectModule _module;
+        private readonly DirectModule _module;
 
         public ModuleCache(DirectModule module)
         {
@@ -148,7 +148,7 @@ namespace Questor.Modules
         {
             get 
             { 
-                var result = false;
+                bool result = false;
                 result |= !IsActivatable;
                 result |= !IsOnline;
                 result |= IsDeactivating;

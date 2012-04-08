@@ -1,5 +1,4 @@
-﻿//NOT FINISH DON'T USE
-namespace Questor.Modules
+﻿namespace Questor.Modules
 {
     public enum LocalWatchState
     {
