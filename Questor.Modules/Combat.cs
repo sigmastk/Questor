@@ -247,11 +247,6 @@ namespace Questor.Modules
             if (DateTime.Now < Cache.Instance._nextWeaponAction) //if we just did something wait a fraction of a second
                 return;
 
-            //
-            // Do we really want a non-mission action moving the ship around at all!! (other than speed tanking)?
-            //
-            const bool dontMoveMyShip = true; // This may become an  XML setting at some point. 
-
             if (Settings.Instance.SpeedTank && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
             {
                 if (DateTime.Now > Cache.Instance._nextOrbit)
@@ -262,7 +257,10 @@ namespace Questor.Modules
                 }
             }
 
-            if (!dontMoveMyShip) //why would we want the ship to move if we aren't speed tanking and the mission XML isn't telling us to move?
+            //
+            // Do we really want a non-mission action moving the ship around at all!! (other than speed tanking)?
+            // If you are not in a mission by all means let combat actions move you around as needed
+            if (!Cache.Instance.InMission) 
             {
                 // Get lowest range
                 double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);

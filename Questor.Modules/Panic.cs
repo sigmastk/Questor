@@ -29,7 +29,7 @@ namespace Questor.Modules
         private int _randomDelay;
 
         public PanicState State { get; set; }
-        public bool InMission { get; set; }
+        //public bool InMission { get; set; }
 
         public void ProcessState()
         {
@@ -51,7 +51,7 @@ namespace Questor.Modules
                             Logging.Log("Panic: You are in a Capsule, you must have died :(");
                             State = PanicState.StartPanicking;
                         }
-                        else if (InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
+                        else if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
                         {
                             // Only check for cap-panic while in a mission, not while doing anything else
                             Logging.Log("Panic: Start panicking, capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage,0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]");
@@ -79,7 +79,7 @@ namespace Questor.Modules
                         }
 
                         _delayedResume = false;
-                        if (InMission)
+                        if (Cache.Instance.InMission)
                         {
                             int frigates = Cache.Instance.Entities.Count(e => e.IsFrigate && e.IsPlayer);
                             int cruisers = Cache.Instance.Entities.Count(e => e.IsCruiser && e.IsPlayer);

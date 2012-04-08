@@ -383,14 +383,15 @@ namespace Questor
                     State = QuestorState.GotoBase;
                 }
             }
+
             // Defense is more important then pause, rest (even panic) isn't!
             // Panic always runs, not just in space
             watch.Reset();
             watch.Start();
-            _panic.InMission = State == QuestorState.ExecuteMission;
+            Cache.Instance.InMission = State == QuestorState.ExecuteMission;
             if (State == QuestorState.Storyline && _storyline.State == StorylineState.ExecuteMission)
             {
-                _panic.InMission |= _storyline.StorylineHandler is GenericCombatStoryline && (_storyline.StorylineHandler as GenericCombatStoryline).State == GenericCombatStorylineState.ExecuteMission;
+                Cache.Instance.InMission |= _storyline.StorylineHandler is GenericCombatStoryline && (_storyline.StorylineHandler as GenericCombatStoryline).State == GenericCombatStorylineState.ExecuteMission;
             }
             _panic.ProcessState();
             watch.Stop();

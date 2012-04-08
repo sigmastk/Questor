@@ -185,6 +185,7 @@ namespace Questor.Modules
         public DirectAgentMission Mission;
         public bool DroneStatsWritten { get; set; }
         public bool DronesKillHighValueTargets { get; set; }
+        public bool InMission { get; set; }
 
         public bool LocalSafe(int maxBad, double stand)
         {
