@@ -311,7 +311,7 @@ namespace Questor.Modules
                                 Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
                         Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
                         Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //should this default to true?
-                        Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
+                        //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
                         IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true));
                         if (damageTypes.Any())
                         {
