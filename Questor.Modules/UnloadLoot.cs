@@ -40,19 +40,24 @@ namespace Questor.Modules
             DirectContainer lootContainer = null;
             if(!string.IsNullOrEmpty(Settings.Instance.LootContainer))
             {
-               var firstlootcontainer = itemshangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
-               if (firstlootcontainer != null)
+               if (itemshangar.IsReady)
                {
-                  long lootContainerID = firstlootcontainer.ItemId;
-                  lootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
-               }
-               else
-               {
-                  Logging.Log("UnloadLoot: unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
-                  var firstothercontainer = itemshangar.Items.FirstOrDefault(i => i.GivenName != null);
-                  if (firstothercontainer != null)
+                  var firstlootcontainer = itemshangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                  if (firstlootcontainer != null)
                   {
-                     Logging.Log("UnloadLoot: we did however find a container named [ " + firstothercontainer.GivenName + " ]");
+                     long lootContainerID = firstlootcontainer.ItemId;
+                     lootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
+                  }
+                  else
+                  {
+                     Logging.Log("UnloadLoot: unable to find LootContainer named [ " +
+                                 Settings.Instance.LootContainer.ToLower() + " ]");
+                     var firstothercontainer = itemshangar.Items.FirstOrDefault(i => i.GivenName != null);
+                     if (firstothercontainer != null)
+                     {
+                        Logging.Log("UnloadLoot: we did however find a container named [ " + firstothercontainer.GivenName +
+                                    " ]");
+                     }
                   }
                }
             }
@@ -225,7 +230,7 @@ namespace Questor.Modules
                             corpBookmarkHangar.Add(itemshangar.Items.Where(i => i.TypeId == 51));
                         }
                         _nextUnloadAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To7());
-                        Logging.Log("UnloadLoot: Stacking items: waiting until [ " + _nextUnloadAction.ToString("HH:mm:ss") + " ] to continue");
+                        Logging.Log("UnloadLoot: Stacking items in Items Hangar: waiting until [ " + _nextUnloadAction.ToString("HH:mm:ss") + " ] to continue");
                         State = UnloadLootState.StackItemsHangar;
                         break;
                     }
@@ -235,7 +240,7 @@ namespace Questor.Modules
                         Logging.Log("UnloadLoot: Moving items timed out, clearing item locks");
                         Cache.Instance.DirectEve.UnlockItems();
 
-                        Logging.Log("UnloadLoot: Stacking items");
+                        Logging.Log("UnloadLoot: Stacking items in Items Hangar");
                         State = UnloadLootState.StackItemsHangar;
                         break;
                     }
@@ -264,7 +269,7 @@ namespace Questor.Modules
                             break;
 
                         // Stack everything
-                        if (corpAmmoHangar != null)
+                        if (((corpAmmoHangar != null)  && corpAmmoHangar.IsValid) && corpAmmoHangar.IsReady)
                         {
                             corpAmmoHangar.StackAll();
                             _nextUnloadAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
@@ -281,7 +286,7 @@ namespace Questor.Modules
                             break;
 
                         // Stack everything
-                        if (corpLootHangar != null)
+                        if (((corpLootHangar != null) && corpLootHangar.IsValid) && corpLootHangar.IsReady)
                         {
                             corpLootHangar.StackAll();
                             _nextUnloadAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
@@ -298,12 +303,12 @@ namespace Questor.Modules
                             break;
 
                         // Stack everything
-                        if (lootContainer != null)
+                        if (((lootContainer != null) && lootContainer.IsValid) && lootContainer.IsReady)
                         {
                             lootContainer.StackAll();
                             _nextUnloadAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
                             _lastUnloadAction = DateTime.Now;
-                            Logging.Log("UnloadLoot: Stacking items: waiting until [ " + _nextUnloadAction.ToString("HH:mm:ss") + " ] to continue");
+                            Logging.Log("UnloadLoot: Stacking items in loot container: waiting until [ " + _nextUnloadAction.ToString("HH:mm:ss") + " ] to continue");
                         }
                     }
                     State = UnloadLootState.WaitForStacking;
