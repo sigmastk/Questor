@@ -25,6 +25,7 @@ namespace Questor.Modules
 
         private DateTime _lastJettison = DateTime.MinValue;
         private DateTime _nextSalvageAction = DateTime.MinValue;
+        private DateTime _nextPeopleandPlacesrefresh = DateTime.MinValue;
 
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)

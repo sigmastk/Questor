@@ -7,7 +7,7 @@ namespace Questor.Modules
 
     public class Cleanup
     {
-        private CleanupState State { get; set; }
+        public CleanupState State { get; set; }
         private DateTime _lastCleanupAction;
 
         public void ProcessState()
