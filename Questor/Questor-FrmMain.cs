@@ -236,17 +236,17 @@ namespace Questor
                 txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                 Cache.Instance.ExtConsole = null;
             }
-            if (DateTime.Now.Subtract(_questor.LastFrame).TotalSeconds > 90 && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
-            {
-                if (DateTime.Now.Subtract(_lastlogmessage).TotalSeconds > 60)
-                {
-                    Logging.Log("The Last UI Frame Drawn by EVE was more than 90 seconds ago! This is bad.");
-                    //
-                    // closing eve would be a very good idea here
-                    //
-                    _lastlogmessage = DateTime.Now;
-                }
-            }
+            //if (DateTime.Now.Subtract(_questor.LastFrame).TotalSeconds > 90 && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
+            //{
+            //    if (DateTime.Now.Subtract(_lastlogmessage).TotalSeconds > 60)
+            //    {
+            //        Logging.Log("The Last UI Frame Drawn by EVE was more than 90 seconds ago! This is bad.");
+            //        //
+            //        // closing eve would be a very good idea here
+            //        //
+            //        _lastlogmessage = DateTime.Now;
+            //    }
+            //}
             //if (Cache.Instance.MaxRuntime > 0 && Cache.Instance.MaxRuntime != Int32.MaxValue) //if runtime is specified, overrides stop time
             //{
             //    if (DateTime.Now.Subtract(Program.startTime).TotalSeconds > 120)
