@@ -13,8 +13,8 @@
   <!--          MISC SETTINGS          -->
   <!--                                                -->
   
-  <!-- Character Mode is either dps or salvage for combat mode or dedicated salvager mode -->
-  <CharacterMode>dps</CharacterMode><!-- default is dps -->
+  <!-- Character Mode is either Combat Missions or salvage for combat mode or dedicated salvager mode -->
+  <characterMode>Combat Missions</characterMode><!-- default is "Combat Missions" -->
   <!-- Autostart is either true or false and is for automatically running questor when ran -->
   <autoStart>true</autoStart><!-- default is true -->
   <!-- Disable 3d is either true or false and is for automatically disabling the 3D visuals in game -->
