@@ -133,7 +133,8 @@
   <reserveCargoCapacity>100</reserveCargoCapacity>
   <!-- maximum number of wreck targets, at least 1 is required for salvager or tractor beam to work -->
   <maximumWreckTargets>2</maximumWreckTargets>
-  <useGatesInSalvage>True</useGatesInSalvage><!-- default is true -->
+  <!-- if the mission does not despawn (ninja looters?) and the accel gates are still present: use gates! -->
+  <useGatesInSalvage>true</useGatesInSalvage><!-- default is true -->
   <!-- All salvage bookmarks will be prefixed by this string, default: Salvage: -->
   <bookmarkPrefix>Salvage:</bookmarkPrefix><!-- default is salvage: -->
   <!-- Minimum amount of wrecks / unlooted containers needed for a bookmark to be created -->
