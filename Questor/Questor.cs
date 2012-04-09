@@ -555,7 +555,7 @@ namespace Questor
                     }
                     else
                     {
-                        Logging.Log("Character Mode is [" + Settings.Instance.CharacterMode + "] no need to write any mission stats");
+                        //Logging.Log("Character Mode is [" + Settings.Instance.CharacterMode + "] no need to write any mission stats");
                     }
 
 
