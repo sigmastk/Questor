@@ -93,7 +93,7 @@ namespace Questor.Modules
                 if (!entities.Any())
                 {
                     // not found, that cant be true?!?!?!?!
-                    Logging.Log("Traveler: Error [Stargate (" + locationName + ")] not found, most likely lag waiting 15 seconds.");
+                    Logging.Log("Traveler: Error [" + locationName + "] not found, most likely lag waiting 15 seconds.");
                     _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerNoStargatesFoundRetryDelay_seconds);
                     return;
                 }
@@ -119,7 +119,7 @@ namespace Questor.Modules
                 {
                     if (DateTime.Now > Cache.Instance._nextWarpTo)
                     {
-                        Logging.Log("Traveler: Warping to [Stargate (" + locationName + ")]");
+                        Logging.Log("Traveler: Warping to [" + locationName + "]");
                         entity.WarpTo();
                         Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                     }

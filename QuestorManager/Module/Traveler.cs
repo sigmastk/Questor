@@ -89,7 +89,7 @@ namespace QuestorManager.Module
             if (entities.Count() == 0)
             {
                 // not found, that cant be true?!?!?!?!
-                Logging.Log("QuestorManager: Error [Stargate (" + locationName + ")] not found, most likely lag waiting 15 seconds.");
+                Logging.Log("QuestorManager: Error [" + locationName + "] not found, most likely lag waiting 15 seconds.");
                 _nextAction = DateTime.Now.AddSeconds(15);
                 return;
             }
@@ -110,7 +110,7 @@ namespace QuestorManager.Module
             }
             else
             {
-                Logging.Log("QuestorManager: Warping to [Stargate (" + locationName + ")] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
+                Logging.Log("QuestorManager: Warping to [" + locationName + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                 entity.WarpTo();
 
                 _nextAction = DateTime.Now.AddSeconds(5);
