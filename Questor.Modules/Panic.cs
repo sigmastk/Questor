@@ -21,8 +21,7 @@ namespace Questor.Modules
         private double _lastNormalZ;
 
         private DateTime _resumeTime;
-        private DateTime _nextDock = DateTime.Now;
-        private DateTime _nextWarpTo = DateTime.Now;
+
         //private DateTime _lastDockedorJumping;
         private DateTime _lastWarpScrambled = DateTime.MinValue;
         private bool _delayedResume;
@@ -187,23 +186,61 @@ namespace Questor.Modules
 
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
-                            if (DateTime.Now > _nextWarpTo)
+                            if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                            {
+                                Logging.Log("Panic: We are still warp scrambled!"); //This runs every 'tick' so we should see it every 1.5 seconds or so
+                                _lastWarpScrambled = DateTime.Now;
+                            }
+                            else
+                            {
+                                if (DateTime.Now > Cache.Instance.NextWarpTo || DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < (int)Time.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
                             {
                                 Logging.Log("Panic: Warping to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
                                 station.WarpToAndDock();
-                                _nextWarpTo = DateTime.Now.AddSeconds(5);
-                                _nextDock = DateTime.MinValue;
+                                    Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                                    //_nextDock = DateTime.MinValue;
+                                }
+                                else
+                                {
+                                    Logging.Log("Panic: Warping has been delayed until [" + Cache.Instance.NextWarpTo.ToString("HH:mm:ss") + "]");
                             }
                         }
-                        else if (DateTime.Now > _nextDock)
-                        {
-                            Logging.Log("Panic: Docking with [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
-                            station.Dock();
-                            _nextDock = DateTime.Now.AddSeconds(5);
                         }
                         else
                         {
-                            Logging.Log("Panic: Docking has been delayed until [" + _nextDock.ToString("HH:mm:ss") + "]");
+                            if (station.Distance < (int)Distance.DockingRange)
+                            {
+                                if (DateTime.Now > Cache.Instance.NextUndockAction)
+                                {
+                                   Logging.Log("Panic: Docking with [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
+                                   station.Dock();
+                                   Cache.Instance.NextUndockAction = DateTime.Now.AddSeconds((int)Time.DockingDelay_seconds);
+                                }
+                                else
+                                {
+                                    Logging.Log("Panic: Docking has been delayed until [" + Cache.Instance.NextUndockAction.ToString("HH:mm:ss") + "]");
+                                }
+                            }
+                            else
+                            {
+                                if (DateTime.Now > Cache.Instance.NextTravelerAction)
+                                {
+                                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id)
+                                    {
+                                        Logging.Log("Panic: Approaching to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
+                                        station.Approach();
+                                        Cache.Instance.NextTravelerAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                                    }
+                                    else
+                                    {
+                                        Logging.Log("Panic: Already Approaching to: [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
+                                    }
+                                }
+                                else
+                                {
+                                    Logging.Log("Panic: Approaching has been delayed until [" + Cache.Instance.NextTravelerAction.ToString("HH:mm:ss") + "]");
+                                }
+                            }
                         }
                         break;
                     }
@@ -229,15 +266,15 @@ namespace Questor.Modules
                             Logging.Log("Panic: We are still warp scrambled!"); //This runs every 'tick' so we should see it every 1.5 seconds or so
                             _lastWarpScrambled = DateTime.Now;
                         }
-                        else if (DateTime.Now > _nextWarpTo | DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < 10) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                        else if (DateTime.Now > Cache.Instance.NextWarpTo | DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < 10) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                         {
                             Logging.Log("Panic: Warping to [" + Cache.Instance.Star.Name + "] which is [" + Math.Round(Cache.Instance.Star.Distance/1000, 0) + "k away]");
                             Cache.Instance.Star.WarpTo();
-                            _nextWarpTo = DateTime.Now.AddSeconds(5);
+                            Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                         }
                         else
                         {
-                            Logging.Log("Panic: Warping has been delayed until [" + _nextWarpTo.ToString("HH:mm:ss") + "]");
+                            Logging.Log("Panic: Warping has been delayed until [" + Cache.Instance.NextWarpTo.ToString("HH:mm:ss") + "]");
                         }
                     }
                     else

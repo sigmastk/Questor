@@ -13,6 +13,7 @@ namespace Questor.Modules
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
+    using Questor.Modules;
 
     /// <summary>
     ///   The combat class will target and kill any NPC that is targeting the questor.
@@ -244,59 +245,87 @@ namespace Questor.Modules
         /// </summary>
         private void ActivateWeapons(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance._nextWeaponAction) //if we just did something wait a fraction of a second
+           if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
                 return;
-
-            if (Settings.Instance.SpeedTank && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
-            {
-                if (DateTime.Now > Cache.Instance._nextOrbit)
-                {
-                    target.Orbit(Cache.Instance.OrbitDistance);
-                    Logging.Log("Combat.ActivateWeapons: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
-                    Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                }
-            }
 
             //
             // Do we really want a non-mission action moving the ship around at all!! (other than speed tanking)?
             // If you are not in a mission by all means let combat actions move you around as needed
-            if (!Cache.Instance.InMission) 
+            if (!Cache.Instance.InMission)
             {
-                // Get lowest range
-                double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+                //why not keep here approach and orbit? it would work for all of of mission controller states as well as combat helper
+                if (DateTime.Now > Cache.Instance.NextOrbit)
+                {
+                    if (target.Distance + (int)Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
+                    {
+                        Logging.Log("MissionController.StartOrbiting: Target in range");
+                        if (!Cache.Instance.IsApproachingOrOrbiting)
+                        {
+                            Logging.Log("We are not approaching nor orbiting");
+                            var orbitStructure = false;
+                            var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
 
-                if (!Settings.Instance.SpeedTank) //we need to make sure that orbitrange is set to the range of the ship if it isn't specified in the character XML!!!!
+                            if (orbitStructure && structure != null)
+                            {
+                                structure.Orbit((int)Cache.Instance.OrbitDistance);
+                                Logging.Log("MissionController.Combat: Initiating Orbit [" + structure.Name + "][ID: " + structure.Id + "]");
+                            }
+                            else
+                            {
+                                target.Orbit(Cache.Instance.OrbitDistance);
+                                Logging.Log("Combat.ActivateWeapons: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
+                            }
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                            return;
+                         }
+                    }
+                    else
+                    {
+                        Logging.Log("Combat: Possible out of range. ignoring orbit around structure");
+                        target.Orbit(Cache.Instance.OrbitDistance);
+                        Logging.Log("Combat.Combat: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
+                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                        return;
+                    }
+                    //else Logging.Log("MissionControler:Too soon to orbit. Next orbiting delayed until [" + Cache.Instance.NextOrbit.ToString("HH:mm:ss") + "]");
+                }
+                else
+                {
+                  if (DateTime.Now > Cache.Instance.NextApproachAction)
                 {
                     if (Settings.Instance.OptimalRange != 0)
                     {
                         if (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
                             target.Approach(Settings.Instance.OptimalRange);
-                            Logging.Log("Combat.ActivateWeapons:: Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "]");
+                            Logging.Log("Combat.ActivateWeapons:: Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                         }
-
+                        //ahaw: I think when approach distance will be reached ship will be stoppedd so this is not needed
                         if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
                         {
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                             Cache.Instance.Approaching = null;
-                            Logging.Log("Combat.ActivateWeapons: Using Optimal Range: Stop ship, target is in orbit range");
+                            Logging.Log("Combat.ActivateWeapons: Using Optimal Range: Stop ship, target at [" + Math.Round(target.Distance / 1000, 0) + "k away] is inside optimal");
                         }
                     }
                     else
                     {
-                        if (target.Distance > range && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                        if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
                             target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
-                            Logging.Log("Combat.ActivateWeapons: Using Weapons Range: Approaching target [" + target.Name + "][ID: " + target.Id + "]");
+                            Logging.Log("Combat.ActivateWeapons: Using Weapons Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                         }
-
-                        if (target.Distance <= range && Cache.Instance.Approaching != null)
+                        //ahaw: I think when approach distance will be reached ship will be stoppedd so this is not needed
+                        if (target.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching != null)
                         {
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                             Cache.Instance.Approaching = null;
                             Logging.Log("Combat.ActivateWeapons: Using Weapons Range: Stop ship, target is in orbit range");
                         }
                     }
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    return;
+                 }
                 }
             }
 
@@ -312,10 +341,10 @@ namespace Questor.Modules
                 {
                     if (Settings.Instance.WeaponGroupId == 55 || Settings.Instance.WeaponGroupId == 508 || Settings.Instance.WeaponGroupId == 506)
                     {
-                    if (target.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !target.TargetValue.HasValue && target.GroupId != (int)Group.LargeCollidableStructure)
-                        {
-                            weapon.Deactivate();
-                        }
+                       if (target.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !target.TargetValue.HasValue && target.GroupId != (int)Group.LargeCollidableStructure)
+                       {
+                          weapon.Click();
+                       }
                     }
                 }
                 if (!weapon.IsActive)
@@ -348,7 +377,7 @@ namespace Questor.Modules
                     continue;
                 }
                 // Target is out of range, stop firing
-                weapon.Deactivate();
+                weapon.Click();
             }
 
             // Hax for max charges returning incorrect value
@@ -368,7 +397,7 @@ namespace Questor.Modules
                 if (weapon.IsActive)
                 {
                     if (weapon.TargetId != target.Id)
-                        weapon.Deactivate();
+                       weapon.Click();
 
                     continue;
                 }
@@ -378,7 +407,7 @@ namespace Questor.Modules
                 {
                     Logging.Log("Combat: Activating weapon  [" + weapon.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away]");
                     weapon.Activate(target.Id);
-                    Cache.Instance._nextWeaponAction = DateTime.Now.AddMilliseconds((int)Time.WeaponDelay_milliseconds);
+                    Cache.Instance.NextWeaponAction = DateTime.Now.AddMilliseconds((int)Time.WeaponDelay_milliseconds);
                     //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
@@ -391,7 +420,7 @@ namespace Questor.Modules
         /// </summary>
         public void ActivateTargetPainters(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance._nextWeaponAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
                 return;
 
             List<ModuleCache> targetPainters = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TargetPainter).ToList();
@@ -404,7 +433,7 @@ namespace Questor.Modules
                 if (painter.IsActive)
                 {
                     if (painter.TargetId != target.Id)
-                        painter.Deactivate();
+                       painter.Click();
 
                     continue;
                 }
@@ -417,7 +446,7 @@ namespace Questor.Modules
                 {
                     Logging.Log("Combat: Activating painter [" + painter.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away]");
                     painter.Activate(target.Id);
-                    Cache.Instance._nextPainterAction = DateTime.Now.AddMilliseconds((int)Time.PainterDelay_milliseconds);
+                    Cache.Instance.NextPainterAction = DateTime.Now.AddMilliseconds((int)Time.PainterDelay_milliseconds);
                     return;
                 }
             }
@@ -427,7 +456,7 @@ namespace Questor.Modules
         /// </summary>
         public void ActivateNos(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance._nextWeaponAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
                 return;
 
             List<ModuleCache> noses = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.NOS).ToList();
@@ -440,7 +469,7 @@ namespace Questor.Modules
                 if (nos.IsActive)
                 {
                     if (nos.TargetId != target.Id)
-                        nos.Deactivate();
+                       nos.Click();
 
                     continue;
                 }
@@ -457,7 +486,7 @@ namespace Questor.Modules
                 {
                     Logging.Log("Combat: Activating Nos     [" + nos.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away]");
                     nos.Activate(target.Id);
-                    Cache.Instance._nextNosAction = DateTime.Now.AddMilliseconds((int)Time.NosDelay_milliseconds);
+                    Cache.Instance.NextNosAction = DateTime.Now.AddMilliseconds((int)Time.NosDelay_milliseconds);
                     return;
                 }
                 else
@@ -471,7 +500,7 @@ namespace Questor.Modules
         /// </summary>
         public void ActivateStasisWeb(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance._nextWeaponAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
                 return;
 
             List<ModuleCache> webs = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.StasisWeb).ToList();
@@ -484,7 +513,7 @@ namespace Questor.Modules
                 if (web.IsActive)
                 {
                     if (web.TargetId != target.Id)
-                        web.Deactivate();
+                       web.Click();
 
                     continue;
                 }
@@ -501,7 +530,7 @@ namespace Questor.Modules
                 {
                     Logging.Log("Combat: Activating web     [" + web.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "]");
                     web.Activate(target.Id);
-                    Cache.Instance._nextWebAction = DateTime.Now.AddMilliseconds((int)Time.WebDelay_milliseconds);
+                    Cache.Instance.NextWebAction = DateTime.Now.AddMilliseconds((int)Time.WebDelay_milliseconds);
                     return; 
                 }
             }
@@ -514,7 +543,7 @@ namespace Questor.Modules
         /// </remarks>
         private void TargetCombatants()
         {
-            if (DateTime.Now < Cache.Instance._nextTargetAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
                 return;
 
             // We are jammed, forget targeting anything...
@@ -554,7 +583,7 @@ namespace Questor.Modules
             for (int i = combatTargets.Count - 1; i >= 0; i--)
             {
                 EntityCache target = combatTargets[i];
-                if (target.Distance > maxRange*1.5d)
+                if (target.Distance > Cache.Instance.MaxRange * 1.5d)
                 {
                     Logging.Log("Combat: Target [" + target.Name + "][ID: " + target.Id + "] out of range [" + Math.Round(target.Distance/1000,0) + "k away]");
                 }
@@ -565,7 +594,7 @@ namespace Questor.Modules
                 else continue;
 
                 target.UnlockTarget();
-                Cache.Instance._nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
                 combatTargets.RemoveAt(i);
                 return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server
             }
@@ -575,8 +604,8 @@ namespace Questor.Modules
             List<EntityCache> lowValueTargets = combatTargets.Where(t => !t.TargetValue.HasValue && !Cache.Instance.PriorityTargets.Any(pt => pt.Id == t.Id)).ToList();
 
             // Build a list of things targeting me
-            List<EntityCache> targetingMe = Cache.Instance.TargetedBy.Where(t => t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < maxRange && !targets.Any(c => c.Id == t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
-            List<EntityCache> highValueTargetingMe = targetingMe.Where(t => t.TargetValue.HasValue).OrderByDescending(t => t.TargetValue.Value).ThenBy(t => t.Distance).ToList();
+            List<EntityCache> targetingMe = Cache.Instance.TargetedBy.Where(t => t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < Cache.Instance.MaxRange && !targets.Any(c => c.Id == t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
+            List<EntityCache> highValueTargetingMe = targetingMe.Where(t => t.TargetValue.HasValue).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(t => t.Distance).ToList();
             List<EntityCache> lowValueTargetingMe = targetingMe.Where(t => !t.TargetValue.HasValue).OrderBy(t => t.Distance).ToList();
 
             // Get the number of maximum targets, if there are no low or high value targets left, use the combined total of targets
@@ -594,7 +623,7 @@ namespace Questor.Modules
                 Logging.Log("Combat: unlocking high value target [" + target.Name + "][ID:" + target.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance/1000,0) + "k away]");
                 target.UnlockTarget();
                 highValueTargets.Remove(target);
-                Cache.Instance._nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
                 return;
             }
 
@@ -606,7 +635,7 @@ namespace Questor.Modules
                 Logging.Log("Combat: unlocking low value target [" + target.Name + "][ID:" + target.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance/1000,0) + "k away]");
                 target.UnlockTarget();
                 lowValueTargets.Remove(target);
-                Cache.Instance._nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
                 return;
             }
 
@@ -616,7 +645,7 @@ namespace Questor.Modules
                 return;
 
             // Do we have any priority targets?
-            IEnumerable<EntityCache> priority = Cache.Instance.PriorityTargets.Where(t => t.Distance < maxRange && !targets.Any(c => c.Id == t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
+            IEnumerable<EntityCache> priority = Cache.Instance.PriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && !targets.Any(c => c.Id == t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
             foreach (EntityCache entity in priority)
             {
                 // Have we reached the limit of high value targets?
@@ -632,10 +661,9 @@ namespace Questor.Modules
                     Logging.Log("Combat: Targeting priority target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance/1000,0) + "k away]");
                     entity.LockTarget();
                     highValueTargets.Add(entity);
-                    Cache.Instance._nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
                     return;
                 }
-                
             }
 
             foreach (EntityCache entity in highValueTargetingMe)
@@ -653,7 +681,7 @@ namespace Questor.Modules
                     Logging.Log("Combat: Targeting high value target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance/1000,0) + "k away]");
                     entity.LockTarget();
                     highValueTargets.Add(entity);
-                    Cache.Instance._nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
                     return;
                 }
             }
@@ -673,10 +701,9 @@ namespace Questor.Modules
                     Logging.Log("Combat: Targeting low value target [" + entity.Name + "][ID:" + entity.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(entity.Distance/1000,0) + "k away]");
                     entity.LockTarget();
                     lowValueTargets.Add(entity);
-                    Cache.Instance._nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
                     return;
                 }
-                
             }
         }
 

@@ -11,25 +11,29 @@ namespace Questor.Modules
 {
     public enum Time
     {
+        LootingDelay_milliseconds,                               // Delay between loot attempts
+        WarpScrambledNoDelay_seconds = 10,                       // Time after you are no longer warp scrambled to consider it IMPORTANT That you warp soon
+        RemoveBookmarkDelay_seconds = 2,                         // Dealy between each removal of a bookmark
         QuestorPulse_milliseconds = 1000,                         // Used to delay the next pulse, units: milliseconds. Default is 1500
-        DefenceDelay_milliseconds = 500,
-        AfterburnerDelay_milliseconds = 1000,
-        RepModuleDelay_milliseconds = 2500,
-        ApproachDelay_seconds = 10,
-        TargetDelay_milliseconds = 1000,
+        DefenceDelay_milliseconds = 500,                         // Delay between defence actions
+        AfterburnerDelay_milliseconds = 1000,                    // 
+        RepModuleDelay_milliseconds = 2500,                      //
+        ApproachDelay_seconds = 15,                              //
+        TargetDelay_milliseconds = 1000,                         //
+        DelayBetweenSalvagingSessions_minutes = 20,              //
         OrbitDelay_seconds = 15,                                 // This is the delay between orbit commands, units: seconds. Default is 15
         DockingDelay_seconds = 5,                                // This is the delay between docking attempts, units: seconds. Default is 5
         WarptoDelay_seconds = 5,                                 // This is the delay between warpto commands, units: seconds. Default is 5
-        WeaponDelay_milliseconds = 220,
-        NosDelay_milliseconds = 220,
-        WebDelay_milliseconds = 220,
-        PainterDelay_milliseconds = 220,
+        WeaponDelay_milliseconds = 220,                          //
+        NosDelay_milliseconds = 220,                             //
+        WebDelay_milliseconds = 220,                             //
+        PainterDelay_milliseconds = 220,                         //
         ValidateSettings_seconds = 15,                           // This is the delay between character settings validation attempts. The settings will be reloaded at this interval if they have changed. Default is 15
         SetupLogPathDelay_seconds = 10,                          // Why is this delay here? this can likely be removed with some testing... Default is 10
         SessionRunningTimeUpdate_seconds = 15,                   // This is used to update the session running time counter every x seconds: default is 15 seconds
         WalletCheck_minutes = 1,                                 // Used to delay the next wallet balance check, units: minutes. Default is 1
         DelayedGotoBase_seconds = 15,                            // Delay before going back to base, usually after a disconnect / reconnect. units: seconds. Default is 15
-        WaitforBadGuytoGoAway_minutes = 5,                       // Stay docked for this amount of time before checking local again, units: minutes. Default is 5
+        WaitforBadGuytoGoAway_minutes = 25,                       // Stay docked for this amount of time before checking local again, units: minutes. Default is 5
         CloseQuestorDelayBeforeExit_seconds = 20,                // Delay before closing eve, units: seconds. Default is 20
         QuestorBeforeLoginPulseDelay_milliseconds = 60,          // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule
         SwitchShipsDelay_seconds = 10,                           // Switch Ships Delay before retrying, units: seconds. Default is 10
@@ -44,14 +48,14 @@ namespace Questor.Modules
         DelayBetweenJetcans_seconds = 185,                       // Once you have made a jetcan you cannot make another for 3 minutes, units: seconds. Default is 185 (to account for lag)
         SalvageStackItemsDelayBeforeResuming_seconds = 5,        // When stacking items in cargohold delay before proceeding, units: seconds. Default is 5
         SalvageStackItems_seconds = 150,                         // When salvaging stack items in your cargo every x seconds, units: seconds. Default is 180
-        SalvageDelayBetweenActions_milliseconds=200,
+        SalvageDelayBetweenActions_milliseconds=200,             //
         TravelerExitStationAmIInSpaceYet_seconds = 17,           // Traveler - Exit Station before you are in space delay, units: seconds. Default is 7
         TravelerNoStargatesFoundRetryDelay_seconds = 15,         // Traveler could not find any stargates, retry when this time has elapsed, units: seconds. Default is 15
         TravelerJumpedGateNextCommandDelay_seconds = 15,         // Traveler jumped a gate - delay before assuming we have loaded grid, units: seconds. Default is 15
         TravelerInWarpedNextCommandDelay_seconds = 15,           // Traveler is in warp - delay before processing another command, units: seconds. Default is 15
         WrecksDisappearAfter_minutes = 110,                      // used to determine how long a wreck will be in space: usually to delay salvaging until a later time, units: minutes. Default is 120 minutes (2 hours)
-        AverageTimeToCompleteAMission_minutes = 30,              // average time for all missions, all races, all shiptypes (guestimated)... it is used to determine when to do things like salvage. units: minutes. Default is 30 
-        AverageTimetoSalvageMultipleMissions_minutes = 30,       // average time it will take to salvage the multiple mission chain we plan on salvaging all in one go.
+        AverageTimeToCompleteAMission_minutes = 40,              // average time for all missions, all races, all shiptypes (guestimated)... it is used to determine when to do things like salvage. units: minutes. Default is 30
+        AverageTimetoSalvageMultipleMissions_minutes = 40,       // average time it will take to salvage the multiple mission chain we plan on salvaging all in one go.
         CheckForWindows_seconds = 15                             // Check for and deal with modal windows every x seconds, units: seconds. Default is 15
      }
 }

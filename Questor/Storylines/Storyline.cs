@@ -13,12 +13,12 @@
         public long AgentId { get; private set; }
         
         private IStoryline _storyline;
-        private Dictionary<string, IStoryline> _storylines;
-        private List<long> _agentBlacklist;
+        private readonly Dictionary<string, IStoryline> _storylines;
+        private readonly List<long> _agentBlacklist;
 
-        private Combat _combat;
-        private Traveler _traveler;
-        private AgentInteraction _agentInteraction;
+        private readonly Combat _combat;
+        private readonly Traveler _traveler;
+        private readonly AgentInteraction _agentInteraction;
 
         private DateTime _nextAction = DateTime.MinValue;
         private DateTime _nextStoryLineAttempt = DateTime.MinValue;
@@ -31,40 +31,43 @@
 
             _agentBlacklist = new List<long>();
 
-            _storylines = new Dictionary<string, IStoryline>();
-            //_storylines.Add("__", new GenericCombatStoryline());
-            _storylines.Add("Materials For War Preparation", new MaterialsForWarPreparation());
-            _storylines.Add("Shipyard Theft", new GenericCombatStoryline());
-            _storylines.Add("Evolution", new GenericCombatStoryline());
-            _storylines.Add("Record Cleaning", new GenericCombatStoryline());
-            _storylines.Add("Covering Your Tracks", new GenericCombatStoryline());
-            _storylines.Add("Crowd Control", new GenericCombatStoryline());
-            _storylines.Add("A Force to Be Reckoned With", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - The Secret Meeting (7 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - Defend the Civilian Convoy (8 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - Retrieve the Prisoners (9 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Kidnappers Strike - The Final Battle (10 of 10)", new GenericCombatStoryline());
-            _storylines.Add("Whispers in the Dark - First Contact (1 of 4)", new GenericCombatStoryline());
-            _storylines.Add("Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline());
-            _storylines.Add("Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline());
-            _storylines.Add("Transaction Data Delivery", new TransactionDataDelivery());
-            _storylines.Add("Innocents in the Crossfire", new GenericCombatStoryline());
-            _storylines.Add("Patient Zero", new GenericCombatStoryline());
-            _storylines.Add("Soothe the Salvage Beast", new GenericCombatStoryline());
-            _storylines.Add("Forgotten Outpost", new GenericCombatStoryline());
-            _storylines.Add("Stem the Flow", new GenericCombatStoryline());
-            _storylines.Add("Quota Season", new GenericCombatStoryline()); //why cant we pickup the Custom Circuitry? problem in salvage.cs somewhere: "salvage: Container" name: Number "contained no valuable loot"
-            //_storylines.Add("Matriarch", new GenericCombatStoryline());
-            //_storylines.Add("Diplomatic Incident", new GenericCombatStoryline());
-            _storylines.Add("Nine Tenths of the Wormhole", new GenericCombatStoryline());
+            _storylines = new Dictionary<string, IStoryline>
+                {
+                    //{"__", new GenericCombatStoryline()}, //example
+                    {"Materials For War Preparation", new MaterialsForWarPreparation()},
+                    {"Shipyard Theft", new GenericCombatStoryline()},
+                    {"Evolution", new GenericCombatStoryline()},
+                    {"Record Cleaning", new GenericCombatStoryline()},
+                    {"Covering Your Tracks", new GenericCombatStoryline()},
+                    {"Crowd Control", new GenericCombatStoryline()},
+                    {"A Force to Be Reckoned With", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - The Secret Meeting (7 of 10)", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - Retrieve the Prisoners (9 of 10)", new GenericCombatStoryline()},
+                    {"Kidnappers Strike - The Final Battle (10 of 10)", new GenericCombatStoryline()},
+                    {"Whispers in the Dark - First Contact (1 of 4)", new GenericCombatStoryline()},
+                    {"Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline()},
+                    {"Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline()},
+                    {"Transaction Data Delivery", new TransactionDataDelivery()},
+                    {"Innocents in the Crossfire", new GenericCombatStoryline()},
+                    {"Patient Zero", new GenericCombatStoryline()},
+                    {"Soothe the Salvage Beast", new GenericCombatStoryline()},
+                    {"Forgotten Outpost", new GenericCombatStoryline()},
+                    {"Stem the Flow", new GenericCombatStoryline()},
+                    {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
+                    {"Blood Farm", new GenericCombatStoryline()}, 
+                    {"Jealous Rivals", new GenericCombatStoryline()},
+                    //{"Quota Season", new GenericCombatStoryline()}, //why cant we pickup the Custom Circuitry? problem in salvage.cs somewhere: "salvage: Container" name: Number "contained no valuable loot"
+                    //{"Matriarch", new GenericCombatStoryline()},
+                    //{"Diplomatic Incident", new GenericCombatStoryline()},
+                    //these work but are against other factions that I generally like to avoid
+                    //{"The Blood of Angry Men", new GenericCombatStoryline()},  //amarr faction
+                    //{"Amarrian Excavators", new GenericCombatStoryline()}, 	//amarr faction
+                };
         }
-            //these work but are against other factions that I generally like to avoid
-            //_storylines.Add("The Blood of Angry Men", new GenericCombatStoryline());  //amarr faction
-            //_storylines.Add("Amarrian Excavators", new GenericCombatStoryline()); 	//amarr faction
-
 
         public void Reset()
         {
@@ -87,14 +90,15 @@
                 missions = missions.Where(m => !_agentBlacklist.Contains(m.AgentId));
                 missions = missions.Where(m => m.Important);
                 missions = missions.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name)));
-                missions = missions.Where(m => !Settings.Instance.Blacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
+                missions = missions.Where(m => !Settings.Instance.MissionBlacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
+                //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
                 return missions.FirstOrDefault();
             }
         }
 
         private void IdleState()
         {
-            var mission = Mission;
+            DirectAgentMission mission = Mission;
             if (mission == null)
             {
                 _nextStoryLineAttempt = DateTime.Now.AddMinutes(15);
@@ -104,7 +108,7 @@
             }
 
             AgentId = mission.AgentId;
-            var agent = Cache.Instance.DirectEve.GetAgentById(AgentId);
+            DirectAgent agent = Cache.Instance.DirectEve.GetAgentById(AgentId);
             if (agent == null)
             {
                 Logging.Log("Storyline: Unknown agent [" + AgentId + "]");
@@ -122,7 +126,7 @@
 
         private void GotoAgent(StorylineState nextState)
         {
-            var agent = Cache.Instance.DirectEve.GetAgentById(AgentId);
+            DirectAgent agent = Cache.Instance.DirectEve.GetAgentById(AgentId);
             if (agent == null)
             {
                 State = StorylineState.Done;
@@ -152,12 +156,12 @@
 
         private void BringSpoilsOfWar()
         {
-            var directEve = Cache.Instance.DirectEve;
+            DirectEve directEve = Cache.Instance.DirectEve;
             if (_nextAction > DateTime.Now)
                 return;
 
             // Open the item hangar (should still be open)
-            var hangar = directEve.GetItemHangar();
+            DirectContainer hangar = directEve.GetItemHangar();
             if (hangar.Window == null)
             {
                 _nextAction = DateTime.Now.AddSeconds(10);
@@ -180,7 +184,7 @@
             }
 
             // Yes, open the ships cargo
-            var cargo = directEve.GetShipsCargo();
+            DirectContainer cargo = directEve.GetShipsCargo();
             if (cargo.Window == null)
             {
                 _nextAction = DateTime.Now.AddSeconds(10);
@@ -198,7 +202,7 @@
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
             {
                 // Move all the implants to the cargo bay
-                foreach (var item in hangar.Items.Where(i => i.GroupId >= 738 && i.GroupId <= 750))
+                foreach (DirectItem item in hangar.Items.Where(i => i.GroupId >= 738 && i.GroupId <= 750))
                 {
                     if (cargo.Capacity - cargo.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
@@ -210,10 +214,8 @@
                     Logging.Log("Storyline: Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo");
                     cargo.Add(item, item.Quantity);
                 }
-
                 _nextAction = DateTime.Now.AddSeconds(10);
             }
-
             return;
         }
 

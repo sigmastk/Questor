@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 // 
@@ -18,7 +18,6 @@ namespace Questor.Modules
 
     public class Arm
     {
-        private DateTime _nextArmAction;
         private bool _missionItemMoved;
 
         public Arm()
@@ -76,13 +75,13 @@ namespace Questor.Modules
                     TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
                     UseMissionShip = false; // Were we successful in activating the mission specific ship?
                     State = ArmState.OpenShipHangar;
-                    _nextArmAction = DateTime.Now;
+                    Cache.Instance.NextArmAction = DateTime.Now;
                     break;
 
                 case ArmState.OpenShipHangar:
                 case ArmState.SwitchToTransportShip:
                 case ArmState.SwitchToSalvageShip:
-                    if (DateTime.Now > _nextArmAction) //default 10 seconds
+                    if (DateTime.Now > Cache.Instance.NextArmAction) //default 10 seconds
                     {
                         // Is the ship hangar open?
                         if (shipHangar.Window == null)
@@ -90,7 +89,7 @@ namespace Questor.Modules
                             // No, command it to open
                             Logging.Log("Arm: Opening Ship Hangar");
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                            _nextArmAction = DateTime.Now.AddSeconds(3);
+                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(3);
                             break;
                         }
 
@@ -117,10 +116,9 @@ namespace Questor.Modules
                     break;
 
                 case ArmState.ActivateTransportShip:
+                    if (DateTime.Now < Cache.Instance.NextArmAction) return;
                     string transportshipName = Settings.Instance.TransportShipName.ToLower();
                     
-                    if (DateTime.Now > _nextArmAction) //default 10 seconds
-                    {
                         if (string.IsNullOrEmpty(transportshipName))
                         {
                             State = ArmState.NotEnoughAmmo;
@@ -129,17 +127,16 @@ namespace Questor.Modules
                         }
                        if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
                        {
-                            
                           List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
                           foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
                           {
                              Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                              ship.ActivateShip();
-                             _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                             Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
                           }
                           return;
                        }
-                       if (DateTime.Now > _nextArmAction) //default 7 seconds
+                       if (DateTime.Now > Cache.Instance.NextArmAction) //default 7 seconds
                        {
 
                           if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == transportshipName)
@@ -150,13 +147,11 @@ namespace Questor.Modules
                           }
                        }
                        break;
-                    }
-                    break;
                     
                 case ArmState.ActivateSalvageShip:
                     string salvageshipName = Settings.Instance.SalvageShipName.ToLower();
                     
-                    if (DateTime.Now > _nextArmAction) //default 10 seconds
+                    if (DateTime.Now > Cache.Instance.NextArmAction) //default 10 seconds
                     {
                         if (string.IsNullOrEmpty(salvageshipName))
                         {
@@ -167,25 +162,25 @@ namespace Questor.Modules
 
                         if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
                         {
-                            if (DateTime.Now > _nextArmAction)
+                            if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
                                 List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName))
                                 {
                                     Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                                     ship.ActivateShip();
-                                    _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                                    Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
                                 }
                                 return;
                             }
                             return;
                         }
-                        if (DateTime.Now > _nextArmAction && (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
+                        if (DateTime.Now > Cache.Instance.NextArmAction && (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
                         {
                             State = ArmState.OpenShipHangar;
                             break;
                         }
-                        if (DateTime.Now > _nextArmAction)
+                        if (DateTime.Now > Cache.Instance.NextArmAction)
                         {
                             Logging.Log("Arm: Done");
                             State = ArmState.Done;
@@ -197,7 +192,7 @@ namespace Questor.Modules
                 case ArmState.ActivateCombatShip:
                     string shipName = Settings.Instance.CombatShipName.ToLower();
 
-                    if (DateTime.Now > _nextArmAction) //default is 3 seconds after opening items hangar
+                    if (DateTime.Now < Cache.Instance.NextArmAction) return;//default is 3 seconds after opening items hangar
                     {
                         if (string.IsNullOrEmpty(shipName))
                         {
@@ -220,14 +215,14 @@ namespace Questor.Modules
 
                         if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
                         {
-                            if (DateTime.Now > _nextArmAction)
+                        if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
                                 List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
                                 {
                                     Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                                     ship.ActivateShip();
-                                    _nextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                                    Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int) Time.SwitchShipsDelay_seconds);
                                     if (TryMissionShip)
                                         UseMissionShip = true;
                                     return;
@@ -279,21 +274,20 @@ namespace Questor.Modules
                         {
                             State = ArmState.OpenItemHangar;
                         }
-                        break;
                     }
                     break;
 
                 case ArmState.OpenItemHangar:
                     // Is the hangar open?
 
-                    if (DateTime.Now > _nextArmAction)
+                    if (DateTime.Now > Cache.Instance.NextArmAction)
                     {
                         if (itemHangar.Window == null)
                         {
                             // No, command it to open
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                            _nextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
-                            Logging.Log("Arm: Opening Item Hangar: waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds, 0) + "sec ]");
+                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
+                            Logging.Log("Arm: Opening Item Hangar: waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                             break;
                         }
                     }
@@ -317,14 +311,14 @@ namespace Questor.Modules
                     // Is the hangar open?
                     if (corpHangar != null)
                     {
-                        if (DateTime.Now > _nextArmAction)
+                        if (DateTime.Now > Cache.Instance.NextArmAction)
                         {
                             if (corpHangar.Window == null)
                             {
                                 // No, command it to open
                                 Cache.Instance.DirectEve.OpenCorporationHangar();
-                                _nextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
-                                Logging.Log("Arm: Opening Corporate Hangar: waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds, 0) + "sec ]");
+                                Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
+                                Logging.Log("Arm: Opening Corporate Hangar: waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                                 break;
                             }
                         }
@@ -339,14 +333,14 @@ namespace Questor.Modules
 
                 case ArmState.OpenCargo:
                     // Is cargo open?
-                    if (DateTime.Now > _nextArmAction)
+                    if (DateTime.Now > Cache.Instance.NextArmAction)
                     {
                         if (cargo.Window == null)
                         {
                             // No, command it to open
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                            _nextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
-                            Logging.Log("Arm: Cargohold of active ship: waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds, 0) + "sec ]");
+                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
+                            Logging.Log("Arm: Cargohold of active ship: waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                             
                             break;
                         }
@@ -379,11 +373,11 @@ namespace Questor.Modules
                     }
                     else
                     {
-                        if (DateTime.Now > _nextArmAction)
+                        if (DateTime.Now > Cache.Instance.NextArmAction)
                         {
                             Cache.Instance.DirectEve.OpenFitingManager(); //you should only have to issue this command once
-                            _nextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
-                            Logging.Log("Arm: Opening Fitting Manager: waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds, 0) + "sec ]");
+                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
+                            Logging.Log("Arm: Opening Fitting Manager: waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                             State = ArmState.WaitForFittingWindow;
                         }
                     }
@@ -391,15 +385,14 @@ namespace Questor.Modules
 
                 case ArmState.WaitForFittingWindow:
                     DirectFittingManagerWindow fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-                    if (DateTime.Now > _nextArmAction)
+                    if (DateTime.Now < Cache.Instance.NextArmAction) return;
                     {
                         //open it again ?
                         if (fittingMgr == null)
                         {
                             Cache.Instance.DirectEve.OpenFitingManager(); //you should only have to issue this command once
-                            _nextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
-                            Logging.Log("Arm: Opening fitting manager: waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds, 0) + "sec ]");
-                            
+                        Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
+                        Logging.Log("Arm: Opening fitting manager: waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                         }
                     }
                     if (fittingMgr != null && (fittingMgr.IsReady)) //check if it's ready
@@ -442,7 +435,7 @@ namespace Questor.Modules
                        }
                     }
                     Logging.Log("Arm: Looking for fitting " + Cache.Instance.Fitting);
-                    if (DateTime.Now > _nextArmAction)
+                    if (DateTime.Now > Cache.Instance.NextArmAction)
                     {
                        if (fittingMgr != null)
                        {
@@ -450,11 +443,10 @@ namespace Questor.Modules
                           {
                              //ok found it
                              DirectActiveShip ship = Cache.Instance.DirectEve.ActiveShip;
-                             if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) &&
-                                 fitting.ShipTypeId == ship.TypeId)
+                             if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == ship.TypeId)
                              {
-                                _nextArmAction = DateTime.Now.AddSeconds((int) Time.SwitchShipsDelay_seconds);
-                                Logging.Log("Arm: Found fitting [ " + fitting.Name + " ] waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds, 0) + "sec ]");
+                                Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
+                                Logging.Log("Arm: Found fitting [ " + fitting.Name + " ] waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                                 //switch to the requested fitting for the current mission
                                 fitting.Fit();
                                 Cache.Instance.CurrentFit = fitting.Name;
@@ -493,13 +485,13 @@ namespace Questor.Modules
 
                 case ArmState.WaitForFitting:
                     //let's wait 10 seconds
-                    if (DateTime.Now > _nextArmAction && Cache.Instance.DirectEve.GetLockedItems().Count == 0)
+                    if (DateTime.Now > Cache.Instance.NextArmAction && Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
                         //we should be done fitting, proceed to the next state
                         State = ArmState.MoveItems;
                         fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
                         if (fittingMgr != null) fittingMgr.Close();
-                        _nextArmAction = DateTime.Now.AddSeconds((int)Time.FittingWindowLoadFittingDelay_seconds);
+                        Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.FittingWindowLoadFittingDelay_seconds);
                         Logging.Log("Arm: Done fitting");
                     }
                     else Logging.Log("Arm: Waiting for fitting. locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count);
@@ -507,13 +499,13 @@ namespace Questor.Modules
 
                 case ArmState.OpenDroneBay:
                     // Is cargo open?
-                    if (DateTime.Now > _nextArmAction)
+                    if (DateTime.Now > Cache.Instance.NextArmAction)
                     {
                         if (droneBay.Window == null)
                         {
                             // No, command it to open
-                            _nextArmAction = DateTime.Now.AddSeconds(3);
-                            Logging.Log("Arm: Open Drone Bay of Active Ship: waiting [" + Math.Round(DateTime.Now.Subtract(_nextArmAction).TotalSeconds,0) + "sec ]");
+                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(3);
+                            Logging.Log("Arm: Open Drone Bay of Active Ship: waiting [" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds, 0) + "sec ]");
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
                             break;
                         }
@@ -622,7 +614,7 @@ namespace Questor.Modules
 
                     if (AmmoToLoad.Count == 0 && _missionItemMoved)
                     {
-                        _nextArmAction = DateTime.Now.AddSeconds((int)Time.WaitforItemstoMove_seconds);
+                        Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.WaitforItemstoMove_seconds);
 
                         Logging.Log("Arm: Waiting for items");
                         State = ArmState.WaitForItems;
@@ -644,7 +636,7 @@ namespace Questor.Modules
 
                 case ArmState.WaitForItems:
                     // Wait 5 seconds after moving
-                    if (DateTime.Now < _nextArmAction)
+                    if (DateTime.Now < Cache.Instance.NextArmAction)
                         break;
 
                     if (cargo.Items.Count == 0)

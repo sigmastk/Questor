@@ -26,5 +26,6 @@ namespace Questor.Modules
         WaitForStacking,
         Done,
         MoveAmmo,
+        MoveCommonMissionCompletionItemsToCorpAmmoHangar
     }
 }

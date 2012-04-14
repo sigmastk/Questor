@@ -109,19 +109,19 @@ namespace Questor.Modules
                 }
                 else if (entity.Distance < (int)Distance.WarptoDistance)
                 {
-                    if (DateTime.Now > Cache.Instance._nextApproachAction)
+                    if (DateTime.Now > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching)
                     {
                         entity.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
-                        Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                     }
                 }
                 else
                 {
-                    if (DateTime.Now > Cache.Instance._nextWarpTo)
+                    if (DateTime.Now > Cache.Instance.NextWarpTo)
                     {
                         Logging.Log("Traveler: Warping to [" + locationName + "]");
                         entity.WarpTo();
-                        Cache.Instance._nextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                        Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                     }
                 }
             }

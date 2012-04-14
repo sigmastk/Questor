@@ -15,14 +15,11 @@ namespace Questor.Modules
 
     public class Defense
     {
-        private DateTime _nextActivateAction = DateTime.MinValue;
-        private DateTime _nextRepModuleAction = DateTime.MinValue;
-        private DateTime _nextAfterburnerAction = DateTime.MinValue;
         private DateTime _lastSessionChange = DateTime.MinValue;
 
         private void ActivateOnce()
         {
-            if (DateTime.Now < _nextActivateAction) //if we just did something wait a fraction of a second
+         if (DateTime.Now < Cache.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
                 return;
 
             foreach (ModuleCache module in Cache.Instance.Modules)
@@ -67,21 +64,21 @@ namespace Questor.Modules
                 // at this point the module should be active but isn't: activate it, set the delay and return. The process will resume on the next tick
                 //
                 module.Click();
-                _nextActivateAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
-                Logging.Log("Defense: Defensive module activated: [ " + module.ItemId + "] next Activation delayed until [" + _nextActivateAction.ToString("HH:mm:ss") + "]");
-                return;
+                Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                Logging.Log("Defense: Defensive module activated: [ " + module.ItemId + "] next Activation delayed until [" + Cache.Instance.NextActivateSupportModules.ToString("HH:mm:ss") + "]");
+                continue;
             }
         }
 
         private void ActivateRepairModules()
         {
-            var watch = new Stopwatch();
-            if (DateTime.Now < _nextRepModuleAction) //if we just did something wait a fraction of a second
+            //var watch = new Stopwatch();
+            if (DateTime.Now < Cache.Instance.NextRepModuleAction) //if we just did something wait a fraction of a second
                 return;
 
             foreach (ModuleCache module in Cache.Instance.Modules)
             {
-                if (module.InLimboState)
+                if (module.InLimboState | module.IsDeactivating | module.IsGoingOnline | !module.IsOnline | !module.IsActivatable)
                     continue;
 
                 double perc;
@@ -117,11 +114,12 @@ namespace Questor.Modules
                         Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     }
-                    //More human behavior
-                    //System.Threading.Thread.Sleep(333);
+                    if ((Cache.Instance.UnlootedContainers != null) && Cache.Instance.wrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
+                       Cache.Instance.wrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
+
                     module.Click();
                     Cache.Instance.StartedBoosting = DateTime.Now;
-                    _nextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
                     Logging.Log("Defense: RepModule   activated: [ " + module.ItemId + "]");
                     //Logging.Log("LowestShieldPercentage(pocket) [ " + Cache.Instance.lowest_shield_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestArmorPercentage(pocket) [ " + Cache.Instance.lowest_armor_percentage_this_pocket + " ] ");
@@ -129,29 +127,29 @@ namespace Questor.Modules
                     //Logging.Log("LowestShieldPercentage(mission) [ " + Cache.Instance.lowest_shield_percentage_this_mission + " ] ");
                     //Logging.Log("LowestArmorPercentage(mission) [ " + Cache.Instance.lowest_armor_percentage_this_mission + " ] ");
                     //Logging.Log("LowestCapacitorPercentage(mission) [ " + Cache.Instance.lowest_capacitor_percentage_this_mission + " ] ");
-                    return;
+                    continue;
                 }
                 else if (module.IsActive && perc >= Settings.Instance.DeactivateRepairModules)
                 {
                     //More human behavior
                     //System.Threading.Thread.Sleep(333);
                     module.Click();
-                    Cache.Instance._lastModuleActivation = DateTime.Now;
+                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
                     Cache.Instance.RepairCycleTimeThisPocket = Cache.Instance.RepairCycleTimeThisPocket + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
                     Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
-                    _nextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
-                    Logging.Log("Defense: RepModule deactivated: [ " + module.ItemId + "][" + Math.Round(DateTime.Now.Subtract(_nextRepModuleAction).TotalSeconds, 0) + "] sec reactivation delay");
+                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                    Logging.Log("Defense: RepModule deactivated: [ " + module.ItemId + "][" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextRepModuleAction).TotalSeconds, 0) + "] sec reactivation delay");
                     //Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)watch.Elapsed);
                     //Cache.Instance.repair_cycle_time_this_mission = Cache.Instance.repair_cycle_time_this_mission + watch.Elapsed.TotalMinutes;
-                    return;
+                    continue;
                 }
             }
         }
 
         private void ActivateAfterburner()
         {
-            if (DateTime.Now < _nextAfterburnerAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextAfterburnerAction) //if we just did something wait a fraction of a second
                 return; 
             
             foreach (ModuleCache module in Cache.Instance.Modules)
@@ -190,13 +188,13 @@ namespace Questor.Modules
                 if (activate)
                 {
                     module.Click();
-                    _nextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
+                    Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
                     return;
                 }
                 else if (deactivate && module.IsActive)
                 {
                     module.Click();
-                    _nextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
+                    Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
                     return;
                 }
             }

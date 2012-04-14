@@ -24,7 +24,7 @@ namespace Questor
     using global::Questor.Modules;
     using DirectEve;
 
-    static class Program
+   internal static class Program
     {
         private static bool _done;
         private static DirectEve _directEve;
@@ -75,7 +75,7 @@ namespace Questor
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+      private static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
             var p = new OptionSet
@@ -133,7 +133,9 @@ namespace Questor
                 if (values.Root != null)
                     foreach (XElement value in values.Root.Elements("char"))
                         CharSchedules.Add(new CharSchedule(value));
-
+                //
+                // chantling scheduler
+                //
                 CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.Name == _character);
                 if (schedule == null)
                 {
@@ -158,64 +160,67 @@ namespace Questor
 
                     if (schedule.StartTimeSpecified )
                         _startTime = _startTime.AddSeconds(R.Next(0, (RandStartDelay * 60)));
-                        ScheduledstopTime = schedule.Stop;
-                        StopTime = schedule.Stop;
 
-                        //if ((DateTime.Now > _scheduledstopTime))
-                        //{
-                        //	_startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
-                        //	_readyToStarta = false;
-                        //}
-                        if ((DateTime.Now > _startTime))
-                        {
-                            if ((DateTime.Now.Subtract( _startTime).TotalMinutes < 1200 )) //if we're less than x hours past start time, start now
-                            {
-                                _startTime = DateTime.Now;
-                                _readyToStarta = true;
-                            }
-                            else
-                                _startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
-                        }
-                        else
-                            if ((_startTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
-                            {
-                                _startTime = DateTime.Now;
-                                _readyToStarta = true;
-                            }
+                     ScheduledstopTime = schedule.Stop;
+                     StopTime = schedule.Stop;
 
-                        if (StopTime < _startTime)
-                            StopTime = StopTime.AddDays(1);
+                     //if ((DateTime.Now > _scheduledstopTime))
+                     //{
+                     //	_startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
+                     //	_readyToStarta = false;
+                     //}
+                     if ((DateTime.Now > _startTime))
+                     {
+                           if ((DateTime.Now.Subtract( _startTime).TotalMinutes < 1200 )) //if we're less than x hours past start time, start now
+                           {
+                              _startTime = DateTime.Now;
+                              _readyToStarta = true;
+                           }
+                           else
+                              _startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
+                     }
+                     else
+                           if ((_startTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
+                           {
+                              _startTime = DateTime.Now;
+                              _readyToStarta = true;
+                           }
 
-                        if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
-                            StopTime = _startTime.AddHours(schedule.RunTime);
+                     if (StopTime < _startTime)
+                           StopTime = StopTime.AddDays(1);
 
-                        string stopTimeText = "No stop time specified";
-                        StopTimeSpecified = schedule.StopTimeSpecified;
-                        if (StopTimeSpecified)
-                            stopTimeText = StopTime.ToString(CultureInfo.InvariantCulture);
+                     if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
+                           StopTime = _startTime.AddHours(schedule.RunTime);
 
-                        Logging.Log("[Startup] Start Time: " + _startTime + " - Stop Time: " + stopTimeText);
+                     string stopTimeText = "No stop time specified";
+                     StopTimeSpecified = schedule.StopTimeSpecified;
+                     if (StopTimeSpecified)
+                           stopTimeText = StopTime.ToString(CultureInfo.InvariantCulture);
 
-                        if (!_readyToStarta)
-                        {
-                            _minutesToStart = _startTime.Subtract(DateTime.Now).TotalMinutes;
-                            Logging.Log("[Startup] Starting at " + _startTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.");
-                            Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
-                            if (_minutesToStart > 0)
-                                Timer.Interval = (int)(_minutesToStart * 60000);
-                            else
-                                Timer.Interval = 1000;
-                            Timer.Enabled = true;
-                            Timer.Start();
-                        }
-                        else
-                        {
-                            _readyToStart = true;
-                            Logging.Log("[Startup] Already passed start time.  Starting in 15 seconds.");
-                            System.Threading.Thread.Sleep(15000);
-                        }
+                     Logging.Log("[Startup] Start Time: " + _startTime + " - Stop Time: " + stopTimeText);
+
+                     if (!_readyToStarta)
+                     {
+                           _minutesToStart = _startTime.Subtract(DateTime.Now).TotalMinutes;
+                           Logging.Log("[Startup] Starting at " + _startTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.");
+                           Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
+                           if (_minutesToStart > 0)
+                              Timer.Interval = (int)(_minutesToStart * 60000);
+                           else
+                              Timer.Interval = 1000;
+                           Timer.Enabled = true;
+                           Timer.Start();
+                     }
+                     else
+                     {
+                           _readyToStart = true;
+                           Logging.Log("[Startup] Already passed start time.  Starting in 15 seconds.");
+                           System.Threading.Thread.Sleep(15000);
+                     }                    
                 }
-
+                //
+                // chantling scheduler (above)
+                //
                 _directEve = new DirectEve();
                 _directEve.OnFrame += OnFrame;
 
@@ -254,7 +259,7 @@ namespace Questor
             Application.Run(new QuestorfrmMain());
         }
 
-        static void OnFrame(object sender, EventArgs e)
+      private static void OnFrame(object sender, EventArgs e)
         {
             if (!_readyToStart)
             {
@@ -372,7 +377,6 @@ namespace Questor
                             window.Close();
                             continue;
                         }
-                        
                     }
 
                     if (string.IsNullOrEmpty(window.Html))
@@ -451,13 +455,12 @@ namespace Questor
             }
         }
 
-        static void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
+      private static void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
         {
             Timer.Stop();
             Logging.Log("[Startup] Timer elapsed.  Starting now.");
             _readyToStart = true;
             _readyToStarta = true;
         }
-    
     }
 }

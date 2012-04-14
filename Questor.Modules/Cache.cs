@@ -7,6 +7,9 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
+
+using System.Globalization;
+
 namespace Questor.Modules
 {
     using System;
@@ -162,6 +165,8 @@ namespace Questor.Modules
             get { return _instance; }
         }
 
+      public bool StopBot = false;
+
         public bool DoNotBreakInvul = false;
         public bool UseDrones = true;
 
@@ -199,12 +204,12 @@ namespace Questor.Modules
 
                 if(alliance.Min() <= stand || corporation.Min() <= stand || personal.Min() <= stand)
                 {
-                    Logging.Log("Cache.WatchLocal: Bad Standing Pilot Detected: [ " + localMember.Name + "] " + " [ " + number + " ] so far... of [ " + maxBad + " ] allowed");
+                    Logging.Log("Cache.LocalSafe: Bad Standing Pilot Detected: [ " + localMember.Name + "] " + " [ " + number + " ] so far... of [ " + maxBad + " ] allowed");
                     number++;
                 }
                 if(number > maxBad)
                 {
-                    Logging.Log("Cache.WatchLocal: [" + number + "] Bad Standing pilots in local, We should stay in station");
+                    Logging.Log("Cache.LocalSafe: [" + number + "] Bad Standing pilots in local, We should stay in station");
                     return false;
                 }
             }
@@ -235,7 +240,6 @@ namespace Questor.Modules
         /// </summary>
         public bool AfterMissionSalvaging { get; set; }
 
-		
 		/// <summary>
         ///   Returns the maximum weapon distance
         /// </summary>
@@ -278,47 +282,366 @@ namespace Questor.Modules
         public string ConsoleLog { get; set; }
         public bool IsAgentLoop { get; set; }
         private string _agentName = "";
+        private DateTime _lastAction = DateTime.MinValue;
 
-        public DateTime _lastDefence;
-        public DateTime _lastModuleActivation;
-        public DateTime _lastLoggingAction = DateTime.MinValue;
-        public DateTime _nextTargetAction = DateTime.MinValue;
-        public DateTime _nextWeaponAction = DateTime.MinValue;
-        public DateTime _nextWebAction = DateTime.MinValue;
-        public DateTime _nextNosAction = DateTime.MinValue;
-        public DateTime _nextPainterAction = DateTime.MinValue;
-        public DateTime _nextActivateAction = DateTime.Now;
-        public DateTime _nextApproachAction = DateTime.Now;
-        public DateTime _nextBookmarkPocketAttempt = DateTime.Now;
-        public DateTime _nextAlign = DateTime.Now;
-        public DateTime _nextOrbit = DateTime.Now;
-        public DateTime _nextReload = DateTime.Now;
-        public DateTime _nextUndockAction = DateTime.Now;
+      public DateTime LastAction
+      {
+         get
+         {
+            return _lastAction;
+         }
+         set
+         {
+            _lastAction = value;
+         }
+      }
+
+      private DateTime _nextArmAction = DateTime.MinValue;
+
+      public DateTime NextArmAction
+      {
+         get
+         {
+            return _nextArmAction;
+         }
+         set
+         {
+            _nextArmAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextSalvageAction = DateTime.MinValue;
+
+      public DateTime NextSalvageAction
+      {
+         get
+         {
+            return _nextSalvageAction;
+         }
+         set
+         {
+            _nextSalvageAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextLootAction = DateTime.MinValue;
+
+      public DateTime NextLootAction
+      {
+         get
+         {
+            return _nextLootAction;
+         }
+         set
+         {
+            _nextLootAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _lastJettison = DateTime.MinValue;
+
+      public DateTime LastJettison
+      {
+         get
+         {
+            return _lastJettison;
+         }
+         set
+         {
+            _lastJettison = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextDefenceModuleAction = DateTime.MinValue;
+
+      public DateTime NextDefenceModuleAction
+      {
+         get
+         {
+            return _nextDefenceModuleAction;
+         }
+         set
+         {
+            _nextDefenceModuleAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextAfterburnerAction = DateTime.MinValue;
+
+      public DateTime NextAfterburnerAction
+      {
+         get { return _nextAfterburnerAction; }
+         set
+         {
+            _nextAfterburnerAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextRepModuleAction = DateTime.MinValue;
+
+      public DateTime NextRepModuleAction
+      {
+         get { return _nextRepModuleAction; }
+         set
+         {
+            _nextRepModuleAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextActivateSupportModules = DateTime.MinValue;
+
+      public DateTime NextActivateSupportModules
+      {
+         get { return _nextActivateSupportModules; }
+         set
+         {
+            _nextActivateSupportModules = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextRemoveBookmarkAction = DateTime.MinValue;
+
+      public DateTime NextRemoveBookmarkAction
+      {
+         get { return _nextRepModuleAction; }
+         set
+         {
+            _nextRemoveBookmarkAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextApproachAction = DateTime.MinValue;
+
+      public DateTime NextApproachAction
+      {
+         get { return _nextApproachAction; }
+         set
+         {
+            _nextApproachAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextOrbit = DateTime.MinValue;
+
+      public DateTime NextOrbit
+      {
+         get { return _nextOrbit; }
+         set
+         {
+            _nextOrbit = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextWarpTo;
+
+      public DateTime NextWarpTo
+      {
+         get { return _nextWarpTo; }
+         set
+         {
+            _nextWarpTo = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextTravelerAction = DateTime.MinValue;
+
+      public DateTime NextTravelerAction
+      {
+         get { return _nextTravelerAction; }
+         set
+         {
+            _nextTravelerAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextTargetAction = DateTime.MinValue;
+
+      public DateTime NextTargetAction
+      {
+         get { return _nextTargetAction; }
+         set
+         {
+            _nextTargetAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextWeaponAction = DateTime.MinValue;
+      private DateTime _nextReload = DateTime.MinValue;
+
+      public DateTime NextReload
+      {
+         get { return _nextReload; }
+         set
+         {
+            _nextReload = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      public DateTime NextWeaponAction
+      {
+         get { return _nextWeaponAction; }
+         set
+         {
+            _nextWeaponAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextWebAction = DateTime.MinValue;
+
+      public DateTime NextWebAction
+      {
+         get { return _nextWebAction; }
+         set
+         {
+            _nextWebAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextNosAction = DateTime.MinValue;
+
+      public DateTime NextNosAction
+      {
+         get { return _nextNosAction; }
+         set
+         {
+            _nextNosAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextPainterAction = DateTime.MinValue;
+
+      public DateTime NextPainterAction
+      {
+         get { return _nextPainterAction; }
+         set
+         {
+            _nextPainterAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextActivateAction = DateTime.MinValue;
+
+      public DateTime NextActivateAction
+      {
+         get { return _nextActivateAction; }
+         set
+         {
+            _nextActivateAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextBookmarkPocketAttempt = DateTime.MinValue;
+
+      public DateTime NextBookmarkPocketAttempt
+      {
+         get { return _nextBookmarkPocketAttempt; }
+         set
+         {
+            _nextBookmarkPocketAttempt = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextAlign = DateTime.MinValue;
+
+      public DateTime NextAlign
+      {
+         get { return _nextAlign; }
+         set
+         {
+            _nextAlign = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextUndockAction = DateTime.Now;
+
+      public DateTime NextUndockAction
+      {
+         get { return _nextUndockAction; }
+         set
+         {
+            _nextUndockAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextDockAction = DateTime.MinValue; //unused
+
+      public DateTime NextDockAction
+      {
+         get { return _nextDockAction; }
+         set
+         {
+            _nextDockAction = value;
+            _lastAction = DateTime.Now;
+         }
+      }
+
+      private DateTime _nextDroneRecall;
+
+      public DateTime NextDroneRecall
+      {
+         get { return _nextDroneRecall; }
+         set
+         {
+            _nextDroneRecall = value;
+            _lastAction = DateTime.Now;
+         }
+      }
         
-        public DateTime _nextDock;
-        public DateTime _nextDroneRecall;
         public DateTime _lastLocalWatchAction;
         public DateTime _lastWalletCheck;
-        public DateTime _nextWarpTo;
+
         public DateTime _lastupdateofSessionRunningTime;
         public DateTime _nextInSpaceorInStation;
         public DateTime _lastTimeCheckAction;
 
-        public int PanicAttemptsThisMission { get; set; }
-        public double LowestShieldPercentageThisPocket { get; set; }
-        public double LowestArmorPercentageThisPocket { get; set; }
-        public double LowestCapacitorPercentageThisPocket { get; set; }
+      public int wrecksThisPocket = 0;
+      public int wrecksThisMission = 0;
+      public DateTime _lastLoggingAction = DateTime.MinValue;
+
         public int RepairCycleTimeThisPocket { get; set; }
         public int PanicAttemptsThisPocket { get; set; }
         public double LowestShieldPercentageThisMission { get; set; }
         public double LowestArmorPercentageThisMission { get; set; }
         public double LowestCapacitorPercentageThisMission { get; set; }
+
+      public double LowestShieldPercentageThisPocket { get; set; }
+
+      public double LowestArmorPercentageThisPocket { get; set; }
+
+      public double LowestCapacitorPercentageThisPocket { get; set; }
+
+      public int PanicAttemptsThisMission { get; set; }
+
         public DateTime StartedBoosting { get; set; }
         public int RepairCycleTimeThisMission { get; set; }
         public DateTime LastKnownGoodConnectedTime { get; set; }
         public long TotalMegaBytesOfMemoryUsed { get; set; }
         public double MyWalletBalance { get; set; }
         public string CurrentPocketAction { get; set; }
+      public float AgentEffectiveStandingtoMe;
         public string CurrentAgent
         {
             get
@@ -445,7 +768,6 @@ namespace Questor.Modules
             }
         }
         
-        
         public IEnumerable<EntityCache> Targets
         {
             get
@@ -509,7 +831,26 @@ namespace Questor.Modules
 
         public bool InWarp
         {
-            get { return DirectEve.ActiveShip.Entity != null ? DirectEve.ActiveShip.Entity.Mode == 3 : false; }
+         get { return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3); }
+      }
+
+      public bool IsOrbiting
+      {
+         get { return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4; }
+      }
+
+      public bool IsApproaching
+      {
+         get
+         {
+            Logging.Log(DirectEve.ActiveShip.Entity.Mode.ToString(CultureInfo.InvariantCulture));
+            return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1;
+         }
+      }
+
+      public bool IsApproachingOrOrbiting
+      {
+         get { return DirectEve.ActiveShip.Entity != null && (DirectEve.ActiveShip.Entity.Mode == 1 || DirectEve.ActiveShip.Entity.Mode == 4); }
         }
 
         public IEnumerable<EntityCache> ActiveDrones
@@ -534,6 +875,22 @@ namespace Questor.Modules
             }
         }
 
+      public EntityCache StationByName(string stationName)
+      {
+         EntityCache _station = Stations.First(x => x.Name.ToLower() == stationName.ToLower());
+
+         return _station;
+      }
+
+      public IEnumerable<DirectSolarSystem> SolarSystems
+      {
+         get
+         {
+            var _solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+            return _solarSystems;
+         }
+      }
+
         public IEnumerable<EntityCache> Stargates
         {
             get
@@ -550,7 +907,7 @@ namespace Questor.Modules
             get
             {
                 if (_star == null)
-                    _star = Entities.Where(e => e.CategoryId == (int) CategoryID.Celestial && e.GroupId == (int) Group.Star).FirstOrDefault();
+               _star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star);
 
                 return _star;
             }
@@ -613,8 +970,6 @@ namespace Questor.Modules
         /// <returns></returns>
         public string BringMissionItem { get; private set; }
 
-
-
         public string Fitting { get; set; } // stores name of the final fitting we want to use
         public string MissionShip { get; set; } //stores name of mission specific ship
         public string DefaultFitting { get; set; } //stores name of the default fitting
@@ -669,6 +1024,11 @@ namespace Questor.Modules
         {
             return Entities.Where(e => e.Name == name).ToList();
         }
+
+      public IEnumerable<EntityCache> EntitiesByNamePart(string name)
+      {
+         return Entities.Where(e => e.Name.Contains(name)).ToList();
+      }
 
         /// <summary>
         ///   Return entities that contain the name
@@ -729,6 +1089,7 @@ namespace Questor.Modules
         /// <returns></returns>
         public List<DirectBookmark> BookmarksByLabel(string label)
         {
+            // Does not seems to refresh the Corp Bookmark list so it's having troubles to find Corp Bookmarks
             return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.StartsWith(label)).ToList();
         }
 
@@ -832,7 +1193,6 @@ namespace Questor.Modules
 
                                 if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
                                 {
-                        
                                     OrbitDistance = (int) pocket.Element("orbitdistance");
                                     Logging.Log(string.Format("Cache: Using Mission Orbit distance {0}",OrbitDistance));
                                 }
@@ -863,7 +1223,7 @@ namespace Questor.Modules
                                         var action = new Action();
                                         action.State = (ActionState) Enum.Parse(typeof (ActionState), (string) element.Attribute("name"), true);
                                         XAttribute xAttribute = element.Attribute("name");
-                                        if (xAttribute != null && (string)xAttribute.Value == "ClearPocket")
+                                        if (xAttribute != null && xAttribute.Value == "ClearPocket")
                                         {
                                             action.AddParameter("", "");
                                         }
@@ -883,7 +1243,6 @@ namespace Questor.Modules
                         {
                             return new Action[0];
                         }
-                        
                     }
                     else
                     {
@@ -1104,5 +1463,19 @@ namespace Questor.Modules
             // Return either one or the other
             return lowValueTarget ?? highValueTarget;
         }
+
+      public int RandomNumber(int min, int max)
+      {
+         var random = new Random();
+         return random.Next(min, max);
+      }
+
+      public double MaxRange
+      {
+         get
+         {
+            return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+         }
+      }
     }
 }

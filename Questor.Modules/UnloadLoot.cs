@@ -28,6 +28,7 @@ namespace Questor.Modules
         {
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             DirectContainer itemshangar = Cache.Instance.DirectEve.GetItemHangar();
+            IEnumerable<DirectItem> itemsToMove = cargo.Items.Where(i => i.TypeId == 17192 || i.TypeId == 2076 || i.TypeId == 3814 || i.TypeId == 17206 || i.TypeId == 28260 || i.GroupId == 283 || i.GroupId == 314);
 
             DirectContainer corpAmmoHangar = null;
             if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
@@ -114,7 +115,12 @@ namespace Questor.Modules
                         //Logging.Log("UnloadLoot: Opening corporation hangar");
                         State = UnloadLootState.OpenCorpHangar;
                     }
-                    else
+                    else if (Settings.Instance.MoveCommonMissionItemsToCorpAmmoHangar == true)
+                    {
+                        //Logging.Log("UnloadLoot: Moving CommonMissionItems to CorpAmmoHangar");
+                        State = UnloadLootState.MoveCommonMissionCompletionItemsToCorpAmmoHangar;
+                    }
+                    else if (Settings.Instance.MoveCommonMissionItemsToCorpAmmoHangar == false)
                     {
                         //Logging.Log("UnloadLoot: CommonMissionCompletionitems");
                         State = UnloadLootState.MoveCommonMissionCompletionitems;
@@ -137,8 +143,30 @@ namespace Questor.Modules
                         if (!corpHangar.IsReady)
                             break;
                     }
-                    Logging.Log("UnloadLoot: Moving CommonMissionCompletionitems");
+                    if (Settings.Instance.MoveCommonMissionItemsToCorpAmmoHangar == true)
+                    {
+                        Logging.Log("UnloadLoot: Moving Common Mission Completion items to Corp Ammo Hangar");
+                        State = UnloadLootState.MoveCommonMissionCompletionItemsToCorpAmmoHangar;
+                    }
+                    else if (Settings.Instance.MoveCommonMissionItemsToCorpAmmoHangar == false)
+                    {
+                        Logging.Log("UnloadLoot: Moving Common Mission Completion items to to Local Hangar");
                     State = UnloadLootState.MoveCommonMissionCompletionitems;
+                    }
+                    break;
+
+                case UnloadLootState.MoveCommonMissionCompletionItemsToCorpAmmoHangar:
+                    DirectContainer corpHangarForAmmo = corpAmmoHangar;
+                    //
+                    // how do we get IsMissionItem to work for us here? (see ItemCache)
+                    // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
+                    //
+                    
+                    Logging.Log("UnloadLoot: Moving Common Mission Completion Items to Corp Ammo Hangar");
+                    
+                    corpHangarForAmmo.Add(itemsToMove);
+                    //_nextUnloadAction = DateTime.Now.AddSeconds((int)Settings.Instance.random_number3_5());
+                    State = UnloadLootState.MoveLoot;
                     break;
 
                 case UnloadLootState.MoveCommonMissionCompletionitems:
@@ -147,9 +175,9 @@ namespace Questor.Modules
                     // how do we get IsMissionItem to work for us here? (see ItemCache)
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
                     //
-                    IEnumerable<DirectItem> itemsToMove = cargo.Items.Where(i => i.TypeId == 17192 || i.TypeId == 2076 || i.TypeId == 3814 || i.TypeId == 17206 || i.TypeId == 28260 || i.GroupId == 283 || i.GroupId == 314);
                     
-                    Logging.Log("UnloadLoot: Moving Common Mission Completion items");
+                    Logging.Log("UnloadLoot: Moving Common Mission Completion items to to Local Hangar");
+
                     commonMissionCompletionItemHangar.Add(itemsToMove);
                     //_nextUnloadAction = DateTime.Now.AddSeconds((int)Settings.Instance.random_number3_5());
                     State = UnloadLootState.MoveLoot;

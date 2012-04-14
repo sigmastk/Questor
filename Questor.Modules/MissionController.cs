@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 // 
@@ -18,1028 +18,1198 @@ namespace Questor.Modules
     using System.Linq;
     using DirectEve;
     //using System.Reflection;
-    
-    public class MissionController
-    {
-        private DateTime? _clearPocketTimeout;
-        private int _currentAction;
 
-        private readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
-        private double _lastX;
-        private double _lastY;
-        private double _lastZ;
-        private int _pocket;
-        private List<Action> _pocketActions;
-        private bool _waiting;
-        private DateTime _waitingSince;
-        private DateTime _moveToNextPocket = DateTime.MaxValue;
+   public class MissionController
+   {
+      private DateTime? _clearPocketTimeout;
+      private int _currentAction;
+
+      private readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
+      private double _lastX;
+      private double _lastY;
+      private double _lastZ;
+      private int _pocket;
+      private List<Action> _pocketActions;
+      private bool _waiting;
+      private DateTime _waitingSince;
+      private DateTime _moveToNextPocket = DateTime.MaxValue;
 
 
-        private bool _targetNull = false;
-        public long AgentId { get; set; }
+      private bool _targetNull = false;
+      public long AgentId { get; set; }
 
-        public MissionController()
-        {
-            _pocketActions = new List<Action>();
-        }
+      public MissionController()
+      {
+         _pocketActions = new List<Action>();
+      }
 
-        public MissionControllerState State { get; set; }
-        // Statistics information
-        //public DateTime Started { get; set; }
-        public DateTime StartedPocket { get; set; }
-        public string Mission { get; set; }
-        public double Wealth { get; set; }
-        public double LootValue { get; set; }
-        public int LoyaltyPoints { get; set; }
-        public int LostDrones { get; set; }
-        
-        private void LogStatistics()
-        {
-            // We are not supposed to create bookmarks
-            //if (!Settings.Instance.LogBounties)
-            //    return;
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
-            string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
-            if (Settings.Instance.PocketStatistics)
+      public MissionControllerState State { get; set; }
+      // Statistics information
+      //public DateTime Started { get; set; }
+      public DateTime StartedPocket { get; set; }
+      public string Mission { get; set; }
+      public double Wealth { get; set; }
+      public double LootValue { get; set; }
+      public int LoyaltyPoints { get; set; }
+      public int LostDrones { get; set; }
+
+      private void LogStatistics()
+      {
+         // We are not supposed to create bookmarks
+         //if (!Settings.Instance.LogBounties)
+         //    return;
+         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
+         string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
+         if (Settings.Instance.PocketStatistics)
+         {
+            if (Settings.Instance.PocketStatsUseIndividualFilesPerPocket)
             {
-                if (Settings.Instance.PocketStatsUseIndividualFilesPerPocket)
-                {
-                        Settings.Instance.PocketStatisticsFile = Path.Combine(Settings.Instance.PocketStatisticsPath, Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + _pocket + " - PocketStatistics.csv");
-                }
-                if (!Directory.Exists(Settings.Instance.PocketStatisticsPath)) 
-                    Directory.CreateDirectory(Settings.Instance.PocketStatisticsPath);
-
-                //
-                // this is writing down stats from the PREVIOUS pocket (if any?!)
-                //
-
-                // Write the header
-                if (!File.Exists(Settings.Instance.PocketStatisticsFile))
-                    File.AppendAllText(Settings.Instance.PocketStatisticsFile, "Date and Time;Mission Name and Pocket;Time to complete;Isk;panics;LowestShields;LowestArmor;LowestCapacitor;RepairCycles\r\n");
-
-                // Build the line
-                string pocketstatsLine = DateTime.Now + ";";                                          //Date
-                pocketstatsLine += currentPocketName + ";";                                           //Mission Name
-                pocketstatsLine += "pocket" + (_pocket) + ";";                                        //Pocket number
-                pocketstatsLine += ((int)DateTime.Now.Subtract(StartedPocket).TotalMinutes) + ";";    //Time to Complete
-                pocketstatsLine += ((long)(Cache.Instance.DirectEve.Me.Wealth - Wealth)) + ";";       //Isk
-                pocketstatsLine += ((int)Cache.Instance.PanicAttemptsThisPocket) + ";";               //Panics
-                pocketstatsLine += ((int)Cache.Instance.LowestShieldPercentageThisPocket) + ";";      //LowestShields
-                pocketstatsLine += ((int)Cache.Instance.LowestArmorPercentageThisPocket) + ";";       //LowestArmor
-                pocketstatsLine += ((int)Cache.Instance.LowestCapacitorPercentageThisPocket) + ";";   //LowestCapacitor
-                pocketstatsLine += ((int)Cache.Instance.RepairCycleTimeThisPocket) + ";\r\n";         //repairCycles
-
-                // The old pocket is finished
-                Logging.Log("MissionController: Writing pocket statistics to [ " + Settings.Instance.PocketStatisticsFile + " ] and clearing stats for next pocket");
-                File.AppendAllText(Settings.Instance.PocketStatisticsFile, pocketstatsLine);
+               Settings.Instance.PocketStatisticsFile = Path.Combine(Settings.Instance.PocketStatisticsPath,Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + _pocket + " - PocketStatistics.csv");
             }
-            // Update statistic values for next pocket stats
-            Wealth = Cache.Instance.DirectEve.Me.Wealth;
-            StartedPocket = DateTime.Now;
-            Cache.Instance.PanicAttemptsThisPocket = 0;
-            Cache.Instance.LowestShieldPercentageThisPocket = 101;
-            Cache.Instance.LowestArmorPercentageThisPocket = 101;
-            Cache.Instance.LowestCapacitorPercentageThisPocket = 101;
-            Cache.Instance.RepairCycleTimeThisPocket = 0;
-            LostDrones = 0;
-        }
+            if (!Directory.Exists(Settings.Instance.PocketStatisticsPath))
+               Directory.CreateDirectory(Settings.Instance.PocketStatisticsPath);
 
-        private void ReloadAll()
-        {
-            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+            //
+            // this is writing down stats from the PREVIOUS pocket (if any?!)
+            //
 
-            correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId));
+            // Write the header
+            if (!File.Exists(Settings.Instance.PocketStatisticsFile))
+               File.AppendAllText(Settings.Instance.PocketStatisticsFile,
+                                  "Date and Time;Mission Name ;Pocket;Time to complete;Isk;panics;LowestShields;LowestArmor;LowestCapacitor;RepairCycles;Wrecks\r\n");
 
-            if (!correctAmmo1.Any())
-                return;
+            // Build the line
+            string pocketstatsLine = DateTime.Now + ";"; //Date
+            pocketstatsLine += currentPocketName + ";"; //Mission Name
+            pocketstatsLine += "pocket" + (_pocket) + ";"; //Pocket number
+            pocketstatsLine += ((int) DateTime.Now.Subtract(StartedPocket).TotalMinutes) + ";"; //Time to Complete
+            pocketstatsLine += ((long) (Cache.Instance.DirectEve.Me.Wealth - Wealth)) + ";"; //Isk
+            pocketstatsLine += ((int) Cache.Instance.PanicAttemptsThisPocket) + ";"; //Panics
+            pocketstatsLine += ((int) Cache.Instance.LowestShieldPercentageThisPocket) + ";"; //LowestShields
+            pocketstatsLine += ((int) Cache.Instance.LowestArmorPercentageThisPocket) + ";"; //LowestArmor
+            pocketstatsLine += ((int) Cache.Instance.LowestCapacitorPercentageThisPocket) + ";"; //LowestCapacitor
+            pocketstatsLine += ((int) Cache.Instance.RepairCycleTimeThisPocket) + ";"; //repairCycles
+            pocketstatsLine += ((int) Cache.Instance.wrecksThisPocket) + ";";
+            pocketstatsLine += "\r\n";
 
-            Ammo ammo = correctAmmo1.Where(a => a.Range > 1).OrderBy(a => a.Range).FirstOrDefault();
-            DirectItem charge = cargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId);
+            // The old pocket is finished
+            Logging.Log("MissionController: Writing pocket statistics to [ " + Settings.Instance.PocketStatisticsFile +
+                        " ] and clearing stats for next pocket");
+            File.AppendAllText(Settings.Instance.PocketStatisticsFile, pocketstatsLine);
+         }
+         // Update statistic values for next pocket stats
+         Wealth = Cache.Instance.DirectEve.Me.Wealth;
+         StartedPocket = DateTime.Now;
+         Cache.Instance.PanicAttemptsThisPocket = 0;
+         Cache.Instance.LowestShieldPercentageThisPocket = 101;
+         Cache.Instance.LowestArmorPercentageThisPocket = 101;
+         Cache.Instance.LowestCapacitorPercentageThisPocket = 101;
+         Cache.Instance.RepairCycleTimeThisPocket = 0;
+         Cache.Instance.wrecksThisMission += Cache.Instance.wrecksThisPocket;
+         Cache.Instance.wrecksThisPocket = 0;
 
-            if (ammo == null)
-                return;
+         LostDrones = 0;
+      }
 
-            Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
+      private void ReloadAll()
+      {
+         IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
+         DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
+         IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
 
-            foreach (ModuleCache weapon in weapons)
+         correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId));
+
+         if (!correctAmmo1.Any())
+            return;
+
+         Ammo ammo = correctAmmo1.Where(a => a.Range > 1).OrderBy(a => a.Range).FirstOrDefault();
+         DirectItem charge = cargo.Items.FirstOrDefault(i => ammo != null && i.TypeId == ammo.TypeId);
+
+         if (ammo == null)
+            return;
+
+         Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds +
+                                                     (int) Time.ReloadWeaponDelayBeforeUsable_seconds;
+
+         foreach (ModuleCache weapon in weapons)
+         {
+            // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
+            if (weapon.IsEnergyWeapon)
+               return;
+
+            if (weapon.CurrentCharges >= weapon.MaxCharges)
+               return;
+
+            if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+               return;
+
+            if (_lastWeaponReload.ContainsKey(weapon.ItemId) &&
+                DateTime.Now <
+                _lastWeaponReload[weapon.ItemId].AddSeconds((int) Time.ReloadWeaponDelayBeforeUsable_seconds))
+               return;
+
+            _lastWeaponReload[weapon.ItemId] = DateTime.Now;
+
+            if (charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
-                // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
-                if (weapon.IsEnergyWeapon)
-                    return;
+               Logging.Log("MissionController: ReloadingAll [" + weapon.ItemId + "] with [" + charge.TypeName +
+                           "][ typeID:" + charge.TypeId + "]");
 
-                if (weapon.CurrentCharges >= weapon.MaxCharges)
-                    return;
+               weapon.ReloadAmmo(charge);
+            }
+         }
+         return;
+      }
 
-                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
-                    return;
+      private void BookmarkPocketForSalvaging()
+      {
+         // Nothing to loot
+         if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
+         {
+            // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
+            // This scenario only happens when all wrecks are within tractor range and you have a salvager 
+            // (typically only with a Golem).  Check to see if there are any cargo containers in space.  Cap 
+            // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.  
+            if (DateTime.Now > Cache.Instance.NextBookmarkPocketAttempt)
+            {
+               Cache.Instance.NextBookmarkPocketAttempt =
+                  DateTime.Now.AddSeconds((int) Time.BookmarkPocketRetryDelay_seconds);
+               if (!Settings.Instance.LootEverything &&
+                   Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
+               {
+                  Logging.Log("MissionController: No bookmark created because the pocket has [" +
+                              Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" +
+                              Settings.Instance.MinimumWreckCount + "]");
+               }
+               else if (Settings.Instance.LootEverything)
+               {
+                  Logging.Log("MissionController: No bookmark created because the pocket has [" +
+                              Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" +
+                              Settings.Instance.MinimumWreckCount + "]");
+               }
+            }
+         }
+         else
+         {
+            // Do we already have a bookmark?
+            List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+            DirectBookmark bookmark =
+               bookmarks.FirstOrDefault(
+                  b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int) Distance.OnGridWithMe);
+            if (bookmark != null)
+            {
+               Logging.Log("MissionController: Pocket already bookmarked for salvaging [" + bookmark.Title + "]");
+            }
+            else
+            {
+               // No, create a bookmark
+               string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
+               //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+               Logging.Log("MissionController: Bookmarking pocket for salvaging [" + label + "]");
+               Cache.Instance.CreateBookmark(label);
+               //Cache.Instance.CreateBookmarkofwreck(containers,label);
+            }
+         }
+      }
 
-                if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
-                    return;
+      private void ActivateAction(Action action)
+      {
+         string target = action.GetParameterValue("target");
 
-                _lastWeaponReload[weapon.ItemId] = DateTime.Now;
+         // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
+         if (string.IsNullOrEmpty(target))
+            target = "Acceleration Gate";
 
-                if (weapon.Charge.TypeId == charge.TypeId)
-                {
-                    Logging.Log("MissionController: ReloadingAll [" + weapon.ItemId + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]");
-
-                    weapon.ReloadAmmo(charge);
-                }
-
+         IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+         if (targets == null || !targets.Any())
+         {
+            if (!_waiting)
+            {
+               Logging.Log("MissionController: Activate: Can't find [" + target +
+                           "] to activate! Waiting 30 seconds before giving up");
+               _waitingSince = DateTime.Now;
+               _waiting = true;
+            }
+            else if (_waiting)
+            {
+               if (DateTime.Now.Subtract(_waitingSince).TotalSeconds > (int) Time.NoGateFoundRetryDelay_seconds)
+               {
+                  Logging.Log(
+                     "MissionController: Activate: After 30 seconds of waiting the gate is still not on grid: MissionControllerState.Error");
+                  State = MissionControllerState.Error;
+               }
             }
             return;
-        }
+         }
 
-        private void BookmarkPocketForSalvaging()
-        {
-            // Nothing to loot
-            if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
+         //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
+         EntityCache closest = targets.OrderBy(t => t.Distance).First();
+         if (closest.Distance < (int) Distance.GateActivationRange + 5000)
+         {
+            // Tell the drones module to retract drones
+            Cache.Instance.IsMissionPocketDone = true;
+
+            // We cant activate if we have drones out
+            if (Cache.Instance.ActiveDrones.Any())
+               return;
+
+            //
+            // this is a bad idea for a speed tank, we ought to somehow cache the object they are orbiting/approaching, etc
+            // this seemingly slowed down the exit from certain missions for me for 2-3min as it had a command to orbit some random object
+            // after the "done" command
+            //
+            if (closest.Distance < -10100)
             {
-                // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
-                // This scenario only happens when all wrecks are within tractor range and you have a salvager 
-                // (typically only with a Golem).  Check to see if there are any cargo containers in space.  Cap 
-                // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.  
-                if (DateTime.Now > Cache.Instance._nextBookmarkPocketAttempt)
-                {
-                    if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
-                    {
-                        Logging.Log("MissionController: No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]");
-                        Cache.Instance._nextBookmarkPocketAttempt = DateTime.Now.AddSeconds((int)Time.BookmarkPocketRetryDelay_seconds);
-                    }
-                    else if (Settings.Instance.LootEverything)
-                    {
-                        Logging.Log("MissionController: No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]");
-                        Cache.Instance._nextBookmarkPocketAttempt = DateTime.Now.AddSeconds((int)Time.BookmarkPocketRetryDelay_seconds);
-                    }
-                }
-
+               if (DateTime.Now > Cache.Instance.NextOrbit)
+               {
+                  closest.Orbit(1000);
+                  Logging.Log("MissionController: Activate: We are too close to [" + closest.Name + "] Initiating orbit");
+                  Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
+               }
+               return;
             }
-            else
+            //Logging.Log("MissionController: distance " + closest.Distance);
+            //if ((closest.Distance <= (int)Distance.TooCloseToStructure) && (DateTime.Now.Subtract(Cache.Instance._lastOrbit).TotalSeconds > 30)) //-10100 meters (inside docking ring) - so close that we may get tangled in the structure on activation - move away
+            //{
+            //    Logging.Log("MissionController.Activate: Too close to Structure to activate: orbiting");
+            //    closest.Orbit((int)Distance.GateActivationRange); // 1000 meters
+            //    Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+            //}
+
+            //if (closest.Distance >= (int)Distance.TooCloseToStructure) //If we aren't so close that we may get tangled in the structure, activate it
+            if (closest.Distance >= -10100)
             {
-                // Do we already have a bookmark?
-                List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
-                if (bookmark != null)
-                {
-                    Logging.Log("MissionController: Pocket already bookmarked for salvaging [" + bookmark.Title + "]");
-                }
-                else
-                {
-                    // No, create a bookmark
-                    string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
-                    //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-                    Logging.Log("MissionController: Bookmarking pocket for salvaging [" + label + "]");
-                    Cache.Instance.CreateBookmark(label);
-                    //Cache.Instance.CreateBookmarkofwreck(containers,label);
-                }
+               // Add bookmark (before we activate)
+               if (Settings.Instance.CreateSalvageBookmarks)
+                  BookmarkPocketForSalvaging();
+
+               // Reload weapons and activate gate to move to the next pocket
+               if (DateTime.Now > Cache.Instance.NextReload)
+               {
+                  Logging.Log("MissionController: Activate: Reload before moving to next pocket");
+                  ReloadAll();
+                  Cache.Instance.NextReload = DateTime.Now.AddSeconds((int) Time.ReloadWeaponDelayBeforeUsable_seconds);
+               }
+               if (DateTime.Now > Cache.Instance.NextActivateAction)
+               {
+                  Logging.Log("MissionController: Activate: [" + closest.Name +
+                              "] Move to next pocket after reload command and change state to 'NextPocket'");
+                  closest.Activate();
+
+                  // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
+                  Cache.Instance.NextActivateAction = DateTime.Now.AddSeconds(15);
+                  _moveToNextPocket = DateTime.Now;
+                  State = MissionControllerState.NextPocket;
+               }
+               return;
             }
-        }
-
-        private void ActivateAction(Action action)
-        {
-            string target = action.GetParameterValue("target");
-
-            // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
-            if (string.IsNullOrEmpty(target))
-                target = "Acceleration Gate";
-
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || !targets.Any())
-            {
-                if (!_waiting)
-                {
-                    Logging.Log("MissionController: Activate: Can't find [" + target + "] to activate! Waiting 30 seconds before giving up");
-                    _waitingSince = DateTime.Now;
-                    _waiting = true;
-                }
-                else if (_waiting)
-                {
-                    if (DateTime.Now.Subtract(_waitingSince).TotalSeconds > (int)Time.NoGateFoundRetryDelay_seconds)
-                    {
-                        Logging.Log("MissionController: Activate: After 30 seconds of waiting the gate is still not on grid: MissionControllerState.Error");
-                        State = MissionControllerState.Error;
-                    }
-                }
-                return;
-            }
-            
-            //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
-            EntityCache closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance < (int)Distance.GateActivationRange + 5000)
-            {
-                // Tell the drones module to retract drones
-                Cache.Instance.IsMissionPocketDone = true;
-
-                // We cant activate if we have drones out
-                if (Cache.Instance.ActiveDrones.Any())
-                    return;
-
-                //
-                // this is a bad idea for a speed tank, we ought to somehow cache the object they are orbiting/approaching, etc
-                // this seemingly slowed down the exit from certain missions for me for 2-3min as it had a command to orbit some random object
-                // after the "done" command
-                //
-                if (closest.Distance < -10100)
-                {
-                    if (DateTime.Now > Cache.Instance._nextOrbit)
-                    {
-                        closest.Orbit(1000);
-                        Logging.Log("MissionController: Activate: We are too close to [" + closest.Name + "] Initiating orbit");
-                        Cache.Instance._nextOrbit = DateTime.Now.AddSeconds(15);
-                    }
-                    return;
-                }
-                //Logging.Log("MissionController: distance " + closest.Distance);
-                //if ((closest.Distance <= (int)Distance.TooCloseToStructure) && (DateTime.Now.Subtract(_lastOrbit).TotalSeconds > 30)) //-10100 meters (inside docking ring) - so close that we may get tangled in the structure on activation - move away
-                //{
-                //    Logging.Log("MissionController.Activate: Too close to Structure to activate: orbiting");
-                //    closest.Orbit((int)Distance.GateActivationRange); // 1000 meters
-                //    _lastOrbit = DateTime.Now;
-                //}
-
-                //if (closest.Distance >= (int)Distance.TooCloseToStructure) //If we aren't so close that we may get tangled in the structure, activate it
-                if (closest.Distance >= -10100)
-                {
-                    // Add bookmark (before we activate)
-                    if (Settings.Instance.CreateSalvageBookmarks)
-                        BookmarkPocketForSalvaging();
-
-                    // Reload weapons and activate gate to move to the next pocket
-                    if (DateTime.Now > Cache.Instance._nextReload)
-                    {
-                        Logging.Log("MissionController: Activate: Reload before moving to next pocket");
-                        ReloadAll();
-                        Cache.Instance._nextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
-                    }
-                    if (DateTime.Now > Cache.Instance._nextActivateAction)
-                    {
-                        Logging.Log("MissionController: Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'");
-                        closest.Activate();
-
-                        // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
-                        Cache.Instance._nextActivateAction = DateTime.Now.AddSeconds(15);
-                        _moveToNextPocket = DateTime.Now;
-                        State = MissionControllerState.NextPocket;
-                    }
-                    return;
-                }
-            }
-            else if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
-            {
-                // Move to the target
-                if (DateTime.Now > Cache.Instance._nextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
-                {
-                    Logging.Log("MissionController: Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                    closest.Approach();
-                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                }
-                else if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
-                {
-                    Logging.Log("MissionController: Activate: Delaying approach for: [" + Math.Round(Cache.Instance._nextApproachAction.Subtract(DateTime.Now).TotalSeconds,0) + "] seconds");
-                }
-                return;
-            }
-            else if (closest.Distance > (int)Distance.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
-            {
-                // We cant warp if we have drones out - but we are aligning not warping so we do not care
-                //if (Cache.Instance.ActiveDrones.Count() > 0)
-                //    return;
-
-                if (DateTime.Now > Cache.Instance._nextAlign)
-                {
-                    // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
-                    Logging.Log("MissionController: Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distance.CloseToGateActivationRange + "]");
-                    closest.AlignTo();
-                    Cache.Instance._nextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
-                }
-                else
-                {
-                    Logging.Log("MissionController: Activate: Unable to align: Next Align in [" + Cache.Instance._nextAlign.Subtract(DateTime.Now).TotalSeconds + "] seconds");
-                }
-                return;
-            }
-            else //how in the world would we ever get here?
-            {
-                Logging.Log("MissionController: Activate: Error: [" + closest.Name + "] at [" + closest.Distance + "] is not within jump distance, within warpable distance or outside warpable distance, (!!!), retrying action.");
-                return;
-            }
-        }
-
-        private void ClearPocketAction(Action action)
-        {
-            if (!Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = true;
-            
-            // Get lowest range
-            double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
-            
-            int distancetoclear;
-            if (!int.TryParse(action.GetParameterValue("distance"), out distancetoclear))
-                distancetoclear = (int)range;
-            
-            if (distancetoclear != 0 && distancetoclear != -2147483648 && distancetoclear != 2147483647)
-            {
-                range = Math.Min(range, distancetoclear);
-            }
-
-            // Is there a priority target out of range?
-            EntityCache target = Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
-            if (target == null)
-                _targetNull = true;
-            else
-                _targetNull = false;
-            // Or is there a target out of range that is targeting us?
-            target = target ?? Cache.Instance.TargetedBy.Where(t => !t.IsSentry && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
-            // Or is there any target out of range?
-            target = target ?? Cache.Instance.Entities.Where(t => !t.IsSentry && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
-            int targetedby = Cache.Instance.TargetedBy.Count(t => !t.IsSentry && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int) CategoryID.Entity && t.GroupId != (int) Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
-
-            if (target != null)
-            {
-                // Reset timeout
-                _clearPocketTimeout = null;
-
-                // Lock priority target if within weapons range
-                if (target.Distance < range)
-                {
-                    if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance._nextReload)
-                    {
-                        Logging.Log("MissionController: ReloadALL: Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance,0) + "] < [" + range + "]");
-                        ReloadAll();
-                        Cache.Instance._nextReload = DateTime.Now.AddSeconds(20);
-                    }
-
-                    if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
-                    { 
-                        if (target.IsTarget || target.IsTargeting) //This target is already targeted no need to target it again
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            Logging.Log("MissionController.ClearPocket: Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                            target.LockTarget();
-                        }
-                    }
-                    return;
-                }
-                else
-                {
-                    if (DateTime.Now > Cache.Instance._nextReload)
-                    {
-                        Logging.Log("MissionController: ReloadAll: Reload weapons");
-                        ReloadAll();
-                        Cache.Instance._nextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
-                    }
-                }
-
-                // Are we approaching the active (out of range) target?
-                // Wait for it (or others) to get into range
-
-                if (Settings.Instance.SpeedTank && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
-                {
-                    if (DateTime.Now > Cache.Instance._nextOrbit)
-                    {
-                        target.Orbit(Cache.Instance.OrbitDistance);
-                        Logging.Log("MissionController.ClearPocket: Initiating [" + Cache.Instance.OrbitDistance + "] meter Orbit of [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                        Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds); 
-                    }
-                }
-
-                if (!Settings.Instance.SpeedTank) //we need to make sure that orbitrange is set to the range of the ship if it isn't specified in the character XML!!!!
-                {
-                    if (Settings.Instance.OptimalRange != 0)
-                    {
-                        if (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
-                        {
-                            if (DateTime.Now > Cache.Instance._nextApproachAction)
-                            {
-                                target.Approach(Settings.Instance.OptimalRange);
-                                Logging.Log("MissionController.ClearPocket: Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                                Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                            }
-                        }
-
-                        if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
-                        {
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                            Cache.Instance.Approaching = null;
-                            Logging.Log("MissionController.ClearPocket: Using Optimal Range: Stop ship, target at [" + Math.Round(target.Distance / 1000, 0) + "k away] is inside optimal");
-                        }
-                    }
-                    else
-                    {
-                        if (target.Distance > range && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
-                        {
-                            if (DateTime.Now > Cache.Instance._nextApproachAction)
-                            {
-                                target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
-                                Logging.Log("MissionController.ClearPocket: Using Weapons Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                                Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                            }
-                        }
-
-                        if (target.Distance <= range && Cache.Instance.Approaching != null)
-                        {
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                            Cache.Instance.Approaching = null;
-                            Logging.Log("MissionController.ClearPocket: Using Weapons Range: Stop ship, target is in orbit range");
-                        }
-                    }
-                }
-                return;
-            }
-
-            // Do we have a timeout?  No, set it to now + 5 seconds
-            if (!_clearPocketTimeout.HasValue)
-                _clearPocketTimeout = DateTime.Now.AddSeconds(5);
-
-            // Are we in timeout?
-            if (DateTime.Now < _clearPocketTimeout.Value)
-                return;
-
-            // We have cleared the Pocket, perform the next action \o/ - reset the timers that we had set for actions...
-            Cache.Instance._nextApproachAction = DateTime.Now;
-            Cache.Instance._nextOrbit = DateTime.Now;
-            Cache.Instance._nextAlign = DateTime.Now;
-            _currentAction++;
-
-            // Reset timeout
-            _clearPocketTimeout = null;
-        }
-
-        private void ClearWithinWeaponsRangeOnlyAction(Action action)
-        {
-             // Get lowest range
-            double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
-            double distancetoconsidertargets = range;
-            
-            EntityCache target = Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < distancetoconsidertargets && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
-
-            // Or is there a target within distancetoconsidertargets that is targeting us?
-            target = target ?? Cache.Instance.TargetedBy.Where(t => t.Distance < distancetoconsidertargets && !t.IsEntityIShouldLeaveAlone && !t.IsSentry && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
-            // Or is there any target within distancetoconsidertargets?
-            target = target ?? Cache.Instance.Entities.Where(t => t.Distance < distancetoconsidertargets && !t.IsEntityIShouldLeaveAlone && !t.IsSentry && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
-            int targetedby = Cache.Instance.TargetedBy.Count(t => t.Distance < distancetoconsidertargets && !t.IsEntityIShouldLeaveAlone && !t.IsSentry && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
-
-            if (target != null)
-            {
-                // Reset timeout
-                _clearPocketTimeout = null;
-
-                // Lock priority target if within weapons range
-                if (target.Distance < range)
-                {
-                    if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
-                    {
-                        if (target.IsTarget || target.IsTargeting) //This target is already targeted no need to target it again
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            Logging.Log("MissionController: ClearwithinWeaponsRange: Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                            target.LockTarget();
-                        }
-                    }
-                    return;
-                }
-            }
-
-            // Do we have a timeout?  No, set it to now + 5 seconds
-            if (!_clearPocketTimeout.HasValue)
-                _clearPocketTimeout = DateTime.Now.AddSeconds(5);
-
-            // Are we in timeout?
-            if (DateTime.Now < _clearPocketTimeout.Value)
-                return;
-
-            Logging.Log("MissionController: ClearWithinWeaponsRangeOnlyAction is complete: no more targets in weapons range");
-            _currentAction++;
-
-            // Reset timeout
-            _clearPocketTimeout = null;
-        }
-
-        private void MoveToBackgroundAction(Action action)
-        {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
-
-            int distancetoapp;
-            if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
-                distancetoapp = 1000;
-
-            string target = action.GetParameterValue("target");
-
-            // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
-            if (string.IsNullOrEmpty(target))
-                target = "Acceleration Gate";
-
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
-            if (!targets.Any())
-            {
-                // Unlike activate, no target just means next action
-                _currentAction++;
-                return;
-            }
-
-            EntityCache closest = targets.OrderBy(t => t.Distance).First();
+         }
+         else if (closest.Distance < (int) Distance.WarptoDistance)
+            //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
+         {
             // Move to the target
-            Logging.Log("MissionController: MoveToBackground: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-            closest.Approach(distancetoapp);
-           _currentAction++;
-        }
-
-        private void MoveToAction(Action action)
-        {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
-
-            string target = action.GetParameterValue("target");
-
-            // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
-            if (string.IsNullOrEmpty(target))
-                target = "Acceleration Gate";
-
-            int distancetoapp;
-            if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
-                distancetoapp = 1000;
-
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || !targets.Any())
+            if (DateTime.Now > Cache.Instance.NextApproachAction &&
+                (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null ||
+                 Cache.Instance.Approaching.Id != closest.Id))
             {
-                Logging.Log("MissionController: MoveTo: no entities found named [" + target + "] proceeding to next action");
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
+               Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+               Logging.Log("MissionController.Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id +
+                           "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
+               closest.Approach();
+               Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+            }
+            else if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null ||
+                     Cache.Instance.Approaching.Id != closest.Id)
+            {
+               Logging.Log("MissionController: Activate: Delaying approach for: [" +
+                           Math.Round(Cache.Instance.NextApproachAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                           "] seconds");
+            }
+            return;
+         }
+         else if (closest.Distance > (int) Distance.WarptoDistance)
+            //we must be outside warpto distance, but we are likely in a deadspace so align to the target
+         {
+            // We cant warp if we have drones out - but we are aligning not warping so we do not care
+            //if (Cache.Instance.ActiveDrones.Count() > 0)
+            //    return;
+
+            if (DateTime.Now > Cache.Instance.NextAlign)
+            {
+               // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
+               Logging.Log("MissionController: Activate: AlignTo: [" + closest.Name +
+                           "] This only happens if we are asked to Activate something that is outside [" +
+                           Distance.CloseToGateActivationRange + "]");
+               closest.AlignTo();
+               Cache.Instance.NextAlign = DateTime.Now.AddMinutes((int) Time.AlignDelay_minutes);
+            }
+            else
+            {
+               Logging.Log("MissionController: Activate: Unable to align: Next Align in [" +
+                           Cache.Instance.NextAlign.Subtract(DateTime.Now).TotalSeconds + "] seconds");
+            }
+            return;
+         }
+         else //how in the world would we ever get here?
+         {
+            Logging.Log("MissionController: Activate: Error: [" + closest.Name + "] at [" + closest.Distance +
+                        "] is not within jump distance, within warpable distance or outside warpable distance, (!!!), retrying action.");
+            return;
+         }
+      }
+
+      private void ClearPocketAction(Action action)
+      {
+         if (!Cache.Instance.NormalApproch)
+            Cache.Instance.NormalApproch = true;
+
+         // Get lowest range
+         double range = Cache.Instance.MaxRange;
+         int distancetoclear;
+         if (!int.TryParse(action.GetParameterValue("distance"), out distancetoclear))
+            distancetoclear = (int) range;
+
+         if (distancetoclear != 0 && distancetoclear != -2147483648 && distancetoclear != 2147483647)
+         {
+            range = Math.Min(Cache.Instance.MaxRange, distancetoclear);
+         }
+
+         // Is there a priority target out of range?
+         EntityCache target =
+            Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(
+               t =>
+               !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) &&
+                 !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
+         if (target == null)
+            _targetNull = true;
+         else
+            _targetNull = false;
+         // Or is there a target out of range that is targeting us?
+         target = target ??
+                  Cache.Instance.TargetedBy.Where(
+                     t =>
+                     !t.IsSentry && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc &&
+                     t.CategoryId == (int) CategoryID.Entity && t.GroupId != (int) Group.LargeCollidableStructure &&
+                     !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
+         // Or is there any target out of range?
+         target = target ??
+                  Cache.Instance.Entities.Where(
+                     t =>
+                     !t.IsSentry && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc &&
+                     t.CategoryId == (int) CategoryID.Entity && t.GroupId != (int) Group.LargeCollidableStructure &&
+                     !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
+         int targetedby =
+            Cache.Instance.TargetedBy.Count(
+               t =>
+               !t.IsSentry && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc &&
+               t.CategoryId == (int) CategoryID.Entity && t.GroupId != (int) Group.LargeCollidableStructure &&
+               !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
+
+         if (target != null)
+         {
+            // Reset timeout
+            _clearPocketTimeout = null;
+
+            // Lock priority target if within weapons range
+            if (target.Distance < range)
+            {
+               if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
+               {
+                  Logging.Log("MissionController: ReloadALL: Reload if [" + _targetNull + "] && [" + targetedby +
+                              "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + range + "]");
+                  ReloadAll();
+                  Cache.Instance.NextReload = DateTime.Now.AddSeconds(20);
+                  return;
+               }
+
+               if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
+               {
+                  if (target.IsTarget || target.IsTargeting)
+                     //This target is already targeted no need to target it again
+                  {
+                     return;
+                  }
+                  else
+                  {
+                     Logging.Log("MissionController.ClearPocket: Targeting [" + target.Name + "][ID: " + target.Id +
+                                 "][" + Math.Round(target.Distance/1000, 0) + "k away]");
+                     target.LockTarget();
+                  }
+               }
+               return;
+            }
+            else
+            {
+               if (DateTime.Now > Cache.Instance.NextReload)
+               {
+                  Logging.Log("MissionController: ReloadAll: Reload weapons");
+                  ReloadAll();
+                  Cache.Instance.NextReload = DateTime.Now.AddSeconds((int) Time.ReloadWeaponDelayBeforeUsable_seconds);
+                  return;
+               }
             }
 
-            EntityCache closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance <= distancetoapp + 5000) // if we are inside the range that we are supposed to approach assume we are done
-            {
-                Logging.Log("MissionController: MoveTo: We are [" + closest.Distance + "] from a [" + target + "] we dont need to go any further");
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
+            // Are we approaching the active (out of range) target?
+            // Wait for it (or others) to get into range
 
-                if (Cache.Instance.Approaching != null)
-                {
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                    Cache.Instance.Approaching = null;
-                    Logging.Log("MissionController: MoveTo: Stop ship, we are [" + distancetoapp + "] from [ID: " + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                }
-                //if (Settings.Instance.SpeedTank)
-                //{
-                //    //this should at least keep speed tanked ships from going poof if a mission XML uses moveto
-                //    closest.Orbit(Cache.Instance.OrbitDistance);
-                //    Logging.Log("MissionController: MoveTo: Initiating orbit after reaching target")
-                //}
-                return;
-            }
-            else if (closest.Distance < (int)Distance.WarptoDistance) // if we are inside warptorange you need to approach (you cant warp from here)
+            if (Settings.Instance.SpeedTank &&
+                (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
             {
-                // Move to the target
-                if (DateTime.Now > Cache.Instance._nextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
-                {
-                    Logging.Log("MissionController: Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                    closest.Approach();
-                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                }
-                return;
+               if (DateTime.Now > Cache.Instance.NextOrbit)
+               {
+                  target.Orbit(Cache.Instance.OrbitDistance);
+                  Logging.Log("MissionController.ClearPocket: Initiating [" + Cache.Instance.OrbitDistance +
+                              "] meter Orbit of [" + target.Name + "][ID: " + target.Id + "][" +
+                              Math.Round(target.Distance/1000, 0) + "k away]");
+                  Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
+               }
             }
-            else // if we are outside warpto distance (presumably inside a deadspace where we cant warp) align to the target
+
+            if (!Settings.Instance.SpeedTank)
+               //we need to make sure that orbitrange is set to the range of the ship if it isn't specified in the character XML!!!!
             {
-                //// Move to the target
-                //if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
-                //{
-                //    Logging.Log("MissionController.MoveTo: Approaching target [" + closest.Name + "][" + closest.Id + "][" + Math.Round(closest.Distance/1000,0) + "k away]");
-                //    closest.Approach();
-                //}
-                // We cant warp if we have drones out
-                if (Cache.Instance.ActiveDrones.Any())
-                    return;
+               if (Settings.Instance.OptimalRange != 0)
+               {
+                  if (target.Distance > Settings.Instance.OptimalRange + (int) Distance.OptimalRangeCushion &&
+                      (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                  {
+                     if (DateTime.Now > Cache.Instance.NextApproachAction)
+                     {
+                        target.Approach(Settings.Instance.OptimalRange);
+                        Logging.Log("MissionController.ClearPocket: Using Optimal Range: Approaching target [" +
+                                    target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000, 0) +
+                                    "k away]");
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+                     }
+                  }
 
-                if (DateTime.Now > Cache.Instance._nextAlign)
-                {
-                    // Probably never happens
-                    Logging.Log("MissionController: Activate: Alligning to target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                    closest.AlignTo();
-                    Cache.Instance._nextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
-                }
-                return;
+                  if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
+                  {
+                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                     Cache.Instance.Approaching = null;
+                     Logging.Log("MissionController.ClearPocket: Using Optimal Range: Stop ship, target at [" +
+                                 Math.Round(target.Distance/1000, 0) + "k away] is inside optimal");
+                  }
+               }
+               else
+               {
+                  if (target.Distance > range &&
+                      (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                  {
+                     if (DateTime.Now > Cache.Instance.NextApproachAction)
+                     {
+                        target.Approach((int) (Cache.Instance.WeaponRange*0.8d));
+                        Logging.Log("MissionController.ClearPocket: Using Weapons Range: Approaching target [" +
+                                    target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000, 0) +
+                                    "k away]");
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+                     }
+                  }
+
+                  if (target.Distance <= range && Cache.Instance.Approaching != null)
+                  {
+                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                     Cache.Instance.Approaching = null;
+                     Logging.Log(
+                        "MissionController.ClearPocket: Using Weapons Range: Stop ship, target is in orbit range");
+                  }
+               }
             }
-        }
+            return;
+         }
 
-        private void WaitUntilTargeted(Action action)
-        {
+         // Do we have a timeout?  No, set it to now + 5 seconds
+         if (!_clearPocketTimeout.HasValue)
+            _clearPocketTimeout = DateTime.Now.AddSeconds(5);
+
+         // Are we in timeout?
+         if (DateTime.Now < _clearPocketTimeout.Value)
+            return;
+
+         // We have cleared the Pocket, perform the next action \o/ - reset the timers that we had set for actions...
+         Cache.Instance.NextApproachAction = DateTime.Now;
+         Cache.Instance.NextOrbit = DateTime.Now;
+         Cache.Instance.NextAlign = DateTime.Now;
+         _currentAction++;
+
+         // Reset timeout
+         _clearPocketTimeout = null;
+      }
+
+      private void ClearWithinWeaponsRangeOnlyAction(Action action)
+      {
+         // Get lowest range
+         double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+         double distancetoconsidertargets = range;
+
+         EntityCache target =
+            Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(
+               t =>
+               t.Distance < distancetoconsidertargets &&
+               !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) &&
+                 !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
+
+         // Or is there a target within distancetoconsidertargets that is targeting us?
+         target = target ??
+                  Cache.Instance.TargetedBy.Where(
+                     t =>
+                     t.Distance < distancetoconsidertargets && !t.IsEntityIShouldLeaveAlone && !t.IsSentry &&
+                     !t.IsContainer && t.IsNpc && t.CategoryId == (int) CategoryID.Entity &&
+                     t.GroupId != (int) Group.LargeCollidableStructure &&
+                     !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
+         // Or is there any target within distancetoconsidertargets?
+         target = target ??
+                  Cache.Instance.Entities.Where(
+                     t =>
+                     t.Distance < distancetoconsidertargets && !t.IsEntityIShouldLeaveAlone && !t.IsSentry &&
+                     !t.IsContainer && t.IsNpc && t.CategoryId == (int) CategoryID.Entity &&
+                     t.GroupId != (int) Group.LargeCollidableStructure &&
+                     !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
+
+         if (target != null)
+         {
+            // Reset timeout
+            _clearPocketTimeout = null;
+
+            // Lock priority target if within weapons range
+            if (target.Distance < Cache.Instance.MaxRange)
+            {
+               if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
+               {
+                  if (target.IsTarget || target.IsTargeting)
+                     //This target is already targeted no need to target it again
+                  {
+                     return;
+                  }
+                  else
+                  {
+                     Logging.Log("MissionController: ClearwithinWeaponsRange: Targeting [" + target.Name + "][ID: " +
+                                 target.Id + "][" + Math.Round(target.Distance/1000, 0) + "k away]");
+                     target.LockTarget();
+                  }
+               }
+               return;
+            }
+         }
+
+         // Do we have a timeout?  No, set it to now + 5 seconds
+         if (!_clearPocketTimeout.HasValue)
+            _clearPocketTimeout = DateTime.Now.AddSeconds(5);
+
+         // Are we in timeout?
+         if (DateTime.Now < _clearPocketTimeout.Value)
+            return;
+
+         Logging.Log(
+            "MissionController: ClearWithinWeaponsRangeOnlyAction is complete: no more targets in weapons range");
+         _currentAction++;
+
+         // Reset timeout
+         _clearPocketTimeout = null;
+      }
+
+      private void MoveToBackgroundAction(Action action)
+      {
+         if (Cache.Instance.NormalApproch)
+            Cache.Instance.NormalApproch = false;
+
+         int distancetoapp;
+         if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
+            distancetoapp = 1000;
+
+         string target = action.GetParameterValue("target");
+
+         // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
+         if (string.IsNullOrEmpty(target))
+            target = "Acceleration Gate";
+
+         IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+         if (!targets.Any())
+         {
+            // Unlike activate, no target just means next action
+            _currentAction++;
+            return;
+         }
+
+         EntityCache closest = targets.OrderBy(t => t.Distance).First();
+         // Move to the target
+         Logging.Log("MissionController: MoveToBackground: Approaching target [" + closest.Name + "][ID: " + closest.Id +
+                     "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
+         closest.Approach(distancetoapp);
+         _currentAction++;
+      }
+
+      private void MoveToAction(Action action)
+      {
+         if (Cache.Instance.NormalApproch)
+            Cache.Instance.NormalApproch = false;
+
+         string target = action.GetParameterValue("target");
+
+         // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
+         if (string.IsNullOrEmpty(target))
+            target = "Acceleration Gate";
+
+         int distancetoapp;
+         if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
+            distancetoapp = 1000;
+
+         IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+         if (targets == null || !targets.Any())
+         {
+            Logging.Log("MissionController: MoveTo: no entities found named [" + target + "] proceeding to next action");
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         EntityCache closest = targets.OrderBy(t => t.Distance).First();
+         if (closest.Distance <= distancetoapp + 5000)
+            // if we are inside the range that we are supposed to approach assume we are done
+         {
+            Logging.Log("MissionController: MoveTo: We are [" + closest.Distance + "] from a [" + target +
+                        "] we dont need to go any further");
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+
+            if (Cache.Instance.Approaching != null)
+            {
+               Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+               Cache.Instance.Approaching = null;
+               Logging.Log("MissionController: MoveTo: Stop ship, we are [" + distancetoapp + "] from [ID: " +
+                           closest.Name + "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
+            }
+            //if (Settings.Instance.SpeedTank)
+            //{
+            //    //this should at least keep speed tanked ships from going poof if a mission XML uses moveto
+            //    closest.Orbit(Cache.Instance.OrbitDistance);
+            //    Logging.Log("MissionController: MoveTo: Initiating orbit after reaching target")
+            //}
+            return;
+         }
+         else if (closest.Distance < (int) Distance.WarptoDistance)
+            // if we are inside warptorange you need to approach (you cant warp from here)
+         {
+            // Move to the target
+            if (DateTime.Now > Cache.Instance.NextApproachAction &&
+                (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+            {
+               Logging.Log("MissionController: Activate: Approaching target [" + closest.Name + "][ID: " + closest.Id +
+                           "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
+               closest.Approach();
+               Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+            }
+            return;
+         }
+         else
+            // if we are outside warpto distance (presumably inside a deadspace where we cant warp) align to the target
+         {
+            //// Move to the target
+            //if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+            //{
+            //    Logging.Log("MissionController.MoveTo: Approaching target [" + closest.Name + "][" + closest.Id + "][" + Math.Round(closest.Distance/1000,0) + "k away]");
+            //    closest.Approach();
+            //}
+            // We cant warp if we have drones out
+            if (Cache.Instance.ActiveDrones.Any())
+               return;
+
+            if (DateTime.Now > Cache.Instance.NextAlign)
+            {
+               // Probably never happens
+               Logging.Log("MissionController: Activate: Alligning to target [" + closest.Name + "][ID: " +
+                           closest.Id + "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
+               closest.AlignTo();
+               Cache.Instance.NextAlign = DateTime.Now.AddMinutes((int) Time.AlignDelay_minutes);
+            }
+            return;
+         }
+      }
+
+      private void WaitUntilTargeted(Action action)
+      {
+         IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
+         if (targetedBy != null && targetedBy.Any())
+         {
+            Logging.Log("MissionController: WaitUntilTargeted: We have been targeted!");
+
+            // We have been locked, go go go ;)
+            _waiting = false;
+            _currentAction++;
+            return;
+         }
+
+         // Default timeout is 30 seconds
+         int timeout;
+         if (!int.TryParse(action.GetParameterValue("timeout"), out timeout))
+            timeout = 30; // Probably don't need to do this
+
+         if (_waiting)
+         {
+            if (DateTime.Now.Subtract(_waitingSince).TotalSeconds < timeout)
+               return;
+
+            Logging.Log("MissionController: WaitUntilTargeted: Nothing targeted us within the timeout!");
+
+            // Nothing has targeted us in the specified timeout
+            _waiting = false;
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         // Start waiting
+         _waiting = true;
+         _waitingSince = DateTime.Now;
+      }
+
+      private void AggroOnlyAction(Action action)
+      {
+         if (Cache.Instance.NormalApproch)
+            Cache.Instance.NormalApproch = false;
+
+         bool ignoreAttackers;
+         if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
+            ignoreAttackers = false;
+
+         bool breakOnAttackers;
+         if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
+            breakOnAttackers = false;
+
+         bool nottheclosest;
+         if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
+            nottheclosest = false;
+
+         int numbertoignore;
+         if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
+            numbertoignore = 0;
+
+         List<string> targetNames = action.GetParameterValues("target");
+         // No parameter? Ignore kill action
+         if (targetNames.Count == 0)
+         {
+            Logging.Log("MissionController: AggroOnly: No targets defined!");
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
+         if (targets.Count() == numbertoignore)
+         {
+            Logging.Log("MissionController: AggroOnly: All targets gone " +
+                        targetNames.Aggregate((current, next) => current + "[" + next + "]"));
+
+            // We killed it/them !?!?!? :)
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         if (Cache.Instance.TargetedBy.Any(t => !t.IsSentry && targetNames.Contains(t.Name)))
+         {
+            // We are being attacked, break the kill order
+            if (Cache.Instance.RemovePriorityTargets(targets))
+               Logging.Log("MissionController: AggroOnly: Done with AggroOnly: We have aggro.");
+
+            foreach (EntityCache target in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
+            {
+               Logging.Log("MissionController: AggroOnly: Unlocking [" + target.Name + "][ID: " + target.Id + "][" +
+                           Math.Round(target.Distance/1000, 0) + "k away] due to aggro being obtained");
+               target.UnlockTarget();
+               return;
+            }
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         if (!ignoreAttackers || breakOnAttackers)
+         {
+            // Apparently we are busy, wait for combat to clear attackers first
             IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
-            if (targetedBy != null && targetedBy.Any())
+            if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
+               return;
+         }
+
+         EntityCache closest = targets.OrderBy(t => t.Distance).First();
+
+         if (nottheclosest)
+            closest = targets.OrderByDescending(t => t.Distance).First();
+
+         if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == closest.Id))
+         {
+            Logging.Log("MissionController: AggroOnly: Adding [" + closest.Name + "][ID: " + closest.Id + "][" +
+                        Math.Round(closest.Distance/1000, 0) + "k away] as a priority target");
+            Cache.Instance.AddPriorityTargets(new[] {closest}, Priority.PriorityKillTarget);
+         }
+      }
+
+      private void KillAction(Action action)
+      {
+         if (Cache.Instance.NormalApproch)
+            Cache.Instance.NormalApproch = false;
+
+         bool ignoreAttackers;
+         if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
+            ignoreAttackers = false;
+
+         bool breakOnAttackers;
+         if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
+            breakOnAttackers = false;
+
+         bool nottheclosest;
+         if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
+            nottheclosest = false;
+
+         int numbertoignore;
+         if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
+            numbertoignore = 0;
+
+         List<string> targetNames = action.GetParameterValues("target");
+         // No parameter? Ignore kill action
+         if (targetNames.Count == 0)
+         {
+            Logging.Log("MissionController: Kill: No targets defined!");
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+
+         IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
+         if (targets.Count() == numbertoignore)
+         {
+            Logging.Log("MissionController: Kill: All targets killed " +
+                        targetNames.Aggregate((current, next) => current + "[" + next + "]"));
+
+            // We killed it/them !?!?!? :)
+            Cache.Instance.NextApproachAction = DateTime.Now;
+            Cache.Instance.NextOrbit = DateTime.Now;
+            Cache.Instance.NextAlign = DateTime.Now;
+            _currentAction++;
+            return;
+         }
+
+         if (breakOnAttackers && Cache.Instance.TargetedBy.Any(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange))
+         {
+            // We are being attacked, break the kill order
+            if (Cache.Instance.RemovePriorityTargets(targets))
+               Logging.Log("MissionController: Kill: Breaking off kill order, new spawn has arrived!");
+
+            foreach (EntityCache target in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
             {
-                Logging.Log("MissionController: WaitUntilTargeted: We have been targeted!");
-
-                // We have been locked, go go go ;)
-                _waiting = false;
-                _currentAction++;
-                return;
+               Logging.Log("MissionController: Kill: Unlocking [" + target.Name + "][ID: " + target.Id + "][" +
+                           Math.Round(target.Distance/1000, 0) + "k away] due to kill order being put on hold");
+               target.UnlockTarget();
             }
+            return;
+         }
 
-            // Default timeout is 30 seconds
-            int timeout;
-            if (!int.TryParse(action.GetParameterValue("timeout"), out timeout))
-                timeout = 30; // Probably don't need to do this
+         if (!ignoreAttackers || breakOnAttackers)
+         {
+            // Apparently we are busy, wait for combat to clear attackers first
+            IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
+            if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
+               return;
+         }
 
-            if (_waiting)
-            {
-                if (DateTime.Now.Subtract(_waitingSince).TotalSeconds < timeout)
-                    return;
+         EntityCache closest = targets.OrderBy(t => t.Distance).First();
 
-                Logging.Log("MissionController: WaitUntilTargeted: Nothing targeted us within the timeout!");
+         if (nottheclosest)
+            closest = targets.OrderByDescending(t => t.Distance).First();
 
-                // Nothing has targeted us in the specified timeout
-                _waiting = false;
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
-            }
-
-            // Start waiting
-            _waiting = true;
-            _waitingSince = DateTime.Now;
-        }
-
-        private void AggroOnlyAction(Action action)
-        {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
-
-            bool ignoreAttackers;
-            if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
-                ignoreAttackers = false;
-
-            bool breakOnAttackers;
-            if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
-                breakOnAttackers = false;
-
-            bool nottheclosest;
-            if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
-                nottheclosest = false;
-
-            int numbertoignore;
-            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
-                numbertoignore = 0;
-
-            List<string> targetNames = action.GetParameterValues("target");
-            // No parameter? Ignore kill action
-            if (targetNames.Count == 0)
-            {
-                Logging.Log("MissionController: AggroOnly: No targets defined!");
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
-            }
-
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
-            if (targets.Count() == numbertoignore)
-            {
-                Logging.Log("MissionController: AggroOnly: All targets gone " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
-
-                // We killed it/them !?!?!? :)
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
-            }
-
-            if (Cache.Instance.TargetedBy.Any(t => !t.IsSentry && targetNames.Contains(t.Name)))
-            {
-                // We are being attacked, break the kill order
-                if (Cache.Instance.RemovePriorityTargets(targets))
-                    Logging.Log("MissionController: AggroOnly: Done with AggroOnly: We have aggro.");
-
-                foreach (EntityCache target in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
-                {
-                    Logging.Log("MissionController: AggroOnly: Unlocking [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away] due to aggro being obtained");
-                    target.UnlockTarget();
-
-                }
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
-            }
-
-            if (!ignoreAttackers || breakOnAttackers)
-            {
-                // Apparently we are busy, wait for combat to clear attackers first
-                IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
-                if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
-                    return;
-            }
-
-            EntityCache closest = targets.OrderBy(t => t.Distance).First();
-
-            if (nottheclosest)
-                closest = targets.OrderByDescending(t => t.Distance).First();
-
-           
+         if (closest.Distance < Cache.Instance.MaxRange)
+         {
             if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == closest.Id))
             {
-                Logging.Log("MissionController: AggroOnly: Adding [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance/1000,0) + "k away] as a priority target");
-                Cache.Instance.AddPriorityTargets(new[] { closest }, Priority.PriorityKillTarget);
+               Logging.Log("MissionController: Kill: Adding [" + closest.Name + "][ID: " + closest.Id +
+                           "] as a priority target");
+               Cache.Instance.AddPriorityTargets(new[] {closest}, Priority.PriorityKillTarget);
             }
-        }
-
-        private void KillAction(Action action)
-        {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
-
-            bool ignoreAttackers;
-            if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
-                ignoreAttackers = false;
-
-            bool breakOnAttackers;
-            if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
-                breakOnAttackers = false;
-
-            bool nottheclosest;
-            if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
-                nottheclosest = false;
-
-            int numbertoignore;
-            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
-                numbertoignore = 0;
-
-            List<string> targetNames = action.GetParameterValues("target");
-            // No parameter? Ignore kill action
-            if (targetNames.Count == 0)
+            //it should stop without our action
+            if (Cache.Instance.Approaching != null && !Settings.Instance.SpeedTank && (Settings.Instance.OptimalRange <= 0))
             {
-                Logging.Log("MissionController: Kill: No targets defined!");
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
+               if (DateTime.Now > Cache.Instance.NextApproachAction)
+               {
+                  Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                  Cache.Instance.Approaching = null;
+                  Logging.Log("MissionController: Kill: Stop ship, target is in weapons range");
+                  Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+               }
             }
+         }
 
-            double range = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+         //if optimalrange is setup and distance to target is less than 80% of optimalrange and we aren't speedtanking
+         if (Settings.Instance.OptimalRange > 0 && (closest.Distance < (Settings.Instance.OptimalRange*0.8d)) && !Settings.Instance.SpeedTank)
+         {
+            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+            Cache.Instance.Approaching = null;
+            Logging.Log("MissionController: Kill: Stop ship, target is in optimalRange");
+         }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
-            if (targets.Count() == numbertoignore)
+         //if distance to target is more than weapons range and we haven't setup optimalrange OR we are inside optimalrange and optimalrange has been setup
+         if ((closest.Distance > Cache.Instance.MaxRange && Settings.Instance.OptimalRange <= 0) || (closest.Distance > Settings.Instance.OptimalRange + (int) Distance.OptimalRangeCushion) && Settings.Instance.OptimalRange > 0)
+         {
+            //Logging.Log("MissionController: kill: we are out of range)");
+            Cache.Instance.TimeSpentInMissionOutOfRange = Cache.Instance.TimeSpentInMissionOutOfRange +
+                                                          ((int) Time.QuestorPulse_milliseconds/1000);
+               //their has to be a more precise way to do this...
+            //
+            // are we approaching anything?
+            //
+            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
             {
-                Logging.Log("MissionController: Kill: All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
+               //
+               // if speed tanking use orbit settings and setup an orbit on the target (or an object?)
+               //
+               if (Settings.Instance.SpeedTank)
+               {
 
-                // We killed it/them !?!?!? :)
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
-                _currentAction++;
-                return;
-            }
-
-            if (breakOnAttackers && Cache.Instance.TargetedBy.Any(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange))
-            {
-                // We are being attacked, break the kill order
-                if (Cache.Instance.RemovePriorityTargets(targets))
-                    Logging.Log("MissionController: Kill: Breaking off kill order, new spawn has arrived!");
-
-                foreach (EntityCache target in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
-                {
-                    Logging.Log("MissionController: Kill: Unlocking [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance/1000,0) + "k away] due to kill order being put on hold");
-                    target.UnlockTarget();
-                }
-
-                return;
-            }
-
-            if (!ignoreAttackers || breakOnAttackers)
-            {
-                // Apparently we are busy, wait for combat to clear attackers first
-                IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
-                if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
-                    return;
-            }
-
-            EntityCache closest = targets.OrderBy(t => t.Distance).First();
-
-            if (nottheclosest)
-                closest = targets.OrderByDescending(t => t.Distance).First();
-
-            if (closest.Distance < range)
-            {
-                if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == closest.Id))
-                {
-                    Logging.Log("MissionController: Kill: Adding [" + closest.Name + "][ID: " + closest.Id + "] as a priority target");
-                    Cache.Instance.AddPriorityTargets(new[] {closest}, Priority.PriorityKillTarget);
-                }
-                
-                if (Cache.Instance.Approaching != null && !Settings.Instance.SpeedTank && (Settings.Instance.OptimalRange <= 0))
-                {
-                    if (DateTime.Now > Cache.Instance._nextApproachAction)
-                    {
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                        Cache.Instance.Approaching = null;
-                        Logging.Log("MissionController: Kill: Stop ship, target is in weapons range");
-                        Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                    }
-                }
-            }
-
-            //if optimalrange is setup and distance to target is less than 80% of optimalrange and we aren't speedtanking
-            if (Settings.Instance.OptimalRange > 0 && (closest.Distance < (Settings.Instance.OptimalRange * 0.8d)) && !Settings.Instance.SpeedTank)
-            {
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                Cache.Instance.Approaching = null;
-                Logging.Log("MissionController: Kill: Stop ship, target is in optimalRange");
-            }
-
-            //if distance to target is more than weapons range and we haven't setup optimalrange OR we are inside optimalrange and optimalrange has been setup
-            if ((closest.Distance > range && Settings.Instance.OptimalRange <= 0) || (closest.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion) && Settings.Instance.OptimalRange > 0)
-            {
-
-                //Logging.Log("MissionController: kill: we are out of range)");
-                Cache.Instance.TimeSpentInMissionOutOfRange = Cache.Instance.TimeSpentInMissionOutOfRange + ((int)Time.QuestorPulse_milliseconds / 1000); //their has to be a more precise way to do this...
-                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
-                {
-                    //Logging.Log("MissionController: kill: if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)");
-                    if (Settings.Instance.SpeedTank)
-                    {
-                        if (DateTime.Now > Cache.Instance._nextOrbit)
+                  if (DateTime.Now > Cache.Instance.NextOrbit)
+                  {
+                     if (closest.Distance + (int) Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
+                     {
+                        Logging.Log("MissionController: Kill: StartOrbiting: Target in range");
+                        if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
-                            closest.Orbit(Cache.Instance.OrbitDistance);
-                            Logging.Log("MissionController: Kill: Initiating Orbit [" + closest.Name + "][ID: " + closest.Id + "] at [" + Cache.Instance.OrbitDistance + "] meters, the orbit target is: [" + Math.Round(closest.Distance, 0) + "] meters away");
-                            Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                        }
+                           Logging.Log("MissionController: Kill: We are not yet approaching nor orbiting");
+                           var orbitStructure = false;
+                              //this needs to be made a setting and have more testing and adjustment before afk use
+                           var structure =
+                              Cache.Instance.Entities.Where(
+                                 i =>
+                                 i.GroupId == (int) Group.LargeCollidableStructure || i.Name.Contains("Gate") ||
+                                 i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).
+                                 FirstOrDefault();
 
-                    }
-                    else if (Settings.Instance.OptimalRange > 0)
-                    {
-                        if (DateTime.Now > Cache.Instance._nextApproachAction)
-                        {
-                            closest.Approach((int)(Settings.Instance.OptimalRange * 0.8d)); // Move within 80% of optimalrange
-                            Logging.Log("MissionController: Kill: initiating Approach of [" + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away] approaching to [" + (Settings.Instance.OptimalRange * 0.8d) + "]");
-                            Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                           if (orbitStructure && structure != null)
+                           {
+                              structure.Orbit((int) Cache.Instance.OrbitDistance);
+                              Logging.Log("MissionController: Kill: Initiating Orbit [" + structure.Name + "][ID: " +
+                                          structure.Id + "]");
+                           }
+                           else
+                           {
+                              closest.Orbit(Cache.Instance.OrbitDistance);
+                              Logging.Log("MissionController: Kill: Initiating Orbit [" + closest.Name + "][ID: " +
+                                          closest.Id + "]");
+                           }
+                           Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
+                           return;
                         }
-                    }
-                    else
-                    {
-                        if (DateTime.Now > Cache.Instance._nextApproachAction)
+                     }
+                     else
+                     {
+                        //Logging.Log("MissionController: Possible out of range. ignoring orbit around structure");
+                        closest.Orbit(Cache.Instance.OrbitDistance);
+                        Logging.Log("MissionController: Kill: Initiating Orbit [" + closest.Name + "][ID: " + closest.Id +
+                                    "] at [" + Cache.Instance.OrbitDistance + "] meters, the orbit target is: [" +
+                                    Math.Round(closest.Distance, 0) + "] meters away");
+                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
+                        return;
+                     }
+                  }
+               }
+               else //if speed tank is false: if orbit range is not set we shouldnt try to use it at all. Maybe they dont want to orbit.           
+               {
+                  if (DateTime.Now > Cache.Instance.NextApproachAction)
+                  {
+                     if (Settings.Instance.OptimalRange != 0)
+                     {
+                        if (closest.Distance > Settings.Instance.OptimalRange + (int) Distance.OptimalRangeCushion &&
+                            (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                         {
-                            closest.Approach((int)(Cache.Instance.WeaponRange * 0.8d)); // Move within 80% of range
-                            Logging.Log("MissionController: Kill: initiating Approach of [" + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away] approaching to [" + (Settings.Instance.OptimalRange * 0.8d) + "]");
-                            Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                           closest.Approach(Settings.Instance.OptimalRange);
+                           Logging.Log("MissionController" + _pocketActions[_currentAction] +
+                                       ": Using Optimal Range: Approaching target [" + closest.Name + "][ID: " +
+                                       closest.Id + "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
                         }
-                    }
-                }
-                else
-                {
-                    if (DateTime.Now > Cache.Instance._nextOrbit) //abuse the lastorbit timestamp here for debugging
-                    {
-                        //Logging.Log("MissionController: kill: we are already on approach to the target");
-                    }
-                }
+                        // when approach distance will be reached ship will be stopped so this is not needed
+                        if (closest.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
+                        {
+                           Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                           Cache.Instance.Approaching = null;
+                           Logging.Log("MissionController" + _pocketActions[_currentAction] +
+                                       ": Using Optimal Range: Stop ship, target at [" +
+                                       Math.Round(closest.Distance/1000, 0) + "k away] is inside optimal");
+                        }
+                     }
+                     else
+                     {
+                        if (closest.Distance > Cache.Instance.MaxRange &&
+                            (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+                        {
+                           closest.Approach((int) (Cache.Instance.WeaponRange*0.8d));
+                           Logging.Log("MissionController.KillAction: Using Weapons Range: Approaching target [" +
+                                       closest.Name + "][ID: " + closest.Id + "][" +
+                                       Math.Round(closest.Distance/1000, 0) + "k away]");
+                        }
+                        //I think when approach distance will be reached ship will be stoppedd so this is not needed
+                        if (closest.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching != null)
+                        {
+                           Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                           Cache.Instance.Approaching = null;
+                           Logging.Log(
+                              "MissionController.KillAction: Using Weapons Range: Stop ship, target is in orbit range");
+                        }
+                     }
+                     Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int) Time.ApproachDelay_seconds);
+                     return;
+                  }
+               }
             }
             else
             {
-                if (DateTime.Now > Cache.Instance._nextOrbit) //abuse the lastorbit timestamp here
-                {
-                    Cache.Instance.TimeSpentInMissionInRange = Cache.Instance.TimeSpentInMissionInRange + ((int)Time.QuestorPulse_milliseconds / 1000); //their has to be a more precise way to do this...
-                    //Logging.Log("MissionController: kill: target(s) are IN range");
-                }
+               if (DateTime.Now > Cache.Instance.NextOrbit) //abuse the lastorbit timestamp here for debugging
+               {
+                  //Logging.Log("MissionController: kill: we are already on approach to the target");
+               }
             }
-        }
-
-        private void KillOnceAction(Action action)
-        {
-
-            Logging.Log("This action (KillOnce) is not yet enabled: proceeding to next action");
-            _currentAction++;
-            //some impossible speed - to quiet a compile warning until this action gets fixed
-            
-            if (Cache.Instance.DirectEve.ActiveShip.Entity.Velocity > 9999999) //this concept with a relatively more realistic speed should be used in places to make sure speed tanks are moving
+         }
+         else
+         {
+            if (DateTime.Now > Cache.Instance.NextOrbit) //abuse the lastorbit timestamp here
             {
-                /* if (Cache.Instance.NormalApproch)
-                    Cache.Instance.NormalApproch = false;
-
-                bool ignoreAttackers;
-                if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
-                    ignoreAttackers = false;
-
-                bool breakOnAttackers;
-                if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
-                    breakOnAttackers = false;
-
-                bool nottheclosest;
-                if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
-                    nottheclosest = false;
-
-                int numbertoignore;
-                if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
-                    numbertoignore = 0;
-
-                var targetNames = action.GetParameterValues("target");
-                // No parameter? Ignore kill action
-                if (targetNames.Count == 0)
-                {
-                    Logging.Log("MissionController.KillOnce: No targets defined!");
-
-                    Cache.Instance._nextApproachAction = DateTime.Now;
-                    Cache.Instance._nextOrbit = DateTime.Now;
-                    Cache.Instance._nextAlign = DateTime.Now;
-                    _currentAction++;
-                    return;
+               Cache.Instance.TimeSpentInMissionInRange = Cache.Instance.TimeSpentInMissionInRange +
+                                                          ((int) Time.QuestorPulse_milliseconds/1000);
+                  //their has to be a more precise way to do this...
+               //Logging.Log("MissionController: kill: target(s) are IN range");
             }
+         }
+      }
 
+      private void KillOnceAction(Action action)
+      {
+         Logging.Log("This action (KillOnce) is not yet enabled: proceeding to next action");
+         _currentAction++;
+         //some impossible speed - to quiet a compile warning until this action gets fixed
+            
+         if (Cache.Instance.DirectEve.ActiveShip.Entity.Velocity > 9999999) //this concept with a relatively more realistic speed should be used in places to make sure speed tanks are moving
+         {
+               /* if (Cache.Instance.NormalApproch)
+                  Cache.Instance.NormalApproch = false;
 
-                if (Cache.Instance.CurrentCombatTargets.Count == 0 )
-                {
-                    if (!nottheclosest) //default is the closest target
-                    {
-                //        Cache.Instance.CurrentCombatTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).First();
-                    }
-                    else if (nottheclosest) // if specified then reverse the entity search so that we are targeting the furthest target
-                    {                    
-                //        Cache.Instance.CurrentCombatTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).First();
-                        //Cache.Instance.CurrentCombatTargets = Cache.Instance.Entities.Where(e => e.IsContainer && e.HaveLootRights || e.GroupId == (int) Group.Wreck)).OrderBy(e => e.Distance).ToList();
+               bool ignoreAttackers;
+               if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
+                  ignoreAttackers = false;
 
-                    }
-                }
-                var target = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).First();
-                //var containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance); 
-                //        target =   Cache.Instance.Entities.Where(e =>  Cache.Instance.CurrentCombatTargets.Contains(e.Id).Orderby(t => target.Distance).First();
-                //
-                // is it dead?
-                //
-                //if (target.)
-                //{
-                //    Logging.Log("MissionController.KillOnce: The target is dead, not valid anymore ");
-                //
-                //    // We killed it/them !?!?!? :)
-                //                Cache.Instance._nextApproachAction = DateTime.Now;
-                //                Cache.Instance._nextOrbit = DateTime.Now;
-                //                Cache.Instance._nextAlign = DateTime.Now;
-                //                _currentAction++;
-                //    return;
-                //}
+               bool breakOnAttackers;
+               if (!bool.TryParse(action.GetParameterValue("breakonattackers"), out breakOnAttackers))
+                  breakOnAttackers = false;
 
-                if (!ignoreAttackers || breakOnAttackers)
-                {
-                    // Apparently we are busy, wait for combat to clear attackers first
-                    var targetedBy = Cache.Instance.TargetedBy;
-                    if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
-                        return;
-                }
+               bool nottheclosest;
+               if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
+                  nottheclosest = false;
 
+               int numbertoignore;
+               if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
+                  numbertoignore = 0;
 
-                if (target.Distance < Cache.Instance.WeaponRange)
-                {
-                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
-                    {
-                        Logging.Log("MissionController.KillOnce: Adding [" + target.Name + "][" + target.Id + "] as a priority target");
-                        Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
-                    }
+               var targetNames = action.GetParameterValues("target");
+               // No parameter? Ignore kill action
+               if (targetNames.Count == 0)
+               {
+                  Logging.Log("MissionController.KillOnce: No targets defined!");
 
-                    if (Cache.Instance.Approaching != null && !Settings.Instance.SpeedTank)
-                    {
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                        Cache.Instance.Approaching = null;
-                        Logging.Log("MissionController.KillOnce: Stop ship, target is in weapons range");
-                    }
-                }
-                else
-                {
-                    // Move within 80% max distance
-                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id)
-                    {
-                        Logging.Log("MissionController.KillOnce: Approaching target [" + target.Name + "][" + target.Id + "]");
+                  Cache.Instance._nextApproachAction = DateTime.Now;
+                  Cache.Instance._nextOrbit = DateTime.Now;
+                  Cache.Instance._nextAlign = DateTime.Now;
+                  _currentAction++;
+                  return;
+               }
 
-                        if (Settings.Instance.SpeedTank)
-                        {
-                            if (DateTime.Now.Subtract(_lastOrbit).TotalSeconds > 15)
-                            {
-                                target.Orbit(Cache.Instance.OrbitDistance);
-                                Logging.Log("MissionController: killonce: initiating orbit");
-                                _lastOrbit = DateTime.Now;
-                            }
-                        }
-                        else
-                        {
-                            target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
-                            Logging.Log("MissionController: killonce: approaching");
-                        }
-                    }
-                } */
+               if (Cache.Instance.CurrentCombatTargets.Count == 0 )
+               {
+                  if (!nottheclosest) //default is the closest target
+                  {
+               //        Cache.Instance.CurrentCombatTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).First();
+                  }
+                  else if (nottheclosest) // if specified then reverse the entity search so that we are targeting the furthest target
+                  {                    
+               //        Cache.Instance.CurrentCombatTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).First();
+                     //Cache.Instance.CurrentCombatTargets = Cache.Instance.Entities.Where(e => e.IsContainer && e.HaveLootRights || e.GroupId == (int) Group.Wreck)).OrderBy(e => e.Distance).ToList();
+                  }
+               }
+               var target = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).First();
+               //var containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance); 
+               //        target =   Cache.Instance.Entities.Where(e =>  Cache.Instance.CurrentCombatTargets.Contains(e.Id).Orderby(t => target.Distance).First();
+               //
+               // is it dead?
+               //
+               //if (target.)
+               //{
+               //    Logging.Log("MissionController.KillOnce: The target is dead, not valid anymore ");
+               //
+               //    // We killed it/them !?!?!? :)
+               //                Cache.Instance._nextApproachAction = DateTime.Now;
+               //                Cache.Instance._nextOrbit = DateTime.Now;
+               //                Cache.Instance._nextAlign = DateTime.Now;
+               //                _currentAction++;
+               //    return;
+               //}
+
+               if (!ignoreAttackers || breakOnAttackers)
+               {
+                  // Apparently we are busy, wait for combat to clear attackers first
+                  var targetedBy = Cache.Instance.TargetedBy;
+                  if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.WeaponRange) > 0)
+                     return;
+               }
+
+               if (target.Distance < Cache.Instance.WeaponRange)
+               {
+                  if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
+                  {
+                     Logging.Log("MissionController.KillOnce: Adding [" + target.Name + "][" + target.Id + "] as a priority target");
+                     Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
+                  }
+
+                  if (Cache.Instance.Approaching != null && !Settings.Instance.SpeedTank)
+                  {
+                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                     Cache.Instance.Approaching = null;
+                     Logging.Log("MissionController.KillOnce: Stop ship, target is in weapons range");
+                  }
+               }
+               else
+               {
+                  // Move within 80% max distance
+                  if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id)
+                  {
+                     Logging.Log("MissionController.KillOnce: Approaching target [" + target.Name + "][" + target.Id + "]");
+
+                     if (Settings.Instance.SpeedTank)
+                     {
+                           if (DateTime.Now>Cache.Instance._nextOrbit)
+                           {
+                              target.Orbit(Cache.Instance.OrbitDistance);
+                              Logging.Log("MissionController: killonce: initiating orbit");
+                              Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                           }
+                     }
+                     else
+                     {
+                           target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
+                           Logging.Log("MissionController: killonce: approaching");
+                     }
+                  }
+               } */
             }
         }
 
@@ -1059,9 +1229,6 @@ namespace Questor.Modules
                 Logging.Log("MissionController: UseDrones: Enable launch of drones");
                 Cache.Instance.UseDrones = true;
             }
-            Cache.Instance._nextApproachAction = DateTime.Now;
-            Cache.Instance._nextOrbit = DateTime.Now;
-            Cache.Instance._nextAlign = DateTime.Now;
             _currentAction++;
             return;
         }
@@ -1082,9 +1249,9 @@ namespace Questor.Modules
             if (targetNames.Count == 0)
             {
                 Logging.Log("MissionController: AttackClosestByName: No targets defined!");
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
+                Cache.Instance.NextApproachAction = DateTime.Now;
+                Cache.Instance.NextOrbit = DateTime.Now;
+                Cache.Instance.NextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -1099,14 +1266,14 @@ namespace Questor.Modules
                 Logging.Log("MissionController: AttackClosestByName: All targets killed, not valid anymore ");
 
                 // We killed it/them !?!?!? :)
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
+                Cache.Instance.NextApproachAction = DateTime.Now;
+                Cache.Instance.NextOrbit = DateTime.Now;
+                Cache.Instance.NextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
 
-            if (target.Distance < range)
+            if (target.Distance < Cache.Instance.MaxRange)
             {
                 if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
                 {
@@ -1131,7 +1298,7 @@ namespace Questor.Modules
             }
 
             //if distance to target is more than weapons range and we havent setup optimalrange OR we are inside optimalrange and optimalrange has been setup
-            if ((target.Distance > range && Settings.Instance.OptimalRange <= 0) || (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion) && Settings.Instance.OptimalRange > 0)
+            if ((target.Distance > Cache.Instance.MaxRange && Settings.Instance.OptimalRange <= 0) || (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion) && Settings.Instance.OptimalRange > 0)
             {
                 if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id)
                 {
@@ -1139,11 +1306,11 @@ namespace Questor.Modules
 
                     if (Settings.Instance.SpeedTank)
                     {
-                        if (DateTime.Now > Cache.Instance._nextOrbit)
+                        if (DateTime.Now > Cache.Instance.NextOrbit)
                         {
                             target.Orbit(Cache.Instance.OrbitDistance); //orbit
                             Logging.Log("MissionController: AttackClosestByName: initiating Orbit of [" + target.Name + "] orbiting at [" + Cache.Instance.OrbitDistance + "]");
-                            Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
                         }
                     }
                     else if (Settings.Instance.OptimalRange > 0)
@@ -1176,9 +1343,9 @@ namespace Questor.Modules
             if (targetNames.Count == 0)
             {
                 Logging.Log("MissionController: AttackClosest: No targets defined!");
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
+                Cache.Instance.NextApproachAction = DateTime.Now;
+                Cache.Instance.NextOrbit = DateTime.Now;
+                Cache.Instance.NextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
@@ -1192,14 +1359,14 @@ namespace Questor.Modules
                 Logging.Log("MissionController: AttackClosest: All targets killed, not valid anymore ");
 
                 // We killed it/them !?!?!? :)
-                Cache.Instance._nextApproachAction = DateTime.Now;
-                Cache.Instance._nextOrbit = DateTime.Now;
-                Cache.Instance._nextAlign = DateTime.Now;
+                Cache.Instance.NextApproachAction = DateTime.Now;
+                Cache.Instance.NextOrbit = DateTime.Now;
+                Cache.Instance.NextAlign = DateTime.Now;
                 _currentAction++;
                 return;
             }
 
-            if (target.Distance < range)
+            if (target.Distance < Cache.Instance.MaxRange)
             {
                 if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
                 {
@@ -1224,7 +1391,7 @@ namespace Questor.Modules
             }
 
             //if distance to target is more than weapons range and we havent setup optimalrange OR we are inside optimalrange and optimalrange has been setup
-            if ((target.Distance > range && Settings.Instance.OptimalRange <= 0) || (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion) && Settings.Instance.OptimalRange > 0)
+            if ((target.Distance > Cache.Instance.MaxRange && Settings.Instance.OptimalRange <= 0) || (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion) && Settings.Instance.OptimalRange > 0)
             {
                 if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id)
                 {
@@ -1232,35 +1399,36 @@ namespace Questor.Modules
 
                     if (Settings.Instance.SpeedTank)
                     {
-                        if (DateTime.Now > Cache.Instance._nextOrbit)
+                        if (DateTime.Now > Cache.Instance.NextOrbit)
                         {
                             target.Orbit(Cache.Instance.OrbitDistance); //orbit
                             Logging.Log("MissionController: AttackClosest: initiating Orbit of [" + target.Name + "] orbiting at [" + Cache.Instance.OrbitDistance + "]");
-                            Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                            
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
                         }
                     }
                     else if (Settings.Instance.OptimalRange > 0)
                     {
-                        if (DateTime.Now > Cache.Instance._nextApproachAction)
+                        if (DateTime.Now > Cache.Instance.NextApproachAction)
                         {
                             target.Approach((int)(Settings.Instance.OptimalRange * 0.8d)); // Move within 80% of optimalrange
                             Logging.Log("MissionController: AttackClosest: initiating Approach of [" + target.Name + "][" + Math.Round(target.Distance/1000,0) + "k away] approaching to [" + (Settings.Instance.OptimalRange * 0.8d) + "]");
-                            Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                            Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                         }
                     }
                     else
                     {
-                        if (DateTime.Now > Cache.Instance._nextApproachAction)
+                  if (DateTime.Now > Cache.Instance.NextApproachAction)
                         {
                             target.Approach((int)(Cache.Instance.WeaponRange * 0.8d)); // Move within 80% of range
                             Logging.Log("MissionController: AttackClosest: initiating Approach of [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "k away] approaching to [" + (Settings.Instance.OptimalRange * 0.8d) + "]");
-                            Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                        }
-                    }
-                }
+                     Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                  }
+               }
             }
-        }
+         }
+      }
+
+
 
         private void LootItemAction(Action action)
         {
@@ -1304,14 +1472,14 @@ namespace Questor.Modules
                 return;
             }
 
-            EntityCache closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
-            if (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+            EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
+            if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
             {
-                if (DateTime.Now > Cache.Instance._nextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+                if (DateTime.Now > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                 {
                     Logging.Log("MissionController: LootItem: Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]");
                     closest.Approach();
-                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                 }
             }
         }
@@ -1346,7 +1514,7 @@ namespace Questor.Modules
             // unlock targets count
             Cache.Instance.MissionLoot = true;
 
-            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.Id);
             if (!containers.Any())
             {
                 // lock targets count
@@ -1359,14 +1527,14 @@ namespace Questor.Modules
                 return;
             }
 
-            EntityCache closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.First();
-            if (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+            EntityCache closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
+            if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
             {
-                if (DateTime.Now > Cache.Instance._nextApproachAction)
+                if (DateTime.Now > Cache.Instance.NextApproachAction)
                 {
                     Logging.Log("MissionController: Loot: Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
                     closest.Approach();
-                    Cache.Instance._nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                 }
             }
         }
@@ -1430,11 +1598,11 @@ namespace Questor.Modules
                         BookmarkPocketForSalvaging();
 
                     // Reload weapons
-                    if (DateTime.Now > Cache.Instance._nextReload)
+                    if (DateTime.Now > Cache.Instance.NextReload)
                     {
                         Logging.Log("MissionController: ReloadAll: Reload because ActionState is Done - Reloading Weapons.");
                         ReloadAll();
-                        Cache.Instance._nextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
+                        Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                     }
 
                     State = MissionControllerState.Done;
@@ -1450,6 +1618,10 @@ namespace Questor.Modules
 
                 case ActionState.UseDrones:
                     UseDrones(action);
+                    break;
+
+                case ActionState.AggroOnly:
+                    AggroOnlyAction(action);
                     break;
 
                 case ActionState.AttackClosestByName:
@@ -1592,8 +1764,6 @@ namespace Questor.Modules
                     Logging.Log("------------------------------------------------------------------");
                     Logging.Log("------------------------------------------------------------------");
 
-                    
-
                     // Reset pocket information
                     _currentAction = 0;
                     Cache.Instance.IsMissionPocketDone = false;
@@ -1645,7 +1815,6 @@ namespace Questor.Modules
                         _pocket++;
                         State = MissionControllerState.LoadPocket;
                         LogStatistics();
-                        
                     }
                     else if (DateTime.Now.Subtract(_moveToNextPocket).TotalMinutes > 2)
                     {

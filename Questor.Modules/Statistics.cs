@@ -11,10 +11,10 @@
         //private DateTime _lastStatisticsAction;
         public DateTime MissionLoggingStartedTimestamp { get; set; }
 
-        public DateTime StartedMission = DateTime.Now;
-        public DateTime FinishedMission = DateTime.Now;
-        public DateTime StartedSalvaging = DateTime.Now;
-        public DateTime FinishedSalvaging = DateTime.Now;
+        public DateTime StartedMission = DateTime.MinValue;
+        public DateTime FinishedMission = DateTime.MinValue;
+        public DateTime StartedSalvaging = DateTime.MinValue;
+        public DateTime FinishedSalvaging = DateTime.MinValue;
 
         public int LootValue { get; set; }
         public int LoyaltyPoints { get; set; }
@@ -45,6 +45,7 @@
             switch (State)
             {
                 case StatisticsState.Idle:
+                    Logging.Log("Statistics: State=StatisticsState.Idle");
                     //This State should only start every 20 seconds
                     //if (DateTime.Now.Subtract(_lastCleanupAction).TotalSeconds < 20)
                     //    break;
@@ -68,7 +69,7 @@
                     //    _lastAction = DateTime.Now;
                     //    return;
                     //}
-                    if (DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes > 10 || DateTime.Now.Subtract(Cache.Instance.StartTime).TotalMinutes < 5) //FinishedSalvaging is the later of the 2 timestamps (FinishedMission and FinishedSalvaging), if you aren't after mission salvaging this timestamp is the same as FinishedMission
+                    if (DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes > 5 || DateTime.Now.Subtract(Cache.Instance.StartTime).TotalMinutes < 5) //FinishedSalvaging is the later of the 2 timestamps (FinishedMission and FinishedSalvaging), if you aren't after mission salvaging this timestamp is the same as FinishedMission
                     {
                         Logging.Log("Statistics: It is unlikely a mission has been run... No Mission log will be written.");
                         Statistics.Instance.MissionLoggingCompleted = true; //if the mission was completed more than 10 min ago assume the logging has been done already.

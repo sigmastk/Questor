@@ -49,6 +49,7 @@ namespace Questor.Modules
         /// </summary>
         private void ActivateTractorBeams()
         {
+            if (Cache.Instance.NextSalvageAction > DateTime.Now) return;
             List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
             if (tractorBeams.Count == 0)
                 return;
@@ -67,10 +68,9 @@ namespace Questor.Modules
                 // If the wreck no longer exists, or its within loot range then disable the tractor beam
                 if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
                 {
-                    tractorBeam.Deactivate();
-            //        return;
-                    //More human behavior
-                    //System.Threading.Thread.Sleep(333);
+                    tractorBeam.Click();
+                    Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                    return;
                 }
                 // Remove the tractor beam as a possible beam to activate
                 tractorBeams.RemoveAt(i);
@@ -80,7 +80,7 @@ namespace Questor.Modules
             foreach (EntityCache wreck in wrecks)
             {
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
-                if (wreck.Velocity != 0 && wreck.Velocity < (int)Distance.SafeScoopRange)
+                if (wreck.Velocity != 0 && wreck.Velocity < 10000)
                     continue;
 
                 // Is this wreck within range?
@@ -95,10 +95,8 @@ namespace Questor.Modules
                 tractorBeam.Activate(wreck.Id);
 
                 Logging.Log("Salvage: Activating tractorbeam [" + tractorBeam.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
-                //More human behavior
-                //System.Threading.Thread.Sleep(333);
-                //_nextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_miliseconds);
-                //return;
+                Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                return;
             }
         }
 
@@ -107,7 +105,7 @@ namespace Questor.Modules
         /// </summary>
         private void ActivateSalvagers()
         {
-            //if (_nextSalvageAction > DateTime.Now) return;
+            if (Cache.Instance.NextSalvageAction > DateTime.Now) return;
             List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
             if (salvagers.Count == 0)
                 return;
@@ -132,6 +130,8 @@ namespace Questor.Modules
 
                 Logging.Log("Salvage: Activating salvager [" + salvager.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
                 salvager.Activate(wreck.Id);
+                Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                return;
             }
         }
 
@@ -140,7 +140,8 @@ namespace Questor.Modules
         /// </summary>
         private void TargetWrecks()
         {
-            //if (_nextTargetAction > DateTime.Now) return; //do not try to target anything until the delay has passed.
+            if (DateTime.Now < Cache.Instance.NextTargetAction) return;
+
             // We are jammed, we do not need to log (Combat does this already)
             if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
                 return;
@@ -159,7 +160,8 @@ namespace Questor.Modules
                 {
                     Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] on the ignore list, ignoring.");
                     wreck.UnlockTarget();
-                    continue;
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    return;
                 }
 
                 if(!Cache.Instance.SalvageAll)
@@ -168,7 +170,8 @@ namespace Questor.Modules
                     {
                         Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] within loot range,wreck is empty, or wreck is on our blacklist, unlocking container.");
                         wreck.UnlockTarget();
-                        continue;
+                        Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                        return;
                     }
                 }
 
@@ -180,7 +183,8 @@ namespace Questor.Modules
                 {
                     Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] within loot range, unlocking container.");
                     wreck.UnlockTarget();
-                    //return;
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    return;
                 }
             }
 
@@ -256,6 +260,7 @@ namespace Questor.Modules
         /// </summary>
         private void LootWrecks()
         {
+            if (Cache.Instance.NextLootAction > DateTime.Now) return;
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             if (cargo.Window == null)
             {
@@ -415,7 +420,7 @@ namespace Questor.Modules
                             // If this is not a cargo container, then jettison loot
                             if (containerEntity.GroupId != (int) Group.CargoContainer || isMissionItem)
                             {
-                                if (DateTime.Now.Subtract(_lastJettison).TotalSeconds < (int)Time.DelayBetweenJetcans_seconds)
+                                if (DateTime.Now.Subtract(Cache.Instance.LastJettison).TotalSeconds < (int)Time.DelayBetweenJetcans_seconds)
                                     return;
 
                                 Logging.Log("Salvage: Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot");
@@ -424,16 +429,18 @@ namespace Questor.Modules
                                 // then picking it up again :/ (granted it should never happen unless 
                                 // mission item volume > reserved volume
                                 cargo.Jettison(moveTheseItems.Select(i => i.ItemId));
-                                _lastJettison = DateTime.Now;
+                                Cache.Instance.LastJettison = DateTime.Now;
                                 return;
                             }
 
                             // Move items to the cargo container
                             container.Add(moveTheseItems);
+                            Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
 
                             // Remove it from the ships cargo list
                             shipsCargo.RemoveAll(i => moveTheseItems.Any(wl => wl.ItemId == i.Id));
                             Logging.Log("Salvage: Moving [" + moveTheseItems.Count + "] items into the cargo container to make room for the more valuable loot");
+                            return;
                         }
                     }
 
@@ -490,7 +497,8 @@ namespace Questor.Modules
                 Logging.Log("Salvage: Opening container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "]");
                 containerEntity.OpenCargo();
                 _openedContainers[containerEntity.Id] = DateTime.Now;
-                break;
+                Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                return;
             }
         }
 
@@ -508,7 +516,6 @@ namespace Questor.Modules
                return;
             }
                 
-
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (State)
             {
@@ -531,14 +538,15 @@ namespace Questor.Modules
 
                     // Default action
                     State = SalvageState.TargetWrecks;
-                    if (cargo.IsReady && cargo.Items.Any() && _nextSalvageAction < DateTime.Now)
+                    if (cargo.IsReady && cargo.Items.Any() && Cache.Instance.NextSalvageAction < DateTime.Now)
                     {
                         // Check if there are actually duplicates
                         bool duplicates = cargo.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
                         if (duplicates)
+                        {
                             State = SalvageState.StackItems;
-                        else
-                            _nextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItems_seconds);
+                            Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItems_seconds);
+                        }
                     }
                     break;
 
@@ -548,13 +556,13 @@ namespace Questor.Modules
                     if (cargo.IsReady)
                         cargo.StackAll();
 
-                    _nextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItemsDelayBeforeResuming_seconds);
+                    Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItemsDelayBeforeResuming_seconds);
                     State = SalvageState.WaitForStacking;
                     break;
 
                 case SalvageState.WaitForStacking:
                     // Wait 5 seconds after stacking
-                    if (_nextSalvageAction > DateTime.Now)
+                    if (Cache.Instance.NextSalvageAction > DateTime.Now)
                         break;
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
@@ -564,7 +572,7 @@ namespace Questor.Modules
                         break;
                     }
 
-                    if (DateTime.Now.Subtract(_nextSalvageAction).TotalSeconds > 120)
+                    if (DateTime.Now.Subtract(Cache.Instance.NextSalvageAction).TotalSeconds > 120)
                     {
                         Logging.Log("Salvage: Stacking items timed out, clearing item locks");
                         Cache.Instance.DirectEve.UnlockItems();
