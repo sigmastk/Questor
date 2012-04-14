@@ -248,6 +248,15 @@ namespace Questor.Modules
            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
                 return;
 
+         if (Settings.Instance.SpeedTank && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+         {
+            if (DateTime.Now > Cache.Instance.NextOrbit)
+            {
+               target.Orbit(Cache.Instance.OrbitDistance);
+               Logging.Log("Combat.ActivateWeapons: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
+               Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+            }
+         }
             //
             // Do we really want a non-mission action moving the ship around at all!! (other than speed tanking)?
             // If you are not in a mission by all means let combat actions move you around as needed
