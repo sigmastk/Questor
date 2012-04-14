@@ -59,7 +59,7 @@
   <!-- Missionspath is a string and is used for the path in /.net programs/ to point questor to where you want it to use the mission xmls from -->
   <missionsPath>Caldari Missions</missionsPath><!-- needs to be customized -->
   <!-- Run missions that take us into low security space? - READ: DANGEROUS!!! -->
-  <LowSecMissions>false</LowSecMissions><!-- default is: false -->
+  <LowSecMissionsInShuttles>false</LowSecMissionsInShuttles><!-- default is: false -->
   <!-- agentsList is used when WaitDecine is true and your standings have gone below MinStandings, it will switch to a lower priority agent, need to be filled out for at least one agent -->
   <agentsList>
     <agentList name="" priority="0" /><!-- needs to be customized -->
