@@ -557,24 +557,20 @@ namespace Questor
                         break;
                     }
 
-                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions") || (Settings.Instance.CharacterMode.ToLower() == "dps")) //only write combat mission logs is we are actually doing missions
+                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower()) || (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())) //only write combat mission logs is we are actually doing missions
                     {
                         // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                         if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
                         {
                             if (!Statistics.Instance.MissionLoggingCompleted)
                             {
-                                Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
-                                if (Cache.Instance.Agent.LoyaltyPoints == -1) //if this agent has no loyalty points associated then you didn't complete a mission yet.
-                                {
-                                    Logging.Log("We do not have loyalty points with the current agent yet, still -1");
-                                    return;
-                                }
-                                Statistics.Instance.MissionLoggingStarted = false;
-                                if (State == QuestorState.Idle)
-                                {
-                                    State = QuestorState.MissionStatistics;
-                                }
+                                //Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                                //if (Cache.Instance.Agent.LoyaltyPoints == -1) //if this agent has no loyalty points associated then you didn't complete a mission yet.
+                                //{
+                                //    Logging.Log("Questor: Idle: MissionStats: We do not have loyalty points with the current agent yet, still -1");
+                                //    return;
+                                //}
+                                Statistics.WriteMissionStatistics();
                                 break;
                             }
                         }
@@ -628,7 +624,7 @@ namespace Questor
                     break;
 
                 case QuestorState.MissionStatistics:
-                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions") || (Settings.Instance.CharacterMode.ToLower() == "dps")) //only write combat mission logs is we are actually doing missions
+                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower()) || (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())) //only write combat mission logs is we are actually doing missions
                     {
                         // Start _statistics.ProcessState
                         // Description: Writes the mission log(s), when necessary. 
@@ -1373,7 +1369,7 @@ namespace Questor
                                 {
                                     if (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile) //if configured as true we will use the innerspace profile to restart this session
                                     {
-                                        //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkInnerspaceProfile is true");
+                                        //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkInnerspaceProfile is ["+ CloseQuestorCMDUplinkInnerspaceProfile.tostring() +"]");
                                         if (_closeQuestorCMDUplink)
                                         {
                                             Logging.Log("Questor: We are in station: Starting a timer in the innerspace uplink to restart this innerspace profile session");
@@ -1398,7 +1394,7 @@ namespace Questor
                                     }
                                     else if (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet) //if configured as true we will use isboxer to restart this session
                                     {
-                                        //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkIsboxerProfile is true");
+                                        //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkIsboxerProfile is ["+ CloseQuestorCMDUplinkIsboxerProfile.tostring() +"]");
                                         if (_closeQuestorCMDUplink)
                                         {
                                             Logging.Log("Questor: We are in station: Starting a timer in the innerspace uplink to restart this isboxer character set");
@@ -1551,34 +1547,33 @@ namespace Questor
                 case QuestorState.UnloadLoot:
                     if (_unloadLoot.State == UnloadLootState.Idle)
                     {
-                        Logging.Log("UnloadLoot: Begin");
+                        Logging.Log("Questor: UnloadLoot: Begin");
                         _unloadLoot.State = UnloadLootState.Begin;
                     }
 
                     _unloadLoot.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("UnloadLoot.State = " + _unloadLoot.State);
+                        Logging.Log("Questor: UnloadLoot.State = " + _unloadLoot.State);
 
                     if (_unloadLoot.State == UnloadLootState.Done)
                     {
-                        Logging.Log("UnloadLoot: Done");
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _unloadLoot.State = UnloadLootState.Idle;
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
                         if (_combat.State == CombatState.OutOfAmmo || (!(Cache.Instance.Mission == null || Cache.Instance.Mission.State == (int)MissionState.Offered))) // on mission
                         {
-                           Logging.Log("We are on mission or out of ammo. Setting State to Start");
+                            Logging.Log("Questor: Unloadloot: We are on mission or out of ammo. Setting State to Start");
                            State = QuestorState.Start;
                      return;
                   }
-                  //This salvaging decision tree does not belong here and should be seperated out into a different questorstate
-                  Logging.Log("We are not in mission and bookmarks are present. We can start salvage");
+                  //This salvaging decision tree does not belong here and should be separated out into a different questorstate
+                  Logging.Log("Questor: Unloadloot: We have No Active Missions and salvage bookmarks are present. We can start salvage");
                   if (Settings.Instance.AfterMissionSalvaging)
                             {   
                      if (Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count == 0)
                      {
-                        Logging.Log("No more salvaging bookmarks. Setting FinishedSalvaging Update.");
+                        Logging.Log("Questor: Unloadloot: No more salvaging bookmarks. Setting FinishedSalvaging Update.");
                         //if (Settings.Instance.CharacterMode == "Salvager")
                         //{
                         //    Logging.Log("Salvager mode set and no bookmarks making delay");
@@ -1587,7 +1582,7 @@ namespace Questor
 
                         if (Settings.Instance.CharacterMode.ToLower() == "salvage".ToLower())
                         {
-                           Logging.Log("Questor: Character mode is BookmarkSalvager and no bookmarks salvage.");
+                           Logging.Log("Questor: Unloadloot: Character mode is BookmarkSalvager and no bookmarks salvage.");
                            //We just need a NextSalvagerSession timestamp to key off of here to add the delay
                            State = QuestorState.Idle;
                         }
@@ -1601,7 +1596,7 @@ namespace Questor
                      }
                      else //There is at least 1 salvage bookmark
                      {
-                        Logging.Log("There are [" + Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count + " ] more salvage bookmarks left to process");
+                        Logging.Log("Questor: Unloadloot: There are [" + Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count + " ] more salvage bookmarks left to process");
                         // Salvage only after multiple missions have been completed
                         if (Settings.Instance.SalvageMultpleMissionsinOnePass)
                         {
@@ -1617,7 +1612,7 @@ namespace Questor
                                         //FIXME: should we be overwriting this timestamp here? What if this is the 3rd run back and fourth to the station?
                                     }
                                 }
-                                else //we are salvaging mission 'in one pass' and it hasnt been rnough time since our last run... do another mission
+                                else //we are salvaging mission 'in one pass' and it has not been enough time since our last run... do another mission
                                 {
                                     Logging.Log("Questor: UnloadLoot: The last finished after mission salvaging session was [" + DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes + "] ago ");
                                     Logging.Log("Questor: UnloadLoot: we are going to the next mission because it has not been [" + ((int)Time.WrecksDisappearAfter_minutes - (int)Time.AverageTimeToCompleteAMission_minutes - (int)Time.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ");
@@ -1632,13 +1627,13 @@ namespace Questor
                             {
                                 if (Settings.Instance.CharacterMode == "salvage".ToLower())
                                 {
-                                    Logging.Log("Missioner mode set, AfterMission Salvaging");
+                                    Logging.Log("Questor: Unloadloot: Missioner mode set, AfterMission Salvaging");
                                     State = QuestorState.BeginAfterMissionSalvaging;
                                     Statistics.Instance.StartedSalvaging = DateTime.Now;
                                 }
                                 else
                                 {
-                                    Logging.Log("Salvager mode not set, salvaging only bookmarks");
+                                    Logging.Log("Questor: Unloadloot: Salvager mode not set, salvaging only bookmarks");
                                     Logging.Log("Questor: UnloadLoot: The last after mission salvaging session was [" + DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes + "] ago ");
                                     State = QuestorState.BeginAfterMissionSalvaging;
                                     Statistics.Instance.StartedSalvaging = DateTime.Now;
@@ -1648,13 +1643,13 @@ namespace Questor
                         }
                         else
                         {
-                     Logging.Log("AfterMissionSalvaging is false");
-                     if (Settings.Instance.CharacterMode.ToLower() == "combat missions".ToLower())
+                            Logging.Log("Questor: Unloadloot: AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "]");
+                            if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower() || Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
                             {
                                 State = QuestorState.Idle;
-                        Logging.Log("Character mode is Missioner and we dont want to salvage. Going to next mission. QuestorState = Idle.");
-                        Statistics.Instance.FinishedMission = DateTime.Now;
-                            return;
+                                Logging.Log("Questor: Unloadloot: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], QuestorState: [" + State + "]");
+                                Statistics.Instance.FinishedMission = DateTime.Now;
+                                return;
                         }
                     }
                }
