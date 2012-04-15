@@ -145,7 +145,7 @@ namespace Questor.Modules
                     }
                     if (Settings.Instance.MoveCommonMissionItemsToCorpAmmoHangar == true)
                     {
-                        Logging.Log("UnloadLoot: Moving Common Mission Completion items to Corp Ammo Hangar");
+                        Logging.Log("UnloadLoot: Moving Common Mission Completion items to Corporate Ammo Hangar");
                         State = UnloadLootState.MoveCommonMissionCompletionItemsToCorpAmmoHangar;
                     }
                     else if (Settings.Instance.MoveCommonMissionItemsToCorpAmmoHangar == false)
@@ -162,8 +162,6 @@ namespace Questor.Modules
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
                     //
                     
-                    Logging.Log("UnloadLoot: Moving Common Mission Completion Items to Corp Ammo Hangar");
-                    
                     corpHangarForAmmo.Add(itemsToMove);
                     //_nextUnloadAction = DateTime.Now.AddSeconds((int)Settings.Instance.random_number3_5());
                     State = UnloadLootState.MoveLoot;
@@ -176,8 +174,6 @@ namespace Questor.Modules
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
                     //
                     
-                    Logging.Log("UnloadLoot: Moving Common Mission Completion items to to Local Hangar");
-
                     commonMissionCompletionItemHangar.Add(itemsToMove);
                     //_nextUnloadAction = DateTime.Now.AddSeconds((int)Settings.Instance.random_number3_5());
                     State = UnloadLootState.MoveLoot;
@@ -254,11 +250,11 @@ namespace Questor.Modules
                     {
                         if (corpBookmarkHangar != null && Settings.Instance.CreateSalvageBookmarks)
                         {
-                            Logging.Log("UnloadLoot: Moving salvage bookmarks to corp hangar");
+                            Logging.Log("UnloadLoot: Moving salvage bookmarks to corporate hangar");
                             corpBookmarkHangar.Add(itemshangar.Items.Where(i => i.TypeId == 51));
                         }
                         _nextUnloadAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To7());
-                        Logging.Log("UnloadLoot: Stacking items in Items Hangar: waiting until [ " + _nextUnloadAction.ToString("HH:mm:ss") + " ] to continue");
+                        Logging.Log("UnloadLoot: Stacking items in Items Hangar: resuming in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds,0) + " sec ]");
                         State = UnloadLootState.StackItemsHangar;
                         break;
                     }
@@ -336,7 +332,7 @@ namespace Questor.Modules
                             lootContainer.StackAll();
                             _nextUnloadAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
                             _lastUnloadAction = DateTime.Now;
-                            Logging.Log("UnloadLoot: Stacking items in loot container: waiting until [ " + _nextUnloadAction.ToString("HH:mm:ss") + " ] to continue");
+                            Logging.Log("UnloadLoot: Stacking items in loot container: resuming in [ " + DateTime.Now.Subtract(_nextUnloadAction).TotalSeconds + " sec ]");
                         }
                     }
                     State = UnloadLootState.WaitForStacking;
