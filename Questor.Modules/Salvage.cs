@@ -66,6 +66,7 @@ namespace Questor.Modules
 
                 EntityCache wreck = wrecks.FirstOrDefault(w => w.Id == tractorBeam.TargetId);
                 // If the wreck no longer exists, or its within loot range then disable the tractor beam
+                //If the wreck no longer exist, beam should be deactivated automaticly. Without our interaction.
                 if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
                 {
                     tractorBeam.Click();
@@ -510,8 +511,8 @@ namespace Questor.Modules
                if (Settings.Instance.CharacterMode.ToLower() == "salvage" && (DateTime.Now > _nextPeopleandPlacesrefresh))
                {
                   _nextPeopleandPlacesrefresh = DateTime.Now.AddMinutes(Settings.Instance.RandomNumber5To15());
-                  Logging.Log("Salvage: Refreshing People and Places Window: Next refresh in [ " + Math.Round(DateTime.Now.Subtract(_nextPeopleandPlacesrefresh).TotalMinutes,0) + " min]");
-                  Cache.Instance.DirectEve.RefreshPnPWindow();
+                  Logging.Log("Salvage: Refreshing Bookmarks: Next refresh in [ " + Math.Round(DateTime.Now.Subtract(_nextPeopleandPlacesrefresh).TotalMinutes,0) + " min]");
+                  Cache.Instance.DirectEve.RefreshBookmarks();
                }
                return;
             }
