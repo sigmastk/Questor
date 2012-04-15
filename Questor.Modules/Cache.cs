@@ -177,6 +177,11 @@ namespace Questor.Modules
         public bool SalvageAll = false;
 
         public double Wealth { get; set; }
+
+        public double WealthatStartofPocket { get; set; }
+        
+        public int PocketNumber { get; set; }
+
         public bool OpenWrecks = false;
         public bool NormalApproch = true;
         public bool CourierMission = false;
@@ -1089,7 +1094,7 @@ namespace Questor.Modules
         /// <returns></returns>
         public List<DirectBookmark> BookmarksByLabel(string label)
         {
-            // Does not seems to refresh the Corp Bookmark list so it's having troubles to find Corp Bookmarks
+            // Does not seems to refresh the Corporate Bookmark list so it's having troubles to find Corporate Bookmarks
             return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.StartsWith(label)).ToList();
         }
 
@@ -1212,7 +1217,7 @@ namespace Questor.Modules
                                 else //Otherwise, use value defined in charname.xml file
                                 {
                                     DronesKillHighValueTargets = Settings.Instance.DronesKillHighValueTargets;
-                                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+                                    //Logging.Log(string.Format("Cache: Using Character Setting DroneKillHighValueTargets  {0}", DronesKillHighValueTargets));
                                 }
                                 var actions = new List<Action>();
                                 XElement elements = pocket.Element("actions");
