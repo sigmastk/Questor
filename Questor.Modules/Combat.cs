@@ -362,6 +362,9 @@ namespace Questor.Modules
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
                     continue;
 
+                if (DateTime.Now < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
+                    return;
+
                 // No ammo loaded
                 if (weapon.Charge == null)
                     continue;

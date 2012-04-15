@@ -65,7 +65,7 @@ namespace Questor.Modules
                 //
                 module.Click();
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
-                Logging.Log("Defense: Defensive module activated: [ " + module.ItemId + "] next Activation delayed until [" + Cache.Instance.NextActivateSupportModules.ToString("HH:mm:ss") + "]");
+                Logging.Log("Defense: Defensive module activated: [" + module.ItemId + "] waiting [" + Math.Round(Cache.Instance.NextActivateSupportModules.Subtract(DateTime.Now).TotalSeconds,0) + " sec]");
                 continue;
             }
         }
@@ -139,7 +139,7 @@ namespace Questor.Modules
                     Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
-                    Logging.Log("Defense: RepModule deactivated: [ " + module.ItemId + "][" + Math.Round(DateTime.Now.Subtract(Cache.Instance.NextRepModuleAction).TotalSeconds, 0) + "] sec reactivation delay");
+                    Logging.Log("Defense: RepModule deactivated: [" + module.ItemId + "][" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.Now).TotalSeconds, 0) + "] sec reactivation delay");
                     //Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)watch.Elapsed);
                     //Cache.Instance.repair_cycle_time_this_mission = Cache.Instance.repair_cycle_time_this_mission + watch.Elapsed.TotalMinutes;
                     continue;

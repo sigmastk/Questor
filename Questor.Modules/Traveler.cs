@@ -106,6 +106,7 @@ namespace Questor.Modules
                     entity.Jump();
                     Cache.Instance._nextInSpaceorInStation = DateTime.Now;
                     _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerJumpedGateNextCommandDelay_seconds);
+                    Cache.Instance.NextActivateSupportModules = DateTime.Now.AddSeconds((int)Time.TravelerJumpedGateNextCommandDelay_seconds);
                 }
                 else if (entity.Distance < (int)Distance.WarptoDistance)
                 {
