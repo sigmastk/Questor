@@ -332,10 +332,15 @@
     <faction>Khanid Kingdom</faction>
     <faction>Thukker Tribe</faction>
   </factionblacklist>
-  <!-- List of missions which the bot will always decline -->
+  <!-- BLACKLIST: List of missions which the bot will always decline -->
   <blacklist>
     <mission>Enemies Abound (1 of 5)</mission>
   </blacklist>
+  
+  <!-- GREYLIST: List of missions which the bot will decline until standings drop below MinAgentGreyListStandings-->
+  <greylist>
+    <!-- <mission>The Blockade</mission> -->
+  </greylist>
   
   <!--                                                -->
   <!--            GUI SETTINGS           -->

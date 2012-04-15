@@ -456,11 +456,11 @@ namespace Questor.Modules
                //
                // Misc Settings
                //
-               CharacterMode = (string) xml.Element("characterMode") ?? "Combat Missions"; //other option is "salvage"
+               CharacterMode = (string)xml.Element("characterMode") ?? "Combat Missions".ToLower(); //other option is "salvage"
 
-               if (Settings.Instance.CharacterMode.ToLower() == "dps")
+               if (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
                {
-                  Settings.Instance.CharacterMode = "Combat Missions";
+                   Settings.Instance.CharacterMode = "Combat Missions".ToLower();
                }
                AutoStart = (bool?) xml.Element("autoStart") ?? false; // auto Start enabled or disabled by default?
                SaveConsoleLog = (bool?) xml.Element("saveLog") ?? true; // save the console log to file
@@ -470,7 +470,7 @@ namespace Questor.Modules
                RandomDelay = (int?) xml.Element("randomDelay") ?? 0;
                MinimumDelay = (int?) xml.Element("minimumDelay") ?? 0;
                //
-               // Enable / Disable Major Features that dont have categories of their own below
+               // Enable / Disable Major Features that do not have categories of their own below
                //
                UseFittingManager = (bool?) xml.Element("UseFittingManager") ?? true;
                EnableStorylines = (bool?) xml.Element("enableStorylines") ?? false;
@@ -687,12 +687,12 @@ namespace Questor.Modules
                      {
                         MultiAgentSupport = true;
                         Logging.Log(
-                           "Settings: Found more than one agent in your character XML: MultiAgentSupport is true");
+                           "Settings: Found more than one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]");
                      }
                      else
                      {
                         MultiAgentSupport = false;
-                        Logging.Log("Settings: Found only one agent in your character XML: MultiAgentSupport is false");
+                        Logging.Log("Settings: Found only one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]");
                      }
                   }
                   else
@@ -755,16 +755,16 @@ namespace Questor.Modules
                MissionBlacklist.Clear();
                XElement blacklist = xml.Element("blacklist");
                if (blacklist != null)
-                  foreach (XElement mission in blacklist.Elements("mission"))
-                     MissionBlacklist.Add((string) mission);
+                   foreach (XElement blacklistedmission in blacklist.Elements("mission"))
+                     MissionBlacklist.Add((string) blacklistedmission);
                //
                // Mission Greylist
                //
-               MissionBlacklist.Clear();
+               MissionGreylist.Clear();
                XElement greylist = xml.Element("greylist");
                if (greylist != null)
-                   foreach (XElement mission in blacklist.Elements("mission"))
-                       MissionGreylist.Add((string)mission);
+                   foreach (XElement greylistedmission in greylist.Elements("mission"))
+                       MissionGreylist.Add((string) greylistedmission);
 
                //
                // Faction Blacklist
