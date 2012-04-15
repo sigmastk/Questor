@@ -190,7 +190,10 @@ namespace Questor
                            StopTime = StopTime.AddDays(1);
 
                      if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
-                           StopTime = _startTime.AddHours(schedule.RunTime);
+                     StopTime = _startTime.AddMinutes(schedule.RunTime); //minutes of runtime
+                  if (schedule.RunTime < 10 && schedule.RunTime > 0)     //if runtime is 10 or less, assume they meant hours
+                     StopTime = _startTime.AddHours(schedule.RunTime);   //hours of runtime
+
 
                      string stopTimeText = "No stop time specified";
                      StopTimeSpecified = schedule.StopTimeSpecified;
