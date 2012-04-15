@@ -110,7 +110,7 @@ namespace QuestorManager.Module
             }
             else
             {
-                Logging.Log("QuestorManager: Warping to [" + locationName + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
+                Logging.Log("QuestorManager: Warping to [" + locationName + "] which is [" + Math.Round((entity.Distance / 1000) / 149598000, 2) + " AU away]");
                 entity.WarpTo();
 
                 _nextAction = DateTime.Now.AddSeconds(5);

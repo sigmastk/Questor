@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 // 
@@ -155,14 +155,15 @@ namespace Questor.Modules
 
             if (localundockBookmark != null)
             {
-                if (Cache.Instance.DistanceFromMe(localundockBookmark.X ?? 0, localundockBookmark.Y ?? 0, localundockBookmark.Z ?? 0) < (int)Distance.WarptoDistance)
+                double distance = Cache.Instance.DistanceFromMe(localundockBookmark.X ?? 0, localundockBookmark.Y ?? 0,localundockBookmark.Z ?? 0);
+                if (distance < (int)Distance.WarptoDistance)
                 {
                     Logging.Log("TravelerDestination.BookmarkDestination: Arrived at undock bookmark [" + localundockBookmark.Title + "]");
                     localundockBookmark = null;
                 }
                 else
                 {
-                    Logging.Log("TravelerDestination.BookmarkDestination: Warping to undock bookmark [" + localundockBookmark.Title + "]");
+                    Logging.Log("TravelerDestination.BookmarkDestination: Warping to undock bookmark [" + localundockBookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]");
                     localundockBookmark.WarpTo();
                     nextAction = DateTime.Now.AddSeconds(10);
                     return false;
@@ -316,14 +317,15 @@ namespace Questor.Modules
 
             if (undockBookmark != null)
             {
-                if (Cache.Instance.DistanceFromMe(undockBookmark.X ?? 0, undockBookmark.Y ?? 0, undockBookmark.Z ?? 0) < (int)Distance.WarptoDistance)
+                double distancetoundockbookmark = Cache.Instance.DistanceFromMe(bookmark.X ?? 0, bookmark.Y ?? 0, bookmark.Z ?? 0);
+                if (distancetoundockbookmark < (int)Distance.WarptoDistance)
                 {
                     Logging.Log("TravelerDestination.BookmarkDestination: Arrived at undock bookmark [" + undockBookmark.Title + "]");
                     undockBookmark = null;
                 }
                 else
                 {
-                    Logging.Log("TravelerDestination.BookmarkDestination: Warping to undock bookmark [" + undockBookmark.Title + "]");
+                    Logging.Log("TravelerDestination.BookmarkDestination: Warping to undock bookmark [" + undockBookmark.Title + "][" + Math.Round((distancetoundockbookmark / 1000) / 149598000, 2) + " AU away]");
                     undockBookmark.WarpTo();
                     nextAction = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
                     return false;
@@ -347,7 +349,7 @@ namespace Questor.Modules
             if (nextAction > DateTime.Now)
                 return false;
 
-            Logging.Log("TravelerDestination.BookmarkDestination: Warping to bookmark [" + bookmark.Title + "]");
+            Logging.Log("TravelerDestination.BookmarkDestination: Warping to bookmark [" + bookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]");
             Cache.Instance.DoNotBreakInvul = false;
             bookmark.WarpTo();
             nextAction = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);

@@ -195,8 +195,8 @@ namespace Questor.Modules
                             {
                                 if (DateTime.Now > Cache.Instance.NextWarpTo || DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < (int)Time.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
                             {
-                                Logging.Log("Panic: Warping to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
-                                station.WarpToAndDock();
+                                    Logging.Log("Panic: Warping to [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]");
+                                    station.WarpToAndDock();
                                     Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                                     //_nextDock = DateTime.MinValue;
                                 }
@@ -212,7 +212,7 @@ namespace Questor.Modules
                             {
                                 if (DateTime.Now > Cache.Instance.NextUndockAction)
                                 {
-                                   Logging.Log("Panic: Docking with [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]");
+                                   Logging.Log("Panic: Docking with [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]");
                                    station.Dock();
                                    Cache.Instance.NextUndockAction = DateTime.Now.AddSeconds((int)Time.DockingDelay_seconds);
                                 }
@@ -268,7 +268,7 @@ namespace Questor.Modules
                         }
                         else if (DateTime.Now > Cache.Instance.NextWarpTo | DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < 10) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                         {
-                            Logging.Log("Panic: Warping to [" + Cache.Instance.Star.Name + "] which is [" + Math.Round(Cache.Instance.Star.Distance/1000, 0) + "k away]");
+                            Logging.Log("Panic: Warping to [" + Cache.Instance.Star.Name + "][" + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + " AU away]");
                             Cache.Instance.Star.WarpTo();
                             Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                         }
