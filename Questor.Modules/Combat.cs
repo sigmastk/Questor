@@ -59,6 +59,7 @@ namespace Questor.Modules
             // We are out of ammo! :(
             if (!correctAmmo.Any())
             {
+                Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]");
                 State = CombatState.OutOfAmmo;
                 return false;
             }
@@ -127,6 +128,7 @@ namespace Questor.Modules
             // We are out of ammo! :(
             if (!correctAmmo.Any())
             {
+                Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]");
                 State = CombatState.OutOfAmmo;
                 return false;
             }
@@ -309,7 +311,7 @@ namespace Questor.Modules
                             target.Approach(Settings.Instance.OptimalRange);
                             Logging.Log("Combat.ActivateWeapons:: Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                         }
-                        //ahaw: I think when approach distance will be reached ship will be stoppedd so this is not needed
+                        //ahaw: I think when approach distance will be reached ship will be stopped so this is not needed
                         if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
                         {
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
