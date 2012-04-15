@@ -142,7 +142,7 @@ namespace QuestorManager.Actions
                     break;
 
                 case ValueDumpState.SaveMineralPrices:
-                    Logging.Log("ValueDump: Saving InvItems.xml");
+                    Logging.Log("ValueDump: Saving InvTypes.xml");
 
                     var xdoc = new XDocument(new XElement("invtypes"));
                     foreach (var type in _form.InvTypesById.Values.OrderBy(i => i.Id))
