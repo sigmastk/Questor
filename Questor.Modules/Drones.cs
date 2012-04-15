@@ -126,7 +126,7 @@ namespace Questor.Modules
             else // Make the target active
             {
                 target.MakeActiveTarget();
-                Logging.Log("Drones: Making [" + target.Name + "][ID: " + target.Id + "]" + Math.Round(target.Distance/1000,0) + "k away] the active target for drone engagement.");
+                Logging.Log("Drones: Making [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away] the active target for drone engagement.");
             }
         }
 
@@ -250,17 +250,17 @@ namespace Questor.Modules
                     }
                     else if (_shieldPctTotal > GetShieldPctTotal())
                     {
-                        Logging.Log("Drones: Recalling drones because we have lost shields! [Old: " + _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") + "]");
+                        Logging.Log("Drones: Recalling drones because drones have lost some shields! [Old: " + _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") + "]");
                         Recall = true;
                     }
                     else if (_armorPctTotal > GetArmorPctTotal())
                     {
-                        Logging.Log("Drones: Recalling drones because we have lost armor! [Old:" + _armorPctTotal.ToString("N2") + "][New: " + GetArmorPctTotal().ToString("N2") + "]");
+                        Logging.Log("Drones: Recalling drones because drones have lost some armor! [Old:" + _armorPctTotal.ToString("N2") + "][New: " + GetArmorPctTotal().ToString("N2") + "]");
                         Recall = true;
                     }
                     else if (_structurePctTotal > GetStructurePctTotal())
                     {
-                        Logging.Log("Drones: Recalling drones because we have lost structure! [Old:" + _structurePctTotal.ToString("N2") + "][New: " + GetStructurePctTotal().ToString("N2") + "]");
+                        Logging.Log("Drones: Recalling drones because drones have lost some structure! [Old:" + _structurePctTotal.ToString("N2") + "][New: " + GetStructurePctTotal().ToString("N2") + "]");
                         Recall = true;
                     }
                     else if (Cache.Instance.ActiveDrones.Count() < _lastDroneCount)
