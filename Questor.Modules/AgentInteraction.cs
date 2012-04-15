@@ -32,10 +32,14 @@ namespace Questor.Modules
       private DateTime _nextAgentAction;
 
       //private DateTime _waitingOnAgentResponse;
+      private bool _waitingonmission;
       private DateTime _waitingonmissiontimer = DateTime.Now;
 
+      private bool _waitingonagentwindow;
       private DateTime _waitingonagentwindowtimer = DateTime.Now;
-      private DateTime _waitingonagentwindowtimer2 = DateTime.Now;
+
+      private bool _waitingonagentresponse;
+      private DateTime _waitingonagentresponsetimer = DateTime.Now;
 
       public bool WaitDecline { get; set; }
 
@@ -90,18 +94,55 @@ namespace Questor.Modules
       {
          DirectAgentWindow agentWindow = Agent.Window;
          if (agentWindow == null || !agentWindow.IsReady)
+         {
+             if (_waitingonagentwindow == false)
+             {
+                 _waitingonagentwindowtimer = DateTime.Now;
+                 _waitingonagentwindow = true;
+             }
+             if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 10)
+             {
+                 Logging.Log("AgentInteraction: ReplyToAgent: Agent.window is not yet open : waiting");
+
+                 if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 15)
+                 {
+                     Logging.Log("AgentInteraction.Agentid [" + AgentId + "] Cache.Instance.AgentId [ " + Cache.Instance.AgentId + "] should be the same if not doing a storyline mission");
+                 }
+                 if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 90)
+                 {
+                     Cache.Instance.CloseQuestorCMDLogoff = false;
+                     Cache.Instance.CloseQuestorCMDExitGame = true;
+                     Cache.Instance.ReasonToStopQuestor = "AgentInteraction: ReplyToAgent: Journal would not open/refresh- journalwindows was null: restarting EVE Session";
+                     Logging.Log(Cache.Instance.ReasonToStopQuestor);
+                     Cache.Instance.SessionState = "Quitting";
+                 }
+             }
             return;
+         }
+         else
+         {
+             _waitingonagentwindow = false;
+         }
 
          List<DirectAgentResponse> responses = agentWindow.AgentResponses;
          if (responses == null || responses.Count == 0)
          {
-            if (DateTime.Now.Subtract(_waitingonagentwindowtimer2).TotalSeconds > 30)
+            if (_waitingonagentresponse == false)
             {
-               Logging.Log("AgentInteraction: ReplyToAgent: agentWindow == null : trying to close the agent window");
+               _waitingonagentresponsetimer = DateTime.Now;
+               _waitingonagentresponse = true;
+            }
+            if (DateTime.Now.Subtract(_waitingonagentresponsetimer).TotalSeconds > 15)
+            {
+               Logging.Log("AgentInteraction: ReplyToAgent: agentWindowAgentresponses == null : trying to close the agent window");
                agentWindow.Close();
                _waitingonagentwindowtimer = DateTime.Now;
             }
             return;
+         }
+         else
+         {
+             _waitingonagentresponse = false;
          }
 
          DirectAgentResponse request = responses.FirstOrDefault(r => r.Text.Contains(RequestMission));
@@ -202,11 +243,20 @@ namespace Questor.Modules
          DirectAgentWindow agentWindow = Agent.Window;
          if (agentWindow == null || !agentWindow.IsReady)
          {
-            if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 60)
+            if (_waitingonagentwindow == false)
             {
-               Logging.Log("AgentInteraction: WaitForMission: agentWindow == null : waiting");
-               _waitingonagentwindowtimer = DateTime.Now;
-               if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 7)
+                _waitingonagentwindowtimer = DateTime.Now;
+                _waitingonagentwindow = true;
+            }
+            if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 10)
+            {
+               Logging.Log("AgentInteraction: WaitForMission: Agent.window is not yet open : waiting");
+               
+               if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 15)
+               {
+                   Logging.Log("AgentInteraction.Agentid [" + AgentId + "] Cache.Instance.AgentId [ "+ Cache.Instance.AgentId + "] should be the same if not doing a storyline mission");
+               }
+               if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 90)
                {
                   Cache.Instance.CloseQuestorCMDLogoff = false;
                   Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -216,6 +266,10 @@ namespace Questor.Modules
                }
             }
             return;
+         }
+         else
+         {
+             _waitingonagentwindow = false;
          }
 
          DirectWindow journalWindow = Cache.Instance.GetWindowByName("journal");
@@ -229,14 +283,19 @@ namespace Questor.Modules
             return;
          }
 
-         DirectAgentMission mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
-         if (mission == null)
+         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
+         if (Cache.Instance.Mission == null)
          {
-            if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 60)
+            if (_waitingonmission == false)
             {
-               Logging.Log("AgentInteraction: WaitForMission: mission == null : waiting");
                _waitingonmissiontimer = DateTime.Now;
-               if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 7)
+                 _waitingonmission = true;
+            }
+            if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 30)
+            {
+               Logging.Log("AgentInteraction: WaitForMission: Unable to find mission from that agent (yet?) : AgentInteraction.AgentId [" + AgentId + "] Cache.Instance.AgentId [" + Cache.Instance.AgentId + "]");
+                journalWindow.Close();
+                if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 120)
                {
                   Cache.Instance.CloseQuestorCMDLogoff = false;
                   Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -248,8 +307,12 @@ namespace Questor.Modules
 
             return;
          }
+         else
+         {
+             _waitingonmission = false;
+         }
 
-         string missionName = Cache.Instance.FilterPath(mission.Name);
+         string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
 
          string html = agentWindow.Objective;
          if (CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == missionName.ToLower()))
@@ -262,8 +325,8 @@ namespace Questor.Modules
             return;
          }
 
-         Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Cache.Instance.AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
-         if (mission.State == (int)MissionState.Offered && Settings.Instance.MissionGreylist.Any(m => m == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
+         Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
+         if (Cache.Instance.Mission.State == (int)MissionState.Offered && Settings.Instance.MissionGreylist.Any(m => m == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
          {
              Logging.Log("AgentInteraction: Agent standing [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], declining greylisted mission [" + Cache.Instance.MissionName + "]");
              State = AgentInteractionState.DeclineMission;
@@ -287,7 +350,7 @@ namespace Questor.Modules
          if (!ForceAccept)
          {
             // Is the mission offered?
-            if (mission.State == (int)MissionState.Offered && (mission.Type == "Mining" || mission.Type == "Trade" || (mission.Type == "Courier" && missionName != "Enemies Abound (2 of 5)")))
+             if (Cache.Instance.Mission.State == (int)MissionState.Offered && (Cache.Instance.Mission.Type == "Mining" || Cache.Instance.Mission.Type == "Trade" || (Cache.Instance.Mission.Type == "Courier" && missionName != "Enemies Abound (2 of 5)")))
             {
                Logging.Log("AgentInteraction: Declining courier/mining/trade");
 
@@ -329,7 +392,7 @@ namespace Questor.Modules
                }
                catch (Exception ex)
                {
-                  Logging.Log("AgentInteraction: Error parsing damage types for mission [" + mission.Name + "], " + ex.Message);
+                   Logging.Log("AgentInteraction: Error parsing damage types for mission [" + Cache.Instance.Mission.Name + "], " + ex.Message);
                }
             }
 
@@ -356,7 +419,7 @@ namespace Questor.Modules
 
          Cache.Instance.MissionName = missionName;
 
-         if (mission.State == (int)MissionState.Offered)
+         if (Cache.Instance.Mission.State == (int)MissionState.Offered)
          {
             Logging.Log("AgentInteraction: Accepting mission [" + missionName + "]");
 
@@ -442,7 +505,7 @@ namespace Questor.Modules
             string html = agentWindow.Briefing;
             if (html.Contains("Declining a mission from this agent within the next"))
             {
-               Cache.Instance.AgentEffectiveStandingtoMe =  Cache.Instance.DirectEve.Standings.EffectiveStanding(Cache.Instance.AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
+               Cache.Instance.AgentEffectiveStandingtoMe =  Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
                //this need to divide by 10 was a remnant of the html scrape method we were using before. this can likely be removed now. 
                if (Cache.Instance.AgentEffectiveStandingtoMe != 0)
                {
