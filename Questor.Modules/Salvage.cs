@@ -147,6 +147,12 @@ namespace Questor.Modules
             if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
                 return;
 
+            //List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
+            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
+            
+            //if (salvagers.Count == 0 && tractorBeams.Count == 0)
+            //    return;
+            
             var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
@@ -197,7 +203,6 @@ namespace Questor.Modules
             else if (wreckTargets.Count >= MaximumWreckTargets)
                     return;
 
-            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
             double tractorBeamRange = 0d;
             if (tractorBeams.Count > 0)
                 tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
@@ -236,6 +241,10 @@ namespace Questor.Modules
 
                     // Ignore empty wrecks
                     if (wreck.GroupId == (int) Group.Wreck && wreck.IsWreckEmpty)
+                        continue;
+                    
+                    // Ignore wrecks already in loot range
+                    if (wreck.Distance < (int)Distance.SafeScoopRange)
                         continue;
                 }
 
