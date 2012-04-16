@@ -26,6 +26,9 @@
         public int MissionsThisSession { get; set; }
 
         public bool MissionLoggingCompleted = false;
+
+        public long AgentID { get; set; }
+
         //private bool PocketLoggingCompleted = false;
         //private bool SessionLoggingCompleted = false;
         public bool DebugMissionStatistics = false;
@@ -47,8 +50,8 @@
             //if (!Settings.Instance.LogBounties)
             //    return;
 
-            //this is incorrect for storyline missions. the agentid is different
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId); 
+            //agentID needs to change if its a storyline mission - so its assigned in storyline.cs to the various modules directly. 
+            //Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID); cant we assume this is already up to date? I think we can. 
             string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
             if (Settings.Instance.PocketStatistics)
             {
@@ -112,7 +115,7 @@
                     {
                         //Logging.Log("Statistics: it has not been more than 10 minutes since the last mission was finished. The Mission log should be written.");
                     }
-                    Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                    Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID);
                     
                     if (Statistics.Instance.DebugMissionStatistics) // we only need to see the following wall of comments if debugging mission statistics
                     {

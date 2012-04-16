@@ -106,7 +106,7 @@ namespace Questor.Modules
 
                  if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 15)
                  {
-                     Logging.Log("AgentInteraction.Agentid [" + AgentId + "] Cache.Instance.AgentId [ " + Cache.Instance.AgentId + "] should be the same if not doing a storyline mission");
+                     Logging.Log("AgentInteraction.Agentid [" + AgentId + "] Regular Mission AgentID [ " + Cache.Instance.AgentId + "] these should match when not doing a storyline mission");
                  }
                  if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 90)
                  {
@@ -293,7 +293,7 @@ namespace Questor.Modules
             }
             if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 30)
             {
-               Logging.Log("AgentInteraction: WaitForMission: Unable to find mission from that agent (yet?) : AgentInteraction.AgentId [" + AgentId + "] Cache.Instance.AgentId [" + Cache.Instance.AgentId + "]");
+               Logging.Log("AgentInteraction: WaitForMission: Unable to find mission from that agent (yet?) : AgentInteraction.AgentId [" + AgentId + "] regular Mission AgentID [" + Cache.Instance.AgentId + "]");
                 journalWindow.Close();
                 if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 120)
                {

@@ -10,7 +10,7 @@
     {
         public StorylineState State { get; set; }
 
-        public long AgentId { get; private set; }
+        public long CurrentStorylineAgentId { get; private set; }
         
         private IStoryline _storyline;
         private readonly Dictionary<string, IStoryline> _storylines;
@@ -72,34 +72,34 @@
         public void Reset()
         {
             State = StorylineState.Idle;
-            AgentId = 0;
+            CurrentStorylineAgentId = 0;
             _storyline = null;
             _agentInteraction.State = AgentInteractionState.Idle;
             _traveler.State = TravelerState.Idle;
             _traveler.Destination = null;
         }
 
-        private DirectAgentMission Mission
+        private DirectAgentMission StorylineMission
         {
             get
             {
-                IEnumerable<DirectAgentMission> missions = Cache.Instance.DirectEve.AgentMissions;
-                if (AgentId != 0)
-                    return missions.FirstOrDefault(m => m.AgentId == AgentId);
+                IEnumerable<DirectAgentMission> missionsinjournal = Cache.Instance.DirectEve.AgentMissions;
+                if (CurrentStorylineAgentId != 0)
+                    return missionsinjournal.FirstOrDefault(m => m.AgentId == CurrentStorylineAgentId);
 
-                missions = missions.Where(m => !_agentBlacklist.Contains(m.AgentId));
-                missions = missions.Where(m => m.Important);
-                missions = missions.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name)));
-                missions = missions.Where(m => !Settings.Instance.MissionBlacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
+                missionsinjournal = missionsinjournal.Where(m => !_agentBlacklist.Contains(m.AgentId));
+                missionsinjournal = missionsinjournal.Where(m => m.Important);
+                missionsinjournal = missionsinjournal.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name)));
+                missionsinjournal = missionsinjournal.Where(m => !Settings.Instance.MissionBlacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
                 //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
-                return missions.FirstOrDefault();
+                return missionsinjournal.FirstOrDefault();
             }
         }
 
         private void IdleState()
         {
-            DirectAgentMission mission = Mission;
-            if (mission == null)
+            DirectAgentMission currentStorylineMission = StorylineMission;
+            if (currentStorylineMission == null)
             {
                 _nextStoryLineAttempt = DateTime.Now.AddMinutes(15);
                 State = StorylineState.Done;
@@ -107,35 +107,35 @@
                 return;
             }
 
-            AgentId = mission.AgentId;
-            DirectAgent agent = Cache.Instance.DirectEve.GetAgentById(AgentId);
-            if (agent == null)
+            CurrentStorylineAgentId = currentStorylineMission.AgentId;
+            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(CurrentStorylineAgentId);
+            if (storylineagent == null)
             {
-                Logging.Log("Storyline: Unknown agent [" + AgentId + "]");
+                Logging.Log("Storyline: Unknown agent [" + CurrentStorylineAgentId + "]");
 
                 State = StorylineState.Done;
                 return;
             }
 
-            Logging.Log("Storyline: Going to do [" + mission.Name + "] for agent [" + agent.Name + "]");
-            Cache.Instance.MissionName = mission.Name;
+            Logging.Log("Storyline: Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "]");
+            Cache.Instance.MissionName = currentStorylineMission.Name;
 
             State = StorylineState.Arm;
-            _storyline = _storylines[Cache.Instance.FilterPath(mission.Name)];
+            _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name)];
         }
 
         private void GotoAgent(StorylineState nextState)
         {
-            DirectAgent agent = Cache.Instance.DirectEve.GetAgentById(AgentId);
-            if (agent == null)
+            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(CurrentStorylineAgentId);
+            if (storylineagent == null)
             {
                 State = StorylineState.Done;
                 return;
             }
 
             var baseDestination = _traveler.Destination as StationDestination;
-            if (baseDestination == null || baseDestination.StationId != agent.StationId)
-                _traveler.Destination = new StationDestination(agent.SolarSystemId, agent.StationId, Cache.Instance.DirectEve.GetLocationName(agent.StationId));
+            if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
+                _traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
 
             if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
@@ -246,7 +246,7 @@
 
                         _agentInteraction.State = AgentInteractionState.StartConversation;
                         _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-                        _agentInteraction.AgentId = AgentId;
+                        _agentInteraction.AgentId = CurrentStorylineAgentId;
                         _agentInteraction.ForceAccept = true;
                     }
 
@@ -258,8 +258,8 @@
                     if (_agentInteraction.State == AgentInteractionState.Done)
                     {
                         _agentInteraction.State = AgentInteractionState.Idle;
-                        // If theres no mission anymore then we're done (we declined it)
-                        State = Mission == null ? StorylineState.Done : StorylineState.ExecuteMission;
+                        // If there is no mission anymore then we're done (we declined it)
+                        State = StorylineMission == null ? StorylineState.Done : StorylineState.ExecuteMission;
                     }
                     break;
                 
@@ -297,7 +297,7 @@
                     break;
 
                 case StorylineState.BlacklistAgent:
-                    _agentBlacklist.Add(AgentId);
+                    _agentBlacklist.Add(CurrentStorylineAgentId);
                     State = StorylineState.Done;
                     break;
 
@@ -313,7 +313,7 @@
         public bool HasStoryline()
         {
             // Do we have a registered storyline?
-            return Mission != null;
+            return StorylineMission != null;
         }
 
         public IStoryline StorylineHandler

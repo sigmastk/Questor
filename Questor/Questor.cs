@@ -47,7 +47,6 @@ namespace Questor
         private readonly Cleanup _cleanup;
         private readonly Statistics _statistics;
 
-        //private Scoop _scoop;
         private readonly Salvage _salvage;
         private readonly Traveler _traveler;
         private readonly UnloadLoot _unloadLoot;
@@ -57,6 +56,7 @@ namespace Questor
         private readonly DateTime _questorStarted;
         private readonly Random _random;
         private int _randomDelay;
+        public static long AgentID;
 
         private double _lastX;
         private double _lastY;
@@ -160,6 +160,8 @@ namespace Questor
                 _agentInteraction.AgentId = agent.AgentId;
                 _missionController.AgentId = agent.AgentId;
                 _arm.AgentId = agent.AgentId;
+                _statistics.AgentID = agent.AgentId;
+                AgentID = agent.AgentId;
             }
         }
 
@@ -564,12 +566,6 @@ namespace Questor
                         {
                             if (!Statistics.Instance.MissionLoggingCompleted)
                             {
-                                //Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
-                                //if (Cache.Instance.Agent.LoyaltyPoints == -1) //if this agent has no loyalty points associated then you didn't complete a mission yet.
-                                //{
-                                //    Logging.Log("Questor: Idle: MissionStats: We do not have loyalty points with the current agent yet, still -1");
-                                //    return;
-                                //}
                                 Statistics.WriteMissionStatistics();
                                 break;
                             }
@@ -754,7 +750,7 @@ namespace Questor
 
                     if (_agentInteraction.State == AgentInteractionState.Done)
                     {
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
                         if (Cache.Instance.Mission != null)
                         {
                             // Update loyalty points again (the first time might return -1)
@@ -968,8 +964,8 @@ namespace Questor
                 case QuestorState.GotoMission:
                     Statistics.Instance.MissionLoggingCompleted = false;
                     var missionDestination = _traveler.Destination as MissionBookmarkDestination;
-                    if (missionDestination == null || missionDestination.AgentId != Cache.Instance.AgentId) // We assume that this will always work "correctly" (tm)
-                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.AgentId, "Encounter"));
+                    if (missionDestination == null || missionDestination.AgentId != AgentID) // We assume that this will always work "correctly" (tm)
+                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(AgentID, "Encounter"));
                     //if (missionDestination == null)
                     //{
                     //    Logging.Log("Invalid bookmark loop! Mission Controller: Error");
@@ -1154,7 +1150,7 @@ namespace Questor
                         if (_traveler.State == TravelerState.AtDestination)
                         {
                             Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
 
                             if (_missionController.State == MissionControllerState.Error)
                             {
@@ -1560,7 +1556,7 @@ namespace Questor
                     {
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _unloadLoot.State = UnloadLootState.Idle;
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(Cache.Instance.AgentId);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
                         if (_combat.State == CombatState.OutOfAmmo || (!(Cache.Instance.Mission == null || Cache.Instance.Mission.State == (int)MissionState.Offered))) // on mission
                         {
                             Logging.Log("Questor: Unloadloot: We are on mission or out of ammo. Setting State to Start");

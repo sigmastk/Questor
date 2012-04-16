@@ -171,7 +171,7 @@
             switch (_state)
             {
                 case TransactionDataDeliveryState.GotoPickupLocation:
-                    if (GotoMissionBookmark(storyline.AgentId, "Objective (Pick Up)"))
+                    if (GotoMissionBookmark(storyline.CurrentStorylineAgentId, "Objective (Pick Up)"))
                         _state = TransactionDataDeliveryState.PickupItem;
                     break;
 
@@ -181,7 +181,7 @@
                     break;
 
                 case TransactionDataDeliveryState.GotoDropOffLocation:
-                    if (GotoMissionBookmark(storyline.AgentId, "Objective (Drop Off)"))
+                    if (GotoMissionBookmark(storyline.CurrentStorylineAgentId, "Objective (Drop Off)"))
                         _state = TransactionDataDeliveryState.DropOffItem;
                     break;
 

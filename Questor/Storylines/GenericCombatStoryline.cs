@@ -1,4 +1,6 @@
-﻿namespace Questor.Storylines
+﻿using DirectEve;
+
+namespace Questor.Storylines
 {
     using System;
     using System.Collections.Generic;
@@ -8,15 +10,16 @@
     public class GenericCombatStoryline : IStoryline
     {
         private long _agentId;
-        private List<Ammo> _neededAmmo;
+        private readonly List<Ammo> _neededAmmo;
 
-        private AgentInteraction _agentInteraction;
-        private Arm _arm;
-        private Traveler _traveler;
-        private MissionController _missionController;
-        private Combat _combat;
-        private Drones _drones;
-        private Salvage _salvage;
+        private readonly AgentInteraction _agentInteraction;
+        private readonly Arm _arm;
+        private readonly Traveler _traveler;
+        private readonly MissionController _missionController;
+        private readonly Combat _combat;
+        private readonly Drones _drones;
+        private readonly Salvage _salvage;
+        private readonly Statistics _statistics;
 
         private GenericCombatStorylineState _state;
 
@@ -36,6 +39,7 @@
             _combat = new Combat();
             _drones = new Drones();
             _salvage = new Salvage();
+            _statistics = new Statistics();
             _missionController = new MissionController();
 
             Settings.Instance.SettingsLoaded += ApplySettings;
@@ -60,10 +64,10 @@
         /// <returns></returns>
         public StorylineState Arm(Storyline storyline)
         {
-            if (_agentId != storyline.AgentId)
+            if (_agentId != storyline.CurrentStorylineAgentId)
             {
                 _neededAmmo.Clear();
-                _agentId = storyline.AgentId;
+                _agentId = storyline.CurrentStorylineAgentId;
 
                 _agentInteraction.AgentId = _agentId;
                 _agentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
@@ -73,6 +77,10 @@
                 _arm.AgentId = _agentId;
                 _arm.State = ArmState.Idle;
                 _arm.AmmoToLoad.Clear();
+
+                Questor.AgentID = _agentId;
+
+                _statistics.AgentID = _agentId;
 
                 _missionController.AgentId = _agentId;
                 _missionController.State = MissionControllerState.Start;
@@ -185,10 +193,10 @@
             switch(_state)
             {
                 case GenericCombatStorylineState.WarpOutStation:
-                    var _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).FirstOrDefault();
-                    var _solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
+                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
-                    if (_bookmark == null)
+                    if (warpOutBookMark == null)
                     {
                         Logging.Log("WarpOut: No Bookmark");
                         if (_state == GenericCombatStorylineState.WarpOutStation)
@@ -196,12 +204,12 @@
                             _state = GenericCombatStorylineState.GotoMission;
                         }
                     }
-                    else if (_bookmark.LocationId == _solarid)
+                    else if (warpOutBookMark.LocationId == solarid)
                     {
                         if (_traveler.Destination == null)
                         {
-                            Logging.Log("WarpOut: Warp at " + _bookmark.Title);
-                            _traveler.Destination = new BookmarkDestination(_bookmark);
+                            Logging.Log("WarpOut: Warp at " + warpOutBookMark.Title);
+                            _traveler.Destination = new BookmarkDestination(warpOutBookMark);
                             Cache.Instance.DoNotBreakInvul = true;
                         }
 
@@ -229,8 +237,8 @@
 
                 case GenericCombatStorylineState.GotoMission:
                     var missionDestination = _traveler.Destination as MissionBookmarkDestination;
-                    if (missionDestination == null || missionDestination.AgentId != storyline.AgentId) // We assume that this will always work "correctly" (tm)
-                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(storyline.AgentId, "Encounter"));
+                    if (missionDestination == null || missionDestination.AgentId != storyline.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
+                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(storyline.CurrentStorylineAgentId, "Encounter"));
 
                     if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
                     {
