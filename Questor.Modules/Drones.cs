@@ -126,7 +126,7 @@ namespace Questor.Modules
             else // Make the target active
             {
                 target.MakeActiveTarget();
-                Logging.Log("Drones: Making [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away] the active target for drone engagement.");
+                Logging.Log("Drones: [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away] is now the target for drones");
             }
         }
 

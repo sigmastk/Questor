@@ -203,7 +203,6 @@ namespace Questor.Modules
                     continue;
                 }
 
-                
                 // Get the container that is associated with the cargo container
                 DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.ItemId);
 

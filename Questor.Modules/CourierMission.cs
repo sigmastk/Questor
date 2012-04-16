@@ -112,6 +112,7 @@
                     break;
 
                 case CourierMissionState.GotoPickupLocation:
+                    //cache.instance.agentid cannot be used for storyline missions! you must pass the correct agentID to this module if you wish to extend it to do storyline missions
                     if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Pick Up)"))
                         State = CourierMissionState.PickupItem;
                     break;
@@ -122,6 +123,7 @@
                     break;
 
                 case CourierMissionState.GotoDropOffLocation:
+                    //cache.instance.agentid cannot be used for storyline missions! you must pass the correct agentID to this module if you wish to extend it to do storyline missions
                     if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Drop Off)"))
                         State = CourierMissionState.DropOffItem;
                     break;

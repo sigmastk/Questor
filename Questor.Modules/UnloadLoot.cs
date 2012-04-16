@@ -51,13 +51,11 @@ namespace Questor.Modules
                   }
                   else
                   {
-                     Logging.Log("UnloadLoot: unable to find LootContainer named [ " +
-                                 Settings.Instance.LootContainer.ToLower() + " ]");
+                     Logging.Log("UnloadLoot: unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
                      var firstothercontainer = itemshangar.Items.FirstOrDefault(i => i.GivenName != null);
                      if (firstothercontainer != null)
                      {
-                        Logging.Log("UnloadLoot: we did however find a container named [ " + firstothercontainer.GivenName +
-                                    " ]");
+                        Logging.Log("UnloadLoot: we did however find a container named [ " + firstothercontainer.GivenName + " ]");
                      }
                   }
                }
@@ -162,7 +160,7 @@ namespace Questor.Modules
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
                     //
                     
-                    corpHangarForAmmo.Add(itemsToMove);
+                    if (corpHangarForAmmo != null) corpHangarForAmmo.Add(itemsToMove);
                     //_nextUnloadAction = DateTime.Now.AddSeconds((int)Settings.Instance.random_number3_5());
                     State = UnloadLootState.MoveLoot;
                     break;

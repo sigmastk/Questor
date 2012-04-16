@@ -286,7 +286,7 @@ namespace Questor.Modules
         {
             string target = action.GetParameterValue("target");
 
-            // No parameter? Although we shouldnt really allow it, assume its the acceleration gate :)
+            // No parameter? Although we should not allow it, assume its the acceleration gate :)
             if (string.IsNullOrEmpty(target))
                 target = "Acceleration Gate";
 

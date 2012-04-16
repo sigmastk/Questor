@@ -49,10 +49,7 @@ namespace Questor.Modules
                 //if (hasSalvagers && wreck.GroupId != (int)Group.CargoContainer)
                 //    continue;
               }
-
-            
         }
-
 
         public void ProcessState()
         {
