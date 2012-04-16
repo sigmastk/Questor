@@ -22,7 +22,7 @@ namespace Questor.Modules
     public class Combat
     {
         private readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
-        private readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
+        private static readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
         private bool _isJammed;
         public CombatState State { get; set; }
         private int MaxCharges { get; set; }
@@ -191,6 +191,52 @@ namespace Questor.Modules
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity) : ReloadNormalAmmo(weapon, entity);
         }
 
+        public static void ReloadAll()
+        {
+            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
+            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
+            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+
+            correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId));
+
+            if (!correctAmmo1.Any())
+                return;
+
+            Ammo ammo = correctAmmo1.Where(a => a.Range > 1).OrderBy(a => a.Range).FirstOrDefault();
+            DirectItem charge = cargo.Items.FirstOrDefault(i => ammo != null && i.TypeId == ammo.TypeId);
+
+            if (ammo == null)
+                return;
+
+            Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
+
+            foreach (ModuleCache weapon in weapons)
+            {
+                // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
+                if (weapon.IsEnergyWeapon)
+                    return;
+
+                if (weapon.CurrentCharges >= weapon.MaxCharges)
+                    return;
+
+                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+                    return;
+
+                if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
+                    return;
+
+                _lastWeaponReload[weapon.ItemId] = DateTime.Now;
+
+                if (charge != null && weapon.Charge.TypeId == charge.TypeId)
+                {
+                    Logging.Log("Combat: ReloadAll [" + weapon.ItemId + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]");
+
+                    weapon.ReloadAmmo(charge);
+                }
+            }
+            return;
+        }
+
        /// <summary> Returns true if it can activate the weapon on the target
         /// </summary>
         /// <remarks>
@@ -326,7 +372,7 @@ namespace Questor.Modules
                             target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
                             Logging.Log("Combat.ActivateWeapons: Using Weapons Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                         }
-                        //ahaw: I think when approach distance will be reached ship will be stoppedd so this is not needed
+                        //ahaw: I think when approach distance will be reached ship will be stopped so this is not needed
                         if (target.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching != null)
                         {
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
