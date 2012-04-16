@@ -122,6 +122,7 @@ namespace Questor.Modules
                     {
                         Logging.Log("Traveler: Warping to [" + locationName + "][" + Math.Round((entity.Distance / 1000) / 149598000, 2) + " AU away]");
                         entity.WarpTo();
+                        Combat.ReloadAll();
                         Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                     }
                 }

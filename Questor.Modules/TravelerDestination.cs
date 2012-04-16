@@ -200,8 +200,9 @@ namespace Questor.Modules
             {
                 if (DateTime.Now > Cache.Instance.NextDockAction)
                 {
-                    Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
+               Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "][" + Math.Round((entity.Distance / 1000) / 149598000, 2) + " AU away]");
                     entity.WarpTo();
+               Combat.ReloadAll();
                     Cache.Instance.NextDockAction.AddSeconds((int)Time.WarptoDelay_seconds);
                 }
             }
@@ -352,6 +353,7 @@ namespace Questor.Modules
             Logging.Log("TravelerDestination.BookmarkDestination: Warping to bookmark [" + bookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]");
             Cache.Instance.DoNotBreakInvul = false;
             bookmark.WarpTo();
+         Combat.ReloadAll();
             nextAction = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
             return false;
         }
@@ -365,7 +367,6 @@ namespace Questor.Modules
         {
             if (bookmark == null)
             {
-
                 AgentId = -1;
                 Title = null;
                 SolarSystemId = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
