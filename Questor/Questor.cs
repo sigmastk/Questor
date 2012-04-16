@@ -219,36 +219,6 @@ namespace Questor
                 return;
             }
             
-            // Start _cleanup.ProcessState
-            // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
-            //
-            watch.Reset();
-            watch.Start();
-            _cleanup.ProcessState();
-            watch.Stop();
-            if (Settings.Instance.DebugPerformance)
-                Logging.Log("Cleanup.ProcessState took " + watch.ElapsedMilliseconds + "ms");
-            
-            if (Settings.Instance.DebugStates)
-                Logging.Log("Cleanup.State = " + _cleanup.State);
-            // Done
-            // Cleanup State: ProcessState
-            
-            // Start _salvage.ProcessState
-            // Description: salvages, and watches for bookmarks in people and places, a no-op if you are in station and aren't set with characterMode=salvage
-            //
-            watch.Reset();
-            watch.Start();
-            _salvage.ProcessState();
-            watch.Stop();
-            // Done
-            // Salvage State: ProcessState
-            //
-            if (Settings.Instance.DebugPerformance)
-                Logging.Log("Salvage.ProcessState took " + watch.ElapsedMilliseconds + "ms");
-
-            if (Settings.Instance.DebugStates)
-                Logging.Log("Salvage.State = " + _salvage.State);
 
             if (DateTime.Now.Subtract(Cache.Instance._lastupdateofSessionRunningTime).TotalSeconds < (int)Time.SessionRunningTimeUpdate_seconds)
             {
@@ -346,7 +316,6 @@ namespace Questor
                     }
                     else
                     {
-
                         Logging.Log(String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)));
                         Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.Walletbalancechangelogoffdelay + "min";
 
@@ -382,7 +351,7 @@ namespace Questor
                   if (State != QuestorState.GotoNearestStation)
                      State = QuestorState.GotoNearestStation;
                }
-               else //poprawic!!!
+                    else
                {
                   Logging.Log("Local not safe.Station not found. Going  back to base");
                   if (State != QuestorState.GotoBase)
@@ -430,8 +399,39 @@ namespace Questor
                 }
             }
 
-            // Defense is more important then pause, rest (even panic) isn't!
+            // Start _cleanup.ProcessState
+            // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
+            //
+            watch.Reset();
+            watch.Start();
+            _cleanup.ProcessState();
+            watch.Stop();
+            if (Settings.Instance.DebugPerformance)
+                Logging.Log("Cleanup.ProcessState took " + watch.ElapsedMilliseconds + "ms");
+
+            if (Settings.Instance.DebugStates)
+                Logging.Log("Cleanup.State = " + _cleanup.State);
+            // Done
+            // Cleanup State: ProcessState
+
+            // Start _salvage.ProcessState
+            // Description: salvages, and watches for bookmarks in people and places, a no-op if you are in station and aren't set with characterMode=salvage
+            //
+            watch.Reset();
+            watch.Start();
+            _salvage.ProcessState();
+            watch.Stop();
+            // Done
+            // Salvage State: ProcessState
+            //
+            if (Settings.Instance.DebugPerformance)
+                Logging.Log("Salvage.ProcessState took " + watch.ElapsedMilliseconds + "ms");
+
+            if (Settings.Instance.DebugStates)
+                Logging.Log("Salvage.State = " + _salvage.State);
+            //
             // Panic always runs, not just in space
+            //
             watch.Reset();
             watch.Start();
             Cache.Instance.InMission = State == QuestorState.ExecuteMission;
@@ -616,54 +616,6 @@ namespace Questor
                     if (State == QuestorState.DelayedStart)
                     {
                         State = QuestorState.Cleanup;
-                    }
-                    break;
-
-                case QuestorState.MissionStatistics:
-                    if ((Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower()) || (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())) //only write combat mission logs is we are actually doing missions
-                    {
-                        // Start _statistics.ProcessState
-                        // Description: Writes the mission log(s), when necessary. 
-                        //
-                        watch.Reset();
-                        watch.Start();
-                        _statistics.State = StatisticsState.MissionLog;
-                        if (Settings.Instance.DebugStates | Statistics.Instance.DebugMissionStatistics)
-                            Logging.Log("statistics.State = " + _statistics.State);
-                        _statistics.ProcessState();
-                        watch.Stop();
-                        if (Settings.Instance.DebugPerformance | Statistics.Instance.DebugMissionStatistics)
-                            Logging.Log("statistics.ProcessState took " + watch.ElapsedMilliseconds + "ms");
-                        if (Settings.Instance.DebugStates | Statistics.Instance.DebugMissionStatistics)
-                            Logging.Log("statistics.State = " + _statistics.State);
-                        // Done
-                        // Statistics State: ProcessState
-                        if (DateTime.Now.Subtract(Statistics.Instance.MissionLoggingStartedTimestamp).TotalSeconds > 30)
-                        {
-                            Statistics.Instance.MissionLoggingCompleted = true; //not technically true but if we waited this long it isn't going to happen
-                            Logging.Log("Questor: statistics: Mission Logging took too long to complete, over [ " + "30" + " ] seconds: aborting logging.");
-                            if (State == QuestorState.MissionStatistics)
-                            {
-                                State = QuestorState.Idle;
-                            }
-                        }
-
-                        if (Statistics.Instance.MissionLoggingCompleted)
-                        {
-                            if (State == QuestorState.MissionStatistics)
-                            {
-                                State = QuestorState.Idle;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (State == QuestorState.MissionStatistics)
-                        {
-                            Statistics.Instance.MissionLoggingCompleted = true; //not technically true but if we waited this long it isn't going to happen
-                            Logging.Log("Character Mode is [" + Settings.Instance.CharacterMode + "] no need to write any mission stats");
-                            State = QuestorState.Idle;
-                        }
                     }
                     break;
 
