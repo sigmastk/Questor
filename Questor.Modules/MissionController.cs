@@ -65,7 +65,7 @@ namespace Questor.Modules
                 {
                     if (target.Distance + (int)Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
-                        Logging.Log("MissionController." + _pocketActions[_currentAction] + ": StartOrbiting: Target in range");
+                        //Logging.Log("MissionController." + _pocketActions[_currentAction] + ": StartOrbiting: Target in range");
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
                             Logging.Log("We are not approaching nor orbiting");
