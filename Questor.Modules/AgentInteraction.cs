@@ -314,6 +314,8 @@ namespace Questor.Modules
 
          string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
 
+         Logging.Log("AgentInteraction: Agent standing [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], minAgentGreyListStandings: " + Settings.Instance.MinAgentGreyListStandings);
+
          string html = agentWindow.Objective;
          if (CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == missionName.ToLower()))
          {
@@ -328,7 +330,7 @@ namespace Questor.Modules
          Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
          if (Cache.Instance.Mission.State == (int)MissionState.Offered && Settings.Instance.MissionGreylist.Any(m => m == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
          {
-             Logging.Log("AgentInteraction: Agent standing [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], declining greylisted mission [" + Cache.Instance.MissionName + "]");
+             Logging.Log("AgentInteraction: Declining greylisted mission [" + Cache.Instance.MissionName + "]");
              State = AgentInteractionState.DeclineMission;
              _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
              return;
@@ -543,7 +545,7 @@ namespace Questor.Modules
                if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings && !Cache.Instance.IsAgentLoop)
                {
                   _nextAgentAction = DateTime.Now.AddSeconds(secondsToWait);
-                  Logging.Log("AgentInteraction: Current standings at or below minimum.  Waiting " + (secondsToWait / 60) + " minutes to try decline again.");
+                  Logging.Log("AgentInteraction: Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.");
                   CloseConversation();
 
                   State = AgentInteractionState.StartConversation;
@@ -563,7 +565,7 @@ namespace Questor.Modules
 
                   return;
                }
-               Logging.Log("AgentInteraction: Current standings above minimum.  Declining mission.");
+               Logging.Log("AgentInteraction: Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above or configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining mission.");
             }
          }
 
