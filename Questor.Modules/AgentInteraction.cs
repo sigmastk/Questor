@@ -314,7 +314,7 @@ namespace Questor.Modules
 
          string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
 
-         Logging.Log("AgentInteraction: Agent standing [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], minAgentGreyListStandings: " + Settings.Instance.MinAgentGreyListStandings);
+         Logging.Log("AgentInteraction: ["+  Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], minAgentGreyListStandings: " + Settings.Instance.MinAgentGreyListStandings);
 
          string html = agentWindow.Objective;
          if (CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == missionName.ToLower()))
