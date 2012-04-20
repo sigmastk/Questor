@@ -14,7 +14,6 @@ namespace Questor.Modules
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using DirectEve;
     //using System.Reflection;
@@ -22,13 +21,13 @@ namespace Questor.Modules
     public class MissionController
     {
         private DateTime? _clearPocketTimeout;
-        private int _currentAction;
+        private static int _currentAction;
 
         private readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
         private double _lastX;
         private double _lastY;
         private double _lastZ;
-        private List<Action> _pocketActions;
+        private static List<Action> _pocketActions;
         private bool _waiting;
         private DateTime _waitingSince;
         private DateTime _moveToNextPocket = DateTime.MaxValue;
@@ -57,7 +56,8 @@ namespace Questor.Modules
             Cache.Instance.MissionLoot = false;
             _currentAction++;
         }
-        private void NavigateIntoRange(EntityCache target)
+
+        public static void NavigateIntoRange(EntityCache target)
         {
             if (Settings.Instance.SpeedTank)
             {   //this should be only executed when no specific actions
@@ -351,7 +351,6 @@ namespace Questor.Modules
                 {
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
-                        Logging.Log("MissionController." + _pocketActions[_currentAction] + ": ReloadALL: Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + range + "]");
                         Combat.ReloadAll();
                         Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
@@ -404,6 +403,15 @@ namespace Questor.Modules
         {
             // Get lowest range
             double distancetoconsidertargets = Cache.Instance.MaxRange;
+
+            int distancetoclear;
+            if (!int.TryParse(action.GetParameterValue("distance"), out distancetoclear))
+               distancetoclear = (int)distancetoconsidertargets;
+
+            if (distancetoclear != 0 && distancetoclear != -2147483648 && distancetoclear != 2147483647)
+            {
+               distancetoconsidertargets = Math.Min(Cache.Instance.MaxRange, distancetoclear);
+            }
 
             EntityCache target = Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < distancetoconsidertargets && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
 
@@ -496,6 +504,14 @@ namespace Questor.Modules
             if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
                 distancetoapp = 1000;
 
+            bool stopWhenTargeted;
+            if (!bool.TryParse(action.GetParameterValue("StopWhenTargeted"), out stopWhenTargeted))
+                stopWhenTargeted = false;
+
+            bool stopWhenAggressed;
+            if (!bool.TryParse(action.GetParameterValue("StopWhenAggressed"), out stopWhenAggressed))
+                stopWhenAggressed = false;
+
             IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
             if (targets == null || !targets.Any())
             {
@@ -505,6 +521,39 @@ namespace Questor.Modules
             }
 
             EntityCache closest = targets.OrderBy(t => t.Distance).First();
+            
+            if (stopWhenTargeted)
+            {
+                IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
+                if (targetedBy != null && targetedBy.Any())
+                {
+                    if (Cache.Instance.Approaching != null)
+                    {
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                        Cache.Instance.Approaching = null;
+                        Logging.Log("MissionController." + _pocketActions[_currentAction] +
+                                    ": Stop ship, we have been targeted and are [" + distancetoapp + "] from [ID: " +
+                                    closest.Name + "][" + Math.Round(closest.Distance/1000, 0) + "k away]");
+                    }
+                }
+            }
+
+            if (stopWhenAggressed)
+            {
+                IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
+                if (Cache.Instance.Aggressed.Any(t => !t.IsSentry))
+                {
+                    if (Cache.Instance.Approaching != null)
+                    {
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                        Cache.Instance.Approaching = null;
+                        Logging.Log("MissionController." + _pocketActions[_currentAction] +
+                                    ": Stop ship, we have been targeted and are [" + distancetoapp + "] from [ID: " +
+                                    closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
+                    }
+                }
+            }
+            
             if (closest.Distance <= distancetoapp + 5000) // if we are inside the range that we are supposed to approach assume we are done
             {
                 Logging.Log("MissionController." + _pocketActions[_currentAction] + ": We are [" + closest.Distance + "] from a [" + target + "] we do not need to go any further");
@@ -537,16 +586,6 @@ namespace Questor.Modules
             }
             else // if we are outside warpto distance (presumably inside a deadspace where we cant warp) align to the target
             {
-                //// Move to the target
-                //if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
-                //{
-                //    Logging.Log("MissionController.MoveTo: Approaching target [" + closest.Name + "][" + closest.Id + "][" + Math.Round(closest.Distance/1000,0) + "k away]");
-                //    closest.Approach();
-                //}
-                // We cant warp if we have drones out
-                if (Cache.Instance.ActiveDrones.Any())
-                    return;
-
                 if (DateTime.Now > Cache.Instance.NextAlign)
                 {
                     // Probably never happens
@@ -634,7 +673,7 @@ namespace Questor.Modules
                 return;
             }
 
-            if (Cache.Instance.TargetedBy.Any(t => !t.IsSentry && targetNames.Contains(t.Name)))
+            if(Cache.Instance.Aggressed.Any(t => !t.IsSentry && targetNames.Contains(t.Name)))
             {
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePriorityTargets(targets))
@@ -988,79 +1027,6 @@ namespace Questor.Modules
             NavigateIntoRange(target);
         }
 
-        //
-        // this action still needs some TLC - currently broken (unimplemented)
-        //
-        private void PutItemAction(Action action)
-        {
-            //
-            // example syntax:
-            // <action name="PutItem">
-            //    <parameter name="Item" value="Fajah Ateshi" />
-            //    <parameter name="Container" value="Rogue Drone" />
-            // </action>
-            //
-            bool nottheclosest;
-            if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
-                nottheclosest = false;
-
-            int numbertoignore;
-            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
-                numbertoignore = 0;
-
-            string container = action.GetParameterValue("container");
-            // No parameter? Although we shouldn't really allow it, assume its one of the few missions that needs the put action
-            if (string.IsNullOrEmpty(container))
-                container = "Rogue Drone"; //http://eve-survival.org/wikka.php?wakka=Anomaly4
-
-            Cache.Instance.MissionLoot = true;
-            List<string> items = action.GetParameterValues("item");
-            List<string> targetNames = action.GetParameterValues("target");
-            // if we aren't generally looting we need to re-enable the opening of wrecks to
-            // find this LootItems we are looking for
-            Cache.Instance.OpenWrecks = true;
-
-            int quantity;
-            if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
-                quantity = 1;
-
-            bool done = items.Count == 0;
-            if (!done)
-            {
-                DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-                // We assume that the ship's cargo will be opened somewhere else
-                if (cargo.IsReady)
-                    done |= cargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));
-            }
-            if (done)
-            {
-                Logging.Log("MissionController." + _pocketActions[_currentAction] + ": We are done looting");
-                Nextaction();
-                return;
-            }
-
-            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-            //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Id);
-            //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.Id);
-            if (!containers.Any())
-            {
-                Logging.Log("MissionController." + _pocketActions[_currentAction] + ": We are done looting");
-                Nextaction();
-                return;
-            }
-
-            EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-            if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
-            {
-                if (DateTime.Now > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
-                {
-                    Logging.Log("MissionController." + _pocketActions[_currentAction] + ": Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                    closest.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                }
-            }
-        }
-
         private void LootItemAction(Action action)
         {
             Cache.Instance.MissionLoot = true;
@@ -1295,9 +1261,21 @@ namespace Questor.Modules
 
         public void ProcessState()
         {
+            // There is really no combat in stations (yet)
+            if (Cache.Instance.InStation)
+               return;
+
+            // if we are not in space yet, wait...
+            if (!Cache.Instance.InSpace)
+               return;
+
             // What? No ship entity?
             if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
                 return;
+
+            // There is no combat when cloaked
+            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+               return;
 
             switch (State)
             {
