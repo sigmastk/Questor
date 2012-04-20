@@ -31,7 +31,7 @@
         <parameter name="NumberToIgnore" value="50"></parameter>
         <parameter name="Target" value="Dim"></parameter>
       </action>
-      <action name="KillOnce"> <!-- CURRENTLY DISABLED -->
+      <action name="KillOnce">
         <parameter name="IgnoreAttackers" value="true"></parameter>
         <parameter name="BreakOnAttackers" value="true"></parameter>
         <parameter name="NotClosest" value="true"></parameter>
@@ -41,11 +41,11 @@
       <action name="UseDrones">
         <parameter name="Use" value="true"></parameter>
       </action>
-      <action name="AttackClosestByName">
+      <action name="KillClosestByName">
         <parameter name="NotClosest" value="true"></parameter>
         <parameter name="Target" value="Dim"></parameter>
       </action>
-      <action name="AttackClosest">
+      <action name="KillClosest">
         <parameter name="NotClosest" value="true"></parameter>
         <parameter name="Target" value="Dim"></parameter>
       </action>
