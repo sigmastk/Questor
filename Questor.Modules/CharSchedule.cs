@@ -13,7 +13,7 @@ namespace Questor.Modules
 {
     using System.Xml.Linq;
     using System.Globalization;
-    using Questor.Modules;
+    //using Questor.Modules;
     using System;
     //using System.Windows.Forms;
 
@@ -21,7 +21,7 @@ namespace Questor.Modules
     {
         public CharSchedule(XElement element)
         {
-            var enUS = new CultureInfo("en-US"); 
+            //var timeformat = new CultureInfo("en-US");
             User = (string)element.Attribute("user");
             PW = (string)element.Attribute("pw");
             Name = (string)element.Attribute("name");
@@ -34,7 +34,7 @@ namespace Questor.Modules
             DateTime stopTime;
             if (start != null)
             {
-                if (!DateTime.TryParseExact(start, "HH:mm", enUS, DateTimeStyles.None, out startTime))
+               if (!DateTime.TryParseExact(start, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out startTime))
                 {
                     Logging.Log("[CharSchedule] " + Name + ": Couldn't parse starttime.");
                     startTime = DateTime.Now.AddSeconds(20);
@@ -51,7 +51,7 @@ namespace Questor.Modules
 
             if (stop != null)
             {
-                if (!DateTime.TryParseExact(stop, "HH:mm", enUS, DateTimeStyles.None, out stopTime))
+                if (!DateTime.TryParseExact(stop, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out stopTime))
                 {
                     Logging.Log("[CharSchedule] " + Name + ": Couldn't parse stoptime.");
                     stopTime = DateTime.Now.AddHours(24);
