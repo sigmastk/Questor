@@ -1,9 +1,9 @@
 // ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ namespace Questor.Modules
                             else
                             {
                                 if (DateTime.Now > Cache.Instance.NextWarpTo || DateTime.Now.Subtract(_lastWarpScrambled).TotalSeconds < (int)Time.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
-                            {
+                                {
                                     Logging.Log("Panic: Warping to [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]");
                                     station.WarpToAndDock();
                                     Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
@@ -203,8 +203,8 @@ namespace Questor.Modules
                                 else
                                 {
                                     Logging.Log("Panic: Warping has been delayed until [" + Cache.Instance.NextWarpTo.ToString("HH:mm:ss") + "]");
+                                }
                             }
-                        }
                         }
                         else
                         {
@@ -212,9 +212,9 @@ namespace Questor.Modules
                             {
                                 if (DateTime.Now > Cache.Instance.NextUndockAction)
                                 {
-                                   Logging.Log("Panic: Docking with [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]");
-                                   station.Dock();
-                                   Cache.Instance.NextUndockAction = DateTime.Now.AddSeconds((int)Time.DockingDelay_seconds);
+                                    Logging.Log("Panic: Docking with [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]");
+                                    station.Dock();
+                                    Cache.Instance.NextUndockAction = DateTime.Now.AddSeconds((int)Time.DockingDelay_seconds);
                                 }
                                 else
                                 {

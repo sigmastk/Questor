@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -14,9 +14,9 @@ namespace Questor.Modules
         LootingDelay_milliseconds,                               // Delay between loot attempts
         WarpScrambledNoDelay_seconds = 10,                       // Time after you are no longer warp scrambled to consider it IMPORTANT That you warp soon
         RemoveBookmarkDelay_seconds = 2,                         // Delay between each removal of a bookmark
-        QuestorPulse_milliseconds = 1000,                         // Used to delay the next pulse, units: milliseconds. Default is 1500
+        QuestorPulse_milliseconds = 1000,                        // Used to delay the next pulse, units: milliseconds. Default is 1500
         DefenceDelay_milliseconds = 1500,                        // Delay between defence actions
-        AfterburnerDelay_milliseconds = 1000,                    // 
+        AfterburnerDelay_milliseconds = 1000,                    //
         RepModuleDelay_milliseconds = 2500,                      //
         ApproachDelay_seconds = 15,                              //
         TargetDelay_milliseconds = 1000,                         //
@@ -44,11 +44,11 @@ namespace Questor.Modules
         ReloadWeaponDelayBeforeUsable_seconds = 22,              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 22
         BookmarkPocketRetryDelay_seconds = 20,                   // When checking to see if a bookmark needs to be made in a pocket for after mission salvaging this is the delay between retries, units: seconds. Default is 20
         NoGateFoundRetryDelay_seconds = 30,                      // no gate found on grid when executing the activate action, wait this long to see if it appears (lag), units: seconds. Default is 30
-        AlignDelay_minutes = 2,                                  // Delay between the last align command and the next, units: minutes. Default is 2 
+        AlignDelay_minutes = 2,                                  // Delay between the last align command and the next, units: minutes. Default is 2
         DelayBetweenJetcans_seconds = 185,                       // Once you have made a jetcan you cannot make another for 3 minutes, units: seconds. Default is 185 (to account for lag)
         SalvageStackItemsDelayBeforeResuming_seconds = 5,        // When stacking items in cargohold delay before proceeding, units: seconds. Default is 5
         SalvageStackItems_seconds = 150,                         // When salvaging stack items in your cargo every x seconds, units: seconds. Default is 180
-        SalvageDelayBetweenActions_milliseconds=200,             //
+        SalvageDelayBetweenActions_milliseconds = 1500,             //
         TravelerExitStationAmIInSpaceYet_seconds = 17,           // Traveler - Exit Station before you are in space delay, units: seconds. Default is 7
         TravelerNoStargatesFoundRetryDelay_seconds = 15,         // Traveler could not find any stargates, retry when this time has elapsed, units: seconds. Default is 15
         TravelerJumpedGateNextCommandDelay_seconds = 15,         // Traveler jumped a gate - delay before assuming we have loaded grid, units: seconds. Default is 15
@@ -57,5 +57,5 @@ namespace Questor.Modules
         AverageTimeToCompleteAMission_minutes = 40,              // average time for all missions, all races, all shiptypes (guestimated)... it is used to determine when to do things like salvage. units: minutes. Default is 30
         AverageTimetoSalvageMultipleMissions_minutes = 40,       // average time it will take to salvage the multiple mission chain we plan on salvaging all in one go.
         CheckForWindows_seconds = 15                             // Check for and deal with modal windows every x seconds, units: seconds. Default is 15
-     }
+    }
 }

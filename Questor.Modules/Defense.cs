@@ -1,9 +1,9 @@
 // ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace Questor.Modules
 
         private void ActivateOnce()
         {
-         if (DateTime.Now < Cache.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
                 return;
 
             foreach (ModuleCache module in Cache.Instance.Modules)
@@ -35,7 +35,6 @@ namespace Questor.Modules
                 activate |= module.GroupId == (int)Group.SensorBooster;
                 activate |= module.GroupId == (int)Group.TrackingComputer;
                 activate |= module.GroupId == (int)Group.ECCM;
-                
 
                 if (!activate)
                     continue;
@@ -150,8 +149,8 @@ namespace Questor.Modules
         private void ActivateAfterburner()
         {
             if (DateTime.Now < Cache.Instance.NextAfterburnerAction) //if we just did something wait a fraction of a second
-                return; 
-            
+                return;
+
             foreach (ModuleCache module in Cache.Instance.Modules)
             {
                 if (module.GroupId != (int)Group.Afterburner)

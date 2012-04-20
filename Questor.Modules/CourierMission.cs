@@ -14,7 +14,7 @@
         ///   Arm does nothing but get into a (assembled) shuttle
         /// </summary>
         /// <returns></returns>
-        /// 
+        ///
         public CourierMission()
         {
             _traveler = new Traveler();
@@ -30,13 +30,13 @@
 
             if (_traveler.State == TravelerState.AtDestination)
             {
-               if (destination != null)
-                  Logging.Log("CourierMission: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
-               else
-               {
-                  Logging.Log("CourierMission: destination is null"); //how would this occur exactly?
-               }
-               _traveler.Destination = null;
+                if (destination != null)
+                    Logging.Log("CourierMission: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
+                else
+                {
+                    Logging.Log("CourierMission: destination is null"); //how would this occur exactly?
+                }
+                _traveler.Destination = null;
                 return true;
             }
 
@@ -48,35 +48,14 @@
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            DirectContainer hangar = directEve.GetItemHangar();
-            if (hangar.Window == null)
-            {
-                _nextCourierAction = DateTime.Now.AddSeconds(8);
-                Logging.Log("CourierMissionState: Opening hangar floor");
-                directEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                return false;
-            }
+            if (!Cache.OpenItemsHangar("CourierMission")) return false;
 
-            // Wait for it to become ready
-            if (!hangar.IsReady)
-                return false;
-
-            DirectContainer cargo = directEve.GetShipsCargo();
-            if (cargo.Window == null)
-            {
-                _nextCourierAction = DateTime.Now.AddSeconds(8);
-                Logging.Log("CourierMissionState: Opening cargo");
-                directEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                return false;
-            }
-
-            if (!cargo.IsReady)
-                return false;
+            if (!Cache.OpenShipsHangar("CourierMission")) return false;
 
             const string missionItem = "Encoded Data Chip";
             Logging.Log("CourierMission: mission item is: " + missionItem);
-            DirectContainer from = pickup ? hangar : cargo;
-            DirectContainer to = pickup ? cargo : hangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
+            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
 
             // We moved the item
             if (to.Items.Any(i => i.TypeName == missionItem))
@@ -95,16 +74,16 @@
             return false;
         }
 
-       /// <summary>
-       ///   Goto the pickup location
-       ///   Pickup the item
-       ///   Goto drop off location
-       ///   Drop the item
-       ///   Goto Agent
-       ///   Complete mission
-       /// </summary>
-       /// <returns></returns>
-       public void ProcessState()
+        /// <summary>
+        ///   Goto the pickup location
+        ///   Pickup the item
+        ///   Goto drop off location
+        ///   Drop the item
+        ///   Goto Agent
+        ///   Complete mission
+        /// </summary>
+        /// <returns></returns>
+        public void ProcessState()
         {
             switch (State)
             {

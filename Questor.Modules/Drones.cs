@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ namespace Questor.Modules
         {
             EntityCache target = GetTarget();
 
-            // Nothing to engage yet, probably retargeting 
+            // Nothing to engage yet, probably retargeting
             if (target == null)
                 return;
 
@@ -160,7 +160,7 @@ namespace Questor.Modules
                         launch &= Cache.Instance.DirectEve.ActiveShip.ArmorPercentage >= Settings.Instance.DroneMinimumArmorPct;
                         launch &= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage >= Settings.Instance.DroneMinimumCapacitorPct;
 
-                        // yes if there are targets to kill 
+                        // yes if there are targets to kill
                         launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
 
                         // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
@@ -181,7 +181,7 @@ namespace Questor.Modules
                                 launch = false;
                             }
                         }
-                        else // Drones have been out for more then 30s 
+                        else // Drones have been out for more then 30s
                             _recallCount = 0;
                     }
 
@@ -235,8 +235,8 @@ namespace Questor.Modules
 
                 case DroneState.Fighting:
                     // Should we recall our drones? This is a possible list of reasons why we should
-                    
-                    // Are we done (for now) ? 
+
+                    // Are we done (for now) ?
                     if (Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.IsNpc && e.Distance < Settings.Instance.DroneControlRange) == 0)
                     {
                         Logging.Log("Drones: Recalling drones because no NPC is targeting us within dronerange");
