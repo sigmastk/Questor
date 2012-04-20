@@ -132,6 +132,22 @@ namespace Questor.Modules
 
         public void ProcessState()
         {
+           // There is really no combat in stations (yet)
+           if (Cache.Instance.InStation)
+              return;
+
+           // if we are not in space yet, wait...
+           if (!Cache.Instance.InSpace)
+              return;
+
+           // What? No ship entity?
+           if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+              return;
+
+           // There is no combat when cloaked
+           if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+              return;
+
             if (!Settings.Instance.UseDrones)
                 return;
 
