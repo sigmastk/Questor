@@ -1388,8 +1388,8 @@ namespace Questor
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
                         if (_combat.State == CombatState.OutOfAmmo || (!(Cache.Instance.Mission == null || Cache.Instance.Mission.State == (int)MissionState.Offered))) // on mission
                         {
-                            Logging.Log("Questor: Unloadloot: We are on mission or out of ammo. Setting State to Start");
-                            State = QuestorState.Start;
+                            Logging.Log("Questor: Unloadloot: We are on mission or out of ammo.");
+                            State = QuestorState.Idle;
                             return;
                         }
                         //This salvaging decision tree does not belong here and should be separated out into a different questorstate
