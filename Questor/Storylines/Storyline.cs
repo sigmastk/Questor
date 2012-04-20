@@ -161,50 +161,25 @@
                 return;
 
             // Open the item hangar (should still be open)
-            DirectContainer hangar = directEve.GetItemHangar();
-            if (hangar.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
-
-                Logging.Log("MaterialsForWarPreparation: Opening hangar floor");
-
-                directEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                return;
-            }
-
-            // Wait for it to become ready
-            if (!hangar.IsReady)
-                return;
+            if (!Cache.OpenItemsHangar("Storyline")) return;
 
             // Do we have any implants?
-            if (!hangar.Items.Any(i => i.GroupId >= 738 && i.GroupId <= 750))
+            if (!Cache.Instance.ItemHangar.Items.Any(i => i.GroupId >= 738 && i.GroupId <= 750))
             {
                 State = StorylineState.Done;
                 return;
             }
 
             // Yes, open the ships cargo
-            DirectContainer cargo = directEve.GetShipsCargo();
-            if (cargo.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
-
-                Logging.Log("MaterialsForWarPreparation: Opening cargo");
-
-                directEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                return;
-            }
-
-            if (!cargo.IsReady)
-                return;
+            if (!Cache.OpenCargoHold("Storyline")) return;
 
             // If we aren't moving items
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
             {
                 // Move all the implants to the cargo bay
-                foreach (DirectItem item in hangar.Items.Where(i => i.GroupId >= 738 && i.GroupId <= 750))
+                foreach (DirectItem item in Cache.Instance.ItemHangar.Items.Where(i => i.GroupId >= 738 && i.GroupId <= 750))
                 {
-                    if (cargo.Capacity - cargo.UsedCapacity - (item.Volume * item.Quantity) < 0)
+                    if (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
                         Logging.Log("Storyline: We are full, not moving anything else");
                         State = StorylineState.Done;
@@ -212,7 +187,7 @@
                     }
 
                     Logging.Log("Storyline: Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo");
-                    cargo.Add(item, item.Quantity);
+                    Cache.Instance.CargoHold.Add(item, item.Quantity);
                 }
                 _nextAction = DateTime.Now.AddSeconds(10);
             }

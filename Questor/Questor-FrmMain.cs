@@ -13,8 +13,7 @@ namespace Questor
     public partial class QuestorfrmMain : Form
     {
         public Questor _questor;
-        private DateTime _lastlogmessage;
-
+        
         public QuestorfrmMain()
         {
             InitializeComponent();
@@ -164,8 +163,8 @@ namespace Questor
                 StartButton.Enabled = !Settings.Instance.AutoStart;
             }
 
-            if (PauseCheckBox.Checked != _questor.Paused)
-                PauseCheckBox.Checked = _questor.Paused;
+            if (PauseCheckBox.Checked != Cache.Instance.Paused)
+                PauseCheckBox.Checked = Cache.Instance.Paused;
 
             if (Disable3DCheckBox.Checked != Settings.Instance.Disable3D)
                 Disable3DCheckBox.Checked = Settings.Instance.Disable3D;
@@ -288,7 +287,6 @@ namespace Questor
            // }
         }
 
-
         private void DamageTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
             Cache.Instance.DamageType = (DamageType) Enum.Parse(typeof (DamageType), DamageTypeComboBox.Text);
@@ -309,7 +307,7 @@ namespace Questor
 
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)
         {
-            _questor.Paused = PauseCheckBox.Checked;
+            Cache.Instance.Paused = PauseCheckBox.Checked;
         }
 
         private void StartButtonClick(object sender, EventArgs e)
@@ -338,14 +336,13 @@ namespace Questor
 
         private void FrmMainLoad(object sender, EventArgs e)
         {
-
         }
 
-        void DamageTypeComboBoxMouseWheel(object sender, MouseEventArgs e)
+        private void DamageTypeComboBoxMouseWheel(object sender, MouseEventArgs e)
         {
             ((HandledMouseEventArgs)e).Handled = true;
         }
-        void QuestorStateComboBoxMouseWheel(object sender, MouseEventArgs e)
+        private void QuestorStateComboBoxMouseWheel(object sender, MouseEventArgs e)
         {
             ((HandledMouseEventArgs)e).Handled = true;
         }
@@ -393,7 +390,6 @@ namespace Questor
                 {
                     Logging.Log("QuestorStatistics could not be launched the error was: " +  ex.Message); 
                 }
-
             }
         }
 

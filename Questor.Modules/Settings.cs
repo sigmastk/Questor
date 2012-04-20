@@ -1,11 +1,11 @@
 ﻿// ------------------------------------------------------------------------------
-//   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
-//     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
-//     http://www.thehackerwithin.com/license.htm)
-//   </copyright>
+// <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
+// Copyright (c) TheHackerWithin.COM. All Rights Reserved.
+//
+// Please look in the accompanying license.htm file for the license that
+// applies to this source code. (a copy can also be found at:
+// http://www.thehackerwithin.com/license.htm)
+// </copyright>
 // -------------------------------------------------------------------------------
 
 using System.Globalization;
@@ -24,7 +24,7 @@ namespace Questor.Modules
     public class Settings
     {
         /// <summary>
-        ///   Singleton implementation
+        /// Singleton implementation
         /// </summary>
         public static Settings Instance = new Settings();
 
@@ -41,7 +41,7 @@ namespace Questor.Modules
         {
             return _random.Next(5, 10);
         }
-        
+
         public int RandomNumber5To7()
         {
             return _random.Next(5, 7);
@@ -94,14 +94,14 @@ namespace Questor.Modules
         //
         public bool SaveConsoleLog { get; set; }
         public int MaxLineConsole { get; set; }
-        
+
         //
         // Enable / Disable Major Features that do not have categories of their own below
         //
         public bool EnableStorylines { get; set; }
         public bool UseLocalWatch { get; set; }
         public bool UseFittingManager { get; set; }
-        
+
         //
         // Agent and mission settings
         //
@@ -112,7 +112,7 @@ namespace Questor.Modules
         public bool LowSecMissionsInShuttles { get; set; }
         public bool WaitDecline { get; set; }
         public bool MultiAgentSupport { get; private set; }
-        
+
         //
         // Local Watch settings - if enabled
         //
@@ -138,15 +138,15 @@ namespace Questor.Modules
         public string SalvageShipName { get; set; }
         public string TransportShipName { get; set; }
         //public string MaterialShipName { get; set; }
-        
+
         //
         // Storage location for loot, ammo, and bookmarks
         //
         public string LootHangar { get; set; }
         public string AmmoHangar { get; set; }
         public string BookmarkHangar { get; set; }
-		public string LootContainer { get; set; }
-        public bool MoveCommonMissionItemsToCorpAmmoHangar { get; set; }
+        public string LootContainer { get; set; }
+        public bool MoveCommonMissionCompletionItemsToAmmoHangar { get; set; }
         //
         // Salvage and Loot settings
         //
@@ -169,7 +169,7 @@ namespace Questor.Modules
         // undocking settings
         //
         public string BookmarkWarpOut { get; set; }
-        
+
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
         //
@@ -179,40 +179,40 @@ namespace Questor.Modules
         public string EVEProcessMemoryCeilingLogofforExit { get; set; }
         public bool CloseQuestorCMDUplinkInnerspaceProfile { get; set; }
         public bool CloseQuestorCMDUplinkIsboxerCharacterSet { get; set; }
-        
+
         public string LavishIsBoxerCharacterSet { get; set; }
         public string LavishInnerspaceProfile { get; set; }
         public string LavishGame { get; set; }
 
         //public int missionbookmarktoagentloops { get; set; }  //not yet used - although it is likely a good ide to fix it so it is used - it would eliminate going back and fourth to the same mission over and over
-        
+
         public List<int> ItemsBlackList { get; set; }
         public List<int> WreckBlackList { get; set; }
         public bool WreckBlackListSmallWrecks { get; set; }
         public bool WreckBlackListMediumWrecks { get; set; }
         public string Logpath { get; set; }
-        public bool   SessionsLog { get; set; }
+        public bool SessionsLog { get; set; }
         public string SessionsLogPath { get; set; }
         public string SessionsLogFile { get; set; }
-        public bool   ConsoleLog { get; set; }
+        public bool ConsoleLog { get; set; }
         public string ConsoleLogPath { get; set; }
         public string ConsoleLogFile { get; set; }
-        public bool   DroneStatsLog { get; set; }
+        public bool DroneStatsLog { get; set; }
         public string DroneStatsLogPath { get; set; }
         public string DroneStatslogFile { get; set; }
-        public bool   WreckLootStatistics { get; set; }
+        public bool WreckLootStatistics { get; set; }
         public string WreckLootStatisticsPath { get; set; }
         public string WreckLootStatisticsFile { get; set; }
-        public bool   MissionStats1Log { get; set; }
+        public bool MissionStats1Log { get; set; }
         public string MissionStats1LogPath { get; set; }
         public string MissionStats1LogFile { get; set; }
-        public bool   MissionStats2Log { get; set; }
+        public bool MissionStats2Log { get; set; }
         public string MissionStats2LogPath { get; set; }
         public string MissionStats2LogFile { get; set; }
-        public bool   MissionStats3Log { get; set; }
+        public bool MissionStats3Log { get; set; }
         public string MissionStats3LogPath { get; set; }
         public string MissionStats3LogFile { get; set; }
-        public bool   PocketStatistics { get; set; }
+        public bool PocketStatistics { get; set; }
         public string PocketStatisticsPath { get; set; }
         public string PocketStatisticsFile { get; set; }
         public bool PocketStatsUseIndividualFilesPerPocket = true;
@@ -258,7 +258,7 @@ namespace Questor.Modules
         public int SafeShieldPct { get; set; }
         public int SafeArmorPct { get; set; }
         public int SafeCapacitorPct { get; set; }
-        
+
         public double IskPerLP { get; set; }
 
         //
@@ -289,7 +289,7 @@ namespace Questor.Modules
         public int LongRangeDroneRecallShieldPct { get; set; }
         public int LongRangeDroneRecallArmorPct { get; set; }
         public int LongRangeDroneRecallCapacitorPct { get; set; }
-        public bool DronesKillHighValueTargets {get; set;}
+        public bool DronesKillHighValueTargets { get; set; }
 
         public int MaterialsForWarOreID { get; set; }
         public int MaterialsForWarOreQty { get; set; }
@@ -360,7 +360,7 @@ namespace Questor.Modules
                 //
                 ReserveCargoCapacity = 0;
                 MaximumWreckTargets = 0;
-                
+
                 //
                 // Storage Location for Loot, Ammo, Bookmarks, default is local hangar
                 //
@@ -368,7 +368,7 @@ namespace Questor.Modules
                 AmmoHangar = string.Empty;
                 BookmarkHangar = string.Empty;
                 LootContainer = string.Empty;
-                MoveCommonMissionItemsToCorpAmmoHangar = false;
+                MoveCommonMissionCompletionItemsToAmmoHangar = false;
 
                 MaximumHighValueTargets = 0;
                 MaximumLowValueTargets = 0;
@@ -437,7 +437,7 @@ namespace Questor.Modules
             XElement xml = XDocument.Load(Settings.Instance.SettingsPath).Root;
             if (xml == null)
             {
-               Logging.Log("Settings: unable to find [" + Settings.Instance.SettingsPath + "] FATAL ERROR - use the provided settings.xml to create that file.");
+                Logging.Log("Settings: unable to find [" + Settings.Instance.SettingsPath + "] FATAL ERROR - use the provided settings.xml to create that file.");
             }
             else
             {
@@ -479,9 +479,9 @@ namespace Questor.Modules
                //
                // Agent Standings and Mission Settings
                //
-               MinAgentBlackListStandings = (float?) xml.Element("minStandings") ?? 1;
+               MinAgentBlackListStandings = (float?)xml.Element("minBlackListStandings") ?? (float)1;
                MinAgentGreyListStandings = (float?)xml.Element("minGreyListStandings") ?? (float)-1.7;
-               WaitDecline = (bool?) xml.Element("waitDecline") ?? false;
+               WaitDecline = (bool?)xml.Element("waitDecline") ?? false;
                var missionsPath = (string) xml.Element("missionsPath");
                MissionsPath = !string.IsNullOrEmpty(missionsPath) ? System.IO.Path.Combine(Path, missionsPath) : System.IO.Path.Combine(Path, "Missions");
                LowSecMissionsInShuttles = (bool?) xml.Element("LowSecMissions") ?? false;
@@ -543,7 +543,7 @@ namespace Questor.Modules
                AmmoHangar = (string) xml.Element("ammoHangar");
                BookmarkHangar = (string) xml.Element("bookmarkHangar");
                LootContainer = (string) xml.Element("lootContainer");
-               MoveCommonMissionItemsToCorpAmmoHangar = (bool?) xml.Element("MoveCommonMissionItemsToCorpAmmoHangar") ?? false;
+               MoveCommonMissionCompletionItemsToAmmoHangar = (bool?) xml.Element("MoveCommonMissionCompletionItemsToAmmoHangar") ?? false;
                //
                // Loot and Salvage Settings
                //
@@ -827,17 +827,17 @@ namespace Questor.Modules
             WreckLootStatisticsPath = System.IO.Path.Combine(Logpath);
             WreckLootStatisticsFile = System.IO.Path.Combine(WreckLootStatisticsPath + Cache.Instance.DirectEve.Me.Name + ".WreckLootStatisticsDump.log");
             MissionStats1LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
-            MissionStats1LogFile = System.IO.Path.Combine(MissionStats1LogPath +  Cache.Instance.DirectEve.Me.Name + ".Statistics.log");
+            MissionStats1LogFile = System.IO.Path.Combine(MissionStats1LogPath + Cache.Instance.DirectEve.Me.Name + ".Statistics.log");
             MissionStats2LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
             MissionStats2LogFile = System.IO.Path.Combine(MissionStats2LogPath + Cache.Instance.DirectEve.Me.Name + ".DatedStatistics.log");
             MissionStats3LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
             MissionStats3LogFile = System.IO.Path.Combine(MissionStats3LogPath + Cache.Instance.DirectEve.Me.Name + ".CustomDatedStatistics.csv");
             PocketStatisticsPath = System.IO.Path.Combine(Logpath, "pocketstats\\");
             PocketStatisticsFile = System.IO.Path.Combine(PocketStatisticsPath + Cache.Instance.DirectEve.Me.Name + "pocketstats-combined.csv");
-            //create all the logging directories even if they aren't configured to be used - we can adjust this later if it really bugs people to have some potentially empty directories. 
+            //create all the logging directories even if they aren't configured to be used - we can adjust this later if it really bugs people to have some potentially empty directories.
             Directory.CreateDirectory(Logpath);
 
-            Directory.CreateDirectory(ConsoleLogPath); 
+            Directory.CreateDirectory(ConsoleLogPath);
             Directory.CreateDirectory(SessionsLogPath);
             Directory.CreateDirectory(DroneStatsLogPath);
             Directory.CreateDirectory(WreckLootStatisticsPath);
@@ -845,7 +845,7 @@ namespace Questor.Modules
             Directory.CreateDirectory(MissionStats2LogPath);
             Directory.CreateDirectory(MissionStats3LogPath);
             Directory.CreateDirectory(PocketStatisticsPath);
-            
+
             if (SettingsLoaded != null)
                 SettingsLoaded(this, new EventArgs());
         }

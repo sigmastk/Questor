@@ -13,9 +13,9 @@ namespace Questor.Modules
     {
         Idle,
         Begin,
-        OpenItemHangar,
+        OpenLootHangar,
         OpenShipsCargo,
-        OpenCorpHangar,
+        OpenAmmoHangar,
         MoveCommonMissionCompletionitems,
         MoveLoot,
         WaitForMove,
@@ -26,6 +26,6 @@ namespace Questor.Modules
         WaitForStacking,
         Done,
         MoveAmmo,
-        MoveCommonMissionCompletionItemsToCorpAmmoHangar
+        MoveCommonMissionCompletionItemsToAmmoHangar
     }
 }

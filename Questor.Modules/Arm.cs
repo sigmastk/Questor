@@ -7,6 +7,9 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
+
+using System.Globalization;
+
 namespace Questor.Modules
 {
     using System;
@@ -38,17 +41,8 @@ namespace Questor.Modules
 
         public void ProcessState()
         {
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            DirectContainer droneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
-            DirectContainer itemHangar = Cache.Instance.DirectEve.GetItemHangar();
-            DirectContainer shipHangar = Cache.Instance.DirectEve.GetShipHangar();
-
-            DirectContainer corpHangar = null;
-            if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                corpHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
-
             // Select the correct ammo hangar
-            DirectContainer ammoHangar = corpHangar ?? itemHangar;
+
             switch (State)
             {
                 case ArmState.Idle:
@@ -83,18 +77,7 @@ namespace Questor.Modules
                 case ArmState.SwitchToSalvageShip:
                     if (DateTime.Now > Cache.Instance.NextArmAction) //default 10 seconds
                     {
-                        // Is the ship hangar open?
-                        if (shipHangar.Window == null)
-                        {
-                            // No, command it to open
-                            Logging.Log("Arm: Opening Ship Hangar");
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(3);
-                            break;
-                        }
-
-                        if (!shipHangar.IsReady)
-                            break;
+                        if (!Cache.OpenShipsHangar("Arm")) break;
 
                         if (State == ArmState.OpenShipHangar)
                         {
@@ -271,82 +254,23 @@ namespace Questor.Modules
                         }
                         else
                         {
-                            State = ArmState.OpenItemHangar;
+                            State = ArmState.OpenAmmoHangar;
                         }
                     }
                     break;
 
-                case ArmState.OpenItemHangar:
+                case ArmState.OpenAmmoHangar:
                     // Is the hangar open?
 
-                    if (DateTime.Now > Cache.Instance.NextArmAction)
-                    {
-                        if (itemHangar.Window == null)
-                        {
-                            // No, command it to open
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
-                            Logging.Log("Arm: Opening Item Hangar: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
-                            break;
-                        }
-                    }
+                    if (!Cache.OpenAmmoHangar("Arm")) break;
 
-                    if (!itemHangar.IsReady)
-                        break;
-
-                    if (corpHangar != null)
-                    {
-                        Logging.Log("Arm: Done Opening Item hangar: proceeding to Corporate Hangar");
-                        State = ArmState.OpenCorpHangar;
-                    }
-                    else
-                    {
-                        Logging.Log("Arm: Done Opening Item hangar: proceeding to Cargo Hold");
-                        State = ArmState.OpenCargo;
-                    }
-                    break;
-
-                case ArmState.OpenCorpHangar:
-                    // Is the hangar open?
-                    if (corpHangar != null)
-                    {
-                        if (DateTime.Now > Cache.Instance.NextArmAction)
-                        {
-                            if (corpHangar.Window == null)
-                            {
-                                // No, command it to open
-                                Cache.Instance.DirectEve.OpenCorporationHangar();
-                                Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
-                                Logging.Log("Arm: Opening Corporate Hangar: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
-                                break;
-                            }
-                        }
-
-                        if (!corpHangar.IsReady)
-                            break;
-                    }
-
-                    Logging.Log("Arm: Done Opening Corporate Hangar: proceeding to Cargo Hold");
+                    Logging.Log("Arm: Done Opening Item hangar: proceeding to Cargo Hold");
                     State = ArmState.OpenCargo;
                     break;
 
                 case ArmState.OpenCargo:
                     // Is cargo open?
-                    if (DateTime.Now > Cache.Instance.NextArmAction)
-                    {
-                        if (cargo.Window == null)
-                        {
-                            // No, command it to open
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To5());
-                            Logging.Log("Arm: Cargohold of active ship: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
-
-                            break;
-                        }
-                    }
-
-                    if (!cargo.IsReady)
-                        break;
+                    if (!Cache.OpenCargoHold("Arm")) break;
 
                     if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                     {
@@ -355,7 +279,6 @@ namespace Questor.Modules
                     }
                     else if ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings)))
                     {
-                        Logging.Log("Arm: Fitting");
                         State = ArmState.OpenFittingWindow;
                     }
                     else
@@ -445,7 +368,7 @@ namespace Questor.Modules
                                 if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == ship.TypeId)
                                 {
                                     Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
-                                    Logging.Log("Arm: Found fitting [ " + fitting.Name + " ] waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
+                                    Logging.Log("Arm: Found fitting [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
                                     //switch to the requested fitting for the current mission
                                     fitting.Fit();
                                     Cache.Instance.CurrentFit = fitting.Name;
@@ -497,50 +420,31 @@ namespace Questor.Modules
                     break;
 
                 case ArmState.OpenDroneBay:
-                    // Is cargo open?
-                    if (DateTime.Now > Cache.Instance.NextArmAction)
-                    {
-                        if (droneBay.Window == null)
-                        {
-                            // No, command it to open
-                            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(3);
-                            Logging.Log("Arm: Open Drone Bay of Active Ship: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                            break;
-                        }
-                    }
-
-                    if (!droneBay.IsReady)
-                        break;
+                    // Is the drone bay open?
+                    if (!Cache.OpenDroneBay("Arm")) break;
 
                     Logging.Log("Arm: Moving drones");
                     State = ArmState.MoveDrones;
                     break;
 
                 case ArmState.MoveDrones:
+                    if (!Cache.OpenShipsHangar("Arm")) break;
+                    
+                    if (!Cache.OpenDroneBay("Arm")) break;
+                    
+                    if (!Cache.OpenAmmoHangar("Arm")) break;
+                    
+                    
                     DirectItem drone;
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                    {
-                        if (corpHangar != null)
-                        {
-                            drone = corpHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
-                        }
-                        else
-                        {
-                            drone = itemHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
-                        }
-                    }
-                    else
-                        drone = itemHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
-
+                    drone = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
                     if (drone == null || drone.Stacksize < 1)
                     {
-                        Logging.Log("Arm: Out of drones");
+                        Logging.Log("Arm: Out of drones in [" + Settings.Instance.AmmoHangar + "]");
                         State = ArmState.NotEnoughDrones;
                         break;
                     }
 
-                    double neededDrones = Math.Floor((droneBay.Capacity - droneBay.UsedCapacity) / drone.Volume);
+                    double neededDrones = Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                     Logging.Log("Arm: neededDrones: " + neededDrones);
                     if (neededDrones == 0 && ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings))))
                     {
@@ -557,25 +461,33 @@ namespace Questor.Modules
 
                     // Move needed drones
                     Logging.Log("Arm: Move [ " + (int)Math.Min(neededDrones, drone.Stacksize) + " ] Drones into drone bay");
-                    droneBay.Add(drone, (int)Math.Min(neededDrones, drone.Stacksize));
+                    Cache.Instance.DroneBay.Add(drone, (int)Math.Min(neededDrones, drone.Stacksize));
                     break;
 
                 case ArmState.MoveItems:
+                    if (!Cache.OpenCargoHold("Arm")) break;
+  
+                    if (!Cache.OpenDroneBay("Arm")) break;
+
+                    if (!Cache.OpenAmmoHangar("Arm")) break;
+                        
+                    
                     string bringItem = Cache.Instance.BringMissionItem;
                     if (string.IsNullOrEmpty(bringItem))
                         _missionItemMoved = true;
 
                     if (!_missionItemMoved)
                     {
-                        DirectItem missionItem = (corpHangar ?? itemHangar).Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        if (!Cache.OpenAmmoHangar("Arm")) break;
+                        DirectItem missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                         if (missionItem == null)
-                            missionItem = itemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                           missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
-                        if (missionItem != null)
+                        if (missionItem != null && !string.IsNullOrEmpty(missionItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                         {
-                            Logging.Log("Arm: Moving [" + missionItem.TypeName + "]");
+                            Logging.Log("Arm: Moving MissionItem [" + missionItem.TypeName + "] to CargoHold");
 
-                            cargo.Add(missionItem, 1);
+                            Cache.Instance.CargoHold.Add(missionItem, 1);
                             _missionItemMoved = true;
                             break;
                         }
@@ -586,7 +498,7 @@ namespace Questor.Modules
                     {
                         AmmoToLoad = new List<Ammo>(Cache.Instance.MissionAmmo);
                     }
-                    foreach (DirectItem item in ammoHangar.Items.OrderBy(i => i.Quantity))
+                    foreach (DirectItem item in Cache.Instance.AmmoHangar.Items.OrderBy(i => i.Quantity))
                     {
                         if (item.ItemId <= 0)
                             continue;
@@ -595,11 +507,11 @@ namespace Questor.Modules
                         if (ammo == null)
                             continue;
 
-                        Logging.Log("Arm: Moving [" + item.TypeName + "]");
+                        Logging.Log("Arm: Moving Ammo [" + item.TypeName + "] to CargoHold");
 
                         int moveQuantity = Math.Min(item.Quantity, ammo.Quantity);
                         moveQuantity = Math.Max(moveQuantity, 1);
-                        cargo.Add(item, moveQuantity);
+                        Cache.Instance.CargoHold.Add(item, moveQuantity);
 
                         ammo.Quantity -= moveQuantity;
                         if (ammo.Quantity <= 0)
@@ -638,14 +550,16 @@ namespace Questor.Modules
                     if (DateTime.Now < Cache.Instance.NextArmAction)
                         break;
 
-                    if (cargo.Items.Count == 0)
+                    if (!Cache.OpenCargoHold("Arm")) break;
+                    
+                    if (Cache.Instance.CargoHold.Items.Count == 0)
                         break;
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
                         // Close the drone bay, its not required in space.
-                        if (droneBay.IsReady)
-                            droneBay.Window.Close();
+                        if (Cache.Instance.DroneBay.IsReady)
+                           Cache.Instance.DroneBay.Window.Close();
 
                         Logging.Log("Arm: Done");
 

@@ -8,7 +8,7 @@
     public class TransactionDataDelivery : IStoryline
     {
         private DateTime _nextAction;
-        private Traveler _traveler;
+        private readonly Traveler _traveler;
         private TransactionDataDeliveryState _state;
 
         public TransactionDataDelivery()
@@ -26,29 +26,15 @@
                 return StorylineState.Arm;
 
             // Are we in a shuttle?  Yes, goto the agent
-            var directEve = Cache.Instance.DirectEve;
+            DirectEve directEve = Cache.Instance.DirectEve;
             if (directEve.ActiveShip.GroupId == 31)
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            var ships = directEve.GetShipHangar();
-            if (ships.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
-
-                Logging.Log("TransactionDataDelivery: Opening ship hangar");
-
-                // No, command it to open
-                directEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                return StorylineState.Arm;
-            }
-
-            // If the ship hangar is not ready then wait for it
-            if (!ships.IsReady)
-                return StorylineState.Arm;
+            if (!Cache.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.Arm;
 
             //  Look for a shuttle
-            var item = ships.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
+            DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
             if (item != null)
             {
                 Logging.Log("TransactionDataDelivery: Switching to shuttle");
@@ -99,42 +85,17 @@
 
         private bool MoveItem(bool pickup)
         {
-            var directEve = Cache.Instance.DirectEve;
+            DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            var hangar = directEve.GetItemHangar();
-            if (hangar.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
+            if (!Cache.OpenItemsHangar("TransactionDataDelivery")) return false;
 
-                Logging.Log("TransactionDataDelivery: Opening hangar floor");
-
-                directEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                return false;
-            }
-
-            // Wait for it to become ready
-            if (!hangar.IsReady)
-                return false;
-
-            var cargo = directEve.GetShipsCargo();
-            if (cargo.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
-
-                Logging.Log("TransactionDataDelivery: Opening cargo");
-
-                directEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                return false;
-            }
-
-            if (!cargo.IsReady)
-                return false;
+            if (!Cache.OpenCargoHold("TransactionDataDelivery")) return false;
 
             // 314 == Transaction And Salary Logs (all different versions)
             const int groupId = 314;
-            DirectContainer from = pickup ? hangar : cargo;
-            DirectContainer to = pickup ? cargo : hangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
+            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
 
             // We moved the item
             if (to.Items.Any(i => i.GroupId == groupId))
@@ -144,7 +105,7 @@
                 return false;
 
             // Move items
-            foreach (var item in from.Items.Where(i => i.GroupId == groupId))
+            foreach (DirectItem item in from.Items.Where(i => i.GroupId == groupId))
             {
                 Logging.Log("TransactionDataDelivery: Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"));
                 to.Add(item);

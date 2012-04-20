@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -16,7 +16,6 @@ namespace Questor.Modules
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
-    using System.IO;
 
     public class Salvage
     {
@@ -30,7 +29,7 @@ namespace Questor.Modules
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
-        private Dictionary<long, DateTime> _openedContainers;
+        public static Dictionary<long, DateTime> _openedContainers;
 
         public Salvage()
         {
@@ -61,12 +60,12 @@ namespace Questor.Modules
             for (int i = tractorBeams.Count - 1; i >= 0; i--)
             {
                 ModuleCache tractorBeam = tractorBeams[i];
-                if (!tractorBeam.IsActive && !tractorBeam.IsDeactivating)
+                if (!tractorBeam.IsActive && !tractorBeam.IsDeactivating || tractorBeam.InLimboState)
                     continue;
 
                 EntityCache wreck = wrecks.FirstOrDefault(w => w.Id == tractorBeam.TargetId);
                 // If the wreck no longer exists, or its within loot range then disable the tractor beam
-                //If the wreck no longer exist, beam should be deactivated automaticly. Without our interaction.
+                // If the wreck no longer exist, beam should be deactivated automatically. Without our interaction.
                 if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
                 {
                     tractorBeam.Click();
@@ -121,7 +120,7 @@ namespace Questor.Modules
 
             foreach (ModuleCache salvager in salvagers)
             {
-                if (salvager.IsActive || salvager.IsDeactivating)
+                if (salvager.IsActive || salvager.IsDeactivating || salvager.InLimboState || !salvager.IsActivatable)
                     continue;
 
                 // Spread the salvagers around
@@ -132,7 +131,7 @@ namespace Questor.Modules
                 Logging.Log("Salvage: Activating salvager [" + salvager.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
                 salvager.Activate(wreck.Id);
                 Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
-                return;
+                continue;
             }
         }
 
@@ -271,20 +270,11 @@ namespace Questor.Modules
         private void LootWrecks()
         {
             if (Cache.Instance.NextLootAction > DateTime.Now) return;
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            if (cargo.Window == null)
-            {
-                // No, command it to open
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                return;
-            }
 
-            // Ship's cargo is not ready yet
-            if (!cargo.IsReady)
-                return;
+            if (!Cache.OpenCargoHold("Salvage")) return;
 
-            List<ItemCache> shipsCargo = cargo.Items.Select(i => new ItemCache(i)).ToList();
-            double freeCargoCapacity = cargo.Capacity - cargo.UsedCapacity;
+            List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
+            double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
             IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => w.Type == "form.LootCargoView");
             foreach (DirectContainerWindow window in lootWindows)
             {
@@ -304,21 +294,8 @@ namespace Questor.Modules
                 // Build a list of items to loot
                 var lootItems = new List<ItemCache>();
 
-                if (Settings.Instance.WreckLootStatistics)
-                {
-                    // Log all items found in the wreck
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "TIME: " + string.Format("{0:dd/MM/yyyy HH:mm:ss}", DateTime.Now) + "\n");
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "NAME: " + containerEntity.Name + "\n");
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "ITEMS:" + "\n");
-                    foreach (ItemCache item in items.OrderBy(i => i.TypeId))
-                    {
-                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "TypeID: " + item.TypeId.ToString(CultureInfo.InvariantCulture) + "\n");
-                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "Name: " + item.Name + "\n");
-                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "Quantity: " + item.Quantity.ToString(CultureInfo.InvariantCulture) + "\n");
-                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "=\n");
-                    }
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, ";" + "\n");
-                }
+                // log wreck contents to file
+                if (!Statistics.WreckStatistics(items, containerEntity)) break;
                 
                 // Does it no longer exist or is it out of transfer range or its looted
                 if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
@@ -438,7 +415,7 @@ namespace Questor.Modules
                                 // Note: This could (in theory) fuck up with the bot jettison an item and 
                                 // then picking it up again :/ (granted it should never happen unless 
                                 // mission item volume > reserved volume
-                                cargo.Jettison(moveTheseItems.Select(i => i.ItemId));
+                                Cache.Instance.CargoHold.Jettison(moveTheseItems.Select(i => i.ItemId));
                                 Cache.Instance.LastJettison = DateTime.Now;
                                 return;
                             }
@@ -467,7 +444,7 @@ namespace Questor.Modules
                 if (lootItems.Count != 0)
                 {
                     Logging.Log("Salvage: Looting container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "], [" + lootItems.Count + "] valuable items");
-                    cargo.Add(lootItems.Select(i => i.DirectItem));
+                    Cache.Instance.CargoHold.Add(lootItems.Select(i => i.DirectItem));
                 }
                 else
                     Logging.Log("Salvage: Container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "] contained no valuable items");
@@ -476,7 +453,7 @@ namespace Questor.Modules
             // Open a container in range
             foreach (EntityCache containerEntity in Cache.Instance.Containers.Where(e => e.Distance <= (int)Distance.SafeScoopRange))
             {
-                // Emptry wreck, ignore
+                // Empty wreck, ignore
                 if (containerEntity.GroupId == (int) Group.Wreck && containerEntity.IsWreckEmpty)
                     continue;
 

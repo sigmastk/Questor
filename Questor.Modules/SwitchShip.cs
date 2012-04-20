@@ -33,15 +33,7 @@ namespace Questor.Modules
 
                 case SwitchShipState.OpenShipHangar:
                     // Is the ship hangar open?
-                    if (shipHangar.Window == null)
-                    {
-                        // No, command it to open
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                        break;
-                    }
-
-                    if (!shipHangar.IsReady)
-                        break;
+                    if (!Cache.OpenShipsHangar("SwitchShip")) break;
 
                     Logging.Log("SwitchShip: Activating combat ship");
 
@@ -111,30 +103,28 @@ namespace Questor.Modules
                     fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
                     if (fittingMgr != null)
                     {
-                       Logging.Log("SwitchShip: Looking for fitting " + defaultFitting);
+                        Logging.Log("SwitchShip: Looking for fitting " + defaultFitting);
 
-
-                       foreach (DirectFitting fitting in fittingMgr.Fittings)
-                       {
-                          //ok found it
-                          DirectActiveShip ship = Cache.Instance.DirectEve.ActiveShip;
-                          if (defaultFitting.ToLower().Equals(fitting.Name.ToLower()) &&
-                              fitting.ShipTypeId == ship.TypeId)
-                          {
-                             Logging.Log("SwitchShip: Found fitting " + fitting.Name);
-                             //switch to the requested fitting for the current mission
-                             fitting.Fit();
-                             _lastSwitchShipAction = DateTime.Now;
-                             Cache.Instance.CurrentFit = fitting.Name;
-                             State = SwitchShipState.WaitForFitting;
-                             break;
-                          }
-
-                       }
+                        foreach (DirectFitting fitting in fittingMgr.Fittings)
+                        {
+                            //ok found it
+                            DirectActiveShip ship = Cache.Instance.DirectEve.ActiveShip;
+                            if (defaultFitting.ToLower().Equals(fitting.Name.ToLower()) &&
+                                fitting.ShipTypeId == ship.TypeId)
+                            {
+                                Logging.Log("SwitchShip: Found fitting " + fitting.Name);
+                                //switch to the requested fitting for the current mission
+                                fitting.Fit();
+                                _lastSwitchShipAction = DateTime.Now;
+                                Cache.Instance.CurrentFit = fitting.Name;
+                                State = SwitchShipState.WaitForFitting;
+                                break;
+                            }
+                        }
                     }
-                  State = SwitchShipState.Done;
-                  if (fittingMgr != null) fittingMgr.Close();
-                  break;
+                    State = SwitchShipState.Done;
+                    if (fittingMgr != null) fittingMgr.Close();
+                    break;
 
                 case SwitchShipState.WaitForFitting:
                     //let's wait 10 seconds
@@ -145,7 +135,7 @@ namespace Questor.Modules
                         State = SwitchShipState.Done;
                         fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
                         if (fittingMgr != null) fittingMgr.Close();
-                       Logging.Log("SwitchShip: Done fitting");
+                        Logging.Log("SwitchShip: Done fitting");
                     }
                     else Logging.Log("SwitchShip: Waiting for fitting. time elapsed = " + DateTime.Now.Subtract(_lastSwitchShipAction).TotalMilliseconds + " locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count);
                     break;

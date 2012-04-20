@@ -28,7 +28,6 @@ namespace Questor.Modules
       public const string Accept = "Accept";
       public const string Decline = "Decline";
       public const string Close = "Close";
-      private DateTime _nextJournalOpenRequest;
       private DateTime _nextAgentAction;
 
       //private DateTime _waitingOnAgentResponse;
@@ -117,7 +116,7 @@ namespace Questor.Modules
                      Cache.Instance.SessionState = "Quitting";
                  }
              }
-            return;
+             return;
          }
          else
          {
@@ -271,32 +270,24 @@ namespace Questor.Modules
          {
              _waitingonagentwindow = false;
          }
-
-         DirectWindow journalWindow = Cache.Instance.GetWindowByName("journal");
-         if (journalWindow == null)
-         {
-            if (DateTime.Now > _nextJournalOpenRequest)
-            {
-               Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
-               _nextJournalOpenRequest = DateTime.Now.AddSeconds(30);
-            }
-            return;
-         }
+         
+         //open the journal window
+         if (!Cache.OpenJournalWindow("AgentInteraction")) return;
 
          Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
          if (Cache.Instance.Mission == null)
          {
             if (_waitingonmission == false)
             {
-               _waitingonmissiontimer = DateTime.Now;
+                 _waitingonmissiontimer = DateTime.Now;
                  _waitingonmission = true;
             }
             if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 30)
             {
                Logging.Log("AgentInteraction: WaitForMission: Unable to find mission from that agent (yet?) : AgentInteraction.AgentId [" + AgentId + "] regular Mission AgentID [" + Cache.Instance.AgentId + "]");
-                journalWindow.Close();
+                Cache.Instance.JournalWindow.Close();
                 if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 120)
-               {
+                {
                   Cache.Instance.CloseQuestorCMDLogoff = false;
                   Cache.Instance.CloseQuestorCMDExitGame = true;
                   Cache.Instance.ReasonToStopQuestor = "AgentInteraction: WaitforMission: Journal would not open/refresh - mission was null: restarting EVE Session";
@@ -304,7 +295,6 @@ namespace Questor.Modules
                   Cache.Instance.SessionState = "Quitting";
                }
             }
-
             return;
          }
          else
@@ -314,7 +304,7 @@ namespace Questor.Modules
 
          string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
 
-         Logging.Log("AgentInteraction: ["+  Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], minAgentGreyListStandings: " + Settings.Instance.MinAgentGreyListStandings);
+         Logging.Log("AgentInteraction: ["+  Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], minAgentGreyListStandings: [" + Settings.Instance.MinAgentGreyListStandings + "]");
 
          string html = agentWindow.Objective;
          if (CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == missionName.ToLower()))
@@ -327,7 +317,6 @@ namespace Questor.Modules
             return;
          }
 
-         Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
          if (Cache.Instance.Mission.State == (int)MissionState.Offered && Settings.Instance.MissionGreylist.Any(m => m == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
          {
              Logging.Log("AgentInteraction: Declining greylisted mission [" + Cache.Instance.MissionName + "]");
@@ -507,19 +496,18 @@ namespace Questor.Modules
             string html = agentWindow.Briefing;
             if (html.Contains("Declining a mission from this agent within the next"))
             {
-               Cache.Instance.AgentEffectiveStandingtoMe =  Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
                //this need to divide by 10 was a remnant of the html scrape method we were using before. this can likely be removed now. 
                if (Cache.Instance.AgentEffectiveStandingtoMe != 0)
                {
                    if (Cache.Instance.AgentEffectiveStandingtoMe > 10)
-                  {
+                   {
                       Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.AgentEffectiveStandingtoMe / 10;
-                  }
+                   }
                    if (Settings.Instance.MinAgentBlackListStandings > 10)
-                  {
+                   {
                       Settings.Instance.MinAgentBlackListStandings = Settings.Instance.MinAgentBlackListStandings / 10;
-                  }
-                   Logging.Log("AgentInteraction: Agent decline timer detected. Current standings: " + Cache.Instance.AgentEffectiveStandingtoMe + ". Minimum standings: " + Settings.Instance.MinAgentBlackListStandings);
+                   }
+                   Logging.Log("AgentInteraction: Agent decline timer detected. Current standings: " + Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2) + ". Minimum standings: " + Math.Round(Settings.Instance.MinAgentBlackListStandings,2));
                }
 
                var hourRegex = new Regex("\\s(?<hour>\\d+)\\shour");
@@ -545,7 +533,7 @@ namespace Questor.Modules
                if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings && !Cache.Instance.IsAgentLoop)
                {
                   _nextAgentAction = DateTime.Now.AddSeconds(secondsToWait);
-                  Logging.Log("AgentInteraction: Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.");
+                  Logging.Log("AgentInteraction: Current standings [" + Math.Round(Cache.Instance.AgentEffectiveStandingtoMe,2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.");
                   CloseConversation();
 
                   State = AgentInteractionState.StartConversation;
@@ -565,7 +553,7 @@ namespace Questor.Modules
 
                   return;
                }
-               Logging.Log("AgentInteraction: Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above or configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining mission.");
+               Logging.Log("AgentInteraction: Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above or configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.MissionName + "]");
             }
          }
 
@@ -683,6 +671,8 @@ namespace Questor.Modules
                break;
 
             case AgentInteractionState.StartConversation:
+               Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
+
                Agent.InteractWith();
 
                Logging.Log("AgentInteraction: Waiting for conversation");

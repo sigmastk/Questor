@@ -103,12 +103,17 @@ namespace Questor.Modules
         private List<EntityCache> _targets;
 
         /// <summary>
+        ///   Aggressed cache
+        /// </summary>
+        private List<EntityCache> _aggressed;
+
+        /// <summary>
         ///   Returns all unlooted wrecks & containers
         /// </summary>
         private List<EntityCache> _unlootedContainers;
 
         private List<EntityCache> _unlootedWrecksAndSecureCans;
-        
+
         private List<DirectWindow> _windows;
 
         public Cache()
@@ -165,7 +170,7 @@ namespace Questor.Modules
             get { return _instance; }
         }
 
-      public bool StopBot = false;
+        public bool StopBot = false;
 
         public bool DoNotBreakInvul = false;
         public bool UseDrones = true;
@@ -179,7 +184,7 @@ namespace Questor.Modules
         public double Wealth { get; set; }
 
         public double WealthatStartofPocket { get; set; }
-        
+
         public int PocketNumber { get; set; }
 
         public bool OpenWrecks = false;
@@ -193,26 +198,27 @@ namespace Questor.Modules
         public int TimeSpentInMissionInRange = 0;
         public int TimeSpentInMissionOutOfRange = 0;
         public DirectAgentMission Mission;
-        public bool DroneStatsWritten { get; set; }
         public bool DronesKillHighValueTargets { get; set; }
         public bool InMission { get; set; }
+
+        public DateTime QuestorStarted_DateTime = DateTime.Now;
 
         public bool LocalSafe(int maxBad, double stand)
         {
             int number = 0;
             var local = (DirectChatWindow)GetWindowByName("Local");
-            foreach(DirectCharacter localMember in local.Members)
+            foreach (DirectCharacter localMember in local.Members)
             {
                 float[] alliance = {DirectEve.Standings.GetPersonalRelationship(localMember.AllianceId), DirectEve.Standings.GetCorporationRelationship(localMember.AllianceId), DirectEve.Standings.GetAllianceRelationship(localMember.AllianceId)};
                 float[] corporation = {DirectEve.Standings.GetPersonalRelationship(localMember.CorporationId), DirectEve.Standings.GetCorporationRelationship(localMember.CorporationId), DirectEve.Standings.GetAllianceRelationship(localMember.CorporationId)};
                 float[] personal = {DirectEve.Standings.GetPersonalRelationship(localMember.CharacterId), DirectEve.Standings.GetCorporationRelationship(localMember.CharacterId), DirectEve.Standings.GetAllianceRelationship(localMember.CharacterId)};
 
-                if(alliance.Min() <= stand || corporation.Min() <= stand || personal.Min() <= stand)
+                if (alliance.Min() <= stand || corporation.Min() <= stand || personal.Min() <= stand)
                 {
                     Logging.Log("Cache.LocalSafe: Bad Standing Pilot Detected: [ " + localMember.Name + "] " + " [ " + number + " ] so far... of [ " + maxBad + " ] allowed");
                     number++;
                 }
-                if(number > maxBad)
+                if (number > maxBad)
                 {
                     Logging.Log("Cache.LocalSafe: [" + number + "] Bad Standing pilots in local, We should stay in station");
                     return false;
@@ -239,13 +245,13 @@ namespace Questor.Modules
         ///   Best orbit distance for the mission
         /// </summary>
         public int OrbitDistance { get; set; }
-		
-		/// <summary>
+
+        /// <summary>
         ///   Force Salvaging after mission
         /// </summary>
         public bool AfterMissionSalvaging { get; set; }
 
-		/// <summary>
+        /// <summary>
         ///   Returns the maximum weapon distance
         /// </summary>
         public int WeaponRange
@@ -256,9 +262,8 @@ namespace Questor.Modules
                 IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType);
 
                 // Is our ship's cargo available?
-                DirectContainer cargo = DirectEve.GetShipsCargo();
-                if (cargo.IsReady)
-                    ammo = ammo.Where(a => cargo.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+                if (Cache.Instance.CargoHold.IsReady)
+                    ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
 
                 // Return ship range if there's no ammo left
                 if (!ammo.Any())
@@ -287,334 +292,500 @@ namespace Questor.Modules
         public string ConsoleLog { get; set; }
         public bool IsAgentLoop { get; set; }
         private string _agentName = "";
+
+        private DateTime _nextOpenContainerInSpaceAction;
+
+        public DateTime NextOpenContainerInSpaceAction
+        {
+            get
+            {
+                return _nextOpenContainerInSpaceAction;
+            }
+            set
+            {
+                _nextOpenContainerInSpaceAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenJournalWindowAction;
+
+        public DateTime NextOpenJournalWindowAction
+        {
+            get
+            {
+                return _nextOpenJournalWindowAction;
+            }
+            set
+            {
+                _nextOpenJournalWindowAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenLootContainerAction;
+
+        public DateTime NextOpenLootContainerAction
+        {
+            get
+            {
+                return _nextOpenLootContainerAction;
+            }
+            set
+            {
+                _nextOpenLootContainerAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenCorpBookmarkHangarAction;
+
+        public DateTime NextOpenCorpBookmarkHangarAction
+        {
+            get
+            {
+                return _nextOpenCorpBookmarkHangarAction;
+            }
+            set
+            {
+                _nextOpenCorpBookmarkHangarAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenCorpLootHangarAction;
+
+        public DateTime NextOpenCorpLootHangarAction
+        {
+            get
+            {
+                return _nextOpenCorpLootHangarAction;
+            }
+            set
+            {
+                _nextOpenCorpLootHangarAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenItemHangarAction;
+
+        public DateTime NextOpenItemHangarAction
+        {
+            get
+            {
+                return _nextOpenItemHangarAction;
+            }
+            set
+            {
+                _nextOpenItemHangarAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenAmmoHangarAction;
+
+        public DateTime NextOpenAmmoHangarAction
+        {
+            get
+            {
+                return _nextOpenAmmoHangarAction;
+            }
+            set
+            {
+                _nextOpenAmmoHangarAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenDroneBayAction;
+
+        public DateTime NextOpenDroneBayAction
+        {
+            get
+            {
+                return _nextOpenDroneBayAction;
+            }
+            set
+            {
+                _nextOpenDroneBayAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenCorpAmmoHangarAction;
+
+        public DateTime NextOpenCorpAmmoHangarAction
+        {
+            get
+            {
+                return _nextOpenCorpAmmoHangarAction;
+            }
+            set
+            {
+                _nextOpenCorpAmmoHangarAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenShipHangarAction;
+
+        public DateTime NextOpenShipHangarAction
+        {
+            get
+            {
+                return _nextOpenShipHangarAction;
+            }
+            set
+            {
+                _nextOpenShipHangarAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
+        private DateTime _nextOpenCargoAction;
+
+        public DateTime NextOpenCargoAction
+        {
+            get
+            {
+                return _nextOpenCargoAction;
+            }
+            set
+            {
+                _nextOpenCargoAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         private DateTime _lastAction = DateTime.MinValue;
 
-      public DateTime LastAction
-      {
-         get
-         {
-            return _lastAction;
-         }
-         set
-         {
-            _lastAction = value;
-         }
-      }
+        public DateTime LastAction
+        {
+            get
+            {
+                return _lastAction;
+            }
+            set
+            {
+                _lastAction = value;
+            }
+        }
 
-      private DateTime _nextArmAction = DateTime.MinValue;
+        private DateTime _nextArmAction = DateTime.MinValue;
 
-      public DateTime NextArmAction
-      {
-         get
-         {
-            return _nextArmAction;
-         }
-         set
-         {
-            _nextArmAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextArmAction
+        {
+            get
+            {
+                return _nextArmAction;
+            }
+            set
+            {
+                _nextArmAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextSalvageAction = DateTime.MinValue;
+        private DateTime _nextSalvageAction = DateTime.MinValue;
 
-      public DateTime NextSalvageAction
-      {
-         get
-         {
-            return _nextSalvageAction;
-         }
-         set
-         {
-            _nextSalvageAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextSalvageAction
+        {
+            get
+            {
+                return _nextSalvageAction;
+            }
+            set
+            {
+                _nextSalvageAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextLootAction = DateTime.MinValue;
+        private DateTime _nextLootAction = DateTime.MinValue;
 
-      public DateTime NextLootAction
-      {
-         get
-         {
-            return _nextLootAction;
-         }
-         set
-         {
-            _nextLootAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextLootAction
+        {
+            get
+            {
+                return _nextLootAction;
+            }
+            set
+            {
+                _nextLootAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _lastJettison = DateTime.MinValue;
+        private DateTime _lastJettison = DateTime.MinValue;
 
-      public DateTime LastJettison
-      {
-         get
-         {
-            return _lastJettison;
-         }
-         set
-         {
-            _lastJettison = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime LastJettison
+        {
+            get
+            {
+                return _lastJettison;
+            }
+            set
+            {
+                _lastJettison = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextDefenceModuleAction = DateTime.MinValue;
+        private DateTime _nextDefenceModuleAction = DateTime.MinValue;
 
-      public DateTime NextDefenceModuleAction
-      {
-         get
-         {
-            return _nextDefenceModuleAction;
-         }
-         set
-         {
-            _nextDefenceModuleAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextDefenceModuleAction
+        {
+            get
+            {
+                return _nextDefenceModuleAction;
+            }
+            set
+            {
+                _nextDefenceModuleAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextAfterburnerAction = DateTime.MinValue;
+        private DateTime _nextAfterburnerAction = DateTime.MinValue;
 
-      public DateTime NextAfterburnerAction
-      {
-         get { return _nextAfterburnerAction; }
-         set
-         {
-            _nextAfterburnerAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextAfterburnerAction
+        {
+            get { return _nextAfterburnerAction; }
+            set
+            {
+                _nextAfterburnerAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextRepModuleAction = DateTime.MinValue;
+        private DateTime _nextRepModuleAction = DateTime.MinValue;
 
-      public DateTime NextRepModuleAction
-      {
-         get { return _nextRepModuleAction; }
-         set
-         {
-            _nextRepModuleAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextRepModuleAction
+        {
+            get { return _nextRepModuleAction; }
+            set
+            {
+                _nextRepModuleAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextActivateSupportModules = DateTime.MinValue;
+        private DateTime _nextActivateSupportModules = DateTime.MinValue;
 
-      public DateTime NextActivateSupportModules
-      {
-         get { return _nextActivateSupportModules; }
-         set
-         {
-            _nextActivateSupportModules = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextActivateSupportModules
+        {
+            get { return _nextActivateSupportModules; }
+            set
+            {
+                _nextActivateSupportModules = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextRemoveBookmarkAction = DateTime.MinValue;
+        private DateTime _nextRemoveBookmarkAction = DateTime.MinValue;
 
-      public DateTime NextRemoveBookmarkAction
-      {
-         get { return _nextRepModuleAction; }
-         set
-         {
-            _nextRemoveBookmarkAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextRemoveBookmarkAction
+        {
+            get { return _nextRepModuleAction; }
+            set
+            {
+                _nextRemoveBookmarkAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextApproachAction = DateTime.MinValue;
+        private DateTime _nextApproachAction = DateTime.MinValue;
 
-      public DateTime NextApproachAction
-      {
-         get { return _nextApproachAction; }
-         set
-         {
-            _nextApproachAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextApproachAction
+        {
+            get { return _nextApproachAction; }
+            set
+            {
+                _nextApproachAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextOrbit = DateTime.MinValue;
+        private DateTime _nextOrbit = DateTime.MinValue;
 
-      public DateTime NextOrbit
-      {
-         get { return _nextOrbit; }
-         set
-         {
-            _nextOrbit = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextOrbit
+        {
+            get { return _nextOrbit; }
+            set
+            {
+                _nextOrbit = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextWarpTo;
+        private DateTime _nextWarpTo;
 
-      public DateTime NextWarpTo
-      {
-         get { return _nextWarpTo; }
-         set
-         {
-            _nextWarpTo = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextWarpTo
+        {
+            get { return _nextWarpTo; }
+            set
+            {
+                _nextWarpTo = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextTravelerAction = DateTime.MinValue;
+        private DateTime _nextTravelerAction = DateTime.MinValue;
 
-      public DateTime NextTravelerAction
-      {
-         get { return _nextTravelerAction; }
-         set
-         {
-            _nextTravelerAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextTravelerAction
+        {
+            get { return _nextTravelerAction; }
+            set
+            {
+                _nextTravelerAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextTargetAction = DateTime.MinValue;
+        private DateTime _nextTargetAction = DateTime.MinValue;
 
-      public DateTime NextTargetAction
-      {
-         get { return _nextTargetAction; }
-         set
-         {
-            _nextTargetAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextTargetAction
+        {
+            get { return _nextTargetAction; }
+            set
+            {
+                _nextTargetAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextWeaponAction = DateTime.MinValue;
-      private DateTime _nextReload = DateTime.MinValue;
+        private DateTime _nextWeaponAction = DateTime.MinValue;
+        private DateTime _nextReload = DateTime.MinValue;
 
-      public DateTime NextReload
-      {
-         get { return _nextReload; }
-         set
-         {
-            _nextReload = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextReload
+        {
+            get { return _nextReload; }
+            set
+            {
+                _nextReload = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      public DateTime NextWeaponAction
-      {
-         get { return _nextWeaponAction; }
-         set
-         {
-            _nextWeaponAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextWeaponAction
+        {
+            get { return _nextWeaponAction; }
+            set
+            {
+                _nextWeaponAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextWebAction = DateTime.MinValue;
+        private DateTime _nextWebAction = DateTime.MinValue;
 
-      public DateTime NextWebAction
-      {
-         get { return _nextWebAction; }
-         set
-         {
-            _nextWebAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextWebAction
+        {
+            get { return _nextWebAction; }
+            set
+            {
+                _nextWebAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextNosAction = DateTime.MinValue;
+        private DateTime _nextNosAction = DateTime.MinValue;
 
-      public DateTime NextNosAction
-      {
-         get { return _nextNosAction; }
-         set
-         {
-            _nextNosAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextNosAction
+        {
+            get { return _nextNosAction; }
+            set
+            {
+                _nextNosAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextPainterAction = DateTime.MinValue;
+        private DateTime _nextPainterAction = DateTime.MinValue;
 
-      public DateTime NextPainterAction
-      {
-         get { return _nextPainterAction; }
-         set
-         {
-            _nextPainterAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextPainterAction
+        {
+            get { return _nextPainterAction; }
+            set
+            {
+                _nextPainterAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextActivateAction = DateTime.MinValue;
+        private DateTime _nextActivateAction = DateTime.MinValue;
 
-      public DateTime NextActivateAction
-      {
-         get { return _nextActivateAction; }
-         set
-         {
-            _nextActivateAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextActivateAction
+        {
+            get { return _nextActivateAction; }
+            set
+            {
+                _nextActivateAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextBookmarkPocketAttempt = DateTime.MinValue;
+        private DateTime _nextBookmarkPocketAttempt = DateTime.MinValue;
 
-      public DateTime NextBookmarkPocketAttempt
-      {
-         get { return _nextBookmarkPocketAttempt; }
-         set
-         {
-            _nextBookmarkPocketAttempt = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextBookmarkPocketAttempt
+        {
+            get { return _nextBookmarkPocketAttempt; }
+            set
+            {
+                _nextBookmarkPocketAttempt = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextAlign = DateTime.MinValue;
+        private DateTime _nextAlign = DateTime.MinValue;
 
-      public DateTime NextAlign
-      {
-         get { return _nextAlign; }
-         set
-         {
-            _nextAlign = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextAlign
+        {
+            get { return _nextAlign; }
+            set
+            {
+                _nextAlign = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextUndockAction = DateTime.Now;
+        private DateTime _nextUndockAction = DateTime.Now;
 
-      public DateTime NextUndockAction
-      {
-         get { return _nextUndockAction; }
-         set
-         {
-            _nextUndockAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextUndockAction
+        {
+            get { return _nextUndockAction; }
+            set
+            {
+                _nextUndockAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextDockAction = DateTime.MinValue; //unused
+        private DateTime _nextDockAction = DateTime.MinValue; //unused
 
-      public DateTime NextDockAction
-      {
-         get { return _nextDockAction; }
-         set
-         {
-            _nextDockAction = value;
-            _lastAction = DateTime.Now;
-         }
-      }
+        public DateTime NextDockAction
+        {
+            get { return _nextDockAction; }
+            set
+            {
+                _nextDockAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
-      private DateTime _nextDroneRecall;
+        private DateTime _nextDroneRecall;
 
-      public DateTime NextDroneRecall
-      {
-         get { return _nextDroneRecall; }
-         set
-         {
-            _nextDroneRecall = value;
-            _lastAction = DateTime.Now;
-         }
-      }
-        
+        public DateTime NextDroneRecall
+        {
+            get { return _nextDroneRecall; }
+            set
+            {
+                _nextDroneRecall = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         public DateTime _lastLocalWatchAction;
         public DateTime _lastWalletCheck;
 
@@ -622,39 +793,35 @@ namespace Questor.Modules
         public DateTime _nextInSpaceorInStation;
         public DateTime _lastTimeCheckAction;
 
-      public int wrecksThisPocket = 0;
-      public int wrecksThisMission = 0;
-      public DateTime _lastLoggingAction = DateTime.MinValue;
+        public int wrecksThisPocket = 0;
+        public int wrecksThisMission = 0;
+        public DateTime _lastLoggingAction = DateTime.MinValue;
 
+        public bool Paused { get; set; }
         public int RepairCycleTimeThisPocket { get; set; }
         public int PanicAttemptsThisPocket { get; set; }
         public double LowestShieldPercentageThisMission { get; set; }
         public double LowestArmorPercentageThisMission { get; set; }
         public double LowestCapacitorPercentageThisMission { get; set; }
-
-      public double LowestShieldPercentageThisPocket { get; set; }
-
-      public double LowestArmorPercentageThisPocket { get; set; }
-
-      public double LowestCapacitorPercentageThisPocket { get; set; }
-
-      public int PanicAttemptsThisMission { get; set; }
-
+        public double LowestShieldPercentageThisPocket { get; set; }
+        public double LowestArmorPercentageThisPocket { get; set; }
+        public double LowestCapacitorPercentageThisPocket { get; set; }
+        public int PanicAttemptsThisMission { get; set; }
         public DateTime StartedBoosting { get; set; }
         public int RepairCycleTimeThisMission { get; set; }
         public DateTime LastKnownGoodConnectedTime { get; set; }
         public long TotalMegaBytesOfMemoryUsed { get; set; }
         public double MyWalletBalance { get; set; }
         public string CurrentPocketAction { get; set; }
-      public float AgentEffectiveStandingtoMe;
+        public float AgentEffectiveStandingtoMe;
         public string CurrentAgent
         {
             get
             {
-                if(_agentName == "")
+                if (_agentName == "")
                 {
                     _agentName = SwitchAgent;
-                    Logging.Log("Cache.CurrentAgent is null set first agent: " + CurrentAgent);
+                    Logging.Log("CurrentAgent: " + CurrentAgent);
                 }
 
                 return _agentName;
@@ -670,7 +837,7 @@ namespace Questor.Modules
             get
             {
                 AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.Now >= i.DeclineTimer);
-                if(agent == null)
+                if (agent == null)
                 {
                     agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
                     IsAgentLoop = true; //this literally means we have no agents available at the moment (decline timer likely)
@@ -721,10 +888,10 @@ namespace Questor.Modules
         public IEnumerable<ModuleCache> Weapons
         {
             get
-            { 
-                if(Cache.Instance.MissionWeaponGroupId != 0)
-                    return Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId); 
-                else return Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId); 
+            {
+                if (Cache.Instance.MissionWeaponGroupId != 0)
+                    return Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
+                else return Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId);
             }
         }
 
@@ -755,7 +922,7 @@ namespace Questor.Modules
             get
             {
                 if (_unlootedContainers == null)
-                    _unlootedContainers = Entities.Where(e => e.IsContainer && e.HaveLootRights && (!LootedContainers.Contains(e.Id) || e.GroupId == (int) Group.Wreck)).OrderBy(e => e.Distance).ToList();
+                    _unlootedContainers = Entities.Where(e => e.IsContainer && e.HaveLootRights && (!LootedContainers.Contains(e.Id) || e.GroupId == (int)Group.Wreck)).OrderBy(e => e.Distance).ToList();
 
                 return _unlootedContainers;
             }
@@ -772,7 +939,7 @@ namespace Questor.Modules
                 return _unlootedWrecksAndSecureCans;
             }
         }
-        
+
         public IEnumerable<EntityCache> Targets
         {
             get
@@ -804,9 +971,20 @@ namespace Questor.Modules
             get
             {
                 if (_targetedBy == null)
-                    _targetedBy = Entities.Where(e => e.IsTargetedBy).ToList();
+                    _targetedBy = Entities.Where(e => e.IsTargetedBy ).ToList();
 
                 return _targetedBy;
+            }
+        }
+
+        public IEnumerable<EntityCache> Aggressed
+        {
+            get
+            {
+                if (_aggressed == null)
+                    _aggressed = Entities.Where(e => e.IsTargetedBy && e.IsAttacking).ToList();
+
+                return _aggressed;
             }
         }
 
@@ -836,26 +1014,26 @@ namespace Questor.Modules
 
         public bool InWarp
         {
-         get { return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3); }
-      }
+            get { return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3); }
+        }
 
-      public bool IsOrbiting
-      {
-         get { return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4; }
-      }
+        public bool IsOrbiting
+        {
+            get { return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4; }
+        }
 
-      public bool IsApproaching
-      {
-         get
-         {
-            Logging.Log(DirectEve.ActiveShip.Entity.Mode.ToString(CultureInfo.InvariantCulture));
-            return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1;
-         }
-      }
+        public bool IsApproaching
+        {
+            get
+            {
+                Logging.Log(DirectEve.ActiveShip.Entity.Mode.ToString(CultureInfo.InvariantCulture));
+                return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1;
+            }
+        }
 
-      public bool IsApproachingOrOrbiting
-      {
-         get { return DirectEve.ActiveShip.Entity != null && (DirectEve.ActiveShip.Entity.Mode == 1 || DirectEve.ActiveShip.Entity.Mode == 4); }
+        public bool IsApproachingOrOrbiting
+        {
+            get { return DirectEve.ActiveShip.Entity != null && (DirectEve.ActiveShip.Entity.Mode == 1 || DirectEve.ActiveShip.Entity.Mode == 4); }
         }
 
         public IEnumerable<EntityCache> ActiveDrones
@@ -874,27 +1052,27 @@ namespace Questor.Modules
             get
             {
                 if (_stations == null)
-                    _stations = Entities.Where(e => e.CategoryId == (int) CategoryID.Station).ToList();
+                    _stations = Entities.Where(e => e.CategoryId == (int)CategoryID.Station).ToList();
 
                 return _stations;
             }
         }
 
-      public EntityCache StationByName(string stationName)
-      {
-         EntityCache _station = Stations.First(x => x.Name.ToLower() == stationName.ToLower());
+        public EntityCache StationByName(string stationName)
+        {
+            EntityCache _station = Stations.First(x => x.Name.ToLower() == stationName.ToLower());
 
-         return _station;
-      }
+            return _station;
+        }
 
-      public IEnumerable<DirectSolarSystem> SolarSystems
-      {
-         get
-         {
-            var _solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
-            return _solarSystems;
-         }
-      }
+        public IEnumerable<DirectSolarSystem> SolarSystems
+        {
+            get
+            {
+                var _solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+                return _solarSystems;
+            }
+        }
 
         public IEnumerable<EntityCache> Stargates
         {
@@ -912,7 +1090,7 @@ namespace Questor.Modules
             get
             {
                 if (_star == null)
-               _star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star);
+                    _star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star);
 
                 return _star;
             }
@@ -1005,6 +1183,7 @@ namespace Questor.Modules
         public double SessionLPPerHrGenerated { get; set; }
         public double SessionTotalPerHrGenerated { get; set; }
         public bool QuestorJustStarted = true;
+        public DateTime EnteredCloseQuestor_DateTime;
 
         public DirectWindow GetWindowByCaption(string caption)
         {
@@ -1030,10 +1209,10 @@ namespace Questor.Modules
             return Entities.Where(e => e.Name == name).ToList();
         }
 
-      public IEnumerable<EntityCache> EntitiesByNamePart(string name)
-      {
-         return Entities.Where(e => e.Name.Contains(name)).ToList();
-      }
+        public IEnumerable<EntityCache> EntitiesByNamePart(string name)
+        {
+            return Entities.Where(e => e.Name.Contains(name)).ToList();
+        }
 
         /// <summary>
         ///   Return entities that contain the name
@@ -1162,7 +1341,7 @@ namespace Questor.Modules
         public IEnumerable<Action> LoadMissionActions(long agentId, int pocketId, bool missionMode)
         {
             DirectAgentMission missiondetails = GetAgentMission(agentId);
-            if(missiondetails == null && missionMode)
+            if (missiondetails == null && missionMode)
                 return new Action[0];
 
             if (missiondetails != null)
@@ -1204,7 +1383,7 @@ namespace Questor.Modules
                                 else //Otherwise, use value defined in charname.xml file
                                 {
                                     OrbitDistance = Settings.Instance.OrbitDistance;
-                                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}",OrbitDistance));
+                                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
                                 }
                                 if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
                                 {
@@ -1297,7 +1476,7 @@ namespace Questor.Modules
                 ChangeMissionShipFittings = false;
                 if (Settings.Instance.MissionFitting.Any(m => m.Mission.ToLower() == missiondetailsformittionitems.Name.ToLower())) //priority goes to mission-specific fittings
                 {
-                   MissionFitting missionFitting;
+                    MissionFitting missionFitting;
 
                     // if we've got multiple copies of the same mission, find the one with the matching faction
                     if (Settings.Instance.MissionFitting.Any(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missiondetailsformittionitems.Name.ToLower())))
@@ -1335,11 +1514,11 @@ namespace Questor.Modules
                 IEnumerable<string> items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
                 MissionItems.AddRange(items);
 
-               if (xdoc.Root != null) BringMissionItem = (string) xdoc.Root.Element("bring") ?? string.Empty;
-               BringMissionItem = BringMissionItem.ToLower();
+                if (xdoc.Root != null) BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
+                BringMissionItem = BringMissionItem.ToLower();
 
                 //load fitting setting from the mission file
-                //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";  
+                //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";
             }
             catch (Exception ex)
             {
@@ -1403,10 +1582,10 @@ namespace Questor.Modules
                 DirectEve.BookmarkCurrentLocation(label, "", null);
         }
 
-       /// <summary>
-       ///   Create a bookmark of the closest wreck
-       /// </summary>
-       //public void CreateBookmarkofWreck(IEnumerable<EntityCache> containers, string label)
+        /// <summary>
+        ///   Create a bookmark of the closest wreck
+        /// </summary>
+        //public void CreateBookmarkofWreck(IEnumerable<EntityCache> containers, string label)
         //{
         //    DirectEve.BookmarkEntity(Cache.Instance.Containers.FirstOrDefault, "a", "a", null);
         //}
@@ -1459,7 +1638,7 @@ namespace Questor.Modules
             EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
             // Get the closest low value target
             EntityCache lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
-            
+
             if (lowValueFirst && lowValueTarget != null)
                 return lowValueTarget;
             if (!lowValueFirst && highValueTarget != null)
@@ -1469,18 +1648,547 @@ namespace Questor.Modules
             return lowValueTarget ?? highValueTarget;
         }
 
-      public int RandomNumber(int min, int max)
-      {
-         var random = new Random();
-         return random.Next(min, max);
-      }
+        public int RandomNumber(int min, int max)
+        {
+            var random = new Random();
+            return random.Next(min, max);
+        }
 
-      public double MaxRange
-      {
-         get
-         {
-            return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
-         }
-      }
+        public double MaxRange
+        {
+            get
+            {
+                return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+            }
+        }
+
+        public DirectContainer ItemHangar { get; set; }
+
+        public static bool OpenItemsHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.ItemHangar = Cache.Instance.DirectEve.GetItemHangar();
+
+                if (Cache.Instance.ItemHangar == null)
+                    return false;
+                
+                // Is the items hangar open?
+                if (Cache.Instance.ItemHangar.Window == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                    Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
+                    Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                "sec]");
+                    return false;
+                }
+                if (!Cache.Instance.ItemHangar.IsReady)
+                    return false;
+                if (Cache.Instance.ItemHangar.IsReady)
+                    return true;
+            }
+            return false;
+        }
+
+        public DirectContainer CargoHold { get; set; }
+
+        public static bool OpenCargoHold(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
+            {
+                if (DateTime.Now.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
+                {
+                    Logging.Log(module + ": Opening CargoHold: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                "sec]");
+                }
+                return false;
+            }
+
+            if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
+            {
+                Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
+                
+                // Is cargohold open?
+                if (Cache.Instance.CargoHold.Window == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                    Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module + ": Opening Cargohold of active ship: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                "sec]");
+                    return false;
+                }
+
+                if (!Cache.Instance.CargoHold.IsReady)
+                    return false;
+                if (Cache.Instance.CargoHold.IsReady)
+                    return true;
+            }
+            return false;
+        }
+
+        public DirectContainer ShipHangar { get; set; }
+
+        public static bool OpenShipsHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenShipHangarAction)
+                return false;
+
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
+                if (Cache.Instance.ShipHangar == null)
+                    return false;
+
+                // Is the ship hangar open?
+                if (Cache.Instance.ShipHangar.Window == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar); 
+                    Cache.Instance.NextOpenShipHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module + ": Opening Ship Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenShipHangarAction.Subtract(DateTime.Now).TotalSeconds,
+                                           0) + "sec]");
+                    
+                    
+                    return false;
+                }
+                if (!Cache.Instance.ShipHangar.IsReady)
+                    return false;
+                if (Cache.Instance.ShipHangar.IsReady)
+                    return true;
+            }
+            return false;
+        }
+
+        public DirectContainer CorpAmmoHangar { get; set; }
+
+        public static bool OpenCorpAmmoHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpAmmoHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                {
+                    Cache.Instance.CorpAmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
+                                                    
+                    // Is the corp ammo Hangar open?
+                    if (Cache.Instance.CorpAmmoHangar != null)
+                    {
+                        if (Cache.Instance.CorpAmmoHangar.Window == null)
+                        {
+                            // No, command it to open
+                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            Cache.Instance.NextOpenCorpAmmoHangarAction =
+                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                            Logging.Log(module + ": Opening Corporate Hangar: waiting [" +
+                                        Math.Round(Cache.Instance.NextOpenCorpAmmoHangarAction.Subtract(DateTime.Now).TotalSeconds,0) + "sec]");
+                            return false;
+                        }
+                        if (!Cache.Instance.CorpAmmoHangar.IsReady)
+                            return false;
+                        if (Cache.Instance.CorpAmmoHangar.IsReady)
+                            return true;
+                    }
+                    if (Cache.Instance.CorpAmmoHangar == null)
+                    {
+                        if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                            Logging.Log(module +
+                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                        return false;
+                    }
+                }
+                else
+                {
+                    Cache.Instance.CorpAmmoHangar = null;
+                    return true;
+                }
+                
+            }
+            return false;
+        }
+
+        public DirectContainer CorpLootHangar { get; set; }
+
+        public static bool OpenCorpLootHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                {
+                    Cache.Instance.CorpLootHangar =
+                        Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.LootHangar);
+
+                    // Is the corp loot Hangar open?
+                    if (Cache.Instance.CorpLootHangar != null)
+                    {
+                        if (Cache.Instance.CorpLootHangar.Window == null)
+                        {
+                            // No, command it to open
+                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            Cache.Instance.NextOpenCorpLootHangarAction =
+                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                            Logging.Log(module + ": Opening Corporate Hangar: waiting [" +
+                                        Math.Round(
+                                            Cache.Instance.NextOpenCorpLootHangarAction.Subtract(DateTime.Now).
+                                                TotalSeconds,
+                                            0) + "sec]");
+                            return false;
+                        }
+                        if (!Cache.Instance.CorpLootHangar.IsReady)
+                            return false;
+                        if (Cache.Instance.CorpLootHangar.IsReady)
+                            return true;
+                    }
+                    if (Cache.Instance.CorpLootHangar == null)
+                    {
+                        if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                            Logging.Log(module +
+                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                        return false;
+                    }
+                }
+                else
+                {
+                    Cache.Instance.CorpLootHangar = null;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public DirectContainer CorpBookmarkHangar { get; set; }
+
+        public static bool OpenCorpBookmarkHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpBookmarkHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.CorpBookmarkHangar = !string.IsNullOrEmpty(Settings.Instance.BookmarkHangar)
+                                      ? Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.BookmarkHangar)
+                                      : null;
+                // Is the corpHangar open?
+                if (Cache.Instance.CorpBookmarkHangar != null)
+                {
+                    if (Cache.Instance.CorpBookmarkHangar.Window == null)
+                    {
+                        // No, command it to open
+                        Cache.Instance.DirectEve.OpenCorporationHangar();
+                        Cache.Instance.NextOpenCorpBookmarkHangarAction =
+                            DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        Logging.Log(module + ": Opening Corporate Hangar: waiting [" +
+                                    Math.Round(
+                                        Cache.Instance.NextOpenCorpBookmarkHangarAction.Subtract(DateTime.Now).TotalSeconds,
+                                        0) + "sec]");
+                        return false;
+                    }
+                    if (!Cache.Instance.CorpBookmarkHangar.IsReady)
+                        return false;
+                    if (Cache.Instance.CorpBookmarkHangar.IsReady)
+                        return true;
+                }
+                if (Cache.Instance.CorpBookmarkHangar == null)
+                {
+                    if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
+                        Logging.Log(module + ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        public DirectContainer LootContainer { get; set; }
+
+        public static bool OpenLootContainer(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                {
+                    if (!Cache.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+
+                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    if (firstlootcontainer != null)
+                    {
+                        long lootContainerID = firstlootcontainer.ItemId;
+                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
+                        Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    }
+                    else
+                    {
+                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
+                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
+                        if (firstothercontainer != null)
+                        {
+                            
+                            if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
+                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public DirectContainer LootHangar { get; set; }
+
+        public static bool OpenLootHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
+                return false;
+
+            if (Cache.Instance.InStation)
+            {
+                if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                {
+                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.LootHangar);
+
+                    // Is the corp loot Hangar open?
+                    if (Cache.Instance.LootHangar != null)
+                    {
+                        if (Cache.Instance.LootHangar.Window == null)
+                        {
+                            
+                            // No, command it to open
+                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            Cache.Instance.NextOpenCorpLootHangarAction =
+                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                            Logging.Log(module + ": Opening Corporate Loot Hangar: waiting [" +
+                                        Math.Round(
+                                            Cache.Instance.NextOpenCorpLootHangarAction.Subtract(DateTime.Now).
+                                                TotalSeconds,
+                                            0) + "sec]");
+                            return false;
+                        }
+                        if (!Cache.Instance.LootHangar.IsReady)
+                            return false;
+                        if (Cache.Instance.LootHangar.IsReady)
+                            return true;
+                    }
+                    if (Cache.Instance.LootHangar == null)
+                    {
+                        if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                            Logging.Log(module +
+                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                        return false;
+                    }
+                }
+                else
+                {
+                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
+                    if (Cache.Instance.LootHangar == null)
+                        return false;
+
+                    // Is the items hangar open?
+                    if (Cache.Instance.LootHangar.Window == null)
+                    {
+                        // No, command it to open
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                        Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
+                        Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                                    Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                    "sec]");
+                        return false;
+                    }
+                    if (!Cache.Instance.LootHangar.IsReady)
+                        return false;
+                    if (Cache.Instance.LootHangar.IsReady)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        public DirectContainer AmmoHangar { get; set; }
+
+        public static bool OpenAmmoHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
+                return false;
+
+            if (Cache.Instance.InStation)
+            {
+                if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                {
+                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
+
+                    // Is the corp loot Hangar open?
+                    if (Cache.Instance.AmmoHangar != null)
+                    {
+                        if (Cache.Instance.AmmoHangar.Window == null)
+                        {
+                            // No, command it to open
+                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            Cache.Instance.NextOpenCorpAmmoHangarAction =
+                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                            Logging.Log(module + ": Opening Corporate Ammo Hangar: waiting [" +
+                                        Math.Round(
+                                            Cache.Instance.NextOpenCorpAmmoHangarAction.Subtract(DateTime.Now).
+                                                TotalSeconds,
+                                            0) + "sec]");
+                            return false;
+                        }
+                        if (!Cache.Instance.AmmoHangar.IsReady)
+                            return false;
+                        if (Cache.Instance.AmmoHangar.IsReady)
+                            return true;
+                    }
+                    if (Cache.Instance.AmmoHangar == null)
+                    {
+                        if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                            Logging.Log(module +
+                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                        return false;
+                    }
+                }
+                else
+                {
+                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
+                    if (Cache.Instance.AmmoHangar == null)
+                        return false;
+
+                    // Is the items hangar open?
+                    if (Cache.Instance.AmmoHangar.Window == null)
+                    {
+                        // No, command it to open
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                        Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
+                        Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                                    Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                    "sec]");
+                        return false;
+                    }
+                    if (!Cache.Instance.AmmoHangar.IsReady)
+                        return false;
+                    if (Cache.Instance.AmmoHangar.IsReady)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        public DirectContainer DroneBay { get; set; }
+
+        public static bool OpenDroneBay(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenDroneBayAction)
+            {
+                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
+                return false;
+            }
+            if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
+            {
+                Logging.Log(module + ": Opening Drone Bay: We aren't in station or space?!");
+                return false;
+            }
+            //if(Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == 31)
+            //{
+            //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
+            //    return false;
+            //}
+            if (Cache.Instance.InStation || Cache.Instance.InSpace)
+            {
+                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+            }
+            else return false;
+
+            if (Cache.Instance.DroneBay == null)
+            {
+                Cache.Instance.NextOpenDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Logging.Log(module + ": Opening Drone Bay: --- waiting [" +
+                                Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                "sec]");
+
+                return false;
+            }
+
+            // Is the drone bay open?
+            if (Cache.Instance.DroneBay.Window == null)
+            {
+                Cache.Instance.NextOpenDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                // No, command it to open
+                Logging.Log(module + ": Opening Drone Bay: waiting [" +
+                            Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                            "sec]");
+                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
+                return false;
+            }
+            if (!Cache.Instance.DroneBay.IsReady)
+                return false;
+            if (Cache.Instance.DroneBay.IsReady)
+                return true;
+
+            return false;
+        }
+        
+        public DirectWindow JournalWindow { get; set; }
+
+        public static bool OpenJournalWindow(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenJournalWindowAction)
+                return false;
+
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.JournalWindow = Cache.Instance.GetWindowByName("journal");
+                
+                // Is the journal window open?
+                if (Cache.Instance.JournalWindow == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
+                    Cache.Instance.NextOpenJournalWindowAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(15, 30));
+                    Logging.Log(module + ": Opening Journal Window: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenJournalWindowAction.Subtract(DateTime.Now).TotalSeconds,
+                                           0) + "sec]");
+                    return false;
+                }
+                return true; //if JournalWindow is not null then the window must be open.
+            }
+            return false;
+        }
+
+        public DirectContainer ContainerInSpace { get; set; }
+
+        public static bool OpenContainerInSpace(String module, String containerInSpace)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenContainerInSpaceAction)
+                return false;
+
+            if (Cache.Instance.InSpace)
+            {
+                if (!string.IsNullOrEmpty(containerInSpace))
+                {
+                    if (!Cache.OpenCargoHold("Cache.OpenContainerInSpace")) return false;
+
+                    // Open a container in range
+                    foreach (EntityCache containerEntity in Cache.Instance.Containers.Where(e => e.Distance <= (int)Distance.SafeScoopRange & e.Name == containerInSpace))
+                    {
+                        // Open the container
+                        Logging.Log("Cache.OpenContainerInSpace: Opening container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "]");
+                        containerEntity.OpenCargo();
+                        Salvage._openedContainers[containerEntity.Id] = DateTime.Now;
+                        Cache.Instance.NextOpenContainerInSpaceAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                        return true;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }

@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ namespace Questor.Modules
 
         public ScoopState State { get; set; }
 
-       /// <summary>
+        /// <summary>
         ///   Activate salvagers on targeted wreck
         /// </summary>
         private void ActivateSalvagers()
@@ -152,7 +152,7 @@ namespace Questor.Modules
                         continue;
                 }
 
-                Logging.Log("Salvage: Locking [" + wreck.Name + "][ID:" + wreck.Id + "][" + Math.Round(wreck.Distance/1000,0) + "k away]");
+                Logging.Log("Salvage: Locking [" + wreck.Name + "][ID:" + wreck.Id + "][" + Math.Round(wreck.Distance / 1000, 0) + "k away]");
 
                 wreck.LockTarget();
                 wreckTargets.Add(wreck);
@@ -171,20 +171,10 @@ namespace Questor.Modules
             if (!Cache.Instance.InSpace)
                 return;
 
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            if (cargo.Window == null)
-            {
-                // No, command it to open
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                return;
-            }
+            if (!Cache.OpenCargoHold("Scoop")) return;
 
-            // Ship's cargo is not ready yet
-            if (!cargo.IsReady)
-                return;
-
-            List<ItemCache> shipsCargo = cargo.Items.Select(i => new ItemCache(i)).ToList();
-            double freeCargoCapacity = cargo.Capacity - cargo.UsedCapacity;
+            List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
+            double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
             IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => !string.IsNullOrEmpty(w.Name) && w.Name.StartsWith("loot_"));
             foreach (DirectContainerWindow window in lootWindows)
             {
@@ -223,7 +213,7 @@ namespace Questor.Modules
                     // We never want to pick up Bookmarks
                     if (item.IsBookmark)
                         continue;
-                    
+
                     // We never want to pick up a cap booster
                     if (item.GroupID == (int) Group.CapacitorGroupCharge)
                         continue;
@@ -239,7 +229,7 @@ namespace Questor.Modules
                     // We never want to pick up Low End Minerals
                     if (item.IsLowEndMineral)
                         continue;
-                    
+
                     // Never pick up contraband
                     if (item.IsContraband)
                         continue;
@@ -304,10 +294,10 @@ namespace Questor.Modules
 
                                 Logging.Log("Scoop: Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot");
 
-                                // Note: This could (in theory) fuck up with the bot jettison an item and 
-                                // then picking it up again :/ (granted it should never happen unless 
+                                // Note: This could (in theory) fuck up with the bot jettison an item and
+                                // then picking it up again :/ (granted it should never happen unless
                                 // mission item volume > reserved volume
-                                cargo.Jettison(moveTheseItems.Select(i => i.ItemId));
+                                Cache.Instance.CargoHold.Jettison(moveTheseItems.Select(i => i.ItemId));
                                 _lastJettison = DateTime.Now;
                                 return;
                             }
@@ -333,7 +323,7 @@ namespace Questor.Modules
                 // Loot actual items
                 if (lootItems.Count != 0)
                 {
-                    cargo.Add(lootItems.Select(i => i.DirectItem));
+                    Cache.Instance.CargoHold.Add(lootItems.Select(i => i.DirectItem));
                     //Logging.Log("Scoop: Looting container [" + containerEntity.Name + "][" + containerEntity.Id + "], [" + lootItems.Count + "] valuable items");
                 }
                 else
@@ -396,7 +386,7 @@ namespace Questor.Modules
                     State = ScoopState.TargetHostileWrecks;
                     //if (cargo.IsReady && cargo.Items.Any() && _nextAction < DateTime.Now)
                     //{
-                        // Check if there are actually duplicates
+                    // Check if there are actually duplicates
                     //    var duplicates = cargo.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
                     //    if (duplicates)
                     //        State = SalvageState.StackItems;
@@ -437,7 +427,7 @@ namespace Questor.Modules
                         break;
                     }
                     break;
-                
+
                 case ScoopState.Error:
                     // Wait indefinately...
                     break;
