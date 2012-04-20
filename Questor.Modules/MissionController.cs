@@ -346,9 +346,14 @@ namespace Questor.Modules
                 // Reset timeout
                 _clearPocketTimeout = null;
 
-                // Lock priority target if within weapons range
+                // Lock target if within weapons range
                 if (target.Distance < range)
                 {
+                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
+                    {
+                        Logging.Log("MissionController." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
+                        Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
+                    }
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         Combat.ReloadAll();
