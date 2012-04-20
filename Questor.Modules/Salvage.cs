@@ -502,6 +502,22 @@ namespace Questor.Modules
                }
                return;
             }
+
+            if (!Cache.Instance.InSpace)
+               return;
+
+            // What? No ship entity?
+            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+               return;
+
+            // When in warp there's nothing we can do, so ignore everything
+            if (Cache.Instance.InWarp)
+                return;
+
+            // There is no salving when cloaked - 
+            // why not? seems like we might be able to ninja-salvage with a covert-ops hauler with some additional coding (someday?)
+            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+               return;
                 
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (State)
