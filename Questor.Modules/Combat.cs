@@ -711,6 +711,12 @@ namespace Questor.Modules
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
                 return;
 
+            // do not expect non-combat ships to do combat.
+            if (!string.IsNullOrEmpty(Settings.Instance.TransportShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName)
+                return;
+            if (!string.IsNullOrEmpty(Settings.Instance.SalvageShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.SalvageShipName)
+                return;
+
             if (!Cache.Instance.Weapons.Any())
             {
                 Logging.Log("Combat: No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!");
