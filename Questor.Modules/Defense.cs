@@ -253,6 +253,11 @@ namespace Questor.Modules
 
             ActivateOnce();
             ActivateRepairModules();
+
+            // this effectively disables control of speed modules when paused, which is expected behavior
+            if (Cache.Instance.Paused)
+                return;
+
             ActivateAfterburner();
         }
     }
