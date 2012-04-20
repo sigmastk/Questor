@@ -284,6 +284,8 @@ namespace Questor.Modules
         /// </summary>
         private void ActivateWeapons(EntityCache target)
         {
+            // When in warp there's nothing we can do, so ignore everything
+            if (Cache.Instance.InWarp)
                 return;
 
             if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
@@ -303,80 +305,7 @@ namespace Questor.Modules
             // If you are not in a mission by all means let combat actions move you around as needed
             if (!Cache.Instance.InMission)
             {
-                //why not keep here approach and orbit? it would work for all of of mission controller states as well as combat helper
-                if (DateTime.Now > Cache.Instance.NextOrbit)
-                {
-                    if (target.Distance + (int)Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
-                    {
-                        Logging.Log("MissionController.StartOrbiting: Target in range");
-                        if (!Cache.Instance.IsApproachingOrOrbiting)
-                        {
-                            Logging.Log("We are not approaching nor orbiting");
-                            var orbitStructure = false;
-                            var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
-
-                            if (orbitStructure && structure != null)
-                            {
-                                structure.Orbit((int)Cache.Instance.OrbitDistance);
-                                Logging.Log("MissionController.Combat: Initiating Orbit [" + structure.Name + "][ID: " + structure.Id + "]");
-                            }
-                            else
-                            {
-                                target.Orbit(Cache.Instance.OrbitDistance);
-                                Logging.Log("Combat.ActivateWeapons: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
-                            }
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                            return;
-                         }
-                    }
-                    else
-                    {
-                        Logging.Log("Combat: Possible out of range. ignoring orbit around structure");
-                        target.Orbit(Cache.Instance.OrbitDistance);
-                        Logging.Log("Combat.Combat: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
-                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                        return;
-                    }
-                    //else Logging.Log("MissionControler:Too soon to orbit. Next orbiting delayed until [" + Cache.Instance.NextOrbit.ToString("HH:mm:ss") + "]");
-                }
-                else
-                {
-                  if (DateTime.Now > Cache.Instance.NextApproachAction)
-                {
-                    if (Settings.Instance.OptimalRange != 0)
-                    {
-                        if (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
-                        {
-                            target.Approach(Settings.Instance.OptimalRange);
-                            Logging.Log("Combat.ActivateWeapons:: Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                        }
-                        //ahaw: I think when approach distance will be reached ship will be stopped so this is not needed
-                        if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
-                        {
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                            Cache.Instance.Approaching = null;
-                            Logging.Log("Combat.ActivateWeapons: Using Optimal Range: Stop ship, target at [" + Math.Round(target.Distance / 1000, 0) + "k away] is inside optimal");
-                        }
-                    }
-                    else
-                    {
-                        if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
-                        {
-                            target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
-                            Logging.Log("Combat.ActivateWeapons: Using Weapons Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
-                        }
-                        //ahaw: I think when approach distance will be reached ship will be stopped so this is not needed
-                        if (target.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching != null)
-                        {
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                            Cache.Instance.Approaching = null;
-                            Logging.Log("Combat.ActivateWeapons: Using Weapons Range: Stop ship, target is in orbit range");
-                        }
-                    }
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                    return;
-                 }
-                }
+                MissionController.NavigateIntoRange(target); //eventually this method should be moved to something like navigate.cs or movement.cs
             }
 
             // Get the weapons
@@ -596,6 +525,10 @@ namespace Questor.Modules
         /// </remarks>
         private void TargetCombatants()
         {
+            // When in warp we should not try to target anything
+            if (Cache.Instance.InWarp)
+                return;
+
             if (DateTime.Now < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
                 return;
 
@@ -766,6 +699,10 @@ namespace Questor.Modules
             if (Cache.Instance.InStation)
                 return;
 
+            // if we are not in space yet, wait...
+            if (!Cache.Instance.InSpace)
+                return;
+
             // What? No ship entity?
             if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
                 return;
@@ -783,13 +720,19 @@ namespace Questor.Modules
             switch (State)
             {
                 case CombatState.CheckTargets:
+                    // When in warp there's nothing we can do, so ignore everything
+                    if (Cache.Instance.InWarp)
+                        return;
+
                     // Next state
                     State = CombatState.KillTargets;
-
                     TargetCombatants();
                     break;
 
                 case CombatState.KillTargets:
+                    if (Cache.Instance.InWarp)
+                        return;
+
                     // Next state
                     State = CombatState.CheckTargets;
 
