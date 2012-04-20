@@ -5,6 +5,7 @@ namespace Questor.Modules
     {
         Start,
         CheckModalWindows,
+        CheckWindowsThatDontBelongInSpace,
         Done
     }
 }
