@@ -467,8 +467,6 @@ namespace Questor.Modules
                 case ArmState.MoveItems:
                     if (!Cache.OpenCargoHold("Arm")) break;
   
-                    if (!Cache.OpenDroneBay("Arm")) break;
-
                     if (!Cache.OpenAmmoHangar("Arm")) break;
                         
                     
