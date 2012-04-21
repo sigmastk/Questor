@@ -555,10 +555,12 @@ namespace Questor.Modules
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
+                        if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
+                        {
                         // Close the drone bay, its not required in space.
                         if (Cache.Instance.DroneBay.IsReady)
                            Cache.Instance.DroneBay.Window.Close();
-
+                        }
                         Logging.Log("Arm: Done");
 
                         //reload the ammo setting for combat
