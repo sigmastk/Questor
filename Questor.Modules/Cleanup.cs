@@ -95,7 +95,8 @@ namespace Questor.Modules
                         restart |= window.Html.Contains("Connection to server lost"); 														//INFORMATION
                         restart |= window.Html.Contains("The user connection has been usurped on the proxy"); 								//CONNECTION LOST
                         restart |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful"); 	//CONNECTION LOST
-                        restart |= window.Html.Contains("for a remote call to complete. This could mean the server is very loaded"); //SOUL-CRUSHING LAG - Your client has waited x minutes
+                        restart |= window.Html.Contains("Your client has waited"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
+                        restart |= window.Html.Contains("This could mean the server is very loaded"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
                         //
                         // Modal Dialogs the need "yes" pressed
                         //

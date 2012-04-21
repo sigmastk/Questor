@@ -956,7 +956,13 @@ namespace Questor
                     Statistics.Instance.MissionLoggingCompleted = false;
                     var missionDestination = _traveler.Destination as MissionBookmarkDestination;
                     if (missionDestination == null || missionDestination.AgentId != AgentID) // We assume that this will always work "correctly" (tm)
-                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(AgentID, "Encounter"));
+                    {
+                         const string nameOfBookmark = "Encounter";
+                         Logging.Log("Setting Destination to 1st bookmark from AgentID:" + AgentID + "with [" + nameOfBookmark  + "] in the title" );
+                         _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(AgentID, nameOfBookmark));
+                    //   _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(AgentID, "Encounter"));
+                    }
+                  //}
                     //if (missionDestination == null)
                     //{
                     //    Logging.Log("Invalid bookmark loop! Mission Controller: Error");
@@ -1963,6 +1969,11 @@ namespace Questor
                     foreach (DirectWindow window in windows)
                     {
                         Logging.Log("Debug_WindowTypes: [" + window.Name + window.Type + "]");
+                    }
+                    foreach (DirectWindow window in windows)
+                    {
+                        Logging.Log("Debug_Questor_WindowNames: [" + window.Name + "]");
+                        Logging.Log("Debug_WindowTypes: [" + window.Html + "]");
                     }
                     if (State == QuestorState.DebugWindows)
                     {
