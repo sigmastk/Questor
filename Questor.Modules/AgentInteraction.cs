@@ -655,6 +655,12 @@ namespace Questor.Modules
 
       public void ProcessState()
       {
+          if (!Cache.Instance.InStation)
+              return;
+
+          if (Cache.Instance.InSpace)
+              return;
+
          // Wait a bit before doing "things"
          if (DateTime.Now < _nextAgentAction)
             return;
