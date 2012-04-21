@@ -561,7 +561,7 @@ namespace Questor.Modules
             
             if (closest.Distance <= distancetoapp + 5000) // if we are inside the range that we are supposed to approach assume we are done
             {
-                Logging.Log("MissionController." + _pocketActions[_currentAction] + ": We are [" + closest.Distance + "] from a [" + target + "] we do not need to go any further");
+                Logging.Log("MissionController." + _pocketActions[_currentAction] + ": We are [" + Math.Round(closest.Distance,0) + "] from a [" + target + "] we do not need to go any further");
                 Nextaction();
 
                 if (Cache.Instance.Approaching != null)
@@ -1074,17 +1074,18 @@ namespace Questor.Modules
                 return;
             }
 
-            EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-            if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
+            EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
+            if (container != null && (container.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
             {
-                if (DateTime.Now > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+                if (DateTime.Now > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id))
                 {
-                    Logging.Log("MissionController." + _pocketActions[_currentAction] + ": Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                    closest.Approach();
+                    Logging.Log("MissionController." + _pocketActions[_currentAction] + ": Approaching target [" + container.Name + "][ID: " + container.Id + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]");
+                    container.Approach();
                     Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                 }
             }
         }
+
 
         private void LootAction(Action action)
         {
@@ -1129,13 +1130,13 @@ namespace Questor.Modules
                 return;
             }
 
-            EntityCache closest = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-            if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
+            EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
+            if (container != null && (container.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
             {
                 if (DateTime.Now > Cache.Instance.NextApproachAction)
                 {
-                    Logging.Log("MissionController." + _pocketActions[_currentAction] + ": Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]");
-                    closest.Approach();
+                    Logging.Log("MissionController." + _pocketActions[_currentAction] + ": Approaching target [" + container.Name + "][ID: " + container.Id + "][" + Math.Round(container.Distance / 1000, 0) + "k away]");
+                    container.Approach();
                     Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                 }
             }
@@ -1350,6 +1351,7 @@ namespace Questor.Modules
 
                     Logging.Log("------------------------------------------------------------------");
                     Logging.Log("------------------------------------------------------------------");
+                    Logging.Log("Mission Timer Currently At: [" + Math.Round(DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + "]");
                     if (Cache.Instance.OrbitDistance != Settings.Instance.OrbitDistance) //this should be done elsewhere
                     {
                         if (Cache.Instance.OrbitDistance == 0)
