@@ -53,9 +53,9 @@
   <!-- Wait for mission decline timer to expire before declining again -->
   <waitDecline>true</waitDecline>
   <!-- MinAgentBlackListStandings is a number between -10 and 10 and is used for WaitDecline if WaitDecline is true, MinAgentBlackListStandings will only kick in if your standings have gone below MinAgentBlackListStandings -->
-  <MinAgentBlackListStandings>-2.5</MinAgentBlackListStandings>
+  <minAgentBlackListStandings>-2.5</minAgentBlackListStandings>
   <!-- MinAgentGreyListStandings is a number between -10 and 10 and is used to determine if you can decline more greylist missions, Once you drop below this threshold greylist missions will be accepted in order to keep your standings up -->
-  <MinAgentGreyListStandings>-1.7</MinAgentGreyListStandings>
+  <minAgentGreyListStandings>-1.7</minAgentGreyListStandings>
   <!-- Missionspath is a string and is used for the path in /.net programs/ to point questor to where you want it to use the mission xmls from -->
   <missionsPath>Caldari Missions</missionsPath><!-- needs to be customized -->
   <!-- Run missions that take us into low security space? - READ: DANGEROUS!!! -->

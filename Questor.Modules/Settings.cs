@@ -479,8 +479,8 @@ namespace Questor.Modules
                //
                // Agent Standings and Mission Settings
                //
-               MinAgentBlackListStandings = (float?)xml.Element("minBlackListStandings") ?? (float)1;
-               MinAgentGreyListStandings = (float?)xml.Element("minGreyListStandings") ?? (float)-1.7;
+               MinAgentBlackListStandings = (float?)xml.Element("minAgentBlackListStandings") ?? (float)1;
+               MinAgentGreyListStandings = (float?)xml.Element("minAgentGreyListStandings") ?? (float)-1.7;
                WaitDecline = (bool?)xml.Element("waitDecline") ?? false;
                var missionsPath = (string) xml.Element("missionsPath");
                MissionsPath = !string.IsNullOrEmpty(missionsPath) ? System.IO.Path.Combine(Path, missionsPath) : System.IO.Path.Combine(Path, "Missions");
