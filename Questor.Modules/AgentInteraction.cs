@@ -317,7 +317,7 @@ namespace Questor.Modules
             return;
          }
 
-         if (Cache.Instance.Mission.State == (int)MissionState.Offered && Settings.Instance.MissionGreylist.Any(m => m == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
+         if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
          {
              Logging.Log("AgentInteraction: Declining greylisted mission [" + Cache.Instance.MissionName + "]");
              State = AgentInteractionState.DeclineMission;
