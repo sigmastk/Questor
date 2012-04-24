@@ -344,6 +344,32 @@
                 Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
                 Cache.Instance.SessionLootGenerated = (Cache.Instance.SessionLootGenerated + Statistics.Instance.LootValue);
                 Cache.Instance.SessionLPGenerated = (Cache.Instance.SessionLPGenerated + (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints));
+                Logging.Log("Statistics: Printing All Statistics Related Variables to the console log:");
+                Logging.Log("Statistics: Mission Name: [" + Cache.Instance.MissionName + "]");
+                Logging.Log("Statistics: Total Missions completed this session: [" + Statistics.Instance.MissionsThisSession + "]"); 
+                Logging.Log("Statistics: StartedMission: [ " + Statistics.Instance.StartedMission + "]");
+                Logging.Log("Statistics: FinishedMission: [ " + Statistics.Instance.FinishedMission + "]");
+                Logging.Log("Statistics: StartedSalvaging: [ " + Statistics.Instance.StartedSalvaging + "]");
+                Logging.Log("Statistics: FinishedSalvaging: [ " + Statistics.Instance.FinishedSalvaging + "]");
+                Logging.Log("Statistics: Wealth before mission: [ " + Cache.Instance.Wealth + "]");
+                Logging.Log("Statistics: Wealth after mission: [ " + Cache.Instance.DirectEve.Me.Wealth + "]");
+                Logging.Log("Statistics: Value of Loot from the mission: [" + Statistics.Instance.LootValue + "]" );
+                Logging.Log("Statistics: Total LP after mission:  [" + Cache.Instance.Agent.LoyaltyPoints + "]");
+                Logging.Log("Statistics: Total LP before mission: [" + Statistics.Instance.LoyaltyPoints + "]");
+                Logging.Log("Statistics: LostDrones: [" + Statistics.Instance.LostDrones + "]");
+                Logging.Log("Statistics: AmmoConsumption: [" + Statistics.Instance.AmmoConsumption + "]");
+                Logging.Log("Statistics: AmmoValue: [" + Statistics.Instance.AmmoConsumption + "]");
+                Logging.Log("Statistics: Panic Attempts: [" + Cache.Instance.PanicAttemptsThisMission + "]");
+                Logging.Log("Statistics: Lowest Shield %: [" + Math.Round(Cache.Instance.LowestShieldPercentageThisMission,0) + "]");
+                Logging.Log("Statistics: Lowest Armor %: [" +  Math.Round(Cache.Instance.LowestArmorPercentageThisMission,0) + "]");
+                Logging.Log("Statistics: Lowest Capacitor %: [" +  Math.Round(Cache.Instance.LowestCapacitorPercentageThisMission,0) + "]");
+                Logging.Log("Statistics: Repair Cycle Time: [" +  Cache.Instance.RepairCycleTimeThisMission + "]");
+                Logging.Log("Statistics: the stats below may not yet be correct and need some TLC");
+                Logging.Log("Statistics: Time Spent Reloading: [" +  Cache.Instance.TimeSpentReloading_seconds + "sec]");
+                Logging.Log("Statistics: Time Spent IN Mission: [" +  Cache.Instance.TimeSpentInMission_seconds + "sec]");
+                Logging.Log("Statistics: Time Spent In Range: [" +  Cache.Instance.TimeSpentInMissionInRange + "]");
+                Logging.Log("Statistics: Time Spent Out of Range: [" +  Cache.Instance.TimeSpentInMissionOutOfRange + "]");
+
                 if (Settings.Instance.MissionStats1Log)
                 {
                     if (!Directory.Exists(Settings.Instance.MissionStats1LogPath))
