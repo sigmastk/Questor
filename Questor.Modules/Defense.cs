@@ -39,7 +39,7 @@ namespace Questor.Modules
                 if (!activate)
                     continue;
 
-                if (module.IsActive | module.IsGoingOnline | module.IsDeactivating | module.InLimboState)
+                if (module.IsActive | module.InLimboState)
                     continue;
 
                 if (module.GroupId == (int)Group.CloakingDevice)
@@ -77,7 +77,7 @@ namespace Questor.Modules
 
             foreach (ModuleCache module in Cache.Instance.Modules)
             {
-                if (module.InLimboState | module.IsDeactivating | module.IsGoingOnline | !module.IsOnline | !module.IsActivatable)
+                if (module.InLimboState)
                     continue;
 
                 double perc;
@@ -177,7 +177,7 @@ namespace Questor.Modules
                 if (module.GroupId != (int)Group.Afterburner)
                     continue;
 
-                if (module.InLimboState | module.IsDeactivating | module.IsGoingOnline | !module.IsOnline | !module.IsActivatable)
+                if (module.InLimboState)
                     continue;
 
                 // Should we activate the module
@@ -223,8 +223,8 @@ namespace Questor.Modules
             // Thank god stations are safe ! :)
             if (Cache.Instance.InStation)
                 return;
-
-            if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
+            
+            if (!Cache.Instance.InSpace)
             {
                 _lastSessionChange = DateTime.Now;
                 return;
@@ -256,6 +256,9 @@ namespace Questor.Modules
 
             // this effectively disables control of speed modules when paused, which is expected behavior
             if (Cache.Instance.Paused)
+                return;
+
+            if (Cache.Instance.InWarp)
                 return;
 
             ActivateAfterburner();
