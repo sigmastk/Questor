@@ -1886,7 +1886,7 @@ namespace Questor
 
                         Logging.Log("Questor.Salvage: We've moved to the next Pocket [" + Math.Round(distance / 1000, 0) + "k away]");
 
-                        if (State == QuestorState.SalvageUseGate)
+                        if (State == QuestorState.SalvageNextPocket)
                         {
                             State = QuestorState.Salvage;
                         }
