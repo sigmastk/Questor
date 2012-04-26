@@ -50,7 +50,7 @@
             // Open the item hangar (should still be open)
             if (!Cache.OpenItemsHangar("CourierMission")) return false;
 
-            if (!Cache.OpenShipsHangar("CourierMission")) return false;
+            if (!Cache.OpenCargoHold("CourierMission")) return false;
 
             const string missionItem = "Encoded Data Chip";
             Logging.Log("CourierMission: mission item is: " + missionItem);
