@@ -710,16 +710,17 @@ namespace Questor.Modules
             // There is no combat when cloaked
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
                 return;
-
-            // do not expect non-combat ships to do combat.
-            if (!string.IsNullOrEmpty(Settings.Instance.TransportShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName)
-                return;
-            if (!string.IsNullOrEmpty(Settings.Instance.SalvageShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.SalvageShipName)
-                return;
-
-            if (!Cache.Instance.Weapons.Any())
+            //
+            // only the ship defined in CombatShipName will do combat: we assume all other ships are non-combat ships!!!!
+            //
+            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName)
             {
-                Logging.Log("Combat: No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!");
+                return;
+            }
+
+            if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName)
+            {
+                Logging.Log("Combat: No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!", Logging.red);
                 State = CombatState.OutOfAmmo;
             }
 
