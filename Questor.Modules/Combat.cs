@@ -720,7 +720,7 @@ namespace Questor.Modules
 
             if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName)
             {
-                Logging.Log("Combat: No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!", Logging.red);
+                Logging.Log("Combat: No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!");
                 State = CombatState.OutOfAmmo;
             }
 
