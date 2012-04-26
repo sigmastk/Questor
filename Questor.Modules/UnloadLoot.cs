@@ -82,7 +82,7 @@ namespace Questor.Modules
                     else if (Settings.Instance.MoveCommonMissionCompletionItemsToAmmoHangar == false)
                     {
                         Logging.Log("UnloadLoot: Moving Common Mission Completion items to to Local Hangar");
-                    State = UnloadLootState.MoveCommonMissionCompletionitems;
+                        State = UnloadLootState.MoveCommonMissionCompletionitems;
                     }
                     break;
 
@@ -213,18 +213,15 @@ namespace Questor.Modules
                     // Don't stack until 5 seconds after the cargo has cleared
                     if (DateTime.Now < _nextUnloadAction)
                         break;
-
-                    // Stack everything
-                    if (Cache.Instance.CorpAmmoHangar == null || Cache.Instance.CorpLootHangar == null || Cache.Instance.LootContainer == null) // Only stack if we moved something
+                    if (((Cache.Instance.ItemHangar != null) && Cache.Instance.ItemHangar.IsValid) && Cache.Instance.ItemHangar.IsReady)
                     {
                         Cache.Instance.ItemHangar.StackAll();
                         _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                     }
-
-                    State = UnloadLootState.StackItemsCorpAmmo;
+                    State = UnloadLootState.StackAmmoHangar;
                     break;
 
-                case UnloadLootState.StackItemsCorpAmmo:
+                case UnloadLootState.StackAmmoHangar:
                     if (Settings.Instance.AmmoHangar != string.Empty)
                     {
                         // Don't stack until 5 seconds after the cargo has cleared
@@ -232,16 +229,16 @@ namespace Questor.Modules
                             break;
 
                         // Stack everything
-                        if (((Cache.Instance.CorpAmmoHangar != null) && Cache.Instance.CorpAmmoHangar.IsValid) && Cache.Instance.CorpAmmoHangar.IsReady)
+                        if (((Cache.Instance.AmmoHangar != null) && Cache.Instance.AmmoHangar.IsValid) && Cache.Instance.AmmoHangar.IsReady)
                         {
-                            Cache.Instance.CorpAmmoHangar.StackAll();
+                            Cache.Instance.AmmoHangar.StackAll();
                             _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                         }
                     }
-                    State = UnloadLootState.StackItemsCorpLoot;
+                    State = UnloadLootState.StackLootHangar;
                     break;
 
-                case UnloadLootState.StackItemsCorpLoot:
+                case UnloadLootState.StackLootHangar:
                     if (Settings.Instance.LootHangar != string.Empty)
                     {
                         // Don't stack until 5 seconds after the cargo has cleared
@@ -249,16 +246,16 @@ namespace Questor.Modules
                             break;
 
                         // Stack everything
-                        if (((Cache.Instance.CorpLootHangar != null) && Cache.Instance.CorpLootHangar.IsValid) && Cache.Instance.CorpLootHangar.IsReady)
+                        if (((Cache.Instance.LootHangar != null) && Cache.Instance.LootHangar.IsValid) && Cache.Instance.LootHangar.IsReady)
                         {
-                            Cache.Instance.CorpLootHangar.StackAll();
+                            Cache.Instance.LootHangar.StackAll();
                             _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                         }
                     }
-                    State = UnloadLootState.StackItemsLootContainer;
+                    State = UnloadLootState.StackLootContainer;
                     break;
 
-                case UnloadLootState.StackItemsLootContainer:
+                case UnloadLootState.StackLootContainer:
                     if (Settings.Instance.LootContainer != string.Empty)
                     {
                         // Don't stack until 5 seconds after the cargo has cleared
