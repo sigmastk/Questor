@@ -346,6 +346,8 @@ namespace Questor.Modules
                                 Logging.Log("Arm: Error! Couldn't find Default Fitting.  Disabling fitting manager.");
                                 DefaultFittingFound = false;
                                 Settings.Instance.UseFittingManager = false;
+                                Logging.Log("Arm: Closing Fitting Manager");
+                                fittingMgr.Close();
                                 State = ArmState.MoveItems;
                                 break;
                             }
