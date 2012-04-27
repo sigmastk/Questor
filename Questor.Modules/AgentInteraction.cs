@@ -678,7 +678,11 @@ namespace Questor.Modules
 
             case AgentInteractionState.StartConversation:
                Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
-
+               if ((int)Cache.Instance.AgentEffectiveStandingtoMe == (int)0.00)
+               {
+                   Logging.Log("AgentInteraction: Agent Standings not yet available. retrying.");
+                   return;
+               }
                Agent.InteractWith();
 
                Logging.Log("AgentInteraction: Waiting for conversation");
