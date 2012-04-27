@@ -26,11 +26,11 @@ namespace Questor.Modules.Actions
         private static DateTime _nextUnloadAction = DateTime.MinValue;
         private static DateTime _lastUnloadAction = DateTime.MinValue;
 
-        public static UnloadLootState State { get; set; }
+        public UnloadLootState State { get; set; }
 
         //public double LootValue { get; set; }
 
-        public static void ProcessState()
+        public void ProcessState()
         {
             switch (State)
             {

@@ -18,16 +18,16 @@ namespace BuyLPI
     internal class BuyLPI
     {
         private const int WaitMillis = 3500;
-        private static long _lastLoyaltyPoints;
-        private static DateTime _nextAction;
-        private static DateTime _loyaltyPointTimeout;
-        private static string _type;
-        private static int? _quantity;
-        private static int? _totalquantityoforders;
-        private static bool _done;
-        private static DirectEve _directEve;
+        private  long _lastLoyaltyPoints;
+        private  DateTime _nextAction;
+        private  DateTime _loyaltyPointTimeout;
+        private  string _type;
+        private  int? _quantity;
+        private  int? _totalquantityoforders;
+        private  bool _done;
+        private  DirectEve _directEve;
 
-        private static void Main(string[] args)
+        private  void Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -78,13 +78,13 @@ namespace BuyLPI
             Log("BuyLPI: BuyLPI finished.");
         }
 
-        private static void Log(string line, params object[] parms)
+        private  void Log(string line, params object[] parms)
         {
             line = string.Format(line, parms);
             InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
         }
 
-        private static void OnFrame(object sender, EventArgs eventArgs)
+        private  void OnFrame(object sender, EventArgs eventArgs)
         {
             if (_done)
                 return;

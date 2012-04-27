@@ -84,6 +84,20 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsMissileLauncher
+        {
+            get
+            {
+                if (GroupId == (int)Group.AssaultMissilelaunchers) return true;
+                if (GroupId == (int)Group.CruiseMissileLaunchers) return true;
+                if (GroupId == (int)Group.TorpedoLaunchers) return true;
+                if (GroupId == (int)Group.StandardMissileLaunchers) return true;
+                if (GroupId == (int)Group.AssaultMissilelaunchers) return true;
+                if (GroupId == (int)Group.HeavyMissilelaunchers) return true;
+                if (GroupId == (int)Group.DefenderMissilelaunchers) return true;
+                return false;
+            }
+        }
         public bool IsEnergyWeapon
         {
             get { return GroupId == (int)Group.EnergyWeapon; }

@@ -1,14 +1,14 @@
-﻿    
-using System;
+﻿using System;
 using Questor.Modules.Actions;
 using Questor.Modules.Activities;
 using Questor.Modules.Caching;
 using Questor.Modules.Logging;
 using Questor.Modules.States;
-using Questor.Storylines;
 using System.Linq;
 using DirectEve;
 
+namespace Questor.Storylines
+{
 public class GenericCourier : IStoryline
 {
     private DateTime _nextAction;
@@ -23,7 +23,7 @@ public class GenericCourier : IStoryline
     public StorylineState Arm(Storyline storyline)
     {
         if (_nextAction > DateTime.Now)
-            return StorylineState.ArmState;
+                return StorylineState.Arm;
 
         // Are we in an industrial?  Yes, goto the agent
         var directEve = Cache.Instance.DirectEve;
@@ -40,12 +40,12 @@ public class GenericCourier : IStoryline
 
             // No, command it to open
             directEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-            return StorylineState.ArmState;
+                return StorylineState.Arm;
         }
 
         // If the ship hangar is not ready then wait for it
         if (!ships.IsReady)
-            return StorylineState.ArmState;
+                return StorylineState.Arm;
 
         //  Look for an industrial
         var item = ships.Items.FirstOrDefault(i => i.Quantity == -1 && (i.TypeId== 648 || i.TypeId== 649 || i.TypeId== 650 || i.TypeId== 651 || i.TypeId== 652 || i.TypeId== 653 || i.TypeId== 654 || i.TypeId== 655 || i.TypeId== 656 || i.TypeId== 657 || i.TypeId== 1944 || i.TypeId== 19744));
@@ -56,7 +56,7 @@ public class GenericCourier : IStoryline
             _nextAction = DateTime.Now.AddSeconds(10);
 
             item.ActivateShip();
-            return StorylineState.ArmState;
+                return StorylineState.Arm;
         }
         else
         {
@@ -74,23 +74,23 @@ public class GenericCourier : IStoryline
     {
         _state = GenericCourierStorylineState.GotoPickupLocation;
             
-        Traveler.State = TravelerState.Idle;
-        Traveler.Destination = null;
+            _traveler.State = TravelerState.Idle;
+            _traveler.Destination = null;
 
         return StorylineState.AcceptMission;
     }
 
     private bool GotoMissionBookmark(long agentId, string title)
     {
-        var destination = Traveler.Destination as MissionBookmarkDestination;
+            var destination = _traveler.Destination as MissionBookmarkDestination;
         if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
-            Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
-        Traveler.ProcessState();
+            _traveler.ProcessState();
 
-        if (Traveler.State == TravelerState.AtDestination)
+            if (_traveler.State == TravelerState.AtDestination)
         {
-            Traveler.Destination = null;
+                _traveler.Destination = null;
             return true;
         }
 
@@ -192,5 +192,6 @@ public class GenericCourier : IStoryline
         }
 
         return StorylineState.ExecuteMission;
+        }
     }
 }

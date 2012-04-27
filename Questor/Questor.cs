@@ -26,22 +26,43 @@ namespace Questor
 
     public class Questor
     {
-        private QuestorfrmMain m_Parent;
-        private DirectEve _directEve;
+        private readonly QuestorfrmMain m_Parent;
+        //private readonly AgentInteraction _agentInteraction;
+        //private readonly Arm _arm;
+        //private readonly SwitchShip _switch;
+        //private readonly Combat _combat;
+        //private readonly CourierMission _courier;
+        private readonly LocalWatch _localwatch;
+        //private readonly ScanInteraction _scanInteraction;
         private readonly Defense _defense;
-        //public readonly Combat _combat; 
-        //public readonly Drones _drones;
+        private readonly DirectEve _directEve;
+        //private readonly Drones _drones;
 
         private DateTime _lastPulse;
-        //private readonly CombatMissionsBehavior _combatMissionsBehavior;
+        private DateTime _lastSalvageTrip = DateTime.MinValue;
+        private readonly CombatMissionsBehavior _combatMissionsBehavior;
+        //private readonly Panic _panic;
+        //private readonly Storyline _storyline;
         private readonly Cleanup _cleanup;
+        //private readonly Statistics _statistics;
+
+        //private readonly Salvage _salvage;
         //private readonly Traveler _traveler;
+        //private readonly UnloadLoot _unloadLoot;
+
+        public DateTime LastFrame;
         public DateTime LastAction;
+        //private readonly Random _random;
+        //private int _randomDelay;
+        //public static long AgentID;
+
         //private double _lastX;
         //private double _lastY;
         //private double _lastZ;
         //private bool _firstStart = true;
         public bool Panicstatereset = false;
+
+        //DateTime _nextAction = DateTime.Now;
         private readonly Stopwatch _watch;
 
         public Questor(QuestorfrmMain form1)
@@ -50,15 +71,14 @@ namespace Questor
             _lastPulse = DateTime.MinValue;
 
             _defense = new Defense();
-            //_traveler = new Traveler();
-            //_combatMissionsBehavior = new CombatMissionsBehavior();
-            //_combatMissionsBehavior = new CombatMissionsBehavior();
-            //_combatMissionsBehavior = new CombatMissionsBehavior();
-            //_combatMissionsBehavior = new CombatMissionsBehavior();
+            _localwatch = new LocalWatch();
+            //_scanInteraction = new ScanInteraction();
             //_combat = new Combat();
+            //_missionController = new MissionController();
             //_drones = new Drones();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
+            //_statistics = new Statistics();
 
             // State fixed on ExecuteMission
             State = QuestorState.Idle;
@@ -72,7 +92,7 @@ namespace Questor
             Cache.Instance.StartTime = Program.startTime;
             Cache.Instance.QuestorStarted_DateTime = DateTime.Now;
             
-            CombatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
+            //CombatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
             
             //_combatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
             //_combatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
@@ -90,7 +110,7 @@ namespace Questor
             _directEve.OnFrame += OnFrame;
         }
 
-        public static QuestorState State { get; set; }
+        public QuestorState State { get; set; }
 
         private bool _closeQuestorCMDUplink = true;
         public bool CloseQuestorflag = true;
@@ -105,11 +125,11 @@ namespace Questor
                 Logging.Log("CombatMissionsBehavior.State = " + State);
         }
 
-        public void DebugPanicstates()
-        {
-            if (Settings.Instance.DebugStates)
-                Logging.Log("Panic.State = " + Panic.State);
-        }
+        //public void DebugPanicstates()
+        //{
+        //    if (Settings.Instance.DebugStates)
+        //        Logging.Log("Panic.State = " + _panic.State);
+        //    }
 
         public void DebugPerformanceClearandStartTimer()
         {
@@ -141,9 +161,9 @@ namespace Questor
 
         private void TravelToAgentsStation()
         {
-            var baseDestination = _traveler.Destination as StationDestination;
+            var baseDestination = Traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
-                _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId,
+              _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
                                                                Cache.Instance.Agent.StationId,
                                                                Cache.Instance.DirectEve.GetLocationName(
                                                                    Cache.Instance.Agent.StationId));
@@ -174,22 +194,6 @@ namespace Questor
             {
                 Logging.Log("Traveler.State = " + _traveler.State);
             }
-            //if (_traveler.State == TravelerState.AtDestination)
-            //{
-            //    if (State == QuestorState.GotoMission)
-            //    {
-            //        State = QuestorState.ExecuteMission;
-            //    }
-            //    if (State == QuestorState.GotoBase)
-            //    {
-            //        State = QuestorState.UnloadLoot;
-            //    }
-            //
-            //    // Seeing as we just warped to the mission, start the mission controller
-            //    _missionController.State = CombatMissionState.Start;
-            //    _combat.State = CombatState.CheckTargets;
-            //    _traveler.Destination = null;
-            //}
         }
 
         private void AvoidBumpingThings()
@@ -237,18 +241,14 @@ namespace Questor
         {
             var watch = new Stopwatch();
             Cache.Instance.LastFrame = DateTime.Now;
-            
             // Only pulse state changes every 1.5s
-            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int) Time.QuestorPulse_milliseconds)
-                //default: 1500ms
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
                 return;
             _lastPulse = DateTime.Now;
 
             // Session is not ready yet, do not continue
             if (!Cache.Instance.DirectEve.Session.IsReady)
-            {
                 return;
-            }
 
             if (Cache.Instance.DirectEve.Session.IsReady)
                 Cache.Instance.LastSessionIsReady = DateTime.Now;
@@ -386,8 +386,8 @@ namespace Questor
             _cleanup.ProcessState();
             DebugPerformanceStopandDisplayTimer("Cleanup.ProcessState");
 
-            //if (Settings.Instance.DebugStates)
-            //    Logging.Log("Cleanup.State = " + _cleanup.State);
+            if (Settings.Instance.DebugStates)
+                Logging.Log("Cleanup.State = " + _cleanup.State);
 
             // Done
             // Cleanup State: ProcessState
@@ -451,7 +451,7 @@ namespace Questor
                     }
                     break;
 
-                case QuestorState.CombatMissionBehavior:
+                case QuestorState.CombatMissionsBehavior:
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
@@ -459,6 +459,7 @@ namespace Questor
                     {
                         CombatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
                     }
+                           _combatMissionsBehavior.ProcessState();
                     break;
 
                 case QuestorState.Start:
@@ -467,7 +468,7 @@ namespace Questor
                         if (State == QuestorState.Start)
                         {
                             Logging.Log("Questor: Start Mission Behavior");
-                            State = QuestorState.CombatMissionBehavior;
+                            State = QuestorState.CombatMissionsBehavior;
                         }
                         break;
                     }
@@ -503,7 +504,7 @@ namespace Questor
                     //    {
                     //        State = QuestorState.Error;
                     //    }
-                    //   _traveler.Destination = null;
+                    //   Traveler.Destination = null;
                     //}
                     break;
 

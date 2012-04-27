@@ -44,6 +44,13 @@ namespace Questor.Modules.Lookup
         ProjectileWeapon = 55,
         HybridWeapon = 74,
 
+        CruiseMissileLaunchers = 506,
+        RocketLaunchers = 507,
+        TorpedoLaunchers = 508,
+        StandardMissileLaunchers = 509,
+        HeavyMissilelaunchers = 510,
+        AssaultMissilelaunchers = 511,
+        DefenderMissilelaunchers = 512,
         SentryGun = 99,
         ProtectiveSentryGun = 180,
         MobileSentryGun = 336,
@@ -65,8 +72,6 @@ namespace Questor.Modules.Lookup
         FreightContainer = 649,
         MissionContainer = 952,
 
-        SiegeMissileLaunchers = 508,
-        CruiseMissileLaunchers = 506,
 
         Wreck = 186,
 

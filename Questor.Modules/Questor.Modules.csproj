@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6D5DAAB6-0208-46AA-BA56-92B6068028C9}</ProjectGuid>
+    <ProjectGuid>{0C0BE1A3-BA5B-41A1-B578-F20777D02304}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Questor.Modules</RootNamespace>
@@ -68,10 +68,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramFiles)\Innerspace\Lavish.InnerSpace.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC\Microsoft.DirectX.AudioVideoPlayback\1.0.2902.0__31bf3856ad364e35\Microsoft.DirectX.AudioVideoPlayback.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -87,8 +83,7 @@
     </Compile>
     <Compile Include="Caching\ItemCache.cs" />
     <Compile Include="Lookup\CombatMissionSettings.cs" />
-    <Compile Include="States\QuestorState.cs" />
-    <Compile Include="Actions\MissionAction.cs" />
+    <Compile Include="Actions\Action.cs" />
     <Compile Include="States\MissionActionState.cs" />
     <Compile Include="Actions\Buy.cs" />
     <Compile Include="Actions\BuyLPI.cs" />
@@ -132,8 +127,8 @@
     <Compile Include="BackgroundTasks\LocalWatch.cs" />
     <Compile Include="Combat\Combat.cs" />
     <Compile Include="States\CombatState.cs" />
-    <Compile Include="Activities\CourierMission.cs" />
-    <Compile Include="States\CourierMissionState.cs" />
+    <Compile Include="Activities\CourierMissionCtrl.cs" />
+    <Compile Include="States\CourierMissionCtrlState.cs" />
     <Compile Include="Lookup\DamageType.cs" />
     <Compile Include="Actions\DebugModule.cs" />
     <Compile Include="States\DebugModuleState.cs" />
@@ -145,8 +140,8 @@
     <Compile Include="States\DroneState.cs" />
     <Compile Include="Caching\EntityCache.cs" />
     <Compile Include="Actions\Fitting.cs" />
-    <Compile Include="Activities\CombatMission.cs" />
-    <Compile Include="States\CombatMissionState.cs" />
+    <Compile Include="Activities\CombatMissionCtrl.cs" />
+    <Compile Include="States\CombatMissionCtrlState.cs" />
     <Compile Include="States\MissionState.cs" />
     <Compile Include="Caching\ModuleCache.cs" />
     <Compile Include="BackgroundTasks\Panic.cs" />
@@ -166,6 +161,10 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

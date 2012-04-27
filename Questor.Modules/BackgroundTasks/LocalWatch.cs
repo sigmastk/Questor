@@ -9,14 +9,14 @@ namespace Questor.Modules.BackgroundTasks
 
     public class LocalWatch
     {
-        public static LocalWatchState State { get; set; }
+        public LocalWatchState State { get; set; }
         private DateTime _lastAction;
 
         public void ProcessState()
         {
             switch(State)
             {
-                case LocalWatchState.Start:
+                case LocalWatchState.Idle:
                     //checking local every 5 second
                     if(DateTime.Now.Subtract(_lastAction).TotalSeconds < (int)Time.CheckLocalDelay_seconds)
                         break;
@@ -30,17 +30,14 @@ namespace Questor.Modules.BackgroundTasks
                     // and only query everyone in local for standings changes if something has changed...
                     //
                     Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate,Settings.Instance.LocalBadStandingLevelToConsiderBad);
-                    State = LocalWatchState.Done;
-                    break;
 
-                case LocalWatchState.Done:
                     _lastAction = DateTime.Now;
-                    State = LocalWatchState.Start;
+                    State = LocalWatchState.Idle;
                     break;
 
                 default:
                     // Next state
-                    State = LocalWatchState.Start;
+                    State = LocalWatchState.Idle;
                     break;
             }
         }

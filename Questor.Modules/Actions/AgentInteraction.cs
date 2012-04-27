@@ -33,47 +33,47 @@ namespace Questor.Modules.Actions
       public const string Accept = "Accept";
       public const string Decline = "Decline";
       public const string Close = "Close";
-      private static DateTime _nextAgentAction;
+      private DateTime _nextAgentAction;
 
       //private DateTime _waitingOnAgentResponse;
-      private static bool _waitingonmission;
-      private static DateTime _waitingonmissiontimer = DateTime.Now;
+      private bool _waitingonmission;
+      private DateTime _waitingonmissiontimer = DateTime.Now;
 
-      private static bool _waitingonagentwindow;
-      private static DateTime _waitingonagentwindowtimer = DateTime.Now;
+      private bool _waitingonagentwindow;
+      private DateTime _waitingonagentwindowtimer = DateTime.Now;
 
-      private static bool _waitingonagentresponse;
-      private static DateTime _waitingonagentresponsetimer = DateTime.Now;
+      private bool _waitingonagentresponse;
+      private DateTime _waitingonagentresponsetimer = DateTime.Now;
 
-      public static bool WaitDecline { get; set; }
+      public bool WaitDecline { get; set; }
 
       public AgentInteraction()
       {
          AmmoToLoad = new List<Ammo>();
       }
 
-      public static long AgentId { get; set; }
+      public long AgentId { get; set; }
 
-      public static DirectAgent Agent
+      public DirectAgent Agent
       {
          get { return Cache.Instance.DirectEve.GetAgentById(AgentId); }
       }
 
-      public static bool ForceAccept { get; set; }
+      public bool ForceAccept { get; set; }
 
-      public static AgentInteractionState State { get; set; }
+      public AgentInteractionState State { get; set; }
 
-      public static AgentInteractionPurpose Purpose { get; set; }
+      public AgentInteractionPurpose Purpose { get; set; }
 
-      public static List<Ammo> AmmoToLoad { get; private set; }
+      public List<Ammo> AmmoToLoad { get; private set; }
 
-      private static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
+      private void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
       {
          AmmoToLoad.Clear();
          AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
       }
 
-      private static void WaitForConversation()
+      private void WaitForConversation()
       {
          WaitDecline = Settings.Instance.WaitDecline;
 
@@ -94,7 +94,7 @@ namespace Questor.Modules.Actions
          }
       }
 
-      private static void ReplyToAgent()
+      private void ReplyToAgent()
       {
          DirectAgentWindow agentWindow = Agent.Window;
          if (agentWindow == null || !agentWindow.IsReady)
@@ -222,7 +222,7 @@ namespace Questor.Modules.Actions
          }
       }
 
-      private static DamageType GetMissionDamageType(string html)
+      private DamageType GetMissionDamageType(string html)
       {
          // We are going to check damage types
          var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
@@ -242,7 +242,7 @@ namespace Questor.Modules.Actions
          return DamageType.EM;
       }
 
-      private static void WaitForMission()
+      private void WaitForMission()
       {
          DirectAgentWindow agentWindow = Agent.Window;
          if (agentWindow == null || !agentWindow.IsReady)
@@ -432,7 +432,7 @@ namespace Questor.Modules.Actions
          }
       }
 
-      private static void AcceptMission()
+      private void AcceptMission()
       {
          DirectAgentWindow agentWindow = Agent.Window;
          if (agentWindow == null || !agentWindow.IsReady)
@@ -477,7 +477,7 @@ namespace Questor.Modules.Actions
          _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
       }
 
-      private static void DeclineMission()
+      private void DeclineMission()
       {
          // If we are doing an ammo check then Decline Mission is an end-state!
          if (Purpose == AgentInteractionPurpose.AmmoCheck)
@@ -571,7 +571,7 @@ namespace Questor.Modules.Actions
          _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
       }
 
-      public static bool CheckFaction()
+      public bool CheckFaction()
       {
          DirectAgentWindow agentWindow = Agent.Window;
          string html = agentWindow.Objective;
@@ -645,7 +645,7 @@ namespace Questor.Modules.Actions
          return false;
       }
 
-      public static void CloseConversation()
+      public void CloseConversation()
       {
          DirectAgentWindow agentWindow = Agent.Window;
          if (agentWindow == null)
@@ -658,7 +658,7 @@ namespace Questor.Modules.Actions
          agentWindow.Close();
       }
 
-      public static void ProcessState()
+      public void ProcessState()
       {
           if (!Cache.Instance.InStation)
               return;

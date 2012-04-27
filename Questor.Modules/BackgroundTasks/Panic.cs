@@ -32,13 +32,53 @@ namespace Questor.Modules.BackgroundTasks
         private bool _delayedResume;
         private int _randomDelay;
 
-        public static PanicState State { get; set; }
+        public PanicState State { get; set; }
         //public bool InMission { get; set; }
 
         public void ProcessState()
         {
+            // Thank god stations are safe ! :)
+            if (Cache.Instance.InStation)
+            {
+                State = PanicState.Idle;
+                return;
+            }
+
+            if (!Cache.Instance.InSpace)
+            {
+                State = PanicState.Idle;
+                return;
+            }
+
+            // What? No ship entity?
+            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+            {
+                State = PanicState.Idle;
+                return;
+            }
+
+            // There is no better defense then being cloaked ;)
+            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+            {
+                State = PanicState.Idle;
+                return;
+            }
+
             switch (State)
             {
+                case PanicState.Idle:
+                    //
+                    // below is the reasons we will start the panic state(s) - if the below is not met do nothing
+                    //
+                    if (Cache.Instance.InSpace &&
+                        Cache.Instance.DirectEve.ActiveShip.Entity != null &&
+                        !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+                    {
+                        State = PanicState.Normal;
+                        return;
+                    }
+                    break;
+
                 case PanicState.Normal:
 
                         if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
@@ -147,17 +187,12 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), Priority.WarpScrambler);
                             if (Settings.Instance.SpeedTank)
                             {
-                                Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe),
-                                                                  Priority.Webbing);
-                                Cache.Instance.AddPriorityTargets(
-                                    Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), Priority.TargetPainting);
+                                Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), Priority.Webbing);
+                                Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), Priority.TargetPainting);
                             }
-                            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe),
-                                                              Priority.Neutralizing);
-                            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe),
-                                                              Priority.Jamming);
-                            Cache.Instance.AddPriorityTargets(
-                                Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), Priority.Dampening);
+                            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), Priority.Neutralizing);
+                            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), Priority.Jamming);
+                            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), Priority.Dampening);
                             if (Cache.Instance.Modules.Any(m => m.IsTurret))
                                 Cache.Instance.AddPriorityTargets(
                                     Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe),

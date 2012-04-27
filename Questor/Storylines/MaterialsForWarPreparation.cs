@@ -22,7 +22,7 @@ namespace Questor.Storylines
         public StorylineState Arm(Storyline storyline)
         {
             if (_nextAction > DateTime.Now)
-                return StorylineState.ArmState; 
+                return StorylineState.Arm; 
             
             // Are we in a shuttle?  Yes, go to the agent
             DirectEve directEve = Cache.Instance.DirectEve;
@@ -30,7 +30,7 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if(!Cache.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.ArmState;
+            if(!Cache.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.Arm;
 
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
@@ -41,7 +41,7 @@ namespace Questor.Storylines
                 _nextAction = DateTime.Now.AddSeconds(10);
 
                 item.ActivateShip();
-                return StorylineState.ArmState;
+                return StorylineState.Arm;
             }
             else
             {

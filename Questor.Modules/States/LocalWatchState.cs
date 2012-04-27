@@ -2,8 +2,7 @@
 {
     public enum LocalWatchState
     {
-        Start,
-        CheckLocal,
-        Done
+        Idle,
+        CheckLocal
     }
 }

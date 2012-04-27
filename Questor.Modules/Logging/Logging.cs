@@ -30,13 +30,13 @@ namespace Questor.Modules.Logging
         public const string teal = "\at";     //log debug
         public const string white = "\aw";    //questor 
 
-        //public static void Log(string format, params object[] parms)
+        //public  void Log(string format, params object[] parms)
         //{
         //    string line = string.Format(format, parms);
         //    Log(line);
         //}
 
-        //public static void Log(string line)
+        //public  void Log(string line)
         public static void Log(string line, string color = Logging.white)
         {
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, color + line));

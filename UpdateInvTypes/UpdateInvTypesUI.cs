@@ -12,8 +12,6 @@ namespace UpdateInvTypes
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
 
-    
-    
     public partial class UpdateInvTypesUI : Form
     {
         private bool _doUpdate;

@@ -11,23 +11,28 @@ namespace Questor.Modules.Actions
     
     public class BuyLPI
     {
+        /*
+         * 
+         * 
+         * 
+         * 
         public StateBuyLPI State { get; set; }
 
         public int Item { get; set; }
         public int Unit { get; set; }
 
-        //private MainForm _form;
+        private MainForm _form;
 
         private static DateTime _lastAction;
         private static DateTime _loyaltyPointTimeout;
         private static long _lastLoyaltyPoints;
-        private int _requiredUnit;
-        private int _requiredItemId;
+        private int requiredUnit;
+        private int requiredItemId;
 
-        //public BuyLPI(MainForm form1)
-        //{
-        //    _form = form1;
-        //}
+        public BuyLPI(MainForm form1)
+        {
+            _form = form1;
+        }
 
         public void ProcessState()
         {
@@ -56,7 +61,7 @@ namespace Questor.Modules.Actions
 
                     if(lpstore != null)
                         lpstore.Close();*/
-
+        /*
                     State = StateBuyLPI.OpenItemHangar;
 
                     break;
@@ -263,6 +268,7 @@ namespace Questor.Modules.Actions
                     break;
             }
         }
+         */
 
     }
 }

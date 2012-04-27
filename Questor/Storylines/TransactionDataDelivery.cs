@@ -29,7 +29,7 @@ namespace Questor.Storylines
         public StorylineState Arm(Storyline storyline)
         {
             if (_nextAction > DateTime.Now)
-                return StorylineState.ArmState;
+                return StorylineState.Arm;
 
             // Are we in a shuttle?  Yes, go to the agent
             DirectEve directEve = Cache.Instance.DirectEve;
@@ -37,7 +37,7 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if (!Cache.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.ArmState;
+            if (!Cache.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.Arm;
 
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
@@ -48,7 +48,7 @@ namespace Questor.Storylines
                 _nextAction = DateTime.Now.AddSeconds(10);
 
                 item.ActivateShip();
-                return StorylineState.ArmState;
+                return StorylineState.Arm;
             }
             else
             {
@@ -66,23 +66,23 @@ namespace Questor.Storylines
         {
             _state = TransactionDataDeliveryState.GotoPickupLocation;
 
-            Traveler.State = TravelerState.Idle;
-            Traveler.Destination = null;
+            _traveler.State = TravelerState.Idle;
+            _traveler.Destination = null;
 
             return StorylineState.AcceptMission;
         }
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            var destination = _traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
-                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
-            Traveler.ProcessState();
+            _traveler.ProcessState();
 
-            if (Traveler.State == TravelerState.AtDestination)
+            if (_traveler.State == TravelerState.AtDestination)
             {
-                Traveler.Destination = null;
+                _traveler.Destination = null;
                 return true;
             }
 

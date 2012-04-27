@@ -24,7 +24,7 @@ namespace Questor.Modules.Actions
 
     public class Arm
     {
-        private static bool _missionItemMoved;
+        private bool _missionItemMoved;
 
         public Arm()
         {
@@ -32,18 +32,20 @@ namespace Questor.Modules.Actions
         }
 
         // Bleh, we don't want this here, can we move it to cache?
-        public static long AgentId { get; set; }
+        public long AgentId { get; set; }
 
-        public static ArmState State { get; set; }
-        public static List<Ammo> AmmoToLoad { get; private set; }
+        public ArmState State { get; set; }
+        public List<Ammo> AmmoToLoad { get; private set; }
 
-        public static bool DefaultFittingChecked = false; //flag to check for the correct default fitting before using the fitting manager
-        public static bool DefaultFittingFound = true; //Did we find the default fitting?
-        public static bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
-        public static bool UseMissionShip = false; // Were we successful in activating the mission specific ship?
+        public bool DefaultFittingChecked = false; //flag to check for the correct default fitting before using the fitting manager
+        public bool DefaultFittingFound = true; //Did we find the default fitting?
+        public bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
+        public bool UseMissionShip = false; // Were we successful in activating the mission specific ship?
 
-        public static void ProcessState()
+        public void ProcessState()
         {
+            // Select the correct ammo hangar
+
             switch (State)
             {
                 case ArmState.Idle:
@@ -348,6 +350,8 @@ namespace Questor.Modules.Actions
                                 Logging.Log("Arm: Error! Couldn't find Default Fitting.  Disabling fitting manager.");
                                 DefaultFittingFound = false;
                                 Settings.Instance.UseFittingManager = false;
+                                Logging.Log("Arm: Closing Fitting Manager");
+                                fittingMgr.Close();
                                 State = ArmState.MoveItems;
                                 break;
                             }
@@ -441,7 +445,14 @@ namespace Questor.Modules.Actions
                     drone = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
                     if (drone == null || drone.Stacksize < 1)
                     {
-                        Logging.Log("Arm: Out of drones in [" + Settings.Instance.AmmoHangar + "]");
+                        string ammoHangarName;
+                        if (string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                            ammoHangarName = "ItemHangar";
+                        else
+                            ammoHangarName = Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture); //"Corp Hangar Ammo Tab";
+                           
+                        
+                        Logging.Log("Arm: Out of drones with typeID [" + Settings.Instance.DroneTypeId + "] in [" + ammoHangarName + "]"); 
                         State = ArmState.NotEnoughDrones;
                         break;
                     }
@@ -558,7 +569,7 @@ namespace Questor.Modules.Actions
                     if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                     {
                         // Close the drone bay, its not required in space.
-                        if (Cache.Instance.DroneBay.IsValid)
+                        if (Cache.Instance.DroneBay.IsReady)
                         {
                             Logging.Log("Arm: Closing Drone Bay");
                             Cache.Instance.DroneBay.Window.Close();

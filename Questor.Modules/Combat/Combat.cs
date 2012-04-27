@@ -28,11 +28,9 @@ namespace Questor.Modules.Combat
     public class Combat
     {
         private readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
-        private static readonly Dictionary<long, DateTime> NextWeaponReload = new Dictionary<long, DateTime>();
+        private static readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
         private bool _isJammed;
-
-        public static CombatState State { get; set; }
-
+        public CombatState State { get; set; }
         private int MaxCharges { get; set; }
 
         /// <summary> Reload correct (tm) ammo for the NPC
@@ -66,7 +64,7 @@ namespace Questor.Modules.Combat
             // We are out of ammo! :(
             if (!correctAmmo.Any())
             {
-                Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]", Logging.red);
+                Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]");
                 State = CombatState.OutOfAmmo;
                 return false;
             }
@@ -77,32 +75,6 @@ namespace Questor.Modules.Combat
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)
                 return false;
-
-            //if (entity.Distance > ammo.Range)
-            //{
-            //Number of seconds until the target reaches the edge of range for our close range ammo
-            //Cache.Instance.targetWillBeCloseRangeIn_seconds = ((int)entity.Velocity / ((int)entity.Distance - (int)ammo.Range));
-            //if ((int)Cache.Instance.targetWillBeCloseRangeIn_seconds != null || (int)Cache.Instance.targetWillBeCloseRangeIn_seconds <= 1)
-            //{
-            //    // If the target will be in 'close range' before we can reload again - assume we want close range ammo
-            //    if ((int)Cache.Instance.targetWillBeCloseRangeIn_seconds < (int)Time.ReloadWeaponDelayBeforeUsable_seconds)
-            //    {
-            //        //If the entity was ( X number) of seconds closer to you what ammo would we use, use that ammo, where X is Time.SwitchtoCloseRangeAmmoIfTargetWillBeInRange_seconds
-            //        Logging.Log("Combat: ReloadNormalAmmo: " + entity.Name + " will be in range with short range ammo in less than " + (int)Cache.Instance.targetWillBeCloseRangeIn_seconds + " calculating ammo based on targets current distance minus (reload delay * targets velocity)");
-            //        ammo = correctAmmo.Where(a => (a.Range) > (entity.Distance - ((int)Time.ReloadWeaponDelayBeforeUsable_seconds * entity.Velocity))).OrderBy(a => a.Range).FirstOrDefault(); //change default prefer shorter range ammo with fast targets
-            //        // We do not have any ammo left that can hit targets at that range!
-            //        if (ammo == null)
-            //            return false;
-            //    }
-            //    else
-            //   {
-            //        ammo = correctAmmo.Where(a => a.Range > (entity.Distance)).OrderBy(a => a.Range).FirstOrDefault(); //default
-            //        // We do not have any ammo left that can hit targets at that range!
-            //        if (ammo == null)
-            //            return false;
-            //    }
-            //}
-            //}
 
             // We have enough ammo loaded
             if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId && weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges)
@@ -118,19 +90,19 @@ namespace Questor.Modules.Combat
                 return false;
 
             // We are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
-            if (NextWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < NextWeaponReload[weapon.ItemId])
+            if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
                 return false;
-            NextWeaponReload[weapon.ItemId] = DateTime.Now.AddSeconds((int) Time.ReloadWeaponDelayBeforeUsable_seconds);
+            _lastWeaponReload[weapon.ItemId] = DateTime.Now;
 
             // Reload or change ammo
-            if (weapon.Charge.TypeId == charge.TypeId)
+            if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
                 {
                     Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
                     Cache.Instance.LastLoggingAction = DateTime.Now;
                 }
-                Logging.Log("Combat: Reloading [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]", Logging.purple);
+                Logging.Log("Combat: Reloading [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]");
                 weapon.ReloadAmmo(charge);
             }
             else
@@ -140,7 +112,7 @@ namespace Questor.Modules.Combat
                     Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
                     Cache.Instance.LastLoggingAction = DateTime.Now;
                 }
-                Logging.Log("Combat: Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]", Logging.purple);
+                Logging.Log("Combat: Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]");
                 weapon.ChangeAmmo(charge);
             }
 
@@ -161,7 +133,7 @@ namespace Questor.Modules.Combat
             // We are out of ammo! :(
             if (!correctAmmo.Any())
             {
-                Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]", Logging.red);
+                Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]");
                 State = CombatState.OutOfAmmo;
                 return false;
             }
@@ -183,19 +155,19 @@ namespace Questor.Modules.Combat
                 return true;
 
             // We are reloading, wait at least 5 seconds
-            if (NextWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < NextWeaponReload[weapon.ItemId])
+            if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds(5))
                 return false;
-            NextWeaponReload[weapon.ItemId] = DateTime.Now.AddSeconds(5);
+            _lastWeaponReload[weapon.ItemId] = DateTime.Now;
 
             // Reload or change ammo
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
-                Logging.Log("Combat: Reloading [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]", Logging.purple);
+                Logging.Log("Combat: Reloading [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]");
                 weapon.ReloadAmmo(charge);
             }
             else
             {
-                Logging.Log("Combat: Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]", Logging.purple);
+                Logging.Log("Combat: Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]");
                 weapon.ChangeAmmo(charge);
             }
 
@@ -247,14 +219,14 @@ namespace Questor.Modules.Combat
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
                     return;
 
-                if (NextWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < NextWeaponReload[weapon.ItemId])
+                if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
                     return;
 
-                NextWeaponReload[weapon.ItemId] = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
+                _lastWeaponReload[weapon.ItemId] = DateTime.Now;
 
                 if (charge != null && weapon.Charge.TypeId == charge.TypeId)
                 {
-                    Logging.Log("Combat: ReloadAll [" + weapon.ItemId + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]", Logging.purple);
+                    Logging.Log("Combat: ReloadAll [" + weapon.ItemId + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]");
 
                     weapon.ReloadAmmo(charge);
                 }
@@ -318,28 +290,19 @@ namespace Questor.Modules.Combat
         /// </summary>
         private void ActivateWeapons(EntityCache target)
         {
-           bool debugDeActivateWeapons = false;
-           bool debugActivateWeapons = false;
-
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InWarp)
-            {
-                if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: we are in warp! doing nothing", Logging.teal);
                return;
-            }
-           if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
-            {
-                if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: waiting on NextWeaponAction", Logging.teal);
-               return;
-            }
 
-           if (Settings.Instance.SpeedTank && (!Cache.Instance.IsApproachingOrOrbiting || Cache.Instance.Approaching.Id != target.Id))
+           if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
+               return;
+
+            if (Settings.Instance.SpeedTank && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
             {
                 if (DateTime.Now > Cache.Instance.NextOrbit)
                 {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: Currently not approaching or orbiting anything: initiate orbit", Logging.teal);
                     target.Orbit(Cache.Instance.OrbitDistance);
-                    Logging.Log("Combat.ActivateWeapons: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.purple);
+                    Logging.Log("Combat.ActivateWeapons: Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]");
                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
                 }
             }
@@ -348,11 +311,9 @@ namespace Questor.Modules.Combat
             // If you are not in a mission by all means let combat actions move you around as needed
             if (!Cache.Instance.InMission)
             {
-                if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: we are NOT in a mission: navigateintorange", Logging.teal);
-                CombatMission.NavigateIntoRange(target); //eventually this method should be moved to something like navigate.cs or movement.cs
+                CombatMissionCtrl.NavigateIntoRange(target); //eventually this method should be moved to something like navigate.cs or movement.cs
             }
 
-            if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: after navigate into range...");
             // Get the weapons
             IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
 
@@ -360,11 +321,10 @@ namespace Questor.Modules.Combat
             // Get distance of the target and compare that with the ammo currently loaded
             foreach (ModuleCache weapon in weapons)
             {
-                if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: for each weapon [" + weapon.ItemId + "] in weapons", Logging.teal);
                 // don't waste ammo on small target if you use autocannon or siege i hope you use drone
                 //
                 // why the hell do we deactivate the weapon AFTER its been activated?! wtf - fix the activation issue ffs
-                //
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 if (Settings.Instance.DontShootFrigatesWithSiegeorAutoCannons) //this defaults to false and needs to be changed in your characters settings xml file if you want to enable this option
                 {
                     if (Settings.Instance.WeaponGroupId == 55 || Settings.Instance.WeaponGroupId == 508 || Settings.Instance.WeaponGroupId == 506)
@@ -376,53 +336,39 @@ namespace Questor.Modules.Combat
                     }
                 }
                 if (!weapon.IsActive)
-                {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: weapon [" + weapon.ItemId + "] is not active: no need to do anything", Logging.teal);
                    continue;
-                }
+
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
-                {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: weapon [" + weapon.ItemId + "] is reloading, deactivating or changing ammo: no need to do anything", Logging.teal);
                    continue;
-                }
 
                if (DateTime.Now < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
-               {
-                   if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: NextReload is still in the future: wait before doing anything with the weapon", Logging.teal);
                   return;
-               }
 
                 // No ammo loaded
                 if (weapon.Charge == null)
-                {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: no ammo loaded? [" + weapon.ItemId + "] reload will happen elsewhere", Logging.teal);
                    continue;
-                }
 
                Ammo ammo = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
 
                 //use mission specific ammo
                 if (Cache.Instance.MissionAmmo.Count() != 0)
                 {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: MissionAmmocount is not 0", Logging.teal);
                     ammo = Cache.Instance.MissionAmmo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
                 }
 
                 // How can this happen? Someone manually loaded ammo
                 if (ammo == null)
-                {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: ammo == null [" + weapon.ItemId + "] someone manually loaded ammo?", Logging.teal);
                    continue;
-                }
+
+                // If we have already activated warp, deactivate the weapons
+                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
+                {
                // Target is in range
                 if (target.Distance <= ammo.Range)
-                {
-                    if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: target is in range: do nothing, wait until it is dead", Logging.teal);
                    continue;
                 }
 
                // Target is out of range, stop firing
-                if (debugDeActivateWeapons) Logging.Log("Combat: ActivateWeapons: deactivate: target is out of range, stop firing", Logging.teal);
                 weapon.Click();
             }
 
@@ -438,28 +384,20 @@ namespace Questor.Modules.Combat
             {
                 // Are we reloading, deactivating or changing ammo?
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
-                {
-                    if (debugActivateWeapons) Logging.Log("Combat: ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] is reloading, deactivating or changing ammo", Logging.teal);
                    continue;
-                }
-
                // Are we on the right target?
                 if (weapon.IsActive)
                 {
-                    if (debugActivateWeapons) Logging.Log("Combat: ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] is active already", Logging.teal);
                     if (weapon.TargetId != target.Id)
-                    {
-                        if (debugActivateWeapons) Logging.Log("Combat: ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] is shooting at the wrong target: deactivating", Logging.teal);
                        weapon.Click();
-                    }
+
                    continue;
                 }
 
                 // No, check ammo type and if that is correct, activate weapon
                 if (ReloadAmmo(weapon, target) && CanActivate(weapon, target, true))
                 {
-                    if (debugActivateWeapons) Logging.Log("Combat: ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] has the correct ammo: activate", Logging.teal);
-                    Logging.Log("Combat: Activating weapon  [" + weapon.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Activating weapon  [" + weapon.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                     weapon.Activate(target.Id);
                     Cache.Instance.NextWeaponAction = DateTime.Now.AddMilliseconds((int)Time.WeaponDelay_milliseconds);
                     //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
@@ -498,7 +436,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(painter, target, false))
                 {
-                    Logging.Log("Combat: Activating painter [" + painter.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Activating painter [" + painter.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                     painter.Activate(target.Id);
                     Cache.Instance.NextPainterAction = DateTime.Now.AddMilliseconds((int)Time.PainterDelay_milliseconds);
                     return;
@@ -538,14 +476,14 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(nos, target, false))
                 {
-                    Logging.Log("Combat: Activating Nos     [" + nos.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Activating Nos     [" + nos.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                     nos.Activate(target.Id);
                     Cache.Instance.NextNosAction = DateTime.Now.AddMilliseconds((int)Time.NosDelay_milliseconds);
                     return;
                 }
                 else
                 {
-                    Logging.Log("Combat: Cannot Activate Nos [" + nos.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Cannot Activate Nos [" + nos.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]");
                 }
             }
         }
@@ -582,7 +520,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(web, target, false))
                 {
-                    Logging.Log("Combat: Activating web     [" + web.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "]", Logging.purple);
+                    Logging.Log("Combat: Activating web     [" + web.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "]");
                     web.Activate(target.Id);
                     Cache.Instance.NextWebAction = DateTime.Now.AddMilliseconds((int)Time.WebDelay_milliseconds);
                     return;
@@ -609,7 +547,7 @@ namespace Questor.Modules.Combat
             {
                 if (!_isJammed)
                 {
-                    Logging.Log("Combat: We are jammed and can't target anything", Logging.purple);
+                    Logging.Log("Combat: We are jammed and can't target anything");
                 }
 
                 _isJammed = true;
@@ -620,7 +558,7 @@ namespace Questor.Modules.Combat
             {
                 // Clear targeting list as it doesn't apply
                 Cache.Instance.TargetingIDs.Clear();
-                Logging.Log("Combat: We are no longer jammed, retargeting", Logging.purple);
+                Logging.Log("Combat: We are no longer jammed, retargeting");
             }
             _isJammed = false;
 
@@ -643,11 +581,11 @@ namespace Questor.Modules.Combat
                 EntityCache target = combatTargets[i];
                 if (target.Distance > Cache.Instance.MaxRange * 1.5d)
                 {
-                    Logging.Log("Combat: Target [" + target.Name + "][ID: " + target.Id + "] out of range [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Target [" + target.Name + "][ID: " + target.Id + "] out of range [" + Math.Round(target.Distance / 1000, 0) + "k away]");
                 }
                 else if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
                 {
-                    Logging.Log("Combat: Target [" + target.Name + "][ID: " + target.Id + "] on ignore list [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Target [" + target.Name + "][ID: " + target.Id + "] on ignore list [" + Math.Round(target.Distance / 1000, 0) + "k away]");
                 }
                 else continue;
 
@@ -678,7 +616,7 @@ namespace Questor.Modules.Combat
                 if (target == null)
                     break;
 
-                Logging.Log("Combat: unlocking high value target [" + target.Name + "][ID:" + target.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                Logging.Log("Combat: unlocking high value target [" + target.Name + "][ID:" + target.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]");
                 target.UnlockTarget();
                 highValueTargets.Remove(target);
                 Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
@@ -690,7 +628,7 @@ namespace Questor.Modules.Combat
             {
                 // Unlock any target
                 EntityCache target = lowValueTargets.OrderByDescending(t => t.Distance).First();
-                Logging.Log("Combat: unlocking low  value target [" + target.Name + "][ID:" + target.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.purple);
+                Logging.Log("Combat: unlocking low  value target [" + target.Name + "][ID:" + target.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]");
                 target.UnlockTarget();
                 lowValueTargets.Remove(target);
                 Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
@@ -716,7 +654,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    Logging.Log("Combat: Targeting priority target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Targeting priority target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                     entity.LockTarget();
                     highValueTargets.Add(entity);
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
@@ -736,7 +674,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    Logging.Log("Combat: Targeting high value target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Targeting high value target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                     entity.LockTarget();
                     highValueTargets.Add(entity);
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
@@ -756,7 +694,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    Logging.Log("Combat: Targeting low  value target [" + entity.Name + "][ID:" + entity.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.purple);
+                    Logging.Log("Combat: Targeting low  value target [" + entity.Name + "][ID:" + entity.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                     entity.LockTarget();
                     lowValueTargets.Add(entity);
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);

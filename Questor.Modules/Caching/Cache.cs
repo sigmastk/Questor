@@ -62,14 +62,9 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _entities;
 
         /// <summary>
-        ///   Entities that have exploded (all entities within 256km)
-        /// </summary>
-        private List<EntityCache> _entitieshaveexploded;
-
-        /// <summary>
         ///   Entities by Id
         /// </summary>
-        private readonly Dictionary<long, EntityCache> _entitiesById;
+        private Dictionary<long, EntityCache> _entitiesById;
 
         /// <summary>
         ///   Module cache
@@ -79,7 +74,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Priority targets (e.g. warp scramblers or mission kill targets)
         /// </summary>
-        private readonly List<PriorityTarget> _priorityTargets;
+        private List<PriorityTarget> _priorityTargets;
 
         /// <summary>
         ///   Star cache
@@ -116,11 +111,6 @@ namespace Questor.Modules.Caching
         /// </summary>
         private List<EntityCache> _aggressed;
 
-        /// <summary>
-        ///   CurrentCombatTargets cache
-        /// </summary>
-        public List<EntityCache> CurrentCombatTargets;
-        
         /// <summary>
         ///   Returns all unlooted wrecks & containers
         /// </summary>
@@ -167,74 +157,6 @@ namespace Questor.Modules.Caching
             LowestArmorPercentageThisMission = 100;
             LowestCapacitorPercentageThisMission = 100;
             LastKnownGoodConnectedTime = DateTime.Now;
-            //WrecksThisMission = 0;
-        }
-
-        /// <summary>
-        ///   Invalidate the cached items
-        /// </summary>
-        public void InvalidateCache()
-        {
-            _windows = null;
-            _unlootedContainers = null;
-            _star = null;
-            _stations = null;
-            _stargates = null;
-            _modules = null;
-            _targets = null;
-            _targeting = null;
-            _targetedBy = null;
-            _entities = null;
-            //_entitieshaveexploded = null; // we'd want to keep these as they have already exploded and need to be accounted for (right?)
-            _agent = null;
-            _approaching = null;
-            _activeDrones = null;
-            _containers = null;
-            _priorityTargets.ForEach(pt => pt.ClearCache());
-            _entitiesById.Clear();
-
-
-            //in space items
-            //_windows = null;
-            //_star = null;
-            //_stations = null;
-            //_stargates = null;
-            //_entitieshaveexploded = null; // we'd want to keep these as they have already exploded and need to be accounted for (right?)
-            //agent related items
-            //_agent = null;
-            //_agentId = null;
-            
-            //targets and entities
-            //_priorityTargets.ForEach(pt => pt.ClearCache());
-            //_approaching = null;
-
-            //_entities = null;
-            //_entitieshaveexploded = null;
-            //_entitiesById = null;
-
-            //_targets = null;
-            //_targeting = null;
-            //_targetedBy = null;
-            //_aggressed = null;
-            //_priorityTargets = null;
-
-            //CurrentCombatTargets = null;
-
-            //modules and drones
-            //_activeDrones = null;
-            //_modules = null;
-
-            //looting and salvaging
-            //_containers = null;
-            //_unlootedContainers = null;
-            //_unlootedWrecksAndSecureCans = null;
-        }
-
-        public void InvalidateBetweenMissionsCache()
-        {
-            Cache.Instance.LootedContainers.Clear();
-            Cache.Instance._unlootedContainers.Clear();
-            Cache.Instance._unlootedWrecksAndSecureCans.Clear();
         }
 
         /// <summary>
@@ -265,7 +187,6 @@ namespace Questor.Modules.Caching
         public bool NormalApproch = true;
         public bool CourierMission = false;
         public string MissionName = "";
-        public double MissionID { get; set; }
         public int MissionsThisSession = 0;
         public bool ConsoleLogOpened = false;
         public int TimeSpentReloading_seconds = 0;
@@ -276,15 +197,6 @@ namespace Questor.Modules.Caching
         public bool DronesKillHighValueTargets { get; set; }
         public bool InMission { get; set; }
         public DateTime QuestorStarted_DateTime = DateTime.Now;
-        public double CurrentTargetID { get; set; }
-        public double CurrentMovetoID { get; set; }
-        public double CurrentLootID { get; set; }
-        public double CurrentSalvageID { get; set; }
-        public int MyShieldPercentage { get; set; }
-        public int MyArmorPercentage { get; set; }
-        public int MyCapacitorPercentage { get; set; }
-        public bool MyRepActive { get; set; }
-        public bool MyABActive { get; set; }
 
         public bool LocalSafe(int maxBad, double stand)
         {
@@ -964,13 +876,26 @@ namespace Questor.Modules.Caching
             get { return _modules ?? (_modules = DirectEve.Modules.Select(m => new ModuleCache(m)).ToList()); }
         }
 
+        //
+        // this CAN and should just list all possible weapon system groupIDs
+        //
         public IEnumerable<ModuleCache> Weapons
         {
             get
             {
                 if (Cache.Instance.MissionWeaponGroupId != 0)
                     return Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
-                else return Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId);
+                else return Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId && 
+                    m.GroupId == (int)Group.ProjectileWeapon && 
+                    m.GroupId == (int)Group.EnergyWeapon && 
+                    m.GroupId == (int)Group.HybridWeapon && 
+                    m.GroupId == (int)Group.CruiseMissileLaunchers && 
+                    m.GroupId == (int)Group.RocketLaunchers && 
+                    m.GroupId == (int)Group.StandardMissileLaunchers && 
+                    m.GroupId == (int)Group.TorpedoLaunchers &&
+                    m.GroupId == (int)Group.AssaultMissilelaunchers &&
+                    m.GroupId == (int)Group.HeavyMissilelaunchers &&
+                    m.GroupId == (int)Group.DefenderMissilelaunchers);
             }
         }
 
@@ -1045,20 +970,6 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
 
                 return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
-            }
-        }
-
-        public IEnumerable<EntityCache> EntitieshaveExploded
-        {
-            get
-            {
-                if (!InSpace)
-                    return new List<EntityCache>();
-
-                if (_entitieshaveexploded == null)
-                    _entitieshaveexploded = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.HasExploded).ToList();
-
-                return _entitieshaveexploded;
             }
         }
 
@@ -1201,12 +1112,8 @@ namespace Questor.Modules.Caching
         public bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
 
         public List<Ammo> MissionAmmo;
-        public int Missionship { get; set; }
-        public bool? MissionUseDrones { get; set; }
         public int MissionWeaponGroupId { get; set; }
-
-        public int MissionDroneTypeID { get; set; }
-
+        public bool? MissionUseDrones { get; set; }
         public bool StopTimeSpecified { get; set; }
 
         public DateTime StopTime { get; set; }
@@ -1353,6 +1260,29 @@ namespace Questor.Modules.Caching
             return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.Contains(label)).ToList();
         }
 
+        /// <summary>
+        ///   Invalidate the cached items
+        /// </summary>
+        public void InvalidateCache()
+        {
+            _windows = null;
+            _unlootedContainers = null;
+            _star = null;
+            _stations = null;
+            _stargates = null;
+            _modules = null;
+            _targets = null;
+            _targeting = null;
+            _targetedBy = null;
+            _entities = null;
+            _agent = null;
+            _approaching = null;
+            _activeDrones = null;
+            _containers = null;
+            _priorityTargets.ForEach(pt => pt.ClearCache());
+            _entitiesById.Clear();
+        }
+
         public string FilterPath(string path)
         {
             if (path == null)
@@ -1381,11 +1311,11 @@ namespace Questor.Modules.Caching
         /// <param name = "pocketId"> </param>
         /// <param name = "missionMode"> </param>
         /// <returns></returns>
-        public IEnumerable<MissionAction> LoadMissionActions(long agentId, int pocketId, bool missionMode)
+        public IEnumerable<Actions.Action> LoadMissionActions(long agentId, int pocketId, bool missionMode)
         {
             DirectAgentMission missiondetails = GetAgentMission(agentId);
             if (missiondetails == null && missionMode)
-                return new MissionAction[0];
+                return new Actions.Action[0];
 
             if (missiondetails != null)
             {
@@ -1396,7 +1326,7 @@ namespace Questor.Modules.Caching
                     //No mission file but we need to set some cache settings
                     OrbitDistance = Settings.Instance.OrbitDistance;
                     AfterMissionSalvaging = Settings.Instance.AfterMissionSalvaging;
-                    return new MissionAction[0];
+                    return new Actions.Action[0];
                 }
                 //
                 // this loads the settings from each pocket... but NOT any settings global to the mission
@@ -1441,14 +1371,14 @@ namespace Questor.Modules.Caching
                                     DronesKillHighValueTargets = Settings.Instance.DronesKillHighValueTargets;
                                     //Logging.Log(string.Format("Cache: Using Character Setting DroneKillHighValueTargets  {0}", DronesKillHighValueTargets));
                                 }
-                                var actions = new List<MissionAction>();
+                                var actions = new List<Actions.Action>();
                                 XElement elements = pocket.Element("actions");
                                 if (elements != null)
                                 {
                                     foreach (XElement element in elements.Elements("action"))
                                     {
-                                        var action = new MissionAction();
-                                        MissionAction.State = (MissionActionState) Enum.Parse(typeof (MissionActionState), (string) element.Attribute("name"), true);
+                                        var action = new Actions.Action();
+                                        action.State = (ActionState) Enum.Parse(typeof (ActionState), (string) element.Attribute("name"), true);
                                         XAttribute xAttribute = element.Attribute("name");
                                         if (xAttribute != null && xAttribute.Value == "ClearPocket")
                                         {
@@ -1468,12 +1398,12 @@ namespace Questor.Modules.Caching
                         }
                         else
                         {
-                            return new MissionAction[0];
+                            return new Actions.Action[0];
                         }
                     }
                     else
                     {
-                        { return new MissionAction[0]; }
+                        { return new Actions.Action[0]; }
                     }
 
                     // if we reach this code there is no mission XML file, so we set some things -- Assail
@@ -1481,17 +1411,17 @@ namespace Questor.Modules.Caching
                     OrbitDistance = Settings.Instance.OrbitDistance;
                     Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
 
-                    return new MissionAction[0];
+                    return new Actions.Action[0];
                 }
                 catch (Exception ex)
                 {
                     Logging.Log("Error loading mission XML file [" + ex.Message + "]");
-                    return new MissionAction[0];
+                    return new Actions.Action[0];
                 }
             }
             else
             {
-                { return new MissionAction[0]; }
+                { return new Actions.Action[0]; }
             }
         }
 
@@ -1777,7 +1707,7 @@ namespace Questor.Modules.Caching
                 Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
                 
                 // Is cargohold open?
-                if (Cache.Instance.CargoHold != null && Cache.Instance.CargoHold.Window == null)
+                if (Cache.Instance.CargoHold.Window == null)
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
@@ -1788,9 +1718,9 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                if (Cache.Instance.CargoHold != null && !Cache.Instance.CargoHold.IsReady)
+                if (!Cache.Instance.CargoHold.IsReady)
                     return false;
-                if (Cache.Instance.CargoHold != null && Cache.Instance.CargoHold.IsReady)
+                if (Cache.Instance.CargoHold.IsReady)
                     return true;
             }
             return false;
@@ -2087,6 +2017,7 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
+                    //Logging.Log(module + ": Corporate Hangar is defined as the Ammo Hangar");
                     Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
 
                     // Is the corp loot Hangar open?
@@ -2120,6 +2051,7 @@ namespace Questor.Modules.Caching
                 }
                 else
                 {
+                    //Logging.Log(module + ": Item Hangar is defined as the Ammo Hangar");
                     Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
                     if (Cache.Instance.AmmoHangar == null)
                         return false;

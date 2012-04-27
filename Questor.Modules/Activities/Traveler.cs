@@ -23,15 +23,14 @@ namespace Questor.Modules.Activities
 
     public class Traveler
     {
-        private static TravelerDestination _destination;
-        private static DateTime _nextTravelerAction;
+        private TravelerDestination _destination;
+        private DateTime _nextTravelerAction;
         //private DateTime _lastDock;
 
-        public static TravelerState State { get; set; }
+        public TravelerState State { get; set; }
+        public DirectBookmark UndockBookmark { get; set; }
 
-        public static DirectBookmark UndockBookmark { get; set; }
-
-        public static TravelerDestination Destination
+        public TravelerDestination Destination
         {
             get { return _destination; }
             set
@@ -45,7 +44,7 @@ namespace Questor.Modules.Activities
         ///   Navigate to a solar system
         /// </summary>
         /// <param name = "solarSystemId"></param>
-        private static void NagivateToBookmarkSystem(long solarSystemId)
+        private void NagivateToBookmarkSystem(long solarSystemId)
         {
             if (_nextTravelerAction > DateTime.Now)
                 return;
@@ -135,7 +134,7 @@ namespace Questor.Modules.Activities
             }
         }
 
-        public static void ProcessState()
+        public void ProcessState()
         {
             switch (State)
             {

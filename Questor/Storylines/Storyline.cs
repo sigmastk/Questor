@@ -61,7 +61,7 @@ namespace Questor.Storylines
                                {"Transaction Data Delivery", new TransactionDataDelivery()},
                                {"Innocents in the Crossfire", new GenericCombatStoryline()},
                                {"Patient Zero", new GenericCombatStoryline()},
-                               //{"Soothe the Salvage Beast", new GenericCombatStoryline()}, //this does NOT work. Whoever wrote the XML and decided it was working was mistaken It will take some changes to mission actions as currently it gets quite confused motoring between 3 cans and switching to the next can before its anywhere close to any of them. (wtf!)
+                    {"Soothe the Salvage Beast", new GenericCombatStoryline()},
                                {"Forgotten Outpost", new GenericCombatStoryline()},
                                {"Stem the Flow", new GenericCombatStoryline()},
                                {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
@@ -81,9 +81,9 @@ namespace Questor.Storylines
             State = StorylineState.Idle;
             CurrentStorylineAgentId = 0;
             _storyline = null;
-            AgentInteraction.State = AgentInteractionState.Idle;
-            Traveler.State = TravelerState.Idle;
-            Traveler.Destination = null;
+            _agentInteraction.State = AgentInteractionState.Idle;
+            _traveler.State = TravelerState.Idle;
+            _traveler.Destination = null;
         }
 
         private DirectAgentMission StorylineMission
@@ -127,7 +127,7 @@ namespace Questor.Storylines
             Logging.Log("Storyline: Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "]");
             Cache.Instance.MissionName = currentStorylineMission.Name;
 
-            State = StorylineState.ArmState;
+            State = StorylineState.Arm;
             _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name)];
         }
 
@@ -140,9 +140,9 @@ namespace Questor.Storylines
                 return;
             }
 
-            var baseDestination = Traveler.Destination as StationDestination;
+            var baseDestination = _traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
-                Traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
+                _traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
 
             if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
@@ -150,20 +150,20 @@ namespace Questor.Storylines
                 _combat.ProcessState();
             }
 
-            Traveler.ProcessState();
-            if (Traveler.State == TravelerState.AtDestination)
+            _traveler.ProcessState();
+            if (_traveler.State == TravelerState.AtDestination)
             {
                 State = nextState;
-                Traveler.Destination = null;
+                _traveler.Destination = null;
             }
 
             if (Settings.Instance.DebugStates)
-                Logging.Log("Traveler.State = " + Traveler.State);
+                Logging.Log("Traveler.State = " + _traveler.State);
         }
 
         private void BringSpoilsOfWar()
         {
-            //DirectEve directEve = Cache.Instance.DirectEve;
+            DirectEve directEve = Cache.Instance.DirectEve;
             if (_nextAction > DateTime.Now)
                 return;
 
@@ -209,7 +209,7 @@ namespace Questor.Storylines
                     IdleState();
                     break;
 
-                case StorylineState.ArmState:
+                case StorylineState.Arm:
                     State = _storyline.Arm(this);
                     break;
 
@@ -222,24 +222,24 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.AcceptMission:
-                    if (AgentInteraction.State == AgentInteractionState.Idle)
+                    if (_agentInteraction.State == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start conversation [Start Mission]");
 
-                        AgentInteraction.State = AgentInteractionState.StartConversation;
-                        AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-                        AgentInteraction.AgentId = CurrentStorylineAgentId;
-                        AgentInteraction.ForceAccept = true;
+                        _agentInteraction.State = AgentInteractionState.StartConversation;
+                        _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
+                        _agentInteraction.AgentId = CurrentStorylineAgentId;
+                        _agentInteraction.ForceAccept = true;
                     }
 
-                    AgentInteraction.ProcessState();
+                    _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + AgentInteraction.State);
+                        Logging.Log("AgentInteraction.State = " + _agentInteraction.State);
 
-                    if (AgentInteraction.State == AgentInteractionState.Done)
+                    if (_agentInteraction.State == AgentInteractionState.Done)
                     {
-                        AgentInteraction.State = AgentInteractionState.Idle;
+                        _agentInteraction.State = AgentInteractionState.Idle;
                         // If there is no mission anymore then we're done (we declined it)
                         State = StorylineMission == null ? StorylineState.Done : StorylineState.ExecuteMission;
                     }
@@ -254,22 +254,22 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.CompleteMission:
-                    if (AgentInteraction.State == AgentInteractionState.Idle)
+                    if (_agentInteraction.State == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start Conversation [Complete Mission]");
 
-                        AgentInteraction.State = AgentInteractionState.StartConversation;
-                        AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
+                        _agentInteraction.State = AgentInteractionState.StartConversation;
+                        _agentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
-                    AgentInteraction.ProcessState();
+                    _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + AgentInteraction.State);
+                        Logging.Log("AgentInteraction.State = " + _agentInteraction.State);
 
-                    if (AgentInteraction.State == AgentInteractionState.Done)
+                    if (_agentInteraction.State == AgentInteractionState.Done)
                     {
-                        AgentInteraction.State = AgentInteractionState.Idle;
+                        _agentInteraction.State = AgentInteractionState.Idle;
                         State = StorylineState.BringSpoilsOfWar;
                     }
                     break;

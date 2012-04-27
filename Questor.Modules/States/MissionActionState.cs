@@ -9,7 +9,7 @@
 // -------------------------------------------------------------------------------
 namespace Questor.Modules.States
 {
-    public enum MissionActionState
+    public enum ActionState
     {
         MoveTo,
         MoveToBackground,

@@ -11,6 +11,7 @@ namespace Questor.Modules.States
 {
     public enum PanicState
     {
+        Idle,
         Normal,
         StartPanicking,
         Panicking,

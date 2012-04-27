@@ -4,7 +4,6 @@ using System.Diagnostics;
 namespace Questor.Modules.BackgroundTasks
 {
    using System;
-    //using Microsoft.DirectX.AudioVideoPlayback;
     //using System.Linq;
     using DirectEve;
     using global::Questor.Modules.Caching;
@@ -14,7 +13,7 @@ namespace Questor.Modules.BackgroundTasks
 
    public class Cleanup
    {
-      public static CleanupState State { get; set; }
+      public CleanupState State { get; set; }
       private DateTime _lastCleanupAction;
       private DateTime _lastChatWindowAction;
       private bool _newprivateconvowindowhandled;
@@ -24,7 +23,7 @@ namespace Questor.Modules.BackgroundTasks
       private string _convoalarmmp3 = "test.mp3";
       //private Audio _miscalarm;
       private string _miscalarmmp3 = "test.mp3";
-      //private static Audio _music;
+      //private  Audio _music;
 
 
       #region Play WAV
@@ -33,7 +32,7 @@ namespace Questor.Modules.BackgroundTasks
       /// </summary>
       /// <param name="location">The Location to the Sound File.</param>
       /// <param name="repeat">True to Repeat, False to Play Once.</param>
-      public static void PlayWAV(String location, Boolean repeat)
+      public  void PlayWAV(String location, Boolean repeat)
       {
           //Declare player as a new SoundPlayer with SoundLocation as the sound location
           System.Media.SoundPlayer player = new System.Media.SoundPlayer(location);
@@ -57,20 +56,20 @@ namespace Questor.Modules.BackgroundTasks
       /// Plays a .mp3 File.
       /// </summary>
       /// <param name="location">The Location to the Sound File.</param>
-      public static void PlayMP3(String location)
+      public  void PlayMP3(String location)
       {
           //_music = new Microsoft.DirectX.AudioVideoPlayback.Audio(location);
           //_music.Play();
       }
       #endregion
 
-      private static void BeginClosingQuestor()
+      private  void BeginClosingQuestor()
       {
           Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
           Cache.Instance.SessionState = "Quitting";
       }
 
-      public static void CheckEVEStatus()
+      public  void CheckEVEStatus()
       {
           // get the current process
           Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
@@ -144,7 +143,7 @@ namespace Questor.Modules.BackgroundTasks
                         
          switch (State)
          {
-            case CleanupState.Start:
+            case CleanupState.Idle:
                State = CleanupState.CheckModalWindows;
                break;
 
@@ -154,11 +153,6 @@ namespace Questor.Modules.BackgroundTasks
                //
                foreach (DirectWindow window in Cache.Instance.Windows)
                {
-                  if (window.Name == "blah")
-                  {
-                     window.AnswerModal("yes");
-                  }
-
                   // Telecom messages are generally mission info messages: close them
                   if (window.Name == "telecom")
                   {
@@ -166,46 +160,6 @@ namespace Questor.Modules.BackgroundTasks
                      Logging.Log("Cleanup: Content of telecom window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]");
                      window.Close();
                   }
-
-                  if (window.Name.Contains("Chat Invitation from"))
-                  {
-                     var random = new Random();
-                     int randomsecondstowait = random.Next(10, 60);
-
-                     if (!_newprivateconvowindowhandled)
-                     {
-                        _lastChatWindowAction = DateTime.Now;
-                        _newprivateconvowindowhandled = true;
-                     }
-
-                     if (DateTime.Now.Subtract(_lastChatWindowAction).TotalSeconds < randomsecondstowait)
-                        continue;
-
-                     Logging.Log("Cleanup: Convo window...");
-                     Logging.Log("Cleanup: Window Caption was: [" + window.Caption + "]");
-                     window.Close();
-                     _newprivateconvowindowhandled = false;
-                     continue;
-                  }
-
-                  //if (window.Caption.Contains("Private Chat")) //convo is already open?
-                  //{
-                  //    var random = new Random();
-                  //    var randomsecondstowait = random.Next(20, 300);
-
-                  //    if (!newprivateconvowindowhandled)
-                  //    {
-                  //        _lastChatWindowAction = DateTime.Now;
-                  //        newprivateconvowindowhandled = true;
-                  //    }
-
-                  //    if (DateTime.Now.Subtract(_lastChatWindowAction).TotalSeconds < randomsecondstowait)
-                  //        return;
-                  //
-                  //    window.Close();
-                  //    newprivateconvowindowhandled = false;
-                  //    continue;
-                  //}
 
                   // Modal windows must be closed
                   // But lets only close known modal windows
@@ -345,12 +299,12 @@ namespace Questor.Modules.BackgroundTasks
             
              case CleanupState.Done:
                _lastCleanupAction = DateTime.Now;
-               State = CleanupState.Start;
+               State = CleanupState.Idle;
                break;
 
             default:
                // Next state
-               State = CleanupState.Start;
+               State = CleanupState.Idle;
                break;
          }
       }

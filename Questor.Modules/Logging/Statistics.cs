@@ -34,7 +34,7 @@ namespace Questor.Modules.Logging
         public bool MissionLoggingCompleted = false;
         public bool DroneLoggingCompleted = false;
 
-        public static long AgentID { get; set; }
+        public long AgentID { get; set; }
 
         //private bool PocketLoggingCompleted = false;
         //private bool SessionLoggingCompleted = false;
@@ -44,7 +44,7 @@ namespace Questor.Modules.Logging
         /// <summary>
         ///   Singleton implementation
         /// </summary>
-        private static readonly Statistics _instance = new Statistics();
+        private static Statistics _instance = new Statistics();
 
         public static Statistics Instance
         {
@@ -279,7 +279,7 @@ namespace Questor.Modules.Logging
 
         public static void WriteMissionStatistics()
         {
-            Logging.Log("StatisticsState: MissionLogCompleted is false: we still need to create the mission logs for this last mission");
+            //Logging.Log("StatisticsState: MissionLogCompleted is false: we still need to create the mission logs for this last mission");
             if ((DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes > 5 && DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes > 45) || DateTime.Now.Subtract(Cache.Instance.StartTime).TotalMinutes < 5) //FinishedSalvaging is the later of the 2 timestamps (FinishedMission and FinishedSalvaging), if you aren't after mission salvaging this timestamp is the same as FinishedMission
             {
                 Logging.Log("Statistics: It is unlikely a mission has been run yet this session... No Mission log needs to be written.");
@@ -288,9 +288,9 @@ namespace Questor.Modules.Logging
             }
             else
             {
-                Logging.Log("Statistics: it has not been more than 10 minutes since the last mission was finished. The Mission log should be written.");
+                //Logging.Log("Statistics: it has not been more than 10 minutes since the last mission was finished. The Mission log should be written.");
             }
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.AgentID);
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID);
 
             if (Statistics.Instance.DebugMissionStatistics) // we only need to see the following wall of comments if debugging mission statistics
             {

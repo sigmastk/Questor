@@ -309,16 +309,6 @@ namespace Questor.Modules.Lookup
         public int? WindowXPosition { get; set; }
         public int? WindowYPosition { get; set; }
 
-        //Priority List
-        //public int PriorityLevelOfWarpScrambling { get; set; }
-        //public int PriorityLevelOfWebbing { get; set; }
-        //public int PriorityLevelOfTargetPainting { get; set; }
-        //public int PriorityLevelOfNeutralizing { get; set; }
-        //public int PriorityLevelOfJamming { get; set; }
-        //public int PriorityLevelOfDampening { get; set; }
-        //public int PriorityLevelOfTrackingDistrupting { get; set; }
-        //public int PriorityLevelOfPriorityKillTarget { get; set; }
-        
         //
         // path information - used to load the XML and used in other modules
         //
@@ -327,23 +317,9 @@ namespace Questor.Modules.Lookup
 
         public string SettingsPath { get; private set; }
         public event EventHandler<EventArgs> SettingsLoaded;
-        //public IList<QuestorMode> QuestorModeList = new List<QuestorMode>();
-
-        //public class QuestorMode
-        //{
-        //    public string Name { get; set; }
-        //    public string Value { get; set; }
-        //}
 
         public void LoadSettings()
         {
-            //Build a list
-
-            //QuestorModeList.Add(new QuestorMode() { Name = "Combat Missions", Value = "Combat Missions" });
-            //QuestorModeList.Add(new QuestorMode() { Name = "Salvage", Value = "Salvage" });
-            //QuestorModeList.Add(new QuestorMode() { Name = "Courier Missions (not available yet)", Value = "courier" });
-            //QuestorModeList.Add(new QuestorMode() { Name = "Combat Helper (not available yet)", Value = "combathelper" });
-            
             var repairstopwatch = new Stopwatch();
             Settings.Instance.CharacterNameXML = Cache.Instance.DirectEve.Me.Name;
             Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterNameXML) + ".xml");
@@ -469,6 +445,7 @@ namespace Questor.Modules.Lookup
             }
             else
             {
+                Logging.Log("Settings: Loading Settings from [" + Settings.Instance.SettingsPath + "]");
                //
                // these are listed by feature and should likely be re-ordered to reflect that
                //
@@ -776,14 +753,6 @@ namespace Questor.Modules.Lookup
                         MissionFitting.Add(new MissionFitting(missionfitting));
                }
 
-               //PriorityLevelOfWarpScrambling = (int?)xml.Element("warpScrammingPriority") ?? 0;
-               //PriorityLevelOfWebbing = (int?)xml.Element("webbingPriority") ?? 1;
-               //PriorityLevelOfTargetPainting = (int?)xml.Element("targetPaintingPriority") ?? 2;
-               //PriorityLevelOfNeutralizing = (int?)xml.Element("neutPriority") ?? 3;
-               //PriorityLevelOfJamming = (int?)xml.Element("jammingPriority") ?? 4;
-               //PriorityLevelOfDampening = (int?)xml.Element("dampeningPriority") ?? 5;
-               //PriorityLevelOfTrackingDistrupting = (int?)xml.Element("trackingDistruptingPriority") ?? 6;
-               //PriorityLevelOfPriorityKillTarget = (int?)xml.Element("priorityKillTargetPriority") ?? 7;
 
                //
                // Mission Blacklist

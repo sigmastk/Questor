@@ -21,11 +21,10 @@ namespace Questor.Modules.Actions
 
 
     public class ValueDump
-    {
-
+    { /*
         public ValueDumpState State { get; set; }
 
-        //private MainForm _form;
+        private MainForm _form;
         Random ramdom = new Random();
 
         private InvType _currentMineral;
@@ -41,10 +40,10 @@ namespace Questor.Modules.Actions
             }
         }
 
-        //public ValueDump(MainForm form1)
-        //{
-        //    _form = form1;
-        //}
+        public ValueDump(MainForm form1)
+        {
+            _form = form1;
+        }
 
         public void ProcessState()
         {
@@ -63,7 +62,7 @@ namespace Questor.Modules.Actions
                 case ValueDumpState.Idle:
                 case ValueDumpState.Done:
                     break;
-      /*
+
                 case ValueDumpState.Begin:
                     if(_form.RefineCheckBox.Checked && _form.cbxSell.Checked)
                     {
@@ -379,12 +378,12 @@ namespace Questor.Modules.Actions
                         // Add it to the refine list
                         _form.ItemsToRefine.Add(_currentItem);
                     }
-                    else
+                    /*else
                     {
-                        Logging.Log("Selling gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPriceR.ToString("#,##0.00") + "]");
-                    }
+                        Logging.Log("Selling gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPrice_r.ToString("#,##0.00") + "]");
+                    }*/
 
-                    _lastExecute = DateTime.Now;
+        /*         _lastExecute = DateTime.Now;
                     State = ValueDumpState.NextItem;
 
                     break;
@@ -453,13 +452,11 @@ namespace Questor.Modules.Actions
                         else
                             State = ValueDumpState.Done;
                     }
-              */
-                  //  break;
+                 break;
             }
 
         }
-        
-
+         * */
     }
         
 }

@@ -46,7 +46,7 @@ namespace Questor.Modules.BackgroundTasks
         public int ReserveCargoCapacity { get; set; }
         public List<Ammo> Ammo { get; set; }
 
-        public static SalvageState State { get; set; }
+        public SalvageState State { get; set; }
 
         /// <summary>
         ///   Activates tractorbeam on targeted wrecks
@@ -61,22 +61,6 @@ namespace Questor.Modules.BackgroundTasks
             double tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
             List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.Distance < tractorBeamRange).ToList();
 
-            //Logging.Log(Cache.Instance.DirectEve.ActiveShip.Entity.Mode.ToString());
-            //if (wrecks.FirstOrDefault() == null)
-            //{
-            //    var wrecksFar = Cache.Instance.Entities.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.Distance > tractorBeamRange).ToList();
-            //    if (wrecksFar.Count > 0)
-            //        if (Cache.Instance.DirectEve.ActiveShip.Entity.Mode != 1)
-            //        {
-            //            if (_nextApproachAction < DateTime.Now)
-            //            {
-            //                //_nextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-            //                wrecksFar.FirstOrDefault().Approach();
-            //            }
-            //        }
-            //    State = SalvageState.TargetWrecks;
-            //    return;
-            //};
 
             for (int i = tractorBeams.Count - 1; i >= 0; i--)
             {
@@ -536,8 +520,8 @@ namespace Questor.Modules.BackgroundTasks
         public void ProcessState()
         {
             //Salvage State should only run every x seconds
-            if (_nextSalvageAction > DateTime.Now)
-                return;
+            //if (_nextSalvageAction > DateTime.Now)
+            //    return;
 
             // Nothing to salvage in stations
             if (Cache.Instance.InStation)
