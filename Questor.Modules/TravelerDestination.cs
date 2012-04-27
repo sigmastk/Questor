@@ -201,8 +201,8 @@ namespace Questor.Modules
                 if (DateTime.Now > Cache.Instance.NextDockAction)
                 {
                Logging.Log("TravelerDestination.StationDestination: Warp to and dock at [" + entity.Name + "][" + Math.Round((entity.Distance / 1000) / 149598000, 2) + " AU away]");
+                    //Combat.ReloadAll();
                     entity.WarpTo();
-               Combat.ReloadAll();
                     Cache.Instance.NextDockAction.AddSeconds((int)Time.WarptoDelay_seconds);
                 }
             }
@@ -352,8 +352,8 @@ namespace Questor.Modules
 
             Logging.Log("TravelerDestination.BookmarkDestination: Warping to bookmark [" + bookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]");
             Cache.Instance.DoNotBreakInvul = false;
+            //Combat.ReloadAll();
             bookmark.WarpTo();
-         Combat.ReloadAll();
             nextAction = DateTime.Now.AddSeconds((int)Time.TravelerInWarpedNextCommandDelay_seconds);
             return false;
         }
