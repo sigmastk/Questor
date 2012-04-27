@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using Questor.Modules.Caching;
+using Questor.Modules.Logging;
+using Questor.Modules.Lookup;
 
 namespace Questor.Storylines
 {
@@ -13,22 +16,22 @@ namespace Questor.Storylines
         private DateTime _nextAction;
 
         /// <summary>
-        ///   Arm does nothing but get into a (assembled) shuttle
+        /// Arm does nothing but get into a (assembled) shuttle
         /// </summary>
         /// <returns></returns>
         public StorylineState Arm(Storyline storyline)
         {
             if (_nextAction > DateTime.Now)
-                return StorylineState.Arm; 
+                return StorylineState.ArmState; 
             
-            // Are we in a shuttle?  Yes, goto the agent
+            // Are we in a shuttle?  Yes, go to the agent
             DirectEve directEve = Cache.Instance.DirectEve;
             if (directEve.ActiveShip.GroupId == 31)
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if(!Cache.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.Arm;
-            
+            if(!Cache.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.ArmState;
+
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
             if (item != null)
@@ -38,7 +41,7 @@ namespace Questor.Storylines
                 _nextAction = DateTime.Now.AddSeconds(10);
 
                 item.ActivateShip();
-                return StorylineState.Arm;
+                return StorylineState.ArmState;
             }
             else
             {
@@ -48,7 +51,7 @@ namespace Questor.Storylines
         }
 
         /// <summary>
-        ///   Check if we have kernite in station
+        /// Check if we have kernite in station
         /// </summary>
         /// <returns></returns>
         public StorylineState PreAcceptMission(Storyline storyline)
@@ -154,7 +157,7 @@ namespace Questor.Storylines
         }
 
         /// <summary>
-        ///   We have no combat/delivery part in this mission, just accept it
+        /// We have no combat/delivery part in this mission, just accept it
         /// </summary>
         /// <returns></returns>
         public StorylineState PostAcceptMission(Storyline storyline)
@@ -166,7 +169,7 @@ namespace Questor.Storylines
         }
 
         /// <summary>
-        ///   We have no execute mission code
+        /// We have no execute mission code
         /// </summary>
         /// <returns></returns>
         public StorylineState ExecuteMission(Storyline storyline)

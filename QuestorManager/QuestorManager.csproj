@@ -70,45 +70,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions\Buy.cs" />
-    <Compile Include="Actions\BuyLPI.cs" />
-    <Compile Include="Actions\StateBuyLPI.cs" />
-    <Compile Include="Actions\InvType.cs" />
-    <Compile Include="Actions\ItemCache.cs" />
-    <Compile Include="Actions\ValueDump.cs" />
-    <Compile Include="Actions\StateDrop.cs" />
-    <Compile Include="Actions\StateGrab.cs" />
-    <Compile Include="Actions\StateSell.cs" />
-    <Compile Include="Actions\StateBuy.cs" />
-    <Compile Include="Actions\Grab.cs" />
-    <Compile Include="Actions\Drop.cs" />
-    <Compile Include="Actions\Sell.cs" />
-    <Compile Include="Actions\ValueDumpState.cs" />
     <Compile Include="ListItems.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
-    <Compile Include="State.cs" />
-    <Compile Include="Domains\Category.cs" />
-    <Compile Include="Domains\Group.cs" />
-    <Compile Include="Module\BookmarkDestination.cs" />
-    <Compile Include="Common\DirectEve.cs" />
-    <Compile Include="Extensions\DirectEveExtension.cs" />
-    <Compile Include="Common\Logging.cs" />
-    <Compile Include="MainForm.cs">
+    <Compile Include="QuestormanagerState.cs" />
+    <Compile Include="QuestorManagerUI.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
+    <Compile Include="QuestorManagerUI.Designer.cs">
+      <DependentUpon>QuestorManagerUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Module\MissionBookmarkDestination.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="QuestorManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Module\SolarSystemDestination.cs" />
-    <Compile Include="Module\StationDestination.cs" />
-    <Compile Include="Module\Traveler.cs" />
-    <Compile Include="Module\TravelerDestination.cs" />
-    <Compile Include="Module\TravelerState.cs" />
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
+    <EmbeddedResource Include="QuestorManagerUI.resx">
+      <DependentUpon>QuestorManagerUI.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -147,6 +122,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Questor.Modules\Questor.Modules.csproj">
+      <Project>{6D5DAAB6-0208-46AA-BA56-92B6068028C9}</Project>
+      <Name>Questor.Modules</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

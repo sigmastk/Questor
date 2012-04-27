@@ -1,17 +1,24 @@
-﻿namespace Questor.Storylines
+﻿
+namespace Questor.Storylines
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
-    using global::Questor.Modules;
-
+    using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Activities;
+    using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
+    using global::Questor.Modules.Logging;
+    using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.States;
+    
     public class Storyline
     {
         public StorylineState State { get; set; }
 
         public long CurrentStorylineAgentId { get; private set; }
-        
+
         private IStoryline _storyline;
         private readonly Dictionary<string, IStoryline> _storylines;
         private readonly List<long> _agentBlacklist;
@@ -25,58 +32,58 @@
 
         public Storyline()
         {
-            _combat = new Combat();
-            _traveler = new Traveler();
-            _agentInteraction = new AgentInteraction();
+           _combat = new Combat();
+           _traveler = new Traveler();
+           _agentInteraction = new AgentInteraction();
 
-            _agentBlacklist = new List<long>();
+           _agentBlacklist = new List<long>();
 
-            _storylines = new Dictionary<string, IStoryline>
-                {
-                    //{"__", new GenericCombatStoryline()}, //example
-                    {"Materials For War Preparation", new MaterialsForWarPreparation()},
-                    {"Shipyard Theft", new GenericCombatStoryline()},
-                    {"Evolution", new GenericCombatStoryline()},
-                    {"Record Cleaning", new GenericCombatStoryline()},
-                    {"Covering Your Tracks", new GenericCombatStoryline()},
-                    {"Crowd Control", new GenericCombatStoryline()},
-                    {"A Force to Be Reckoned With", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - The Secret Meeting (7 of 10)", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - Retrieve the Prisoners (9 of 10)", new GenericCombatStoryline()},
-                    {"Kidnappers Strike - The Final Battle (10 of 10)", new GenericCombatStoryline()},
-                    {"Whispers in the Dark - First Contact (1 of 4)", new GenericCombatStoryline()},
-                    {"Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline()},
-                    {"Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline()},
-                    {"Transaction Data Delivery", new TransactionDataDelivery()},
-                    {"Innocents in the Crossfire", new GenericCombatStoryline()},
-                    {"Patient Zero", new GenericCombatStoryline()},
-                    {"Soothe the Salvage Beast", new GenericCombatStoryline()},
-                    {"Forgotten Outpost", new GenericCombatStoryline()},
-                    {"Stem the Flow", new GenericCombatStoryline()},
-                    {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
-                    {"Blood Farm", new GenericCombatStoryline()}, 
-                    {"Jealous Rivals", new GenericCombatStoryline()},
-                    //{"Quota Season", new GenericCombatStoryline()}, //why cant we pickup the Custom Circuitry? problem in salvage.cs somewhere: "salvage: Container" name: Number "contained no valuable loot"
-                    //{"Matriarch", new GenericCombatStoryline()},
-                    //{"Diplomatic Incident", new GenericCombatStoryline()},
-                    //these work but are against other factions that I generally like to avoid
-                    //{"The Blood of Angry Men", new GenericCombatStoryline()},  //amarr faction
-                    //{"Amarrian Excavators", new GenericCombatStoryline()}, 	//amarr faction
-                };
+           _storylines = new Dictionary<string, IStoryline>
+                            {
+                               //{"__", new GenericCombatStoryline()}, //example
+                               {"Materials For War Preparation", new MaterialsForWarPreparation()},
+                               {"Shipyard Theft", new GenericCombatStoryline()},
+                               {"Evolution", new GenericCombatStoryline()},
+                               {"Record Cleaning", new GenericCombatStoryline()},
+                               {"Covering Your Tracks", new GenericCombatStoryline()},
+                               {"Crowd Control", new GenericCombatStoryline()},
+                               {"A Force to Be Reckoned With", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - The Secret Meeting (7 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Retrieve the Prisoners (9 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - The Final Battle (10 of 10)", new GenericCombatStoryline()},
+                               {"Whispers in the Dark - First Contact (1 of 4)", new GenericCombatStoryline()},
+                               {"Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline()},
+                               {"Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline()},
+                               {"Transaction Data Delivery", new TransactionDataDelivery()},
+                               {"Innocents in the Crossfire", new GenericCombatStoryline()},
+                               {"Patient Zero", new GenericCombatStoryline()},
+                               //{"Soothe the Salvage Beast", new GenericCombatStoryline()}, //this does NOT work. Whoever wrote the XML and decided it was working was mistaken It will take some changes to mission actions as currently it gets quite confused motoring between 3 cans and switching to the next can before its anywhere close to any of them. (wtf!)
+                               {"Forgotten Outpost", new GenericCombatStoryline()},
+                               {"Stem the Flow", new GenericCombatStoryline()},
+                               {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
+                               {"Blood Farm", new GenericCombatStoryline()},
+                               {"Jealous Rivals", new GenericCombatStoryline()},
+                               //{"Quota Season", new GenericCombatStoryline()}, //why cant we pickup the Custom Circuitry? problem in salvage.cs somewhere: "salvage: Container" name: Number "contained no valuable loot"
+                               //{"Matriarch", new GenericCombatStoryline()},
+                               //{"Diplomatic Incident", new GenericCombatStoryline()},
+                               //these work but are against other factions that I generally like to avoid
+                               //{"The Blood of Angry Men", new GenericCombatStoryline()},  //amarr faction
+                               //{"Amarrian Excavators", new GenericCombatStoryline()}, 	//amarr faction
+                            };
         }
 
-        public void Reset()
+       public void Reset()
         {
             State = StorylineState.Idle;
             CurrentStorylineAgentId = 0;
             _storyline = null;
-            _agentInteraction.State = AgentInteractionState.Idle;
-            _traveler.State = TravelerState.Idle;
-            _traveler.Destination = null;
+            AgentInteraction.State = AgentInteractionState.Idle;
+            Traveler.State = TravelerState.Idle;
+            Traveler.Destination = null;
         }
 
         private DirectAgentMission StorylineMission
@@ -120,7 +127,7 @@
             Logging.Log("Storyline: Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "]");
             Cache.Instance.MissionName = currentStorylineMission.Name;
 
-            State = StorylineState.Arm;
+            State = StorylineState.ArmState;
             _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name)];
         }
 
@@ -133,9 +140,9 @@
                 return;
             }
 
-            var baseDestination = _traveler.Destination as StationDestination;
+            var baseDestination = Traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
-                _traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
+                Traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
 
             if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
@@ -143,20 +150,20 @@
                 _combat.ProcessState();
             }
 
-            _traveler.ProcessState();
-            if (_traveler.State == TravelerState.AtDestination)
+            Traveler.ProcessState();
+            if (Traveler.State == TravelerState.AtDestination)
             {
                 State = nextState;
-                _traveler.Destination = null;
+                Traveler.Destination = null;
             }
 
             if (Settings.Instance.DebugStates)
-                Logging.Log("Traveler.State = " + _traveler.State);
+                Logging.Log("Traveler.State = " + Traveler.State);
         }
 
         private void BringSpoilsOfWar()
         {
-            DirectEve directEve = Cache.Instance.DirectEve;
+            //DirectEve directEve = Cache.Instance.DirectEve;
             if (_nextAction > DateTime.Now)
                 return;
 
@@ -202,7 +209,7 @@
                     IdleState();
                     break;
 
-                case StorylineState.Arm:
+                case StorylineState.ArmState:
                     State = _storyline.Arm(this);
                     break;
 
@@ -215,29 +222,29 @@
                     break;
 
                 case StorylineState.AcceptMission:
-                    if (_agentInteraction.State == AgentInteractionState.Idle)
+                    if (AgentInteraction.State == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start conversation [Start Mission]");
 
-                        _agentInteraction.State = AgentInteractionState.StartConversation;
-                        _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-                        _agentInteraction.AgentId = CurrentStorylineAgentId;
-                        _agentInteraction.ForceAccept = true;
+                        AgentInteraction.State = AgentInteractionState.StartConversation;
+                        AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
+                        AgentInteraction.AgentId = CurrentStorylineAgentId;
+                        AgentInteraction.ForceAccept = true;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + _agentInteraction.State);
+                        Logging.Log("AgentInteraction.State = " + AgentInteraction.State);
 
-                    if (_agentInteraction.State == AgentInteractionState.Done)
+                    if (AgentInteraction.State == AgentInteractionState.Done)
                     {
-                        _agentInteraction.State = AgentInteractionState.Idle;
+                        AgentInteraction.State = AgentInteractionState.Idle;
                         // If there is no mission anymore then we're done (we declined it)
                         State = StorylineMission == null ? StorylineState.Done : StorylineState.ExecuteMission;
                     }
                     break;
-                
+
                 case StorylineState.ExecuteMission:
                     State = _storyline.ExecuteMission(this);
                     break;
@@ -247,22 +254,22 @@
                     break;
 
                 case StorylineState.CompleteMission:
-                    if (_agentInteraction.State == AgentInteractionState.Idle)
+                    if (AgentInteraction.State == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start Conversation [Complete Mission]");
 
-                        _agentInteraction.State = AgentInteractionState.StartConversation;
-                        _agentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
+                        AgentInteraction.State = AgentInteractionState.StartConversation;
+                        AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + _agentInteraction.State);
+                        Logging.Log("AgentInteraction.State = " + AgentInteraction.State);
 
-                    if (_agentInteraction.State == AgentInteractionState.Done)
+                    if (AgentInteraction.State == AgentInteractionState.Done)
                     {
-                        _agentInteraction.State = AgentInteractionState.Idle;
+                        AgentInteraction.State = AgentInteractionState.Idle;
                         State = StorylineState.BringSpoilsOfWar;
                     }
                     break;

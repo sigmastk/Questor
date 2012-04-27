@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0C0BE1A3-BA5B-41A1-B578-F20777D02304}</ProjectGuid>
+    <ProjectGuid>{6D5DAAB6-0208-46AA-BA56-92B6068028C9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Questor.Modules</RootNamespace>
@@ -68,82 +68,104 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramFiles)\Innerspace\Lavish.InnerSpace.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC\Microsoft.DirectX.AudioVideoPlayback\1.0.2902.0__31bf3856ad364e35\Microsoft.DirectX.AudioVideoPlayback.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Action.cs" />
-    <Compile Include="ActionState.cs" />
-    <Compile Include="AgentInteraction.cs" />
-    <Compile Include="AgentInteractionPurpose.cs" />
-    <Compile Include="AgentInteractionState.cs" />
-    <Compile Include="Ammo.cs" />
-    <Compile Include="Arm.cs" />
-    <Compile Include="ArmState.cs" />
-    <Compile Include="Cache.cs" />
-    <Compile Include="CategoryID.cs" />
-    <Compile Include="CharSchedule.cs" />
-    <Compile Include="AnomalyControllerState.cs" />
-    <Compile Include="AnomalyController.cs" />
-    <Compile Include="CleanupState.cs" />
-    <Compile Include="Cleanup.cs" />
-    <Compile Include="StatisticsState.cs" />
-    <Compile Include="Statistics.cs" />
-    <Compile Include="SelectAgent.cs" />
-    <Compile Include="ScanInteraction.cs" />
-    <Compile Include="ScanInteractionState.cs" />
-    <Compile Include="LocalWatchState.cs" />
-    <Compile Include="LocalWatch.cs" />
-    <Compile Include="Combat.cs" />
-    <Compile Include="CombatState.cs" />
-    <Compile Include="CourierMission.cs" />
-    <Compile Include="CourierMissionState.cs" />
-    <Compile Include="DamageType.cs" />
-    <Compile Include="DebugModule.cs" />
-    <Compile Include="DebugModuleState.cs" />
-    <Compile Include="Distances.cs" />
-    <Compile Include="SwitchShipState.cs" />
-    <Compile Include="SwitchShip.cs" />
-    <Compile Include="Defense.cs" />
-    <Compile Include="Drones.cs" />
-    <Compile Include="DroneState.cs" />
-    <Compile Include="EntityCache.cs" />
-    <Compile Include="Fitting.cs" />
-    <Compile Include="GroupID.cs" />
-    <Compile Include="InvType.cs" />
-    <Compile Include="ItemCache.cs" />
-    <Compile Include="Logging.cs" />
-    <Compile Include="MissionController.cs" />
-    <Compile Include="MissionControllerState.cs" />
-    <Compile Include="MissionState.cs" />
-    <Compile Include="ModuleCache.cs" />
-    <Compile Include="Panic.cs" />
-    <Compile Include="PanicState.cs" />
-    <Compile Include="Priority.cs" />
-    <Compile Include="PriorityTarget.cs" />
+    <Compile Include="Alerts\Audio.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Caching\ItemCache.cs" />
+    <Compile Include="Lookup\CombatMissionSettings.cs" />
+    <Compile Include="States\QuestorState.cs" />
+    <Compile Include="Actions\MissionAction.cs" />
+    <Compile Include="States\MissionActionState.cs" />
+    <Compile Include="Actions\Buy.cs" />
+    <Compile Include="Actions\BuyLPI.cs" />
+    <Compile Include="Actions\Drop.cs" />
+    <Compile Include="Actions\Grab.cs" />
+    <Compile Include="Lookup\InvType.cs" />
+    <Compile Include="Actions\Sell.cs" />
+    <Compile Include="States\StateBuy.cs" />
+    <Compile Include="States\StateBuyLPI.cs" />
+    <Compile Include="States\StateDrop.cs" />
+    <Compile Include="States\StateGrab.cs" />
+    <Compile Include="States\StateSell.cs" />
+    <Compile Include="Actions\ValueDump.cs" />
+    <Compile Include="States\ValueDumpState.cs" />
+    <Compile Include="Actions\AgentInteraction.cs" />
+    <Compile Include="Lookup\AgentInteractionPurpose.cs" />
+    <Compile Include="States\AgentInteractionState.cs" />
+    <Compile Include="Lookup\Ammo.cs" />
+    <Compile Include="Actions\Arm.cs" />
+    <Compile Include="States\ArmState.cs" />
+    <Compile Include="Caching\Cache.cs" />
+    <Compile Include="Lookup\CharSchedule.cs" />
+    <Compile Include="States\CleanupState.cs" />
+    <Compile Include="BackgroundTasks\Cleanup.cs" />
+    <Compile Include="Logging\Logging.cs" />
+    <Compile Include="Lookup\CategoryID.cs" />
+    <Compile Include="Lookup\GroupID.cs" />
+    <Compile Include="Actions\BookmarkDestination.cs" />
+    <Compile Include="Actions\MissionBookmarkDestination.cs" />
+    <Compile Include="Actions\SolarSystemDestination.cs" />
+    <Compile Include="Actions\StationDestination.cs" />
+    <Compile Include="Activities\Traveler.cs" />
+    <Compile Include="Actions\TravelerDestination.cs" />
+    <Compile Include="States\TravelerState.cs" />
+    <Compile Include="States\StatisticsState.cs" />
+    <Compile Include="Logging\Statistics.cs" />
+    <Compile Include="Lookup\SelectAgent.cs" />
+    <Compile Include="Actions\ScanInteraction.cs" />
+    <Compile Include="States\ScanInteractionState.cs" />
+    <Compile Include="States\LocalWatchState.cs" />
+    <Compile Include="BackgroundTasks\LocalWatch.cs" />
+    <Compile Include="Combat\Combat.cs" />
+    <Compile Include="States\CombatState.cs" />
+    <Compile Include="Activities\CourierMission.cs" />
+    <Compile Include="States\CourierMissionState.cs" />
+    <Compile Include="Lookup\DamageType.cs" />
+    <Compile Include="Actions\DebugModule.cs" />
+    <Compile Include="States\DebugModuleState.cs" />
+    <Compile Include="Lookup\Distances.cs" />
+    <Compile Include="States\SwitchShipState.cs" />
+    <Compile Include="Actions\SwitchShip.cs" />
+    <Compile Include="BackgroundTasks\Defense.cs" />
+    <Compile Include="Combat\Drones.cs" />
+    <Compile Include="States\DroneState.cs" />
+    <Compile Include="Caching\EntityCache.cs" />
+    <Compile Include="Actions\Fitting.cs" />
+    <Compile Include="Activities\CombatMission.cs" />
+    <Compile Include="States\CombatMissionState.cs" />
+    <Compile Include="States\MissionState.cs" />
+    <Compile Include="Caching\ModuleCache.cs" />
+    <Compile Include="BackgroundTasks\Panic.cs" />
+    <Compile Include="States\PanicState.cs" />
+    <Compile Include="Lookup\Priority.cs" />
+    <Compile Include="Lookup\PriorityTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scoop.cs" />
-    <Compile Include="ScoopState.cs" />
-    <Compile Include="Salvage.cs" />
-    <Compile Include="SalvageState.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="ShipTargetValue.cs" />
-    <Compile Include="Time.cs" />
-    <Compile Include="Traveler.cs" />
-    <Compile Include="TravelerDestination.cs" />
-    <Compile Include="TravelerState.cs" />
-    <Compile Include="UnloadLoot.cs" />
-    <Compile Include="UnloadLootState.cs" />
+    <Compile Include="BackgroundTasks\Scoop.cs" />
+    <Compile Include="States\ScoopState.cs" />
+    <Compile Include="BackgroundTasks\Salvage.cs" />
+    <Compile Include="States\SalvageState.cs" />
+    <Compile Include="Lookup\Settings.cs" />
+    <Compile Include="Lookup\ShipTargetValue.cs" />
+    <Compile Include="Lookup\Time.cs" />
+    <Compile Include="Actions\UnloadLoot.cs" />
+    <Compile Include="States\UnloadLootState.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

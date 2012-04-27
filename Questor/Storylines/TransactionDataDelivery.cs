@@ -1,10 +1,16 @@
-﻿namespace Questor.Storylines
+﻿
+namespace Questor.Storylines
 {
     using System;
     using System.Linq;
     using DirectEve;
-    using global::Questor.Modules;
-
+    using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Activities;
+    using global::Questor.Modules.States;
+    using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Logging;
+    
+    
     public class TransactionDataDelivery : IStoryline
     {
         private DateTime _nextAction;
@@ -23,15 +29,15 @@
         public StorylineState Arm(Storyline storyline)
         {
             if (_nextAction > DateTime.Now)
-                return StorylineState.Arm;
+                return StorylineState.ArmState;
 
-            // Are we in a shuttle?  Yes, goto the agent
+            // Are we in a shuttle?  Yes, go to the agent
             DirectEve directEve = Cache.Instance.DirectEve;
             if (directEve.ActiveShip.GroupId == 31)
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if (!Cache.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.Arm;
+            if (!Cache.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.ArmState;
 
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
@@ -42,7 +48,7 @@
                 _nextAction = DateTime.Now.AddSeconds(10);
 
                 item.ActivateShip();
-                return StorylineState.Arm;
+                return StorylineState.ArmState;
             }
             else
             {
@@ -59,24 +65,24 @@
         public StorylineState PreAcceptMission(Storyline storyline)
         {
             _state = TransactionDataDeliveryState.GotoPickupLocation;
-            
-            _traveler.State = TravelerState.Idle;
-            _traveler.Destination = null;
+
+            Traveler.State = TravelerState.Idle;
+            Traveler.Destination = null;
 
             return StorylineState.AcceptMission;
         }
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = _traveler.Destination as MissionBookmarkDestination;
+            var destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
-                _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
-            _traveler.ProcessState();
+            Traveler.ProcessState();
 
-            if (_traveler.State == TravelerState.AtDestination)
+            if (Traveler.State == TravelerState.AtDestination)
             {
-                _traveler.Destination = null;
+                Traveler.Destination = null;
                 return true;
             }
 
@@ -110,8 +116,8 @@
                 Logging.Log("TransactionDataDelivery: Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"));
                 to.Add(item);
             }
-                _nextAction = DateTime.Now.AddSeconds(10);
-                return false;
+            _nextAction = DateTime.Now.AddSeconds(10);
+            return false;
         }
 
         /// <summary>
@@ -127,8 +133,8 @@
         public StorylineState ExecuteMission(Storyline storyline)
         {
             if (_nextAction > DateTime.Now)
-                return StorylineState.ExecuteMission; 
-            
+                return StorylineState.ExecuteMission;
+
             switch (_state)
             {
                 case TransactionDataDeliveryState.GotoPickupLocation:

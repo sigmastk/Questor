@@ -3,7 +3,7 @@
     public enum StorylineState
     {
         Idle,
-        Arm,
+        ArmState,
         GotoAgent,
         PreAcceptMission,
         AcceptMission,
