@@ -441,7 +441,14 @@ namespace Questor.Modules
                     drone = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
                     if (drone == null || drone.Stacksize < 1)
                     {
-                        Logging.Log("Arm: Out of drones in [" + Settings.Instance.AmmoHangar + "]");
+                        string ammoHangarName;
+                        if (string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                            ammoHangarName = "ItemHangar";
+                        else
+                            ammoHangarName = Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture); //"Corp Hangar Ammo Tab";
+                           
+                        
+                        Logging.Log("Arm: Out of drones with typeID [" + Settings.Instance.DroneTypeId + "] in [" + ammoHangarName + "]"); 
                         State = ArmState.NotEnoughDrones;
                         break;
                     }
