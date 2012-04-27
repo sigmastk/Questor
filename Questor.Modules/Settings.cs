@@ -441,6 +441,7 @@ namespace Questor.Modules
             }
             else
             {
+                Logging.Log("Settings: Loading Settings from [" + Settings.Instance.SettingsPath + "]");
                //
                // these are listed by feature and should likely be re-ordered to reflect that
                //
