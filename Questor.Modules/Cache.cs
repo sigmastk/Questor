@@ -2024,6 +2024,7 @@ namespace Questor.Modules
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
+                    //Logging.Log(module + ": Corporate Hangar is defined as the Ammo Hangar");
                     Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
 
                     // Is the corp loot Hangar open?
@@ -2057,6 +2058,7 @@ namespace Questor.Modules
                 }
                 else
                 {
+                    //Logging.Log(module + ": Item Hangar is defined as the Ammo Hangar");
                     Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
                     if (Cache.Instance.AmmoHangar == null)
                         return false;
