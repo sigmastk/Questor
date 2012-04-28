@@ -254,28 +254,21 @@ namespace Questor.Modules
                         }
                         else
                         {
-                            State = ArmState.OpenAmmoHangar;
+                            State = ArmState.OpenCargo;
                         }
                     }
                     break;
 
-                case ArmState.OpenAmmoHangar:
-                    // Is the hangar open?
-
+                case ArmState.OpenCargo:
+                    // Is CargoBay  and AmmoHangar open?
                     if (!Cache.OpenAmmoHangar("Arm")) break;
 
-                    Logging.Log("Arm: Done Opening Item hangar: proceeding to Cargo Hold");
-                    State = ArmState.OpenCargo;
-                    break;
-
-                case ArmState.OpenCargo:
-                    // Is cargo open?
                     if (!Cache.OpenCargoHold("Arm")) break;
 
                     if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                     {
-                        Logging.Log("Arm: Opening ship's drone bay");
-                        State = ArmState.OpenDroneBay;
+                        Logging.Log("Arm: Moving Drones");
+                        State = ArmState.MoveDrones;
                     }
                     else if ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings)))
                     {
@@ -421,14 +414,6 @@ namespace Questor.Modules
                     else Logging.Log("Arm: Waiting for fitting. locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count);
                     break;
 
-                case ArmState.OpenDroneBay:
-                    // Is the drone bay open?
-                    if (!Cache.OpenDroneBay("Arm")) break;
-
-                    Logging.Log("Arm: Moving drones");
-                    State = ArmState.MoveDrones;
-                    break;
-
                 case ArmState.MoveDrones:
                     if (!Cache.OpenShipsHangar("Arm")) break;
                     
@@ -565,7 +550,7 @@ namespace Questor.Modules
                     if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                     {
                         // Close the drone bay, its not required in space.
-                        if (Cache.Instance.DroneBay.IsReady)
+                        //if (Cache.Instance.DroneBay.IsReady) //why is not .isready and .isvalid working at the moment? 4/2012
                             Cache.Instance.DroneBay.Window.Close();
                     }
 
