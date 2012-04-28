@@ -292,13 +292,16 @@ namespace Questor.Modules
                             break;
 
                         // Stack everything
-                        //if (((Cache.Instance.LootContainer != null) && Cache.Instance.LootContainer.IsValid) && Cache.Instance.LootContainer.IsReady)
-                        //{
-                            _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                            _lastUnloadAction = DateTime.Now;
-                            Logging.Log("UnloadLoot: Stacking items in loot container: resuming in [ " + Math.Round(DateTime.Now.Subtract(_nextUnloadAction).TotalSeconds,0) + " sec ]");
-                            Cache.Instance.LootContainer.StackAll();                            
-                        //}
+                        if (Cache.Instance.LootContainer != null) 
+                        {
+                            //if (Cache.Instance.LootContainer.IsValid && Cache.Instance.LootContainer.IsReady)
+                            //{
+                                _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                                _lastUnloadAction = DateTime.Now;
+                                Logging.Log("UnloadLoot: Stacking items in loot container: resuming in [ " + Math.Round(DateTime.Now.Subtract(_nextUnloadAction).TotalSeconds,0) + " sec ]");
+                                Cache.Instance.LootContainer.StackAll();                            
+                            //}
+                        }
                     }
                     State = UnloadLootState.WaitForStacking;
                     break;
