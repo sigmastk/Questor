@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-//
-//     Please look in the accompanying license.htm file for the license that
-//     applies to this source code. (a copy can also be found at:
+// 
+//     Please look in the accompanying license.htm file for the license that 
+//     applies to this source code. (a copy can also be found at: 
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -14,14 +14,14 @@ namespace Questor.Modules.Actions
     using System.Linq;
     using global::Questor.Modules.States;
 
-    public class MissionAction
+    public class Action
     {
-        public MissionAction()
+        public Action()
         {
             Parameters = new Dictionary<string, List<string>>();
         }
 
-        public static MissionActionState State { get; set; }
+        public ActionState State { get; set; }
         public Dictionary<string, List<string>> Parameters { get; private set; }
 
         public void AddParameter(string parameter, string value)

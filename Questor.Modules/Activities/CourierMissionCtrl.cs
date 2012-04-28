@@ -9,39 +9,39 @@ namespace Questor.Modules.Activities
     using global::Questor.Modules.States;
     using global::Questor.Modules.Caching;
 
-    public class CourierMission
+    public class CourierMissionCtrl
     {
         private DateTime _nextCourierAction;
         private readonly Traveler _traveler;
-        public CourierMissionState State { get; set; }
+        public CourierMissionCtrlState State { get; set; }
 
         /// <summary>
         ///   Arm does nothing but get into a (assembled) shuttle
         /// </summary>
         /// <returns></returns>
         ///
-        public CourierMission()
+        public CourierMissionCtrl()
         {
             _traveler = new Traveler();
         }
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            var destination = _traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
-                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
-            Traveler.ProcessState();
+            _traveler.ProcessState();
 
-            if (Traveler.State == TravelerState.AtDestination)
+            if (_traveler.State == TravelerState.AtDestination)
             {
                 if (destination != null)
-                    Logging.Log("CourierMission: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
+                    Logging.Log("CourierMissionCtrl: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
                 else
                 {
-                    Logging.Log("CourierMission: destination is null"); //how would this occur exactly?
+                    Logging.Log("CourierMissionCtrl: destination is null"); //how would this occur exactly?
                 }
-                Traveler.Destination = null;
+                _traveler.Destination = null;
                 return true;
             }
 
@@ -53,12 +53,12 @@ namespace Questor.Modules.Activities
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.OpenItemsHangar("CourierMission")) return false;
+            if (!Cache.OpenItemsHangar("CourierMissionCtrl")) return false;
 
-            if (!Cache.OpenCargoHold("CourierMission")) return false;
+            if (!Cache.OpenCargoHold("CourierMissionCtrl")) return false;
 
             const string missionItem = "Encoded Data Chip";
-            Logging.Log("CourierMission: mission item is: " + missionItem);
+            Logging.Log("CourierMissionCtrl: mission item is: " + missionItem);
             DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
             DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
 
@@ -72,7 +72,7 @@ namespace Questor.Modules.Activities
             // Move items
             foreach (DirectItem item in from.Items.Where(i => i.TypeName == missionItem))
             {
-                Logging.Log("CourierMissionState: Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"));
+                Logging.Log("CourierMissionCtrl: Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"));
                 to.Add(item);
             }
             _nextCourierAction = DateTime.Now.AddSeconds(8);
@@ -92,33 +92,33 @@ namespace Questor.Modules.Activities
         {
             switch (State)
             {
-                case CourierMissionState.Idle:
+                case CourierMissionCtrlState.Idle:
                     break;
 
-                case CourierMissionState.GotoPickupLocation:
+                case CourierMissionCtrlState.GotoPickupLocation:
                     //cache.instance.agentid cannot be used for storyline missions! you must pass the correct agentID to this module if you wish to extend it to do storyline missions
                     if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Pick Up)"))
-                        State = CourierMissionState.PickupItem;
+                        State = CourierMissionCtrlState.PickupItem;
                     break;
 
-                case CourierMissionState.PickupItem:
+                case CourierMissionCtrlState.PickupItem:
                     if (MoveItem(true))
-                        State = CourierMissionState.GotoDropOffLocation;
+                        State = CourierMissionCtrlState.GotoDropOffLocation;
                     break;
 
-                case CourierMissionState.GotoDropOffLocation:
+                case CourierMissionCtrlState.GotoDropOffLocation:
                     //cache.instance.agentid cannot be used for storyline missions! you must pass the correct agentID to this module if you wish to extend it to do storyline missions
                     if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Drop Off)"))
-                        State = CourierMissionState.DropOffItem;
+                        State = CourierMissionCtrlState.DropOffItem;
                     break;
 
-                case CourierMissionState.DropOffItem:
+                case CourierMissionCtrlState.DropOffItem:
                     if (MoveItem(false))
-                        State = CourierMissionState.Done;
+                        State = CourierMissionCtrlState.Done;
                     break;
 
-                case CourierMissionState.Done:
-                    Logging.Log("CourierMissionState: Done");
+                case CourierMissionCtrlState.Done:
+                    Logging.Log("CourierMissionCtrl: Done");
                     break;
             }
 

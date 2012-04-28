@@ -1,6 +1,6 @@
 ﻿namespace Questor.Modules.States
 {
-    public enum CourierMissionState
+    public enum CourierMissionCtrlState
     {
         GotoPickupLocation,
         PickupItem,
