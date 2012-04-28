@@ -322,7 +322,18 @@ namespace Questor.Modules
                     {
                         if (target.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !target.TargetValue.HasValue && target.GroupId != (int)Group.LargeCollidableStructure)
                         {
-                            weapon.Click();
+                            if (weapon.IsActive)
+                            {
+                                //if we are already shooting at it, stop
+                                weapon.Click();
+                                continue;
+                            }
+                            else
+                            {
+                                //if weapon are not yet shooting at it, do not attempt to shoot
+                                continue;
+                            }
+                            
                         }
                     }
                 }
