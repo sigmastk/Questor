@@ -678,9 +678,9 @@ namespace Questor.Modules
 
             case AgentInteractionState.StartConversation:
                Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
-               if ((int)Cache.Instance.AgentEffectiveStandingtoMe == (int)0.00)
+               if (((int)Cache.Instance.AgentEffectiveStandingtoMe == (int)0.00) && (AgentId == Cache.Instance.AgentId))
                {
-                   Logging.Log("AgentInteraction: Agent Standings not yet available. retrying.");
+                   Logging.Log("AgentInteraction: Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.AgentEffectiveStandingtoMe + " and must not yet be available. retrying.");
                    return;
                }
                Agent.InteractWith();
