@@ -1379,6 +1379,7 @@ namespace Questor
                     if (_unloadLoot.State == UnloadLootState.Idle)
                     {
                         Logging.Log("Questor: UnloadLoot: Begin");
+                        UnloadLoot._nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(1, 3));
                         _unloadLoot.State = UnloadLootState.Begin;
                     }
 
