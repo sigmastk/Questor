@@ -206,12 +206,15 @@ namespace Questor.Modules
                 if (activate)
                 {
                     module.Click();
+                    Logging.Log("Defense: Activating Speed Module: Current Speed [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.Entity.Velocity, 0) + "m/s] Capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] MinimumCap Set to [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "%]");
                     Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
                     return;
                 }
                 else if (deactivate && module.IsActive)
                 {
                     module.Click();
+                    Logging.Log("Defense: Deactivating Speed Module: Current Speed [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.Entity.Velocity, 0) + "m/s] Capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] MinimumCap Set to [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "%]");
+                   
                     Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
                     return;
                 }
