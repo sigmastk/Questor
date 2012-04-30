@@ -74,8 +74,9 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Priority targets (e.g. warp scramblers or mission kill targets)
         /// </summary>
-        private List<PriorityTarget> _priorityTargets;
+        public List<PriorityTarget> _priorityTargets;
 
+        public String _priorityTargets_text;
         /// <summary>
         ///   Star cache
         /// </summary>
@@ -814,6 +815,9 @@ namespace Questor.Modules.Caching
         public double MyWalletBalance { get; set; }
         public string CurrentPocketAction { get; set; }
         public float AgentEffectiveStandingtoMe;
+        public bool Missionbookmarktimerset = false;
+        public DateTime Missionbookmarktimeout = DateTime.MaxValue;
+
         public string CurrentAgent
         {
             get
@@ -821,7 +825,7 @@ namespace Questor.Modules.Caching
                 if (_agentName == "")
                 {
                     _agentName = SwitchAgent;
-                    Logging.Log("CurrentAgent: " + CurrentAgent);
+                    Logging.Log("CurrentAgent: [ " + CurrentAgent + " ] AgentID [ " + AgentId + "]");
                 }
 
                 return _agentName;
@@ -885,17 +889,18 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.MissionWeaponGroupId != 0)
                     return Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
-                else return Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId && 
-                    m.GroupId == (int)Group.ProjectileWeapon && 
-                    m.GroupId == (int)Group.EnergyWeapon && 
-                    m.GroupId == (int)Group.HybridWeapon && 
-                    m.GroupId == (int)Group.CruiseMissileLaunchers && 
-                    m.GroupId == (int)Group.RocketLaunchers && 
-                    m.GroupId == (int)Group.StandardMissileLaunchers && 
-                    m.GroupId == (int)Group.TorpedoLaunchers &&
-                    m.GroupId == (int)Group.AssaultMissilelaunchers &&
-                    m.GroupId == (int)Group.HeavyMissilelaunchers &&
-                    m.GroupId == (int)Group.DefenderMissilelaunchers);
+                else return Modules.Where(m => 
+                    m.GroupId == Settings.Instance.WeaponGroupId); // ||
+                    //m.GroupId == (int)Group.ProjectileWeapon || 
+                    //m.GroupId == (int)Group.EnergyWeapon ||
+                    //m.GroupId == (int)Group.HybridWeapon || 
+                    //m.GroupId == (int)Group.CruiseMissileLaunchers ||
+                    //m.GroupId == (int)Group.RocketLaunchers ||
+                    //m.GroupId == (int)Group.StandardMissileLaunchers ||
+                    //m.GroupId == (int)Group.TorpedoLaunchers ||
+                    //m.GroupId == (int)Group.AssaultMissilelaunchers ||
+                    //m.GroupId == (int)Group.HeavyMissilelaunchers ||
+                    //m.GroupId == (int)Group.DefenderMissilelaunchers);
             }
         }
 
@@ -1378,7 +1383,7 @@ namespace Questor.Modules.Caching
                                     foreach (XElement element in elements.Elements("action"))
                                     {
                                         var action = new Actions.Action();
-                                        action.State = (ActionState) Enum.Parse(typeof (ActionState), (string) element.Attribute("name"), true);
+                                        action.State = (ActionState)Enum.Parse(typeof(ActionState), (string)element.Attribute("name"), true);
                                         XAttribute xAttribute = element.Attribute("name");
                                         if (xAttribute != null && xAttribute.Value == "ClearPocket")
                                         {
@@ -1657,7 +1662,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ItemHangar { get; set; }
 
-        public static bool OpenItemsHangar(String module)
+        public bool OpenItemsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
                 return false;
@@ -1689,7 +1694,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer CargoHold { get; set; }
 
-        public static bool OpenCargoHold(String module)
+        public bool OpenCargoHold(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
             {
@@ -1728,7 +1733,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ShipHangar { get; set; }
 
-        public static bool OpenShipsHangar(String module)
+        public bool OpenShipsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenShipHangarAction)
                 return false;
@@ -1762,7 +1767,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer CorpAmmoHangar { get; set; }
 
-        public static bool OpenCorpAmmoHangar(String module)
+        public bool OpenCorpAmmoHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpAmmoHangarAction)
                 return false;
@@ -1810,7 +1815,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer CorpLootHangar { get; set; }
 
-        public static bool OpenCorpLootHangar(String module)
+        public bool OpenCorpLootHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
                 return false;
@@ -1861,7 +1866,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer CorpBookmarkHangar { get; set; }
 
-        public static bool OpenCorpBookmarkHangar(String module)
+        public bool OpenCorpBookmarkHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpBookmarkHangarAction)
                 return false;
@@ -1902,7 +1907,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer LootContainer { get; set; }
 
-        public static bool OpenLootContainer(String module)
+        public bool OpenLootContainer(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
                 return false;
@@ -1910,7 +1915,7 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
-                    if (!Cache.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
 
                     var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
                     if (firstlootcontainer != null)
@@ -1939,7 +1944,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer LootHangar { get; set; }
 
-        public static bool OpenLootHangar(String module)
+        public bool OpenLootHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
                 return false;
@@ -2008,7 +2013,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer AmmoHangar { get; set; }
 
-        public static bool OpenAmmoHangar(String module)
+        public bool OpenAmmoHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
                 return false;
@@ -2078,7 +2083,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer DroneBay { get; set; }
 
-        public static bool OpenDroneBay(String module)
+        public bool OpenDroneBay(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenDroneBayAction)
             {
@@ -2132,7 +2137,7 @@ namespace Questor.Modules.Caching
         
         public DirectWindow JournalWindow { get; set; }
 
-        public static bool OpenJournalWindow(String module)
+        public bool OpenJournalWindow(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenJournalWindowAction)
                 return false;
@@ -2159,7 +2164,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ContainerInSpace { get; set; }
 
-        public static bool OpenContainerInSpace(String module, String containerInSpace)
+        public bool OpenContainerInSpace(String module, String containerInSpace)
         {
             if (DateTime.Now < Cache.Instance.NextOpenContainerInSpaceAction)
                 return false;
@@ -2168,7 +2173,7 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(containerInSpace))
                 {
-                    if (!Cache.OpenCargoHold("Cache.OpenContainerInSpace")) return false;
+                    if (!Cache.Instance.OpenCargoHold("Cache.OpenContainerInSpace")) return false;
 
                     // Open a container in range
                     foreach (EntityCache containerEntity in Cache.Instance.Containers.Where(e => e.Distance <= (int)Distance.SafeScoopRange & e.Name == containerInSpace))

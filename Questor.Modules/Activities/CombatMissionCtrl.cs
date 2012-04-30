@@ -15,11 +15,11 @@ namespace Questor.Modules.Activities
     using System.Linq;
     using DirectEve;
     using System.Globalization;
-    using Questor.Modules.Lookup;
-    using Questor.Modules.Logging;
-    using Questor.Modules.States;
-    using Questor.Modules.Combat;
-    using Questor.Modules.Actions;
+    using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.Logging;
+    using global::Questor.Modules.States;
+    using global::Questor.Modules.Combat;
+    using global::Questor.Modules.Actions;
     using Questor.Modules.Caching;
 
     //using System.Reflection;
@@ -46,8 +46,6 @@ namespace Questor.Modules.Activities
         {
             _pocketActions = new List<Actions.Action>();
         }
-
-        public CombatMissionCtrlState State { get; set; }
 
         public string Mission { get; set; }
 
@@ -273,7 +271,7 @@ namespace Questor.Modules.Activities
                     if (DateTime.Now.Subtract(_waitingSince).TotalSeconds > (int)Time.NoGateFoundRetryDelay_seconds)
                     {
                         Logging.Log("CombatMissionCtrl: Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error");
-                        State = CombatMissionCtrlState.Error;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Error;
                     }
                 }
                 return;
@@ -335,7 +333,7 @@ namespace Questor.Modules.Activities
                         // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
                         Cache.Instance.NextActivateAction = DateTime.Now.AddSeconds(15);
                         _moveToNextPocket = DateTime.Now;
-                        State = CombatMissionCtrlState.NextPocket;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;
                     }
                     return;
                 }
@@ -1440,7 +1438,7 @@ namespace Questor.Modules.Activities
                         //Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                     }
 
-                    State = CombatMissionCtrlState.Done;
+                    _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
                     break;
 
                 case ActionState.Kill:
@@ -1527,7 +1525,7 @@ namespace Questor.Modules.Activities
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
                return;
 
-            switch (State)
+            switch (_States.CurrentCombatMissionCtrlState)
             {
                 case CombatMissionCtrlState.Idle:
                     break;
@@ -1556,7 +1554,7 @@ namespace Questor.Modules.Activities
                     _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
                     _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
-                    State = CombatMissionCtrlState.LoadPocket;
+                    _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.LoadPocket;
                     break;
 
                 case CombatMissionCtrlState.LoadPocket:
@@ -1628,7 +1626,7 @@ namespace Questor.Modules.Activities
                     Cache.Instance.IsMissionPocketDone = false;
                     Cache.Instance.IgnoreTargets.Clear();
 
-                    State = CombatMissionCtrlState.ExecutePocketActions;
+                    _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.ExecutePocketActions;
                     break;
 
                 case CombatMissionCtrlState.ExecutePocketActions:
@@ -1637,7 +1635,7 @@ namespace Questor.Modules.Activities
                         // No more actions, but we're not done?!?!?!
                         Logging.Log("CombatMissionCtrl: We're out of actions but did not process a 'Done' or 'Activate' action");
 
-                        State = CombatMissionCtrlState.Error;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Error;
                         break;
                     }
 
@@ -1672,7 +1670,7 @@ namespace Questor.Modules.Activities
 
                         // If we moved more then 100km, assume next Pocket
                         Cache.Instance.PocketNumber++;
-                        State = CombatMissionCtrlState.LoadPocket;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.LoadPocket;
                         Statistics.WritePocketStatistics();
                     }
                     else if (DateTime.Now.Subtract(_moveToNextPocket).TotalMinutes > 2)
@@ -1680,7 +1678,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl: We've timed out, retry last action");
 
                         // We have reached a timeout, revert to ExecutePocketActions (e.g. most likely Activate)
-                        State = CombatMissionCtrlState.ExecutePocketActions;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.ExecutePocketActions;
                     }
                     break;
             }

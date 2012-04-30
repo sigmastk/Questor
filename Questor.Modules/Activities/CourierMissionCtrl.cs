@@ -13,7 +13,6 @@ namespace Questor.Modules.Activities
     {
         private DateTime _nextCourierAction;
         private readonly Traveler _traveler;
-        public CourierMissionCtrlState State { get; set; }
 
         /// <summary>
         ///   Arm does nothing but get into a (assembled) shuttle
@@ -33,7 +32,7 @@ namespace Questor.Modules.Activities
 
             _traveler.ProcessState();
 
-            if (_traveler.State == TravelerState.AtDestination)
+            if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
                 if (destination != null)
                     Logging.Log("CourierMissionCtrl: Arrived at Mission Bookmark Destination [ " + destination.Title + " ]");
@@ -53,9 +52,9 @@ namespace Questor.Modules.Activities
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.OpenItemsHangar("CourierMissionCtrl")) return false;
+            if (!Cache.Instance.OpenItemsHangar("CourierMissionCtrl")) return false;
 
-            if (!Cache.OpenCargoHold("CourierMissionCtrl")) return false;
+            if (!Cache.Instance.OpenCargoHold("CourierMissionCtrl")) return false;
 
             const string missionItem = "Encoded Data Chip";
             Logging.Log("CourierMissionCtrl: mission item is: " + missionItem);
@@ -90,7 +89,7 @@ namespace Questor.Modules.Activities
         /// <returns></returns>
         public void ProcessState()
         {
-            switch (State)
+            switch (_States.CurrentCourierMissionCtrlState)
             {
                 case CourierMissionCtrlState.Idle:
                     break;
@@ -98,23 +97,23 @@ namespace Questor.Modules.Activities
                 case CourierMissionCtrlState.GotoPickupLocation:
                     //cache.instance.agentid cannot be used for storyline missions! you must pass the correct agentID to this module if you wish to extend it to do storyline missions
                     if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Pick Up)"))
-                        State = CourierMissionCtrlState.PickupItem;
+                        _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.PickupItem;
                     break;
 
                 case CourierMissionCtrlState.PickupItem:
                     if (MoveItem(true))
-                        State = CourierMissionCtrlState.GotoDropOffLocation;
+                        _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.GotoDropOffLocation;
                     break;
 
                 case CourierMissionCtrlState.GotoDropOffLocation:
                     //cache.instance.agentid cannot be used for storyline missions! you must pass the correct agentID to this module if you wish to extend it to do storyline missions
                     if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Drop Off)"))
-                        State = CourierMissionCtrlState.DropOffItem;
+                        _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.DropOffItem;
                     break;
 
                 case CourierMissionCtrlState.DropOffItem:
                     if (MoveItem(false))
-                        State = CourierMissionCtrlState.Done;
+                        _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.Done;
                     break;
 
                 case CourierMissionCtrlState.Done:

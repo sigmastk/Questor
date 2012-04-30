@@ -15,6 +15,7 @@ using Questor.Modules.Logging;
 using Questor.Modules.Lookup;
 using Questor.Modules.Activities;
 using Questor.Modules.States;
+using QuestorManager.Actions;
 
 namespace QuestorManager
 {
@@ -82,10 +83,10 @@ namespace QuestorManager
             _drop = new Drop();
             _buy = new Buy();
             _sell = new Sell();
-            //_valuedump = new ValueDump(this);
-            _valuedump = new ValueDump();
-            //_buylpi = new BuyLPI(this);
-            _buylpi = new BuyLPI();
+            _valuedump = new ValueDump(this);
+            //_valuedump = new ValueDump();
+            _buylpi = new BuyLPI(this);
+            //_buylpi = new BuyLPI();
             List = new List<ListItems>();
             _directEve = new DirectEve();
             Items = new List<ItemCache2>();
@@ -266,22 +267,22 @@ namespace QuestorManager
                 case QuestormanagerState.BuyLPI:
 
 
-                     if (_buylpi.State == StateBuyLPI.Idle)
+                     if (_States.CurrentBuyLPIState == BuyLPIState.Idle)
                     {
                         _buylpi.Item = Convert.ToInt32(LstTask.Items[0].Tag);
                         _buylpi.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
                         Logging.Log("BuyLPI: Begin");
-                        _buylpi.State = StateBuyLPI.Begin;
+                        _States.CurrentBuyLPIState = BuyLPIState.Begin;
                     }
 
 
                      _buylpi.ProcessState();
 
 
-                     if (_buylpi.State == StateBuyLPI.Done)
+                     if (_States.CurrentBuyLPIState == BuyLPIState.Done)
                     {
                         Logging.Log("BuyLPI: Done");
-                        _buylpi.State = StateBuyLPI.Idle;
+                        _States.CurrentBuyLPIState = BuyLPIState.Idle;
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
                         State = QuestormanagerState.NextAction;
@@ -296,24 +297,24 @@ namespace QuestorManager
                      if (chkUpdateMineral.Checked)
                      {
                          chkUpdateMineral.Checked = false;
-                         _valuedump.State = ValueDumpState.CheckMineralPrices;
+                         _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
                      }
-                     
 
-                     if (_valuedump.State == ValueDumpState.Idle)
+
+                     if (_States.CurrentValueDumpState == ValueDumpState.Idle)
                     {
                         Logging.Log("ValueDump: Begin");
-                        _valuedump.State = ValueDumpState.Begin;
+                        _States.CurrentValueDumpState = ValueDumpState.Begin;
                     }
 
 
                      _valuedump.ProcessState();
 
 
-                     if (_valuedump.State == ValueDumpState.Done)
+                     if (_States.CurrentValueDumpState == ValueDumpState.Done)
                     {
                         Logging.Log("ValueDump: Done");
-                        _valuedump.State = ValueDumpState.Idle;
+                        _States.CurrentValueDumpState = ValueDumpState.Idle;
                         ProcessItems();
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
@@ -357,22 +358,22 @@ namespace QuestorManager
                 case QuestormanagerState.Buy:
 
 
-                     if (_buy.State == StateBuy.Idle)
+                     if (_States.CurrentBuyState == BuyState.Idle)
                     {
                         _buy.Item = Convert.ToInt32(LstTask.Items[0].Tag);
                         _buy.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
                         Logging.Log("Buy: Begin");
-                        _buy.State = StateBuy.Begin;
+                        _States.CurrentBuyState = BuyState.Begin;
                     }
 
                      
                      _buy.ProcessState();
 
 
-                     if (_buy.State == StateBuy.Done)
+                     if (_States.CurrentBuyState == BuyState.Done)
                     {
                         Logging.Log("Buy: Done");
-                        _buy.State = StateBuy.Idle;
+                        _States.CurrentBuyState = BuyState.Idle;
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
                         State = QuestormanagerState.NextAction;
@@ -385,19 +386,19 @@ namespace QuestorManager
                      _sell.Item = Convert.ToInt32(LstTask.Items[0].Tag);
                      _sell.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
 
-                     if (_sell.State == StateSell.Idle)
+                     if (_States.CurrentSellState == SellState.Idle)
                     {
                         Logging.Log("Sell: Begin");
-                        _sell.State = StateSell.Begin;
+                        _States.CurrentSellState = SellState.Begin;
                     }
 
                      _sell.ProcessState();
 
 
-                     if (_sell.State == StateSell.Done)
+                     if (_States.CurrentSellState == SellState.Done)
                     {
                         Logging.Log("Sell: Done");
-                        _sell.State = StateSell.Idle;
+                        _States.CurrentSellState = SellState.Idle;
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
                         State = QuestormanagerState.NextAction;
@@ -410,20 +411,20 @@ namespace QuestorManager
                      _drop.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
                      _drop.Hangar = LstTask.Items[0].SubItems[3].Text;
 
-                     if (_drop.State == StateDrop.Idle)
+                     if (_States.CurrentDropState == DropState.Idle)
                     {
                         Logging.Log("Drop: Begin");
-                        _drop.State = StateDrop.Begin;
+                        _States.CurrentDropState = DropState.Begin;
 
                     }
 
                      _drop.ProcessState();
 
 
-                     if (_drop.State == StateDrop.Done)
+                     if (_States.CurrentDropState == DropState.Done)
                     {
                         Logging.Log("Drop: Done");
-                        _drop.State = StateDrop.Idle;
+                        _States.CurrentDropState = DropState.Idle;
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
                         State = QuestormanagerState.NextAction;
@@ -439,20 +440,20 @@ namespace QuestorManager
                      _grab.Hangar = LstTask.Items[0].SubItems[3].Text;
 
 
-                     if (_grab.State == StateGrab.Idle)
+                     if (_States.CurrentGrabState == GrabState.Idle)
                      {
                          Logging.Log("Grab: Begin");
-                         _grab.State = StateGrab.Begin;
+                         _States.CurrentGrabState = GrabState.Begin;
 
                      }
 
                      _grab.ProcessState();
 
 
-                     if (_grab.State == StateGrab.Done)
+                     if (_States.CurrentGrabState == GrabState.Done)
                      {
                          Logging.Log("Grab: Done");
-                         _grab.State = StateGrab.Idle;
+                         _States.CurrentGrabState = GrabState.Idle;
                          LstTask.Items.Remove(LstTask.Items[0]);
                          _lastAction = DateTime.Now;
                          State = QuestormanagerState.NextAction;
@@ -467,7 +468,7 @@ namespace QuestorManager
                      if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.ActiveShip.Entity != null && Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
                         return;
 
-                    TravelerDestination travelerDestination = Traveler.Destination;
+                    TravelerDestination travelerDestination = _traveler.Destination;
                     if (_destination == null)
                         travelerDestination = null;
 
@@ -490,34 +491,34 @@ namespace QuestorManager
                     }
 
                     // Check to see if destination changed, since changing it will set the traveler to Idle
-                    if (Traveler.Destination != travelerDestination)
-                        Traveler.Destination = travelerDestination;
+                    if (_traveler.Destination != travelerDestination)
+                        _traveler.Destination = travelerDestination;
 
-                    Traveler.ProcessState();
+                    _traveler.ProcessState();
 
                     // Record number of jumps
                     _jumps = Cache.Instance.DirectEve.Navigation.GetDestinationPath().Count;
 
                     // Arrived at destination
-                    if (_destination != null && Traveler.State == TravelerState.AtDestination)
+                    if (_destination != null && _States.CurrentTravelerState == TravelerState.AtDestination)
                     {
-                        Logging.Log("Arived at destination");
+                        Logging.Log("Arrived at destination");
 
-                        Traveler.Destination = null;
+                        _traveler.Destination = null;
                         _destination = null;
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
                         State = QuestormanagerState.NextAction;
                     }
 
-                    // An error occured, reset traveler
-                    if (Traveler.State == TravelerState.Error)
+                    // An error occurred, reset traveler
+                    if (_States.CurrentTravelerState == TravelerState.Error)
                     {
-                        if (Traveler.Destination != null)
+                        if (_traveler.Destination != null)
                             Logging.Log("Stopped traveling, QuestorManager threw an error...");
 
                         _destination = null;
-                        Traveler.Destination = null;
+                        _traveler.Destination = null;
                         Start = false;
                         State = QuestormanagerState.Idle;
                     }
@@ -595,7 +596,7 @@ namespace QuestorManager
                 SearchResults.Items.AddRange(Filter(search, _solarSystems, s => s.Name, b => "Solar System"));
                 SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
 
-                // Automaticly select the only item
+                // Automatically select the only item
                 if (SearchResults.Items.Count == 1)
                     SearchResults.Items[0].Selected = true;
             }
@@ -619,12 +620,12 @@ namespace QuestorManager
             {
                 BttnStart.Text = "Start";
                 State = QuestormanagerState.Idle;
-                _buy.State = StateBuy.Idle;
-                _drop.State = StateDrop.Idle;
-                _grab.State = StateGrab.Idle;
-                _sell.State = StateSell.Idle;
-                _valuedump.State = ValueDumpState.Idle;
-                _buylpi.State = StateBuyLPI.Idle;
+                _States.CurrentBuyState = BuyState.Idle;
+                _States.CurrentDropState = DropState.Idle;
+                _States.CurrentGrabState = GrabState.Idle;
+                _States.CurrentSellState = SellState.Idle;
+                _States.CurrentValueDumpState = ValueDumpState.Idle;
+                _States.CurrentBuyLPIState = BuyLPIState.Idle;
                 Start = false;
             }
         }
@@ -869,7 +870,7 @@ namespace QuestorManager
 
         private void UpdateMineralPricesButton_Click(object sender, EventArgs e)
         {
-            _valuedump.State = ValueDumpState.CheckMineralPrices;
+            _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
         }
 
         private void lvItems_ColumnClick(object sender, ColumnClickEventArgs e)

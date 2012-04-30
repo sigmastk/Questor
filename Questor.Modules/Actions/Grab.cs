@@ -11,8 +11,6 @@ namespace Questor.Modules.Actions
     
     public class Grab
     {
-        public StateGrab State { get; set; }
-
         public int Item { get; set; }
         public int Unit { get; set; }
         public string Hangar { get; set; }
@@ -37,17 +35,17 @@ namespace Questor.Modules.Actions
                 _hangar = Cache.Instance.DirectEve.GetCorporationHangar(Hangar);
 
             
-            switch (State)
+            switch (_States.CurrentGrabState)
             {
-                case StateGrab.Idle:
-                case StateGrab.Done:
+                case GrabState.Idle:
+                case GrabState.Done:
                     break;
 
-                case StateGrab.Begin:
-                    State = StateGrab.OpenItemHangar;
+                case GrabState.Begin:
+                    _States.CurrentGrabState = GrabState.OpenItemHangar;
                     break;
 
-                case StateGrab.OpenItemHangar:
+                case GrabState.OpenItemHangar:
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 2)
                         break;
@@ -91,11 +89,11 @@ namespace Questor.Modules.Actions
 
                         Logging.Log("Grab: Opening Hangar");
 
-                        State = StateGrab.OpenCargo;
+                        _States.CurrentGrabState = GrabState.OpenCargo;
      
                     break;
 
-                case StateGrab.OpenCargo:
+                case GrabState.OpenCargo:
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 2)
                         break;
@@ -116,14 +114,14 @@ namespace Questor.Modules.Actions
                     freeCargoCapacity = cargo.Capacity - cargo.UsedCapacity;
 
                     if (Item == 00)
-                        State = StateGrab.AllItems;
+                        _States.CurrentGrabState = GrabState.AllItems;
                     else
-                        State = StateGrab.MoveItems;
+                        _States.CurrentGrabState = GrabState.MoveItems;
 
                     
                     break;
 
-                case StateGrab.MoveItems:
+                case GrabState.MoveItems:
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 2)
                         break;
@@ -139,11 +137,11 @@ namespace Questor.Modules.Actions
                                 freeCargoCapacity -= totalVolum;
                                 Logging.Log("Grab: Moving all the items");
                                 _lastAction = DateTime.Now;
-                                State = StateGrab.WaitForItems;
+                                _States.CurrentGrabState = GrabState.WaitForItems;
                             }
                             else
                             {
-                                State = StateGrab.Done;
+                                _States.CurrentGrabState = GrabState.Done;
                                 Logging.Log("Grab: No load capacity");
                             }
                         }
@@ -160,11 +158,11 @@ namespace Questor.Modules.Actions
                                 freeCargoCapacity -= totalVolum;
                                 Logging.Log("Grab: Moving item");
                                 _lastAction = DateTime.Now;
-                                State = StateGrab.WaitForItems;
+                                _States.CurrentGrabState = GrabState.WaitForItems;
                             }
                             else
                             {
-                                State = StateGrab.Done;
+                                _States.CurrentGrabState = GrabState.Done;
                                 Logging.Log("Grab: No load capacity");
                             }
                         }
@@ -174,7 +172,7 @@ namespace Questor.Modules.Actions
                      break;
 
 
-                case StateGrab.AllItems:
+                case GrabState.AllItems:
 
                      if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 2)
                          break;
@@ -195,13 +193,13 @@ namespace Questor.Modules.Actions
                          }
                          Logging.Log("Grab: Moving items");
                          _lastAction = DateTime.Now;
-                         State = StateGrab.WaitForItems;
+                         _States.CurrentGrabState = GrabState.WaitForItems;
                      }
 
 
                      break;
 
-                case StateGrab.WaitForItems:
+                case GrabState.WaitForItems:
                      // Wait 5 seconds after moving
                      if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 5)
                          break;
@@ -211,7 +209,7 @@ namespace Questor.Modules.Actions
                      {
 
                          Logging.Log("Grab: Done");
-                         State = StateGrab.Done;
+                         _States.CurrentGrabState = GrabState.Done;
                          break;
                      }
 

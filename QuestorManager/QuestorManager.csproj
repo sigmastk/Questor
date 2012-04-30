@@ -70,6 +70,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actions\BuyLPI.cs" />
+    <Compile Include="Actions\ValueDump.cs" />
     <Compile Include="ListItems.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="QuestormanagerState.cs" />

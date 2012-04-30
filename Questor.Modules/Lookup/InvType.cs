@@ -17,7 +17,7 @@ namespace Questor.Modules.Lookup
 {
     public class InvType
     {
-        public  List<string> Minerals = new List<string>() { "Morphite", "Megacyte", "Zydrine", "Nocxium", "Isogen", "Mexallon", "Pyerite", "Tritanium" };
+        public static List<string> Minerals = new List<string>() { "Morphite", "Megacyte", "Zydrine", "Nocxium", "Isogen", "Mexallon", "Pyerite", "Tritanium" };
 
         public InvType(XElement element)
         {

@@ -73,8 +73,8 @@ public class GenericCourier : IStoryline
     public StorylineState PreAcceptMission(Storyline storyline)
     {
         _state = GenericCourierStorylineState.GotoPickupLocation;
-            
-            _traveler.State = TravelerState.Idle;
+
+            _States.CurrentTravelerState = TravelerState.Idle;
             _traveler.Destination = null;
 
         return StorylineState.AcceptMission;
@@ -88,7 +88,7 @@ public class GenericCourier : IStoryline
 
             _traveler.ProcessState();
 
-            if (_traveler.State == TravelerState.AtDestination)
+            if (_States.CurrentTravelerState == TravelerState.AtDestination)
         {
                 _traveler.Destination = null;
             return true;

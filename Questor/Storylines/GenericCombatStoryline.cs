@@ -79,23 +79,23 @@ namespace Questor.Storylines
 
                 _agentInteraction.AgentId = _agentId;
                 _agentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
-                _agentInteraction.State = AgentInteractionState.Idle;
+                _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 _agentInteraction.Purpose = AgentInteractionPurpose.AmmoCheck;
 
                 _arm.AgentId = _agentId;
-                _arm.State = ArmState.Idle;
+                _States.CurrentArmState = ArmState.Idle;
                 _arm.AmmoToLoad.Clear();
 
-                Questor.AgentID = _agentId;
+                //Questor.AgentID = _agentId;
 
                 _statistics.AgentID = _agentId;
 
                 _combatMissionCtrl.AgentId = _agentId;
-                _combatMissionCtrl.State = CombatMissionCtrlState.Start;
+                _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
 
-                _combat.State = CombatState.CheckTargets;
+                _States.CurrentCombatState = CombatState.CheckTargets;
 
-                _drones.State = DroneState.WaitingForTargets;
+                _States.CurrentDroneState = DroneState.WaitingForTargets;
             }
 
             try
@@ -126,20 +126,20 @@ namespace Questor.Storylines
         private bool Interact()
         {
             // Are we done?
-            if (_agentInteraction.State == AgentInteractionState.Done)
+            if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                 return true;
 
             if (_agentInteraction.Agent == null)
                 throw new Exception("Invalid agent");
 
             // Start the conversation
-            if (_agentInteraction.State == AgentInteractionState.Idle)
-                _agentInteraction.State = AgentInteractionState.StartConversation;
+            if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
+                _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
 
             // Interact with the agent to find out what ammo we need
             _agentInteraction.ProcessState();
 
-            if (_agentInteraction.State == AgentInteractionState.DeclineMission)
+            if (_States.CurrentAgentInteractionState == AgentInteractionState.DeclineMission)
             {
                 if (_agentInteraction.Agent.Window != null)
                     _agentInteraction.Agent.Window.Close();
@@ -147,7 +147,7 @@ namespace Questor.Storylines
                 throw new Exception("Low security systems");
             }
 
-            if (_agentInteraction.State == AgentInteractionState.Done)
+            if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
             {
                 _arm.AmmoToLoad.Clear();
                 _arm.AmmoToLoad.AddRange(_agentInteraction.AmmoToLoad);
@@ -163,17 +163,17 @@ namespace Questor.Storylines
         /// <returns></returns>
         private bool LoadAmmo()
         {
-            if (_arm.State == ArmState.Done)
+            if (_States.CurrentArmState == ArmState.Done)
                 return true;
 
-            if (_arm.State == ArmState.Idle)
-                _arm.State = ArmState.Begin;
+            if (_States.CurrentArmState == ArmState.Idle)
+                _States.CurrentArmState = ArmState.Begin;
 
             _arm.ProcessState();
 
-            if (_arm.State == ArmState.Done)
+            if (_States.CurrentArmState == ArmState.Done)
             {
-                _arm.State = ArmState.Idle;
+                _States.CurrentArmState = ArmState.Idle;
                 return true;
             }
 
@@ -221,7 +221,7 @@ namespace Questor.Storylines
                         }
 
                         _traveler.ProcessState();
-                        if (_traveler.State == TravelerState.AtDestination)
+                        if (_States.CurrentTravelerState == TravelerState.AtDestination)
                         {
                             Logging.Log("WarpOut: Safe!");
                             Cache.Instance.DoNotBreakInvul = false;
@@ -245,7 +245,11 @@ namespace Questor.Storylines
                 case GenericCombatStorylineState.GotoMission:
                     var missionDestination = _traveler.Destination as MissionBookmarkDestination;
                     if (missionDestination == null || missionDestination.AgentId != storyline.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
-                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(storyline.CurrentStorylineAgentId, "Encounter"));
+                    {
+                        const string nameOfBookmark = "Encounter";
+                        Logging.Log("GenericCombatStoryline: Setting Destination to 1st bookmark from AgentID: [" + storyline.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title");
+                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(storyline.CurrentStorylineAgentId, nameOfBookmark));
+                    }
 
                     if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
                     {
@@ -254,9 +258,10 @@ namespace Questor.Storylines
                     }
 
                     _traveler.ProcessState();
-                    if (_traveler.State == TravelerState.AtDestination)
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination)
                     {
                         _state = GenericCombatStorylineState.ExecuteMission;
+                        _States.CurrentCombatState = CombatState.CheckTargets;
                         _traveler.Destination = null;
                     }
                     break;
@@ -269,7 +274,7 @@ namespace Questor.Storylines
 
                     // If we are out of ammo, return to base, the mission will fail to complete and the bot will reload the ship
                     // and try the mission again
-                    if (_combat.State == CombatState.OutOfAmmo)
+                    if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                     {
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
@@ -278,7 +283,7 @@ namespace Questor.Storylines
                         return StorylineState.ReturnToAgent;
                     }
 
-                    if (_combatMissionCtrl.State == CombatMissionCtrlState.Done)
+                    if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Done)
                     {
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
@@ -286,7 +291,7 @@ namespace Questor.Storylines
                     }
 
                     // If in error state, just go home and stop the bot
-                    if (_combatMissionCtrl.State == CombatMissionCtrlState.Error)
+                    if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                     {
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();

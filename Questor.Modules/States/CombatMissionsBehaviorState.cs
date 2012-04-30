@@ -1,5 +1,5 @@
 ﻿
-namespace Questor.Behaviors
+namespace Questor.Modules.States
 {
     public enum CombatMissionsBehaviorState
     {

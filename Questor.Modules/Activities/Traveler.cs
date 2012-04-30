@@ -27,7 +27,6 @@ namespace Questor.Modules.Activities
         private DateTime _nextTravelerAction;
         //private DateTime _lastDock;
 
-        public TravelerState State { get; set; }
         public DirectBookmark UndockBookmark { get; set; }
 
         public TravelerDestination Destination
@@ -36,7 +35,7 @@ namespace Questor.Modules.Activities
             set
             {
                 _destination = value;
-                State = _destination == null ? TravelerState.AtDestination : TravelerState.Idle;
+                _States.CurrentTravelerState = _destination == null ? TravelerState.AtDestination : TravelerState.Idle;
             }
         }
 
@@ -47,7 +46,10 @@ namespace Questor.Modules.Activities
         private void NagivateToBookmarkSystem(long solarSystemId)
         {
             if (_nextTravelerAction > DateTime.Now)
+            {
+                //Logging.Log("Traveler: will continue in [ " + Math.Round(_nextTravelerAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ]sec");
                 return;
+            }
 
             DirectBookmark undockBookmark = UndockBookmark;
             UndockBookmark = undockBookmark;
@@ -65,7 +67,7 @@ namespace Questor.Modules.Activities
                 else
                 {
                     Logging.Log("Traveler: Error setting solar system destination [" + solarSystemId + "]", Logging.green);
-                    State = TravelerState.Error;
+                    _States.CurrentTravelerState = TravelerState.Error;
                 }
                 return;
             }
@@ -120,9 +122,9 @@ namespace Questor.Modules.Activities
                         entity.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
                         Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
                     }
-            }
-            else
-            {
+                }
+                else
+                {
                     if (DateTime.Now > Cache.Instance.NextWarpTo)
                     {
                         Logging.Log("Traveler: Warping to [" + locationName + "][" + Math.Round((entity.Distance / 1000) / 149598000, 2) + " AU away]", Logging.green);
@@ -136,23 +138,34 @@ namespace Questor.Modules.Activities
 
         public void ProcessState()
         {
-            switch (State)
+            switch (_States.CurrentTravelerState)
             {
                 case TravelerState.Idle:
-                    State = TravelerState.Traveling;
+                    _States.CurrentTravelerState = TravelerState.Traveling;
                     break;
 
                 case TravelerState.Traveling:
                     if (Destination == null)
                     {
-                        State = TravelerState.Error;
+                        _States.CurrentTravelerState = TravelerState.Error;
                         break;
                     }
 
                     if (Destination.SolarSystemId != Cache.Instance.DirectEve.Session.SolarSystemId)
+                    {
+                        //Logging.Log("traveler: NagivateToBookmarkSystem(Destination.SolarSystemId);");
                         NagivateToBookmarkSystem(Destination.SolarSystemId);
+                    }
                     else if (Destination.PerformFinalDestinationTask())
-                        State = TravelerState.AtDestination;
+                    {
+                        //Logging.Log("traveler: _States.CurrentTravelerState = TravelerState.AtDestination;");
+                        _States.CurrentTravelerState = TravelerState.AtDestination;
+                    }
+                    break;
+
+                case TravelerState.AtDestination:
+                    //do nothing when at destination
+                    //Traveler sits in AtDestination when it has nothing to do, NOT in idle. 
                     break;
 
                 default:

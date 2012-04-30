@@ -37,7 +37,7 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if (!Cache.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.Arm;
+            if (!Cache.Instance.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.Arm;
 
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
@@ -66,7 +66,7 @@ namespace Questor.Storylines
         {
             _state = TransactionDataDeliveryState.GotoPickupLocation;
 
-            _traveler.State = TravelerState.Idle;
+            _States.CurrentTravelerState = TravelerState.Idle;
             _traveler.Destination = null;
 
             return StorylineState.AcceptMission;
@@ -80,7 +80,7 @@ namespace Questor.Storylines
 
             _traveler.ProcessState();
 
-            if (_traveler.State == TravelerState.AtDestination)
+            if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
                 _traveler.Destination = null;
                 return true;
@@ -94,9 +94,9 @@ namespace Questor.Storylines
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.OpenItemsHangar("TransactionDataDelivery")) return false;
+            if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
 
-            if (!Cache.OpenCargoHold("TransactionDataDelivery")) return false;
+            if (!Cache.Instance.OpenCargoHold("TransactionDataDelivery")) return false;
 
             // 314 == Transaction And Salary Logs (all different versions)
             const int groupId = 314;

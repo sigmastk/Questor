@@ -41,8 +41,6 @@ namespace Questor.Modules.BackgroundTasks
         public int ReserveCargoCapacity { get; set; }
         public List<Ammo> Ammo { get; set; }
 
-        public ScoopState State { get; set; }
-
         /// <summary>
         ///   Activate salvagers on targeted wreck
         /// </summary>
@@ -176,7 +174,7 @@ namespace Questor.Modules.BackgroundTasks
             if (!Cache.Instance.InSpace)
                 return;
 
-            if (!Cache.OpenCargoHold("Scoop")) return;
+            if (!Cache.Instance.OpenCargoHold("Scoop")) return;
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
@@ -369,13 +367,13 @@ namespace Questor.Modules.BackgroundTasks
                 return;
 
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            switch (State)
+            switch (_States.CurrentScoopState)
             {
                 case ScoopState.TargetHostileWrecks:
                     //TargetHostileWrecks();
 
                     // Next state
-                    State = ScoopState.LootHostileWrecks;
+                    _States.CurrentScoopState = ScoopState.LootHostileWrecks;
                     break;
 
                 case ScoopState.LootHostileWrecks:
@@ -388,7 +386,7 @@ namespace Questor.Modules.BackgroundTasks
                     ActivateSalvagers();
 
                     // Default action
-                    State = ScoopState.TargetHostileWrecks;
+                    _States.CurrentScoopState = ScoopState.TargetHostileWrecks;
                     //if (cargo.IsReady && cargo.Items.Any() && _nextAction < DateTime.Now)
                     //{
                     // Check if there are actually duplicates
@@ -407,7 +405,7 @@ namespace Questor.Modules.BackgroundTasks
                         cargo.StackAll();
 
                     _nextAction = DateTime.Now.AddSeconds(5);
-                    State = ScoopState.WaitForStackingWhileAggressed;
+                    _States.CurrentScoopState = ScoopState.WaitForStackingWhileAggressed;
                     break;
 
                 case ScoopState.WaitForStackingWhileAggressed:
@@ -418,7 +416,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
                         Logging.Log("Salvage: Done stacking");
-                        State = ScoopState.TargetHostileWrecks;
+                        _States.CurrentScoopState = ScoopState.TargetHostileWrecks;
                         break;
                     }
 
@@ -428,7 +426,7 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.DirectEve.UnlockItems();
 
                         Logging.Log("Salvage: Done stacking");
-                        State = ScoopState.TargetHostileWrecks;
+                        _States.CurrentScoopState = ScoopState.TargetHostileWrecks;
                         break;
                     }
                     break;
@@ -439,7 +437,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 default:
                     // Unknown state, goto first state
-                    State = ScoopState.LootHostileWrecks;
+                    _States.CurrentScoopState = ScoopState.LootHostileWrecks;
                     break;
             }
         }

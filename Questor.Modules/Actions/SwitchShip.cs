@@ -14,14 +14,12 @@ namespace Questor.Modules.Actions
     {
         private DateTime _lastSwitchShipAction;
 
-        public SwitchShipState State { get; set; }
-
         public void ProcessState()
         {
             DirectContainer shipHangar = Cache.Instance.DirectEve.GetShipHangar();
             var defaultFitting = Settings.Instance.DefaultFitting.Fitting;
 
-            switch (State)
+            switch (_States.CurrentSwitchShipState)
             {
                 case SwitchShipState.Idle:
 
@@ -30,16 +28,16 @@ namespace Questor.Modules.Actions
                     break;
 
                 case SwitchShipState.Begin:
-                    State = SwitchShipState.OpenShipHangar;
+                    _States.CurrentSwitchShipState = SwitchShipState.OpenShipHangar;
                     break;
 
                 case SwitchShipState.OpenShipHangar:
                     // Is the ship hangar open?
-                    if (!Cache.OpenShipsHangar("SwitchShip")) break;
+                    if (!Cache.Instance.OpenShipsHangar("SwitchShip")) break;
 
                     Logging.Log("SwitchShip: Activating combat ship");
 
-                    State = SwitchShipState.ActivateCombatShip;
+                    _States.CurrentSwitchShipState = SwitchShipState.ActivateCombatShip;
 
                     break;
 
@@ -63,9 +61,9 @@ namespace Questor.Modules.Actions
                         }
                     }
                     if (Settings.Instance.UseFittingManager)
-                        State = SwitchShipState.OpenFittingWindow;
+                        _States.CurrentSwitchShipState = SwitchShipState.OpenFittingWindow;
                     else
-                        State = SwitchShipState.Done;
+                        _States.CurrentSwitchShipState = SwitchShipState.Done;
 
                     break;
 
@@ -76,12 +74,12 @@ namespace Questor.Modules.Actions
                     if (defaultFitting.Equals(Cache.Instance.CurrentFit))
                     {
                         Logging.Log("SwitchShip: Current fit is correct - no change necessary");
-                        State = SwitchShipState.Done;
+                        _States.CurrentSwitchShipState = SwitchShipState.Done;
                     }
                     else
                     {
                         Cache.Instance.DirectEve.OpenFitingManager();
-                        State = SwitchShipState.WaitForFittingWindow;
+                        _States.CurrentSwitchShipState = SwitchShipState.WaitForFittingWindow;
                     }
                     break;
 
@@ -97,7 +95,7 @@ namespace Questor.Modules.Actions
                     //check if it's ready
                     else if (fittingMgr.IsReady)
                     {
-                        State = SwitchShipState.ChoseFitting;
+                        _States.CurrentSwitchShipState = SwitchShipState.ChoseFitting;
                     }
                     break;
 
@@ -119,12 +117,12 @@ namespace Questor.Modules.Actions
                                 fitting.Fit();
                                 _lastSwitchShipAction = DateTime.Now;
                                 Cache.Instance.CurrentFit = fitting.Name;
-                                State = SwitchShipState.WaitForFitting;
+                                _States.CurrentSwitchShipState = SwitchShipState.WaitForFitting;
                                 break;
                             }
                         }
                     }
-                    State = SwitchShipState.Done;
+                    _States.CurrentSwitchShipState = SwitchShipState.Done;
                     if (fittingMgr != null) fittingMgr.Close();
                     break;
 
@@ -134,7 +132,7 @@ namespace Questor.Modules.Actions
                         Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
                         //we should be done fitting, proceed to the next state
-                        State = SwitchShipState.Done;
+                        _States.CurrentSwitchShipState = SwitchShipState.Done;
                         fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
                         if (fittingMgr != null) fittingMgr.Close();
                         Logging.Log("SwitchShip: Done fitting");

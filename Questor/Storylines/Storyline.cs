@@ -15,8 +15,6 @@ namespace Questor.Storylines
     
     public class Storyline
     {
-        public StorylineState State { get; set; }
-
         public long CurrentStorylineAgentId { get; private set; }
 
         private IStoryline _storyline;
@@ -61,7 +59,7 @@ namespace Questor.Storylines
                                {"Transaction Data Delivery", new TransactionDataDelivery()},
                                {"Innocents in the Crossfire", new GenericCombatStoryline()},
                                {"Patient Zero", new GenericCombatStoryline()},
-                    {"Soothe the Salvage Beast", new GenericCombatStoryline()},
+                               {"Soothe the Salvage Beast", new GenericCombatStoryline()},
                                {"Forgotten Outpost", new GenericCombatStoryline()},
                                {"Stem the Flow", new GenericCombatStoryline()},
                                {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
@@ -78,11 +76,11 @@ namespace Questor.Storylines
 
        public void Reset()
         {
-            State = StorylineState.Idle;
+            _States.CurrentStorylineState = StorylineState.Idle;
             CurrentStorylineAgentId = 0;
             _storyline = null;
-            _agentInteraction.State = AgentInteractionState.Idle;
-            _traveler.State = TravelerState.Idle;
+            _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+            _States.CurrentTravelerState = TravelerState.Idle;
             _traveler.Destination = null;
         }
 
@@ -109,7 +107,7 @@ namespace Questor.Storylines
             if (currentStorylineMission == null)
             {
                 _nextStoryLineAttempt = DateTime.Now.AddMinutes(15);
-                State = StorylineState.Done;
+                _States.CurrentStorylineState = StorylineState.Done;
                 Cache.Instance.MissionName = String.Empty;
                 return;
             }
@@ -120,14 +118,14 @@ namespace Questor.Storylines
             {
                 Logging.Log("Storyline: Unknown agent [" + CurrentStorylineAgentId + "]");
 
-                State = StorylineState.Done;
+                _States.CurrentStorylineState = StorylineState.Done;
                 return;
             }
 
-            Logging.Log("Storyline: Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "]");
+            Logging.Log("Storyline: Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + CurrentStorylineAgentId + "]");
             Cache.Instance.MissionName = currentStorylineMission.Name;
 
-            State = StorylineState.Arm;
+            _States.CurrentStorylineState = StorylineState.Arm;
             _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name)];
         }
 
@@ -136,7 +134,7 @@ namespace Questor.Storylines
             DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(CurrentStorylineAgentId);
             if (storylineagent == null)
             {
-                State = StorylineState.Done;
+                _States.CurrentStorylineState = StorylineState.Done;
                 return;
             }
 
@@ -151,14 +149,14 @@ namespace Questor.Storylines
             }
 
             _traveler.ProcessState();
-            if (_traveler.State == TravelerState.AtDestination)
+            if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
-                State = nextState;
+                _States.CurrentStorylineState = nextState;
                 _traveler.Destination = null;
             }
 
             if (Settings.Instance.DebugStates)
-                Logging.Log("Traveler.State = " + _traveler.State);
+                Logging.Log("Traveler.State = " + _States.CurrentTravelerState);
         }
 
         private void BringSpoilsOfWar()
@@ -168,17 +166,17 @@ namespace Questor.Storylines
                 return;
 
             // Open the item hangar (should still be open)
-            if (!Cache.OpenItemsHangar("Storyline")) return;
+            if (!Cache.Instance.OpenItemsHangar("Storyline")) return;
 
             // Do we have any implants?
             if (!Cache.Instance.ItemHangar.Items.Any(i => i.GroupId >= 738 && i.GroupId <= 750))
             {
-                State = StorylineState.Done;
+                _States.CurrentStorylineState = StorylineState.Done;
                 return;
             }
 
             // Yes, open the ships cargo
-            if (!Cache.OpenCargoHold("Storyline")) return;
+            if (!Cache.Instance.OpenCargoHold("Storyline")) return;
 
             // If we aren't moving items
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
@@ -189,7 +187,7 @@ namespace Questor.Storylines
                     if (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
                         Logging.Log("Storyline: We are full, not moving anything else");
-                        State = StorylineState.Done;
+                        _States.CurrentStorylineState = StorylineState.Done;
                         return;
                     }
 
@@ -203,14 +201,14 @@ namespace Questor.Storylines
 
         public void ProcessState()
         {
-            switch (State)
+            switch (_States.CurrentStorylineState)
             {
                 case StorylineState.Idle:
                     IdleState();
                     break;
 
                 case StorylineState.Arm:
-                    State = _storyline.Arm(this);
+                    _States.CurrentStorylineState = _storyline.Arm(this);
                     break;
 
                 case StorylineState.GotoAgent:
@@ -218,15 +216,15 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.PreAcceptMission:
-                    State = _storyline.PreAcceptMission(this);
+                    _States.CurrentStorylineState = _storyline.PreAcceptMission(this);
                     break;
 
                 case StorylineState.AcceptMission:
-                    if (_agentInteraction.State == AgentInteractionState.Idle)
+                    if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start conversation [Start Mission]");
 
-                        _agentInteraction.State = AgentInteractionState.StartConversation;
+                        _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
                         _agentInteraction.AgentId = CurrentStorylineAgentId;
                         _agentInteraction.ForceAccept = true;
@@ -235,18 +233,18 @@ namespace Questor.Storylines
                     _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + _agentInteraction.State);
+                        Logging.Log("AgentInteraction.State = " + _States.CurrentAgentInteractionState);
 
-                    if (_agentInteraction.State == AgentInteractionState.Done)
+                    if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
-                        _agentInteraction.State = AgentInteractionState.Idle;
+                        _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                         // If there is no mission anymore then we're done (we declined it)
-                        State = StorylineMission == null ? StorylineState.Done : StorylineState.ExecuteMission;
+                        _States.CurrentStorylineState = StorylineMission == null ? StorylineState.Done : StorylineState.ExecuteMission;
                     }
                     break;
 
                 case StorylineState.ExecuteMission:
-                    State = _storyline.ExecuteMission(this);
+                    _States.CurrentStorylineState = _storyline.ExecuteMission(this);
                     break;
 
                 case StorylineState.ReturnToAgent:
@@ -254,23 +252,23 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.CompleteMission:
-                    if (_agentInteraction.State == AgentInteractionState.Idle)
+                    if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start Conversation [Complete Mission]");
 
-                        _agentInteraction.State = AgentInteractionState.StartConversation;
+                        _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         _agentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
                     _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + _agentInteraction.State);
+                        Logging.Log("AgentInteraction.State = " + _States.CurrentAgentInteractionState);
 
-                    if (_agentInteraction.State == AgentInteractionState.Done)
+                    if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
-                        _agentInteraction.State = AgentInteractionState.Idle;
-                        State = StorylineState.BringSpoilsOfWar;
+                        _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                        _States.CurrentStorylineState = StorylineState.BringSpoilsOfWar;
                     }
                     break;
 
@@ -280,13 +278,13 @@ namespace Questor.Storylines
 
                 case StorylineState.BlacklistAgent:
                     _agentBlacklist.Add(CurrentStorylineAgentId);
-                    State = StorylineState.Done;
+                    _States.CurrentStorylineState = StorylineState.Done;
                     break;
 
                 case StorylineState.Done:
                     if (DateTime.Now > _nextStoryLineAttempt)
                     {
-                        State = StorylineState.Idle;
+                        _States.CurrentStorylineState = StorylineState.Idle;
                     }
                     break;
             }

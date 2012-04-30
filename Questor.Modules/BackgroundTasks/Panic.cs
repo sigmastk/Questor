@@ -32,39 +32,11 @@ namespace Questor.Modules.BackgroundTasks
         private bool _delayedResume;
         private int _randomDelay;
 
-        public PanicState State { get; set; }
         //public bool InMission { get; set; }
 
         public void ProcessState()
         {
-            // Thank god stations are safe ! :)
-            if (Cache.Instance.InStation)
-            {
-                State = PanicState.Idle;
-                return;
-            }
-
-            if (!Cache.Instance.InSpace)
-            {
-                State = PanicState.Idle;
-                return;
-            }
-
-            // What? No ship entity?
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
-            {
-                State = PanicState.Idle;
-                return;
-            }
-
-            // There is no better defense then being cloaked ;)
-            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
-            {
-                State = PanicState.Idle;
-                return;
-            }
-
-            switch (State)
+            switch (_States.CurrentPanicState)
             {
                 case PanicState.Idle:
                     //
@@ -74,13 +46,16 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.DirectEve.ActiveShip.Entity != null &&
                         !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
                     {
-                        State = PanicState.Normal;
+                        _States.CurrentPanicState = PanicState.Normal;
                         return;
                     }
                     break;
 
                 case PanicState.Normal:
-
+                        if (Cache.Instance.InStation)
+                        {
+                            _States.CurrentPanicState = PanicState.Idle;
+                        }
                         if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
                         {
                             _lastNormalX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
@@ -93,7 +68,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
                         {
                             Logging.Log("Panic: You are in a Capsule, you must have died :(");
-                            State = PanicState.StartPanicking;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
                         }
                         else if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
                         {
@@ -103,7 +78,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                             Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                             Cache.Instance.IsMissionPocketDone = true;
-                            State = PanicState.StartPanicking;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
                         }
                         else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
                         {
@@ -111,7 +86,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                             Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                             Cache.Instance.IsMissionPocketDone = true;
-                            State = PanicState.StartPanicking;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
                         }
                         else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
                         {
@@ -119,7 +94,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                             Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                             Cache.Instance.IsMissionPocketDone = true;
-                            State = PanicState.StartPanicking;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
                         }
 
                         _delayedResume = false;
@@ -137,7 +112,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                                 Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                                 Cache.Instance.IsMissionPocketDone = true;
-                                State = PanicState.StartPanicking;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + frigates + "] frigates");
                             }
 
@@ -148,7 +123,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                                 Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                                 Cache.Instance.IsMissionPocketDone = true;
-                                State = PanicState.StartPanicking;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + cruisers + "] cruisers");
                             }
 
@@ -159,7 +134,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                                 Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                                 Cache.Instance.IsMissionPocketDone = true;
-                                State = PanicState.StartPanicking;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + battlecruisers + "] battlecruisers");
                             }
 
@@ -170,7 +145,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                                 Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                                 Cache.Instance.IsMissionPocketDone = true;
-                                State = PanicState.StartPanicking;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
                                 Logging.Log("Panic: Start panicking, mission invaded by [" + battleships + "] battleships");
                             }
 
@@ -208,24 +183,24 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), Priority.WarpScrambler);
 
                     // Failsafe, in theory would/should never happen
-                    if (State == PanicState.Panicking && Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                    if (_States.CurrentPanicState == PanicState.Panicking && Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
                         // Resume is the only state that will make Questor revert to combat mode
-                        State = PanicState.Resume;
+                        _States.CurrentPanicState = PanicState.Resume;
                         return;
                     }
 
                     if (Cache.Instance.InStation)
                     {
                         Logging.Log("Panic: Entered a station, lower panic mode");
-                        State = PanicState.Panic;
+                        _States.CurrentPanicState = PanicState.Panic;
                     }
 
                     // Once we have warped off 500km, assume we are "safer"
-                    if (State == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distance.PanicDistanceToConsiderSafelyWarpedOff)
+                    if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distance.PanicDistanceToConsiderSafelyWarpedOff)
                     {
                         Logging.Log("Panic: We've warped off");
-                        State = PanicState.Panicking;
+                        _States.CurrentPanicState = PanicState.Panicking;
                     }
 
                     // We leave the panicking state once we actually start warping off
@@ -269,7 +244,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 else
                                 {
-                                    Logging.Log("Panic: Docking has been delayed until [" + Cache.Instance.NextUndockAction.ToString("HH:mm:ss") + "]");
+                                    Logging.Log("Panic: Docking will be attempted in [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds,0) + "sec]");
                                 }
                             }
                             else
@@ -289,7 +264,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 else
                                 {
-                                    Logging.Log("Panic: Approaching has been delayed until [" + Cache.Instance.NextTravelerAction.ToString("HH:mm:ss") + "]");
+                                    Logging.Log("Panic: Approaching has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds,0) + "sec]");
                                 }
                             }
                         }
@@ -325,13 +300,13 @@ namespace Questor.Modules.BackgroundTasks
                         }
                         else
                         {
-                            Logging.Log("Panic: Warping has been delayed until [" + Cache.Instance.NextWarpTo.ToString("HH:mm:ss") + "]");
+                            Logging.Log("Panic: Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds,0) + "sec]");
                         }
                     }
                     else
                     {
                         Logging.Log("Panic: At the star, lower panic mode");
-                        State = PanicState.Panic;
+                        _States.CurrentPanicState = PanicState.Panic;
                     }
                     break;
 
@@ -343,7 +318,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.InStation)
                     {
                         Logging.Log("Panic: We're in a station, resume mission");
-                        State = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
+                        _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }
 
                     bool isSafe = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct;
@@ -353,10 +328,10 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Panic: We've recovered, resume mission");
                         Cache.Instance.IsMissionPocketDone = false;
-                        State = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
+                        _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }
 
-                    if (State == PanicState.DelayedResume)
+                    if (_States.CurrentPanicState == PanicState.DelayedResume)
                     {
                         Logging.Log("Panic: Delaying resume for " + _randomDelay + " seconds");
                         Cache.Instance.IsMissionPocketDone = false;
@@ -366,7 +341,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 case PanicState.DelayedResume:
                     if (DateTime.Now > _resumeTime)
-                        State = PanicState.Resume;
+                        _States.CurrentPanicState = PanicState.Resume;
                     break;
 
                 case PanicState.Resume:

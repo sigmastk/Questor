@@ -1,4 +1,6 @@
-﻿namespace Questor.Storylines
+﻿using Questor.Modules.States;
+
+namespace Questor.Storylines
 {
     public interface IStoryline
     {

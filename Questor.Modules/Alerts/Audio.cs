@@ -28,7 +28,13 @@ namespace Questor.Modules.Alerts
         private System.Windows.Forms.Button _loadSyncButton;
         private System.Windows.Forms.Button _loadAsyncButton;        
         private SoundPlayer _player;
-
+        //private Audio _localalarm;
+        //private string _localalarmmp3 = "test.mp3";
+        //private Audio _convoalarm;
+        //private string _convoalarmmp3 = "test.mp3";
+        //private Audio _miscalarm;
+        //private string _miscalarmmp3 = "test.mp3";
+        //private  Audio _music;
         public Audio()
         {
             // Initialize Forms Designer generated code.
@@ -247,17 +253,17 @@ namespace Questor.Modules.Alerts
             this._loadAsyncButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // filepathTextbox
+            // _filepathTextbox
             // 
-            this._filepathTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this._filepathTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this._filepathTextbox.Location = new System.Drawing.Point(7, 25);
             this._filepathTextbox.Name = "_filepathTextbox";
             this._filepathTextbox.Size = new System.Drawing.Size(263, 20);
             this._filepathTextbox.TabIndex = 1;
-            this._filepathTextbox.Text = "";
             this._filepathTextbox.TextChanged += new System.EventHandler(this.filepathTextbox_TextChanged);
             // 
-            // selectFileButton
+            // _selectFileButton
             // 
             this._selectFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._selectFileButton.Location = new System.Drawing.Point(276, 25);
@@ -267,7 +273,7 @@ namespace Questor.Modules.Alerts
             this._selectFileButton.Text = "...";
             this._selectFileButton.Click += new System.EventHandler(this.selectFileButton_Click);
             // 
-            // label1
+            // _label1
             // 
             this._label1.Location = new System.Drawing.Point(7, 7);
             this._label1.Name = "_label1";
@@ -275,7 +281,7 @@ namespace Questor.Modules.Alerts
             this._label1.TabIndex = 3;
             this._label1.Text = ".wav path or URL:";
             // 
-            // loadSyncButton
+            // _loadSyncButton
             // 
             this._loadSyncButton.Location = new System.Drawing.Point(7, 53);
             this._loadSyncButton.Name = "_loadSyncButton";
@@ -284,7 +290,7 @@ namespace Questor.Modules.Alerts
             this._loadSyncButton.Text = "Load Synchronously";
             this._loadSyncButton.Click += new System.EventHandler(this.loadSyncButton_Click);
             // 
-            // playOnceSyncButton
+            // _playOnceSyncButton
             // 
             this._playOnceSyncButton.Location = new System.Drawing.Point(7, 86);
             this._playOnceSyncButton.Name = "_playOnceSyncButton";
@@ -293,7 +299,7 @@ namespace Questor.Modules.Alerts
             this._playOnceSyncButton.Text = "Play Once Synchronously";
             this._playOnceSyncButton.Click += new System.EventHandler(this.playOnceSyncButton_Click);
             // 
-            // playOnceAsyncButton
+            // _playOnceAsyncButton
             // 
             this._playOnceAsyncButton.Location = new System.Drawing.Point(149, 86);
             this._playOnceAsyncButton.Name = "_playOnceAsyncButton";
@@ -302,7 +308,7 @@ namespace Questor.Modules.Alerts
             this._playOnceAsyncButton.Text = "Play Once Asynchronously";
             this._playOnceAsyncButton.Click += new System.EventHandler(this.playOnceAsyncButton_Click);
             // 
-            // stopButton
+            // _stopButton
             // 
             this._stopButton.Location = new System.Drawing.Point(149, 109);
             this._stopButton.Name = "_stopButton";
@@ -311,7 +317,7 @@ namespace Questor.Modules.Alerts
             this._stopButton.Text = "Stop";
             this._stopButton.Click += new System.EventHandler(this.stopButton_Click);
             // 
-            // playLoopAsyncButton
+            // _playLoopAsyncButton
             // 
             this._playLoopAsyncButton.Location = new System.Drawing.Point(7, 109);
             this._playLoopAsyncButton.Name = "_playLoopAsyncButton";
@@ -320,7 +326,7 @@ namespace Questor.Modules.Alerts
             this._playLoopAsyncButton.Text = "Loop Asynchronously";
             this._playLoopAsyncButton.Click += new System.EventHandler(this.playLoopAsyncButton_Click);
             // 
-            // statusBar
+            // _statusBar
             // 
             this._statusBar.Location = new System.Drawing.Point(0, 146);
             this._statusBar.Name = "_statusBar";
@@ -328,8 +334,9 @@ namespace Questor.Modules.Alerts
             this._statusBar.SizingGrip = false;
             this._statusBar.TabIndex = 9;
             this._statusBar.Text = "(no status)";
+            this._statusBar.PanelClick += new System.Windows.Forms.StatusBarPanelClickEventHandler(this._statusBar_PanelClick);
             // 
-            // loadAsyncButton
+            // _loadAsyncButton
             // 
             this._loadAsyncButton.Location = new System.Drawing.Point(149, 53);
             this._loadAsyncButton.Name = "_loadAsyncButton";
@@ -338,7 +345,7 @@ namespace Questor.Modules.Alerts
             this._loadAsyncButton.Text = "Load Asynchronously";
             this._loadAsyncButton.Click += new System.EventHandler(this.loadAsyncButton_Click);
             // 
-            // SoundTestForm
+            // Audio
             // 
             this.ClientSize = new System.Drawing.Size(306, 168);
             this.Controls.Add(this._loadAsyncButton);
@@ -352,10 +359,11 @@ namespace Questor.Modules.Alerts
             this.Controls.Add(this._selectFileButton);
             this.Controls.Add(this._filepathTextbox);
             this.MinimumSize = new System.Drawing.Size(310, 165);
-            this.Name = "SoundTestForm";
+            this.Name = "Audio";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Sound API Test Form";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         #endregion
@@ -364,6 +372,11 @@ namespace Questor.Modules.Alerts
         static void Main()
         {
             Application.Run(new Audio());
+        }
+
+        private void _statusBar_PanelClick(object sender, StatusBarPanelClickEventArgs e)
+        {
+
         }
     }
 }

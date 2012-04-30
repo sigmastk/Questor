@@ -1,7 +1,7 @@
 ﻿
 namespace Questor.Modules.States
 {
-    public enum StateBuy
+    public enum BuyState
     {
         Idle,
         Done,

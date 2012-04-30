@@ -78,25 +78,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caching\TargetingCache.cs" />
+    <Compile Include="States\DropState.cs" />
     <Compile Include="Alerts\Audio.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Caching\ItemCache.cs" />
     <Compile Include="Lookup\CombatMissionSettings.cs" />
     <Compile Include="Actions\Action.cs" />
+    <Compile Include="States\CombatMissionsBehaviorState.cs" />
     <Compile Include="States\MissionActionState.cs" />
     <Compile Include="Actions\Buy.cs" />
-    <Compile Include="Actions\BuyLPI.cs" />
     <Compile Include="Actions\Drop.cs" />
     <Compile Include="Actions\Grab.cs" />
     <Compile Include="Lookup\InvType.cs" />
     <Compile Include="Actions\Sell.cs" />
-    <Compile Include="States\StateBuy.cs" />
-    <Compile Include="States\StateBuyLPI.cs" />
-    <Compile Include="States\StateDrop.cs" />
-    <Compile Include="States\StateGrab.cs" />
-    <Compile Include="States\StateSell.cs" />
-    <Compile Include="Actions\ValueDump.cs" />
+    <Compile Include="States\BuyState.cs" />
+    <Compile Include="States\BuyLPIState.cs" />
+    <Compile Include="States\GrabState.cs" />
+    <Compile Include="States\QuestorState.cs" />
+    <Compile Include="States\States.cs" />
+    <Compile Include="States\SellState.cs" />
+    <Compile Include="States\StorylineState.cs" />
     <Compile Include="States\ValueDumpState.cs" />
     <Compile Include="Actions\AgentInteraction.cs" />
     <Compile Include="Lookup\AgentInteractionPurpose.cs" />
@@ -159,7 +162,11 @@
     <Compile Include="Actions\UnloadLoot.cs" />
     <Compile Include="States\UnloadLootState.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Alerts\Audio.resx">
+      <DependentUpon>Audio.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

@@ -26,8 +26,6 @@ namespace Questor.Modules.Actions
         public int ReserveCargoCapacity { get; set; }
         public List<Ammo> Ammo { get; set; }
 
-        public DebugModuleState State { get; set; }
-
         private void Debug_Windows()
         {
             // We are should read windows in station and out...
@@ -59,13 +57,13 @@ namespace Questor.Modules.Actions
             //    return;
 
             //DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            switch (State)
+            switch (_States.CurrentDebugModuleState)
             {
                 case DebugModuleState.DebugWindows:
                     Debug_Windows();
 
                     // Next state
-                    State = DebugModuleState.Done;
+                    _States.CurrentDebugModuleState = DebugModuleState.Done;
                     break;
 
                 //case DebugModuleState.LootHostileWrecks:
@@ -85,7 +83,7 @@ namespace Questor.Modules.Actions
 
                 default:
                     // Unknown state, goto first state
-                    State = DebugModuleState.DebugWindows;
+                    _States.CurrentDebugModuleState = DebugModuleState.DebugWindows;
                     break;
             }
         }

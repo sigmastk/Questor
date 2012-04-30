@@ -61,8 +61,6 @@ namespace Questor.Modules.Actions
 
       public bool ForceAccept { get; set; }
 
-      public AgentInteractionState State { get; set; }
-
       public AgentInteractionPurpose Purpose { get; set; }
 
       public List<Ammo> AmmoToLoad { get; private set; }
@@ -84,12 +82,12 @@ namespace Questor.Modules.Actions
          if (Purpose == AgentInteractionPurpose.AmmoCheck)
          {
             Logging.Log("AgentInteraction: Checking ammo type");
-            State = AgentInteractionState.WaitForMission;
+            _States.CurrentAgentInteractionState = AgentInteractionState.WaitForMission;
          }
          else
          {
             Logging.Log("AgentInteraction: Replying to agent");
-            State = AgentInteractionState.ReplyToAgent;
+            _States.CurrentAgentInteractionState = AgentInteractionState.ReplyToAgent;
             _nextAgentAction = DateTime.Now.AddSeconds(7);
          }
       }
@@ -165,7 +163,7 @@ namespace Questor.Modules.Actions
 
                Logging.Log("AgentInteraction: Closing conversation");
 
-               State = AgentInteractionState.CloseConversation;
+               _States.CurrentAgentInteractionState = AgentInteractionState.CloseConversation;
                _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
             }
             else
@@ -173,7 +171,7 @@ namespace Questor.Modules.Actions
                Logging.Log("AgentInteraction: Waiting for mission");
 
                // Apparently someone clicked "accept" already
-               State = AgentInteractionState.WaitForMission;
+               _States.CurrentAgentInteractionState = AgentInteractionState.WaitForMission;
                _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
             }
          }
@@ -186,13 +184,13 @@ namespace Questor.Modules.Actions
                request.Say();
 
                Logging.Log("AgentInteraction: Waiting for mission");
-               State = AgentInteractionState.WaitForMission;
+               _States.CurrentAgentInteractionState = AgentInteractionState.WaitForMission;
                _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
             }
             else
             {
                Logging.Log("AgentInteraction: Unexpected dialog options");
-               State = AgentInteractionState.UnexpectedDialogOptions;
+               _States.CurrentAgentInteractionState = AgentInteractionState.UnexpectedDialogOptions;
             }
          }
          else if (view != null)
@@ -210,14 +208,14 @@ namespace Questor.Modules.Actions
             {
                Logging.Log("AgentInteraction: Waiting for mission");
 
-               State = AgentInteractionState.WaitForMission; // Do not say anything, wait for the mission
+               _States.CurrentAgentInteractionState = AgentInteractionState.WaitForMission; // Do not say anything, wait for the mission
                _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To15());
             }
             else
             {
                Logging.Log("AgentInteraction: Unexpected dialog options");
 
-               State = AgentInteractionState.UnexpectedDialogOptions;
+               _States.CurrentAgentInteractionState = AgentInteractionState.UnexpectedDialogOptions;
             }
          }
       }
@@ -277,7 +275,7 @@ namespace Questor.Modules.Actions
          }
          
          //open the journal window
-         if (!Cache.OpenJournalWindow("AgentInteraction")) return;
+         if (!Cache.Instance.OpenJournalWindow("AgentInteraction")) return;
 
          Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
          if (Cache.Instance.Mission == null)
@@ -317,7 +315,7 @@ namespace Questor.Modules.Actions
             if (Purpose != AgentInteractionPurpose.AmmoCheck)
                Logging.Log("AgentInteraction: Declining blacklisted faction mission");
 
-            State = AgentInteractionState.DeclineMission;
+            _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
             _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
             return;
          }
@@ -325,7 +323,7 @@ namespace Questor.Modules.Actions
          if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
          {
              Logging.Log("AgentInteraction: Declining greylisted mission [" + Cache.Instance.MissionName + "]");
-             State = AgentInteractionState.DeclineMission;
+             _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
              _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
              return;
          }
@@ -337,7 +335,7 @@ namespace Questor.Modules.Actions
                if (Purpose != AgentInteractionPurpose.AmmoCheck)
                   Logging.Log("AgentInteraction: Declining low-sec mission");
 
-               State = AgentInteractionState.DeclineMission;
+               _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
                return;
             }
@@ -350,7 +348,7 @@ namespace Questor.Modules.Actions
             {
                Logging.Log("AgentInteraction: Declining courier/mining/trade");
 
-               State = AgentInteractionState.DeclineMission;
+               _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber5To10());
                return;
             }
@@ -403,7 +401,7 @@ namespace Questor.Modules.Actions
             {
                Logging.Log("AgentInteraction: Closing conversation");
 
-               State = AgentInteractionState.CloseConversation;
+               _States.CurrentAgentInteractionState = AgentInteractionState.CloseConversation;
                return;
             }
          }
@@ -419,7 +417,7 @@ namespace Questor.Modules.Actions
          {
             Logging.Log("AgentInteraction: Accepting mission [" + missionName + "]");
 
-            State = AgentInteractionState.AcceptMission;
+            _States.CurrentAgentInteractionState = AgentInteractionState.AcceptMission;
             _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
          }
          else // If we already accepted the mission, close the convo
@@ -427,7 +425,7 @@ namespace Questor.Modules.Actions
             Logging.Log("AgentInteraction: Mission [" + missionName + "] already accepted");
             Logging.Log("AgentInteraction: Closing conversation");
             //CheckFaction();
-            State = AgentInteractionState.CloseConversation;
+            _States.CurrentAgentInteractionState = AgentInteractionState.CloseConversation;
             _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
          }
       }
@@ -473,7 +471,7 @@ namespace Questor.Modules.Actions
             }
          }
          Logging.Log("AgentInteraction: Closing conversation");
-         State = AgentInteractionState.CloseConversation;
+         _States.CurrentAgentInteractionState = AgentInteractionState.CloseConversation;
          _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
       }
 
@@ -541,7 +539,7 @@ namespace Questor.Modules.Actions
                   Logging.Log("AgentInteraction: Current standings [" + Math.Round(Cache.Instance.AgentEffectiveStandingtoMe,2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.");
                   CloseConversation();
 
-                  State = AgentInteractionState.StartConversation;
+                  _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
 
                   return;
                }
@@ -554,7 +552,7 @@ namespace Questor.Modules.Actions
 
                   Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent;
                   Logging.Log("AgentInteraction: new agent is " + Cache.Instance.CurrentAgent);
-                  State = AgentInteractionState.ChangeAgent;
+                  _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
 
                   return;
                }
@@ -567,7 +565,7 @@ namespace Questor.Modules.Actions
          decline.Say();
 
          Logging.Log("AgentInteraction: Replying to agent");
-         State = AgentInteractionState.ReplyToAgent;
+         _States.CurrentAgentInteractionState = AgentInteractionState.ReplyToAgent;
          _nextAgentAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber3To7());
       }
 
@@ -647,15 +645,24 @@ namespace Questor.Modules.Actions
 
       public void CloseConversation()
       {
-         DirectAgentWindow agentWindow = Agent.Window;
-         if (agentWindow == null)
-         {
-            Logging.Log(Cache.Instance.CourierMission ? "AgentInteraction: Courier Done" : "AgentInteraction: Done");
-            State = AgentInteractionState.Done;
-            return;
-         }
-
-         agentWindow.Close();
+          if (DateTime.Now < _nextAgentAction)
+          {
+              Logging.Log("AgentInteraction.CloseConversation will continue in [" + Math.Round(_nextAgentAction.Subtract(DateTime.Now).TotalSeconds,0) + "]sec");
+              return;
+          }
+          DirectAgentWindow agentWindow = Agent.Window;
+          if (agentWindow != null)
+          {
+              Logging.Log("AgentInteraction: Attempting to close Agent Window");
+              _nextAgentAction = DateTime.Now.AddSeconds(2);
+              agentWindow.Close();
+          }
+          if (agentWindow == null)
+          {
+             Logging.Log(Cache.Instance.CourierMission ? "AgentInteraction: Courier Done" : "AgentInteraction: Done");
+             _States.CurrentAgentInteractionState = AgentInteractionState.Done;
+             return;
+          }
       }
 
       public void ProcessState()
@@ -670,7 +677,7 @@ namespace Questor.Modules.Actions
          if (DateTime.Now < _nextAgentAction)
             return;
 
-         switch (State)
+         switch (_States.CurrentAgentInteractionState)
          {
             case AgentInteractionState.Idle:
                break;
@@ -683,11 +690,15 @@ namespace Questor.Modules.Actions
 
             case AgentInteractionState.StartConversation:
                Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
-
+               if (((int)Cache.Instance.AgentEffectiveStandingtoMe == (int)0.00) && (AgentId == Cache.Instance.AgentId))
+               {
+                   Logging.Log("AgentInteraction: Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.AgentEffectiveStandingtoMe + " and must not yet be available. retrying.");
+                   return;
+               }
                Agent.InteractWith();
 
                Logging.Log("AgentInteraction: Waiting for conversation");
-               State = AgentInteractionState.WaitForConversation;
+               _States.CurrentAgentInteractionState = AgentInteractionState.WaitForConversation;
                break;
 
             case AgentInteractionState.WaitForConversation:

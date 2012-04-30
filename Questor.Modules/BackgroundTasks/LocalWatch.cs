@@ -1,27 +1,26 @@
-﻿using Questor.Modules.Caching;
-using Questor.Modules.Lookup;
-using Questor.Modules.States;
-
+﻿
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
     //using System.Linq;
+    using Questor.Modules.Caching;
+    using Questor.Modules.Lookup;
+    using Questor.Modules.States;
 
     public class LocalWatch
     {
-        public LocalWatchState State { get; set; }
         private DateTime _lastAction;
 
         public void ProcessState()
         {
-            switch(State)
+            switch (_States.CurrentLocalWatchState)
             {
                 case LocalWatchState.Idle:
                     //checking local every 5 second
                     if(DateTime.Now.Subtract(_lastAction).TotalSeconds < (int)Time.CheckLocalDelay_seconds)
                         break;
 
-                    State = LocalWatchState.CheckLocal;
+                    _States.CurrentLocalWatchState = LocalWatchState.CheckLocal;
                     break;
 
                 case LocalWatchState.CheckLocal:
@@ -32,12 +31,12 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate,Settings.Instance.LocalBadStandingLevelToConsiderBad);
 
                     _lastAction = DateTime.Now;
-                    State = LocalWatchState.Idle;
+                    _States.CurrentLocalWatchState = LocalWatchState.Idle;
                     break;
 
                 default:
                     // Next state
-                    State = LocalWatchState.Idle;
+                    _States.CurrentLocalWatchState = LocalWatchState.Idle;
                     break;
             }
         }

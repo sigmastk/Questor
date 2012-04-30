@@ -11,8 +11,6 @@ namespace Questor.Modules.Actions
 
     public class Buy
     {
-        public StateBuy State { get; set; }
-
         public int Item { get; set; }
         public int Unit { get; set; }
 
@@ -24,21 +22,21 @@ namespace Questor.Modules.Actions
         {
             DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
             
-            switch (State)
+            switch (_States.CurrentBuyState)
             {
-                case StateBuy.Idle:
-                case StateBuy.Done:
+                case BuyState.Idle:
+                case BuyState.Done:
                     break;
 
-                case StateBuy.Begin:
+                case BuyState.Begin:
 
                     // Close the market window if there is one
                     if (marketWindow != null)
                         marketWindow.Close();
-                    State = StateBuy.OpenMarket;
+                    _States.CurrentBuyState = BuyState.OpenMarket;
                     break;
 
-                case StateBuy.OpenMarket:
+                case BuyState.OpenMarket:
                     // Close the market window if there is one
                     //if (marketWindow != null)
                     //    marketWindow.Close();
@@ -55,18 +53,18 @@ namespace Questor.Modules.Actions
 
 
                     Logging.Log("Buy: Opening Market");
-                    State = StateBuy.LoadItem;
+                    _States.CurrentBuyState = BuyState.LoadItem;
 
                     break;
 
-                case StateBuy.LoadItem:
+                case BuyState.LoadItem:
 
                     _lastAction = DateTime.Now;
 
                     if (marketWindow.DetailTypeId != Item)
                     {
                         marketWindow.LoadTypeId(Item);
-                        State = StateBuy.BuyItem;
+                        _States.CurrentBuyState = BuyState.BuyItem;
 
                         break;
                     }
@@ -74,7 +72,7 @@ namespace Questor.Modules.Actions
 
                     break;
 
-                case StateBuy.BuyItem:
+                case BuyState.BuyItem:
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 5)
                         break;
@@ -85,11 +83,11 @@ namespace Questor.Modules.Actions
                         DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();
                         if (order != null)
                         {
-                            // Calculate how much kernite we still need
+                            // Calculate how much we still need
                             if (order.VolumeEntered >= Unit)
                             {
                                 order.Buy(Unit, DirectOrderRange.Station);
-                                State = StateBuy.WaitForItems;
+                                _States.CurrentBuyState = BuyState.WaitForItems;
                             }
                             else
                             {
@@ -97,14 +95,14 @@ namespace Questor.Modules.Actions
                                  Unit = Unit - order.VolumeEntered;
                                  Logging.Log("Missing " + Convert.ToString(Unit) + " units");
                                 ReturnBuy = true;
-                                State = StateBuy.WaitForItems;
+                                _States.CurrentBuyState = BuyState.WaitForItems;
                             }
 
                         }
 
                     break;
 
-                case StateBuy.WaitForItems:
+                case BuyState.WaitForItems:
                     // Wait 5 seconds after moving
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 5)
                         break;
@@ -117,12 +115,12 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Buy: Return Buy");
                         ReturnBuy = false;
-                        State = StateBuy.OpenMarket;
+                        _States.CurrentBuyState = BuyState.OpenMarket;
                         break;
                     }
 
                         Logging.Log("Buy: Done");
-                        State = StateBuy.Done;
+                        _States.CurrentBuyState = BuyState.Done;
 
 
 

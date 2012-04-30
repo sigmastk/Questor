@@ -41,9 +41,7 @@ namespace Questor.Modules.Combat
         private double _shieldPctTotal;
         private double _structurePctTotal;
         public bool Recall = false;
-
-        public DroneState State { get; set; }
-
+       
         private double GetShieldPctTotal()
         {
             if (!Cache.Instance.ActiveDrones.Any())
@@ -78,17 +76,16 @@ namespace Questor.Modules.Combat
         private EntityCache GetTarget()
         {
             // Find the first active weapon's target
-            EntityCache droneTarget = Cache.Instance.EntityById(_lastTarget);
-
+            TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
             if (Cache.Instance.DronesKillHighValueTargets)
             {
                 // Return best possible high value target
-                return Cache.Instance.GetBestTarget(droneTarget, Settings.Instance.DroneControlRange, false);
+                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, false);
             }
             else
             {
                 // Return best possible low value target
-                return Cache.Instance.GetBestTarget(droneTarget, Settings.Instance.DroneControlRange, true);
+                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, true);
             }
         }
 
@@ -108,7 +105,9 @@ namespace Questor.Modules.Combat
 
             // Is our current target still the same and is the last Engage command no longer then 15s ago?
             if (_lastTarget == target.Id && DateTime.Now.Subtract(_lastEngageCommand).TotalSeconds < 15)
+            {
                 return;
+            }
 
             // Are we still actively shooting at the target?
             bool mustEngage = false;
@@ -140,40 +139,40 @@ namespace Questor.Modules.Combat
             // There is really no combat in stations (yet)
             if (Cache.Instance.InStation)
             {
-                State = DroneState.Idle;
+                _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
 
             // if we are not in space yet, wait...
             if (!Cache.Instance.InSpace)
             {
-                State = DroneState.Idle;
+                _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
 
             // What? No ship entity?
             if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
             {
-                State = DroneState.Idle;
+                _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
 
             // There is no combat when cloaked
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
             {
-                State = DroneState.Idle;
+                _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
 
             if (!Settings.Instance.UseDrones)
             {
-                State = DroneState.Idle;
+                _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
 
             if (!Cache.Instance.ActiveDrones.Any() && Cache.Instance.InWarp )
             {
-                State = DroneState.Idle;
+                _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
 
@@ -183,14 +182,14 @@ namespace Questor.Modules.Combat
             _structurePctTotal = GetStructurePctTotal();
             _lastDroneCount = Cache.Instance.ActiveDrones.Count();
 
-            switch (State)
+            switch (_States.CurrentDroneState)
             {
                 case DroneState.WaitingForTargets:
                     // Are we in the right state ?
                     if (Cache.Instance.ActiveDrones.Any())
                     {
                         // Apparently not, we have drones out, go into fight mode
-                        State = DroneState.Fighting;
+                        _States.CurrentDroneState = DroneState.Fighting;
                         break;
                     }
 
@@ -238,7 +237,7 @@ namespace Questor.Modules.Combat
                         // Reset launch tries
                         _launchTries = 0;
                         _lastLaunch = DateTime.Now;
-                        State = DroneState.Launch;
+                        _States.CurrentDroneState = DroneState.Launch;
                     }
                     break;
 
@@ -247,7 +246,7 @@ namespace Questor.Modules.Combat
                     Recall = false;
                     _launchTimeout = DateTime.Now;
                     Cache.Instance.DirectEve.ActiveShip.LaunchAllDrones();
-                    State = DroneState.Launching;
+                    _States.CurrentDroneState = DroneState.Launching;
                     break;
 
                 case DroneState.Launching:
@@ -260,18 +259,18 @@ namespace Questor.Modules.Combat
                             if (_launchTries < 10)
                             {
                                 _launchTries++;
-                                State = DroneState.Launch;
+                                _States.CurrentDroneState = DroneState.Launch;
                                 break;
                             }
                             else
-                                State = DroneState.OutOfDrones;
+                                _States.CurrentDroneState = DroneState.OutOfDrones;
                         }
                         break;
                     }
 
                     // Are we done launching?
                     if (_lastDroneCount == Cache.Instance.ActiveDrones.Count())
-                        State = DroneState.Fighting;
+                        _States.CurrentDroneState = DroneState.Fighting;
                     break;
 
                 case DroneState.OutOfDrones:
@@ -279,79 +278,17 @@ namespace Questor.Modules.Combat
                     //{
                     //    State = DroneState.WaitingForTargets;
                     //}
+                    TargetingCache.CurrentDronesTarget = null;
                     break;
 
                 case DroneState.Fighting:
                     // Should we recall our drones? This is a possible list of reasons why we should
 
-                    // Are we done (for now) ?
-                    if (Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.IsNpc && e.Distance < Settings.Instance.DroneControlRange) == 0)
-                    {
-                        Logging.Log("Drones: Recalling drones because no NPC is targeting us within dronerange");
-                        Recall = true;
-                    }
-
-                    if (Cache.Instance.IsMissionPocketDone)
-                    {
-                        Logging.Log("Drones: Recalling drones because we are done with this pocket.");
-                        Recall = true;
-                    }
-                    else if (_shieldPctTotal > GetShieldPctTotal())
-                    {
-                        Logging.Log("Drones: Recalling drones because drones have lost some shields! [Old: " + _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") + "]");
-                        Recall = true;
-                    }
-                    else if (_armorPctTotal > GetArmorPctTotal())
-                    {
-                        Logging.Log("Drones: Recalling drones because drones have lost some armor! [Old:" + _armorPctTotal.ToString("N2") + "][New: " + GetArmorPctTotal().ToString("N2") + "]");
-                        Recall = true;
-                    }
-                    else if (_structurePctTotal > GetStructurePctTotal())
-                    {
-                        Logging.Log("Drones: Recalling drones because drones have lost some structure! [Old:" + _structurePctTotal.ToString("N2") + "][New: " + GetStructurePctTotal().ToString("N2") + "]");
-                        Recall = true;
-                    }
-                    else if (Cache.Instance.ActiveDrones.Count() < _lastDroneCount)
-                    {
-                        // Did we lose a drone? (this should be covered by total's as well though)
-                        Logging.Log("Drones: Recalling drones because we have lost a drone! [Old:" + _lastDroneCount + "][New: " + Cache.Instance.ActiveDrones.Count() + "]");
-                        Recall = true;
-                    }
-                    else
-                    {
-                        // Default to long range recall
-                        int lowShieldWarning = Settings.Instance.LongRangeDroneRecallShieldPct;
-                        int lowArmorWarning = Settings.Instance.LongRangeDroneRecallArmorPct;
-                        int lowCapWarning = Settings.Instance.LongRangeDroneRecallCapacitorPct;
-
-                        if (Cache.Instance.ActiveDrones.Average(d => d.Distance) < (Settings.Instance.DroneControlRange / 2d))
-                        {
-                            lowShieldWarning = Settings.Instance.DroneRecallShieldPct;
-                            lowArmorWarning = Settings.Instance.DroneRecallArmorPct;
-                            lowCapWarning = Settings.Instance.DroneRecallCapacitorPct;
-                        }
-
-                        if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning)
-                        {
-                            Logging.Log("Drones: Recalling drones due to shield [" + Cache.Instance.DirectEve.ActiveShip.ShieldPercentage + "%] below [" + lowShieldWarning + "%] minimum");
-                            Recall = true;
-                        }
-                        else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning)
-                        {
-                            Logging.Log("Drones: Recalling drones due to armor [" + Cache.Instance.DirectEve.ActiveShip.ArmorPercentage + "%] below [" + lowArmorWarning + "%] minimum");
-                            Recall = true;
-                        }
-                        else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning)
-                        {
-                            Logging.Log("Drones: Recalling drones due to capacitor [" + Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "%] below [" + lowCapWarning + "%] minimum");
-                            Recall = true;
-                        }
-                    }
-
                     if (!Cache.Instance.ActiveDrones.Any())
                     {
                         Logging.Log("Drones: Apparently we have lost all our drones");
                         Recall = true;
+
                     }
                     else
                     {
@@ -362,16 +299,101 @@ namespace Questor.Modules.Combat
                         }
                     }
 
+                    if (!Recall)
+                    {
+                        // Are we done (for now) ?
+                        if (
+                            Cache.Instance.TargetedBy.Count(
+                                e => !e.IsSentry && e.IsNpc && e.Distance < Settings.Instance.DroneControlRange) == 0)
+                        {
+                            Logging.Log("Drones: Recalling drones because no NPC is targeting us within dronerange");
+                            Recall = true;
+                        }
+
+                        if (!Recall & (Cache.Instance.IsMissionPocketDone))
+                        {
+                            Logging.Log("Drones: Recalling drones because we are done with this pocket.");
+                            Recall = true;
+                        }
+                        else if ((!Recall & _shieldPctTotal > GetShieldPctTotal()))
+                        {
+                            Logging.Log("Drones: Recalling drones because drones have lost some shields! [Old: " +
+                                        _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") +
+                                        "]");
+                            Recall = true;
+                        }
+                        else if (!Recall & (_armorPctTotal > GetArmorPctTotal()))
+                        {
+                            Logging.Log("Drones: Recalling drones because drones have lost some armor! [Old:" +
+                                        _armorPctTotal.ToString("N2") + "][New: " + GetArmorPctTotal().ToString("N2") +
+                                        "]");
+                            Recall = true;
+                        }
+                        else if (!Recall & (_structurePctTotal > GetStructurePctTotal()))
+                        {
+                            Logging.Log("Drones: Recalling drones because drones have lost some structure! [Old:" +
+                                        _structurePctTotal.ToString("N2") + "][New: " +
+                                        GetStructurePctTotal().ToString("N2") + "]");
+                            Recall = true;
+                        }
+                        else if (!Recall & (Cache.Instance.ActiveDrones.Count() < _lastDroneCount))
+                        {
+                            // Did we lose a drone? (this should be covered by total's as well though)
+                            Logging.Log("Drones: Recalling drones because we have lost a drone! [Old:" + _lastDroneCount +
+                                        "][New: " + Cache.Instance.ActiveDrones.Count() + "]");
+                            Recall = true;
+                        }
+                        else if (!Recall)
+                        {
+                            // Default to long range recall
+                            int lowShieldWarning = Settings.Instance.LongRangeDroneRecallShieldPct;
+                            int lowArmorWarning = Settings.Instance.LongRangeDroneRecallArmorPct;
+                            int lowCapWarning = Settings.Instance.LongRangeDroneRecallCapacitorPct;
+
+                            if (Cache.Instance.ActiveDrones.Average(d => d.Distance) <
+                                (Settings.Instance.DroneControlRange/2d))
+                            {
+                                lowShieldWarning = Settings.Instance.DroneRecallShieldPct;
+                                lowArmorWarning = Settings.Instance.DroneRecallArmorPct;
+                                lowCapWarning = Settings.Instance.DroneRecallCapacitorPct;
+                            }
+
+                            if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning)
+                            {
+                                Logging.Log("Drones: Recalling drones due to shield [" +
+                                            Cache.Instance.DirectEve.ActiveShip.ShieldPercentage + "%] below [" +
+                                            lowShieldWarning + "%] minimum");
+                                Recall = true;
+                            }
+                            else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning)
+                            {
+                                Logging.Log("Drones: Recalling drones due to armor [" +
+                                            Cache.Instance.DirectEve.ActiveShip.ArmorPercentage + "%] below [" +
+                                            lowArmorWarning + "%] minimum");
+                                Recall = true;
+                            }
+                            else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning)
+                            {
+                                Logging.Log("Drones: Recalling drones due to capacitor [" +
+                                            Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "%] below [" +
+                                            lowCapWarning + "%] minimum");
+                                Recall = true;
+                            }
+                        }
+                    }
+
+
+
                     // Recall or engage
                     if (Recall)
-                        State = DroneState.Recalling;
+                        _States.CurrentDroneState = DroneState.Recalling;
                     else
                     {
                         EngageTarget();
 
                         // We lost a drone and did not recall, assume panicking and launch (if any) additional drones
                         if (Cache.Instance.ActiveDrones.Count() < _lastDroneCount)
-                            State = DroneState.Launch;
+                            _States.CurrentDroneState = DroneState.Launch;
                     }
                     break;
 
@@ -381,7 +403,8 @@ namespace Questor.Modules.Combat
                     {
                         _lastRecall = DateTime.Now;
                         Recall = false;
-                        State = DroneState.WaitingForTargets;
+                        TargetingCache.CurrentDronesTarget = null;
+                        _States.CurrentDroneState = DroneState.WaitingForTargets;
                         break;
                     }
 
@@ -403,9 +426,10 @@ namespace Questor.Modules.Combat
                         Settings.Instance.UseDrones &&
                         !Cache.Instance.InWarp)
                     {
-                        State = DroneState.WaitingForTargets;
+                        _States.CurrentDroneState = DroneState.WaitingForTargets;
                         return;
                     }
+                    TargetingCache.CurrentDronesTarget = null;
                     break;
             }
         }

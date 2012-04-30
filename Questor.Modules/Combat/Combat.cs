@@ -30,7 +30,6 @@ namespace Questor.Modules.Combat
         private readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
         private static readonly Dictionary<long, DateTime> _lastWeaponReload = new Dictionary<long, DateTime>();
         private bool _isJammed;
-        public CombatState State { get; set; }
         private int MaxCharges { get; set; }
 
         /// <summary> Reload correct (tm) ammo for the NPC
@@ -65,7 +64,7 @@ namespace Questor.Modules.Combat
             if (!correctAmmo.Any())
             {
                 Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]");
-                State = CombatState.OutOfAmmo;
+                _States.CurrentCombatState = CombatState.OutOfAmmo;
                 return false;
             }
 
@@ -134,7 +133,7 @@ namespace Questor.Modules.Combat
             if (!correctAmmo.Any())
             {
                 Logging.Log("Combat: ReloadNormalAmmo: not enough [" + correctAmmo + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]");
-                State = CombatState.OutOfAmmo;
+                _States.CurrentCombatState = CombatState.OutOfAmmo;
                 return false;
             }
 
@@ -183,7 +182,7 @@ namespace Questor.Modules.Combat
         public bool ReloadAmmo(ModuleCache weapon, EntityCache entity)
         {
             // We need the cargo bay open for both reload actions
-            if (!Cache.OpenCargoHold("Questor: ReloadAmmo")) return false;
+            if (!Cache.Instance.OpenCargoHold("Questor: ReloadAmmo")) return false;
 
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity) : ReloadNormalAmmo(weapon, entity);
         }
@@ -216,7 +215,7 @@ namespace Questor.Modules.Combat
                 if (weapon.CurrentCharges >= weapon.MaxCharges)
                     return;
 
-                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || weapon.IsActive)
                     return;
 
                 if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
@@ -322,16 +321,24 @@ namespace Questor.Modules.Combat
             foreach (ModuleCache weapon in weapons)
             {
                 // don't waste ammo on small target if you use autocannon or siege i hope you use drone
-                //
-                // why the hell do we deactivate the weapon AFTER its been activated?! wtf - fix the activation issue ffs
-                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 if (Settings.Instance.DontShootFrigatesWithSiegeorAutoCannons) //this defaults to false and needs to be changed in your characters settings xml file if you want to enable this option
                 {
                     if (Settings.Instance.WeaponGroupId == 55 || Settings.Instance.WeaponGroupId == 508 || Settings.Instance.WeaponGroupId == 506)
                     {
                         if (target.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !target.TargetValue.HasValue && target.GroupId != (int)Group.LargeCollidableStructure)
                         {
-                            weapon.Click();
+                            if (weapon.IsActive)
+                            {
+                                //if we are already shooting at it, stop
+                                weapon.Click();
+                                continue;
+                            }
+                            else
+                            {
+                                //if weapon are not yet shooting at it, do not attempt to shoot
+                                continue;
+                            }
+
                         }
                     }
                 }
@@ -341,14 +348,14 @@ namespace Questor.Modules.Combat
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
                    continue;
 
-               if (DateTime.Now < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
+                if (DateTime.Now < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
                   return;
 
                 // No ammo loaded
                 if (weapon.Charge == null)
                    continue;
 
-               Ammo ammo = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
+                Ammo ammo = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
 
                 //use mission specific ammo
                 if (Cache.Instance.MissionAmmo.Count() != 0)
@@ -358,17 +365,17 @@ namespace Questor.Modules.Combat
 
                 // How can this happen? Someone manually loaded ammo
                 if (ammo == null)
-                   continue;
+                    continue;
 
                 // If we have already activated warp, deactivate the weapons
                 if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
                 {
-               // Target is in range
-                if (target.Distance <= ammo.Range)
-                   continue;
+                    // Target is in range
+                    if (target.Distance <= ammo.Range)
+                    continue;
                 }
 
-               // Target is out of range, stop firing
+                // Target is out of range, stop firing
                 weapon.Click();
             }
 
@@ -565,7 +572,7 @@ namespace Questor.Modules.Combat
             //
             // ???bounty tracking code goes here???
             //
-
+            if (!Cache.Instance.OpenCargoHold("Combat.TargetCombatants: ")) return;
             // What is the range that we can target at
             double maxRange = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange, Cache.Instance.WeaponRange);
 
@@ -708,52 +715,51 @@ namespace Questor.Modules.Combat
             // There is really no combat in stations (yet)
             if (Cache.Instance.InStation)
             {
-                State = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
 
             // if we are not in space yet, wait...
             if (!Cache.Instance.InSpace)
             {
-                State = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
 
             // What? No ship entity?
             if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
             {
-                State = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
 
             // There is no combat when cloaked
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
             {
-                State = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
             //
             // only the ship defined in CombatShipName will do combat: we assume all other ships are non-combat ships!!!!
             //
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName)
+            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower())
             {
-                State = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
 
             if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName)
             {
                 Logging.Log("Combat: No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!", Logging.red);
-                State = CombatState.OutOfAmmo;
+                _States.CurrentCombatState = CombatState.OutOfAmmo;
             }
 
             if (Cache.Instance.InWarp)
             {
-                State = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
-
-            switch (State)
+            switch (_States.CurrentCombatState)
             {
                 case CombatState.CheckTargets:
                     // When in warp there's nothing we can do, so ignore everything
@@ -761,7 +767,7 @@ namespace Questor.Modules.Combat
                         return;
 
                     // Next state
-                    State = CombatState.KillTargets;
+                    _States.CurrentCombatState = CombatState.KillTargets;
                     TargetCombatants();
                     break;
 
@@ -770,15 +776,25 @@ namespace Questor.Modules.Combat
                         return;
 
                     // Next state
-                    State = CombatState.CheckTargets;
-
-                    EntityCache target = GetTarget();
-                    if (target != null)
+                    _States.CurrentCombatState = CombatState.CheckTargets;
+                    
+                    //
+                    // iterate through priority targets here !!!!!!!!
+                    //
+                    //Cache.Instance._priorityTargets_text = "";
+                    //for (int i = 0; i < Cache.Instance._priorityTargets.Count; i++) // Loop through List with for
+                    //{
+                        
+                    //    Cache.Instance._priorityTargets_text = Cache.Instance._priorityTargets_text + "[ " + i + " ][ " + Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "k away][" + Cache.Instance._priorityTargets[i].Entity.Health + "TH][" + Cache.Instance._priorityTargets[i].Entity.ShieldPct + "S][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.ArmorPct, 0) + "A][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.StructurePct, 0) + "H][" + NPCValue.Value.ToString() + "isk],";
+                        //newlblPriorityTargetstext = newlblPriorityTargetstext + "[ " + i + " ][ "; //+ Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "],";
+                    //}
+                    TargetingCache.CurrentWeaponsTarget = GetTarget();
+                    if (TargetingCache.CurrentWeaponsTarget != null)
                     {
-                        ActivateTargetPainters(target);
-                        ActivateStasisWeb(target);
-                        ActivateNos(target);
-                        ActivateWeapons(target);
+                        ActivateTargetPainters(TargetingCache.CurrentWeaponsTarget);
+                        ActivateStasisWeb(TargetingCache.CurrentWeaponsTarget);
+                        ActivateNos(TargetingCache.CurrentWeaponsTarget);
+                        ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
                     }
                     break;
 
@@ -789,18 +805,22 @@ namespace Questor.Modules.Combat
                     //
                     // below is the reasons we will start the combat state(s) - if the below is not met do nothing
                     //
+                    //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
+                    //Logging.Log("Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked: " + Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked);
+                    //Logging.Log("Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower(): " + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower());
+                    //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
                     if (Cache.Instance.InSpace && 
                         Cache.Instance.DirectEve.ActiveShip.Entity != null && 
                         !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked &&
-                        Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName)
+                        Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                     {
-                        State = CombatState.CheckTargets;
+                        _States.CurrentCombatState = CombatState.CheckTargets;
                         return;
                     }
                     break;
                 default:
                     // Next state
-                    State = CombatState.CheckTargets;
+                    _States.CurrentCombatState = CombatState.CheckTargets;
                     break;
             }
         }

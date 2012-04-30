@@ -1,11 +1,5 @@
 ﻿namespace Questor
 {
-    //using global::Questor.Modules;
-    //using System;
-    //using System.Collections.Generic;
-    
-    //[Serializable()]
-
     partial class QuestorfrmMain
     {
         /// <summary>
@@ -44,9 +38,6 @@
             this.tUpdateUI = new System.Windows.Forms.Timer(this.components);
             this.DamageTypeComboBox = new System.Windows.Forms.ComboBox();
             this.lblDamageType = new System.Windows.Forms.Label();
-            this.lblQuestorState = new System.Windows.Forms.Label();
-            this.QuestorStateComboBox = new System.Windows.Forms.ComboBox();
-            this.StartButton = new System.Windows.Forms.Button();
             this.PauseCheckBox = new System.Windows.Forms.CheckBox();
             this.Disable3DCheckBox = new System.Windows.Forms.CheckBox();
             this.chkShowDetails = new System.Windows.Forms.CheckBox();
@@ -54,7 +45,6 @@
             this.lblCurrentMissionInfo = new System.Windows.Forms.Label();
             this.lblPocketAction = new System.Windows.Forms.Label();
             this.lblCurrentPocketAction = new System.Windows.Forms.Label();
-            this.buttonQuestormanager = new System.Windows.Forms.Button();
             this.buttonQuestorStatistics = new System.Windows.Forms.Button();
             this.buttonSettingsXML = new System.Windows.Forms.Button();
             this.buttonOpenMissionXML = new System.Windows.Forms.Button();
@@ -62,8 +52,8 @@
             this.Console = new System.Windows.Forms.TabPage();
             this.txtComand = new System.Windows.Forms.TextBox();
             this.txtExtConsole = new System.Windows.Forms.TextBox();
-            this.tabInterface1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.Tabs = new System.Windows.Forms.TabControl();
+            this.States = new System.Windows.Forms.TabPage();
             this.label19 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -80,41 +70,58 @@
             this.CombatStateComboBox = new System.Windows.Forms.ComboBox();
             this.PanicStateComboBox = new System.Windows.Forms.ComboBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
             this.AgentInteractionStateComboBox = new System.Windows.Forms.ComboBox();
             this.TravelerStateComboBox = new System.Windows.Forms.ComboBox();
             this.label17 = new System.Windows.Forms.Label();
             this.UnloadStateComboBox = new System.Windows.Forms.ComboBox();
             this.ArmStateComboBox = new System.Windows.Forms.ComboBox();
-            this.MissionActionStateComboBox = new System.Windows.Forms.ComboBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.CombatMissionStateComboBox = new System.Windows.Forms.ComboBox();
+            this.StorylineStateComboBox = new System.Windows.Forms.ComboBox();
+            this.CombatMissionCtrlStateComboBox = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
-            this.MissionStateComboBox = new System.Windows.Forms.ComboBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.comboBox4 = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.Schedule = new System.Windows.Forms.TabPage();
+            this.Targets = new System.Windows.Forms.TabPage();
+            this.CurrentPriorityTargetsData = new System.Windows.Forms.Label();
+            this.CurrentPocketNumberData = new System.Windows.Forms.Label();
+            this.MissionPocketNumberlbl = new System.Windows.Forms.Label();
+            this.CurrentMissionActionData = new System.Windows.Forms.Label();
+            this.CurrentWeaponsTargetData = new System.Windows.Forms.Label();
+            this.CurrentDroneTargetData = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.comboBox3 = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.CombatMissionsBehaviorComboBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.QuestorStateComboBox2 = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.QuestorStateComboBox = new System.Windows.Forms.ComboBox();
+            this.QuestorStatelbl = new System.Windows.Forms.Label();
+            this.buttonOpenSchedulesXML = new System.Windows.Forms.Button();
+            this.buttonOpenCharacterXML = new System.Windows.Forms.Button();
+            this.buttonQuestormanager = new System.Windows.Forms.Button();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.lblDistanceWeaponsTarget = new System.Windows.Forms.Label();
+            this.lblDistanceDroneTarget = new System.Windows.Forms.Label();
+            this.lblDistance3 = new System.Windows.Forms.Label();
             this.Console.SuspendLayout();
-            this.tabInterface1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
+            this.Tabs.SuspendLayout();
+            this.States.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.Targets.SuspendLayout();
             this.SuspendLayout();
             // 
             // AutoStartCheckBox
             // 
             this.AutoStartCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
-            this.AutoStartCheckBox.Location = new System.Drawing.Point(215, 4);
+            this.AutoStartCheckBox.Location = new System.Drawing.Point(222, 28);
             this.AutoStartCheckBox.Name = "AutoStartCheckBox";
-            this.AutoStartCheckBox.Size = new System.Drawing.Size(68, 23);
+            this.AutoStartCheckBox.Size = new System.Drawing.Size(65, 23);
             this.AutoStartCheckBox.TabIndex = 2;
             this.AutoStartCheckBox.Text = "Autostart";
             this.AutoStartCheckBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -131,9 +138,9 @@
             // 
             this.DamageTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.DamageTypeComboBox.FormattingEnabled = true;
-            this.DamageTypeComboBox.Location = new System.Drawing.Point(79, 30);
+            this.DamageTypeComboBox.Location = new System.Drawing.Point(288, 3);
             this.DamageTypeComboBox.Name = "DamageTypeComboBox";
-            this.DamageTypeComboBox.Size = new System.Drawing.Size(130, 21);
+            this.DamageTypeComboBox.Size = new System.Drawing.Size(65, 21);
             this.DamageTypeComboBox.TabIndex = 4;
             this.DamageTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.DamageTypeComboBoxSelectedIndexChanged);
             this.DamageTypeComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
@@ -142,49 +149,18 @@
             // 
             this.lblDamageType.AutoSize = true;
             this.lblDamageType.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.lblDamageType.Location = new System.Drawing.Point(1, 34);
+            this.lblDamageType.Location = new System.Drawing.Point(232, 6);
             this.lblDamageType.Name = "lblDamageType";
-            this.lblDamageType.Size = new System.Drawing.Size(77, 13);
+            this.lblDamageType.Size = new System.Drawing.Size(50, 13);
             this.lblDamageType.TabIndex = 90;
-            this.lblDamageType.Text = "Damage Type:";
-            // 
-            // lblQuestorState
-            // 
-            this.lblQuestorState.AutoSize = true;
-            this.lblQuestorState.Location = new System.Drawing.Point(3, 9);
-            this.lblQuestorState.Name = "lblQuestorState";
-            this.lblQuestorState.Size = new System.Drawing.Size(75, 13);
-            this.lblQuestorState.TabIndex = 1;
-            this.lblQuestorState.Text = "Questor State:";
-            // 
-            // QuestorStateComboBox
-            // 
-            this.QuestorStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.QuestorStateComboBox.FormattingEnabled = true;
-            this.QuestorStateComboBox.Location = new System.Drawing.Point(79, 4);
-            this.QuestorStateComboBox.Name = "QuestorStateComboBox";
-            this.QuestorStateComboBox.Size = new System.Drawing.Size(130, 21);
-            this.QuestorStateComboBox.TabIndex = 1;
-            this.QuestorStateComboBox.SelectedIndexChanged += new System.EventHandler(this.QuestorStateComboBoxSelectedIndexChanged);
-            this.QuestorStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
-            // 
-            // StartButton
-            // 
-            this.StartButton.AutoSize = true;
-            this.StartButton.Location = new System.Drawing.Point(285, 4);
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(68, 23);
-            this.StartButton.TabIndex = 3;
-            this.StartButton.Text = "Start";
-            this.StartButton.UseVisualStyleBackColor = true;
-            this.StartButton.Click += new System.EventHandler(this.StartButtonClick);
+            this.lblDamageType.Text = "Damage:";
             // 
             // PauseCheckBox
             // 
             this.PauseCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
-            this.PauseCheckBox.Location = new System.Drawing.Point(285, 30);
+            this.PauseCheckBox.Location = new System.Drawing.Point(288, 28);
             this.PauseCheckBox.Name = "PauseCheckBox";
-            this.PauseCheckBox.Size = new System.Drawing.Size(68, 23);
+            this.PauseCheckBox.Size = new System.Drawing.Size(65, 23);
             this.PauseCheckBox.TabIndex = 6;
             this.PauseCheckBox.Text = "Pause";
             this.PauseCheckBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -194,9 +170,9 @@
             // Disable3DCheckBox
             // 
             this.Disable3DCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
-            this.Disable3DCheckBox.Location = new System.Drawing.Point(215, 30);
+            this.Disable3DCheckBox.Location = new System.Drawing.Point(367, 1);
             this.Disable3DCheckBox.Name = "Disable3DCheckBox";
-            this.Disable3DCheckBox.Size = new System.Drawing.Size(68, 23);
+            this.Disable3DCheckBox.Size = new System.Drawing.Size(154, 23);
             this.Disable3DCheckBox.TabIndex = 5;
             this.Disable3DCheckBox.Text = "Disable 3D";
             this.Disable3DCheckBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -221,13 +197,12 @@
             this.lblMissionName.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblMissionName.Location = new System.Drawing.Point(2, 55);
             this.lblMissionName.Name = "lblMissionName";
-            this.lblMissionName.Size = new System.Drawing.Size(76, 13);
+            this.lblMissionName.Size = new System.Drawing.Size(0, 13);
             this.lblMissionName.TabIndex = 92;
-            this.lblMissionName.Text = "Mission Name:";
             // 
             // lblCurrentMissionInfo
             // 
-            this.lblCurrentMissionInfo.Location = new System.Drawing.Point(76, 55);
+            this.lblCurrentMissionInfo.Location = new System.Drawing.Point(3, 55);
             this.lblCurrentMissionInfo.MaximumSize = new System.Drawing.Size(250, 13);
             this.lblCurrentMissionInfo.MinimumSize = new System.Drawing.Size(275, 13);
             this.lblCurrentMissionInfo.Name = "lblCurrentMissionInfo";
@@ -241,35 +216,23 @@
             this.lblPocketAction.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblPocketAction.Location = new System.Drawing.Point(1, 73);
             this.lblPocketAction.Name = "lblPocketAction";
-            this.lblPocketAction.Size = new System.Drawing.Size(77, 13);
+            this.lblPocketAction.Size = new System.Drawing.Size(0, 13);
             this.lblPocketAction.TabIndex = 94;
-            this.lblPocketAction.Text = "PocketAction: ";
             // 
             // lblCurrentPocketAction
             // 
-            this.lblCurrentPocketAction.Location = new System.Drawing.Point(76, 73);
+            this.lblCurrentPocketAction.Location = new System.Drawing.Point(2, 73);
             this.lblCurrentPocketAction.MaximumSize = new System.Drawing.Size(180, 15);
             this.lblCurrentPocketAction.MinimumSize = new System.Drawing.Size(180, 15);
             this.lblCurrentPocketAction.Name = "lblCurrentPocketAction";
             this.lblCurrentPocketAction.Size = new System.Drawing.Size(180, 15);
             this.lblCurrentPocketAction.TabIndex = 95;
-            this.lblCurrentPocketAction.Text = "[  ]";
-            // 
-            // buttonQuestormanager
-            // 
-            this.buttonQuestormanager.Location = new System.Drawing.Point(371, 28);
-            this.buttonQuestormanager.Name = "buttonQuestormanager";
-            this.buttonQuestormanager.Size = new System.Drawing.Size(109, 23);
-            this.buttonQuestormanager.TabIndex = 107;
-            this.buttonQuestormanager.Text = "QuestorManager";
-            this.buttonQuestormanager.UseVisualStyleBackColor = true;
-            this.buttonQuestormanager.Click += new System.EventHandler(this.ButtonQuestormanagerClick);
             // 
             // buttonQuestorStatistics
             // 
-            this.buttonQuestorStatistics.Location = new System.Drawing.Point(486, 29);
+            this.buttonQuestorStatistics.Location = new System.Drawing.Point(527, 1);
             this.buttonQuestorStatistics.Name = "buttonQuestorStatistics";
-            this.buttonQuestorStatistics.Size = new System.Drawing.Size(109, 23);
+            this.buttonQuestorStatistics.Size = new System.Drawing.Size(156, 23);
             this.buttonQuestorStatistics.TabIndex = 108;
             this.buttonQuestorStatistics.Text = "QuestorStatistics";
             this.buttonQuestorStatistics.UseVisualStyleBackColor = true;
@@ -277,18 +240,18 @@
             // 
             // buttonSettingsXML
             // 
-            this.buttonSettingsXML.Location = new System.Drawing.Point(601, 30);
+            this.buttonSettingsXML.Location = new System.Drawing.Point(527, 28);
             this.buttonSettingsXML.Name = "buttonSettingsXML";
-            this.buttonSettingsXML.Size = new System.Drawing.Size(109, 23);
+            this.buttonSettingsXML.Size = new System.Drawing.Size(156, 23);
             this.buttonSettingsXML.TabIndex = 110;
             this.buttonSettingsXML.Text = "QuestorSettings";
             this.buttonSettingsXML.UseVisualStyleBackColor = true;
             // 
             // buttonOpenMissionXML
             // 
-            this.buttonOpenMissionXML.Location = new System.Drawing.Point(486, 55);
+            this.buttonOpenMissionXML.Location = new System.Drawing.Point(367, 57);
             this.buttonOpenMissionXML.Name = "buttonOpenMissionXML";
-            this.buttonOpenMissionXML.Size = new System.Drawing.Size(224, 23);
+            this.buttonOpenMissionXML.Size = new System.Drawing.Size(154, 23);
             this.buttonOpenMissionXML.TabIndex = 118;
             this.buttonOpenMissionXML.Text = "Open Current Mission XML";
             this.buttonOpenMissionXML.UseVisualStyleBackColor = true;
@@ -296,11 +259,11 @@
             // 
             // buttonOpenLogDirectory
             // 
-            this.buttonOpenLogDirectory.Location = new System.Drawing.Point(371, 55);
+            this.buttonOpenLogDirectory.Location = new System.Drawing.Point(367, 28);
             this.buttonOpenLogDirectory.Name = "buttonOpenLogDirectory";
-            this.buttonOpenLogDirectory.Size = new System.Drawing.Size(109, 23);
+            this.buttonOpenLogDirectory.Size = new System.Drawing.Size(154, 23);
             this.buttonOpenLogDirectory.TabIndex = 109;
-            this.buttonOpenLogDirectory.Text = "Open Log Directory";
+            this.buttonOpenLogDirectory.Text = "Log Directory";
             this.buttonOpenLogDirectory.UseVisualStyleBackColor = true;
             this.buttonOpenLogDirectory.Click += new System.EventHandler(this.ButtonOpenLogDirectoryClick);
             // 
@@ -311,7 +274,7 @@
             this.Console.Location = new System.Drawing.Point(4, 22);
             this.Console.Name = "Console";
             this.Console.Padding = new System.Windows.Forms.Padding(3);
-            this.Console.Size = new System.Drawing.Size(769, 276);
+            this.Console.Size = new System.Drawing.Size(687, 276);
             this.Console.TabIndex = 0;
             this.Console.Text = "Console";
             this.Console.UseVisualStyleBackColor = true;
@@ -320,7 +283,7 @@
             // 
             this.txtComand.Location = new System.Drawing.Point(3, 243);
             this.txtComand.Name = "txtComand";
-            this.txtComand.Size = new System.Drawing.Size(760, 20);
+            this.txtComand.Size = new System.Drawing.Size(685, 20);
             this.txtComand.TabIndex = 26;
             // 
             // txtExtConsole
@@ -331,46 +294,40 @@
             this.txtExtConsole.Name = "txtExtConsole";
             this.txtExtConsole.ReadOnly = true;
             this.txtExtConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtExtConsole.Size = new System.Drawing.Size(773, 234);
+            this.txtExtConsole.Size = new System.Drawing.Size(688, 234);
             this.txtExtConsole.TabIndex = 25;
-            this.txtExtConsole.TextChanged += new System.EventHandler(this.txtExtConsole_TextChanged);
+            this.txtExtConsole.TextChanged += new System.EventHandler(this.TxtExtConsoleTextChanged);
             // 
-            // tabInterface1
+            // Tabs
             // 
-            this.tabInterface1.Controls.Add(this.Console);
-            this.tabInterface1.Controls.Add(this.tabPage1);
-            this.tabInterface1.Location = new System.Drawing.Point(4, 101);
-            this.tabInterface1.Name = "tabInterface1";
-            this.tabInterface1.SelectedIndex = 0;
-            this.tabInterface1.Size = new System.Drawing.Size(777, 302);
-            this.tabInterface1.TabIndex = 117;
+            this.Tabs.Controls.Add(this.Console);
+            this.Tabs.Controls.Add(this.States);
+            this.Tabs.Controls.Add(this.Schedule);
+            this.Tabs.Controls.Add(this.Targets);
+            this.Tabs.Location = new System.Drawing.Point(4, 101);
+            this.Tabs.Name = "Tabs";
+            this.Tabs.SelectedIndex = 0;
+            this.Tabs.Size = new System.Drawing.Size(695, 302);
+            this.Tabs.TabIndex = 117;
             // 
-            // tabPage1
+            // States
             // 
-            this.tabPage1.Controls.Add(this.label19);
-            this.tabPage1.Controls.Add(this.label11);
-            this.tabPage1.Controls.Add(this.panel2);
-            this.tabPage1.Controls.Add(this.panel1);
-            this.tabPage1.Controls.Add(this.comboBox4);
-            this.tabPage1.Controls.Add(this.label5);
-            this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.comboBox3);
-            this.tabPage1.Controls.Add(this.CombatMissionsBehaviorComboBox);
-            this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Controls.Add(this.QuestorStateComboBox2);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(769, 276);
-            this.tabPage1.TabIndex = 1;
-            this.tabPage1.Text = "States";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.States.Controls.Add(this.label19);
+            this.States.Controls.Add(this.label11);
+            this.States.Controls.Add(this.panel2);
+            this.States.Controls.Add(this.panel1);
+            this.States.Location = new System.Drawing.Point(4, 22);
+            this.States.Name = "States";
+            this.States.Padding = new System.Windows.Forms.Padding(3);
+            this.States.Size = new System.Drawing.Size(687, 276);
+            this.States.TabIndex = 1;
+            this.States.Text = "States";
+            this.States.UseVisualStyleBackColor = true;
             // 
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(310, 258);
+            this.label19.Location = new System.Drawing.Point(88, 258);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(400, 13);
             this.label19.TabIndex = 168;
@@ -380,7 +337,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(310, 3);
+            this.label11.Location = new System.Drawing.Point(88, 3);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(400, 13);
             this.label11.TabIndex = 167;
@@ -401,7 +358,7 @@
             this.panel2.Controls.Add(this.DronesStateComboBox);
             this.panel2.Controls.Add(this.CombatStateComboBox);
             this.panel2.Controls.Add(this.PanicStateComboBox);
-            this.panel2.Location = new System.Drawing.Point(231, 19);
+            this.panel2.Location = new System.Drawing.Point(9, 19);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(257, 236);
             this.panel2.TabIndex = 154;
@@ -441,7 +398,7 @@
             this.SalvageStateComboBox.Name = "SalvageStateComboBox";
             this.SalvageStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.SalvageStateComboBox.TabIndex = 161;
-            this.SalvageStateComboBox.SelectedIndexChanged += new System.EventHandler(this.SalvageStateComboBox_SelectedIndexChanged);
+            this.SalvageStateComboBox.SelectedIndexChanged += new System.EventHandler(this.SalvageStateComboBoxSelectedIndexChanged);
             // 
             // label10
             // 
@@ -460,7 +417,7 @@
             this.LocalWatchStateComboBox.Name = "LocalWatchStateComboBox";
             this.LocalWatchStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.LocalWatchStateComboBox.TabIndex = 159;
-            this.LocalWatchStateComboBox.SelectedIndexChanged += new System.EventHandler(this.LocalWatchStateComboBox_SelectedIndexChanged);
+            this.LocalWatchStateComboBox.SelectedIndexChanged += new System.EventHandler(this.LocalWatchStateComboBoxSelectedIndexChanged);
             // 
             // label9
             // 
@@ -479,7 +436,7 @@
             this.CleanupStateComboBox.Name = "CleanupStateComboBox";
             this.CleanupStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.CleanupStateComboBox.TabIndex = 157;
-            this.CleanupStateComboBox.SelectedIndexChanged += new System.EventHandler(this.CleanupStateComboBox_SelectedIndexChanged);
+            this.CleanupStateComboBox.SelectedIndexChanged += new System.EventHandler(this.CleanupStateComboBoxSelectedIndexChanged);
             // 
             // label8
             // 
@@ -498,7 +455,7 @@
             this.DronesStateComboBox.Name = "DronesStateComboBox";
             this.DronesStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.DronesStateComboBox.TabIndex = 155;
-            this.DronesStateComboBox.SelectedIndexChanged += new System.EventHandler(this.DronesStateComboBox_SelectedIndexChanged);
+            this.DronesStateComboBox.SelectedIndexChanged += new System.EventHandler(this.DronesStateComboBoxSelectedIndexChanged);
             // 
             // CombatStateComboBox
             // 
@@ -508,7 +465,7 @@
             this.CombatStateComboBox.Name = "CombatStateComboBox";
             this.CombatStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.CombatStateComboBox.TabIndex = 154;
-            this.CombatStateComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatStateComboBox_SelectedIndexChanged);
+            this.CombatStateComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatStateComboBoxSelectedIndexChanged);
             // 
             // PanicStateComboBox
             // 
@@ -518,34 +475,42 @@
             this.PanicStateComboBox.Name = "PanicStateComboBox";
             this.PanicStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.PanicStateComboBox.TabIndex = 153;
-            this.PanicStateComboBox.SelectedIndexChanged += new System.EventHandler(this.PanicStateComboBox_SelectedIndexChanged);
+            this.PanicStateComboBox.SelectedIndexChanged += new System.EventHandler(this.PanicStateComboBoxSelectedIndexChanged);
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.label5);
             this.panel1.Controls.Add(this.AgentInteractionStateComboBox);
             this.panel1.Controls.Add(this.TravelerStateComboBox);
             this.panel1.Controls.Add(this.label17);
             this.panel1.Controls.Add(this.UnloadStateComboBox);
             this.panel1.Controls.Add(this.ArmStateComboBox);
-            this.panel1.Controls.Add(this.MissionActionStateComboBox);
-            this.panel1.Controls.Add(this.label14);
-            this.panel1.Controls.Add(this.CombatMissionStateComboBox);
+            this.panel1.Controls.Add(this.StorylineStateComboBox);
+            this.panel1.Controls.Add(this.CombatMissionCtrlStateComboBox);
             this.panel1.Controls.Add(this.label13);
-            this.panel1.Controls.Add(this.MissionStateComboBox);
             this.panel1.Controls.Add(this.label12);
             this.panel1.Controls.Add(this.label7);
             this.panel1.Controls.Add(this.label6);
             this.panel1.Controls.Add(this.label3);
-            this.panel1.Location = new System.Drawing.Point(494, 19);
+            this.panel1.Location = new System.Drawing.Point(277, 19);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(268, 236);
             this.panel1.TabIndex = 153;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(-203, 210);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(105, 13);
+            this.label5.TabIndex = 168;
+            this.label5.Text = "CombatHelper State:";
             // 
             // AgentInteractionStateComboBox
             // 
             this.AgentInteractionStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.AgentInteractionStateComboBox.FormattingEnabled = true;
-            this.AgentInteractionStateComboBox.Location = new System.Drawing.Point(131, 198);
+            this.AgentInteractionStateComboBox.Location = new System.Drawing.Point(131, 168);
             this.AgentInteractionStateComboBox.Name = "AgentInteractionStateComboBox";
             this.AgentInteractionStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.AgentInteractionStateComboBox.TabIndex = 167;
@@ -554,7 +519,7 @@
             // 
             this.TravelerStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.TravelerStateComboBox.FormattingEnabled = true;
-            this.TravelerStateComboBox.Location = new System.Drawing.Point(131, 168);
+            this.TravelerStateComboBox.Location = new System.Drawing.Point(131, 138);
             this.TravelerStateComboBox.Name = "TravelerStateComboBox";
             this.TravelerStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.TravelerStateComboBox.TabIndex = 166;
@@ -562,7 +527,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(48, 171);
+            this.label17.Location = new System.Drawing.Point(48, 141);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(77, 13);
             this.label17.TabIndex = 165;
@@ -572,7 +537,7 @@
             // 
             this.UnloadStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.UnloadStateComboBox.FormattingEnabled = true;
-            this.UnloadStateComboBox.Location = new System.Drawing.Point(131, 138);
+            this.UnloadStateComboBox.Location = new System.Drawing.Point(131, 108);
             this.UnloadStateComboBox.Name = "UnloadStateComboBox";
             this.UnloadStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.UnloadStateComboBox.TabIndex = 164;
@@ -581,69 +546,52 @@
             // 
             this.ArmStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ArmStateComboBox.FormattingEnabled = true;
-            this.ArmStateComboBox.Location = new System.Drawing.Point(131, 108);
+            this.ArmStateComboBox.Location = new System.Drawing.Point(131, 78);
             this.ArmStateComboBox.Name = "ArmStateComboBox";
             this.ArmStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.ArmStateComboBox.TabIndex = 163;
             // 
-            // MissionActionStateComboBox
+            // StorylineStateComboBox
             // 
-            this.MissionActionStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.MissionActionStateComboBox.FormattingEnabled = true;
-            this.MissionActionStateComboBox.Location = new System.Drawing.Point(131, 77);
-            this.MissionActionStateComboBox.Name = "MissionActionStateComboBox";
-            this.MissionActionStateComboBox.Size = new System.Drawing.Size(130, 21);
-            this.MissionActionStateComboBox.TabIndex = 162;
+            this.StorylineStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.StorylineStateComboBox.FormattingEnabled = true;
+            this.StorylineStateComboBox.Location = new System.Drawing.Point(131, 47);
+            this.StorylineStateComboBox.Name = "StorylineStateComboBox";
+            this.StorylineStateComboBox.Size = new System.Drawing.Size(130, 21);
+            this.StorylineStateComboBox.TabIndex = 162;
+            this.StorylineStateComboBox.SelectedIndexChanged += new System.EventHandler(this.StorylineStateComboBoxSelectedIndexChanged);
             // 
-            // label14
+            // CombatMissionCtrlStateComboBox
             // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(52, 21);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(73, 13);
-            this.label14.TabIndex = 161;
-            this.label14.Text = "Mission State:";
-            // 
-            // CombatMissionStateComboBox
-            // 
-            this.CombatMissionStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.CombatMissionStateComboBox.FormattingEnabled = true;
-            this.CombatMissionStateComboBox.Location = new System.Drawing.Point(131, 47);
-            this.CombatMissionStateComboBox.Name = "CombatMissionStateComboBox";
-            this.CombatMissionStateComboBox.Size = new System.Drawing.Size(130, 21);
-            this.CombatMissionStateComboBox.TabIndex = 160;
+            this.CombatMissionCtrlStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CombatMissionCtrlStateComboBox.FormattingEnabled = true;
+            this.CombatMissionCtrlStateComboBox.Location = new System.Drawing.Point(131, 17);
+            this.CombatMissionCtrlStateComboBox.Name = "CombatMissionCtrlStateComboBox";
+            this.CombatMissionCtrlStateComboBox.Size = new System.Drawing.Size(130, 21);
+            this.CombatMissionCtrlStateComboBox.TabIndex = 160;
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(8, 50);
+            this.label13.Location = new System.Drawing.Point(0, 20);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(109, 13);
+            this.label13.Size = new System.Drawing.Size(124, 13);
             this.label13.TabIndex = 159;
-            this.label13.Text = "CombatMission State:";
-            // 
-            // MissionStateComboBox
-            // 
-            this.MissionStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.MissionStateComboBox.FormattingEnabled = true;
-            this.MissionStateComboBox.Location = new System.Drawing.Point(131, 18);
-            this.MissionStateComboBox.Name = "MissionStateComboBox";
-            this.MissionStateComboBox.Size = new System.Drawing.Size(130, 21);
-            this.MissionStateComboBox.TabIndex = 158;
+            this.label13.Text = "CombatMissionCtrl State:";
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(22, 80);
+            this.label12.Location = new System.Drawing.Point(46, 49);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(103, 13);
+            this.label12.Size = new System.Drawing.Size(78, 13);
             this.label12.TabIndex = 157;
-            this.label12.Text = "MissionAction State:";
+            this.label12.Text = "Storyline State:";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(8, 201);
+            this.label7.Location = new System.Drawing.Point(8, 171);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(116, 13);
             this.label7.TabIndex = 156;
@@ -652,7 +600,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(52, 141);
+            this.label6.Location = new System.Drawing.Point(52, 111);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(72, 13);
             this.label6.TabIndex = 155;
@@ -661,109 +609,291 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(69, 111);
+            this.label3.Location = new System.Drawing.Point(69, 81);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(56, 13);
             this.label3.TabIndex = 154;
             this.label3.Text = "Arm State:";
             // 
-            // comboBox4
+            // Schedule
             // 
-            this.comboBox4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox4.FormattingEnabled = true;
-            this.comboBox4.Location = new System.Drawing.Point(9, 212);
-            this.comboBox4.Name = "comboBox4";
-            this.comboBox4.Size = new System.Drawing.Size(130, 21);
-            this.comboBox4.TabIndex = 126;
+            this.Schedule.Location = new System.Drawing.Point(4, 22);
+            this.Schedule.Name = "Schedule";
+            this.Schedule.Padding = new System.Windows.Forms.Padding(3);
+            this.Schedule.Size = new System.Drawing.Size(687, 276);
+            this.Schedule.TabIndex = 2;
+            this.Schedule.Text = "Schedule";
+            this.Schedule.UseVisualStyleBackColor = true;
             // 
-            // label5
+            // Targets
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 189);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(105, 13);
-            this.label5.TabIndex = 125;
-            this.label5.Text = "CombatHelper State:";
+            this.Targets.Controls.Add(this.lblDistance3);
+            this.Targets.Controls.Add(this.lblDistanceDroneTarget);
+            this.Targets.Controls.Add(this.lblDistanceWeaponsTarget);
+            this.Targets.Controls.Add(this.label23);
+            this.Targets.Controls.Add(this.label22);
+            this.Targets.Controls.Add(this.label21);
+            this.Targets.Controls.Add(this.CurrentPriorityTargetsData);
+            this.Targets.Controls.Add(this.CurrentPocketNumberData);
+            this.Targets.Controls.Add(this.MissionPocketNumberlbl);
+            this.Targets.Controls.Add(this.CurrentMissionActionData);
+            this.Targets.Controls.Add(this.CurrentWeaponsTargetData);
+            this.Targets.Controls.Add(this.CurrentDroneTargetData);
+            this.Targets.Controls.Add(this.label20);
+            this.Targets.Controls.Add(this.label14);
+            this.Targets.Controls.Add(this.label4);
+            this.Targets.Controls.Add(this.label1);
+            this.Targets.Location = new System.Drawing.Point(4, 22);
+            this.Targets.Name = "Targets";
+            this.Targets.Padding = new System.Windows.Forms.Padding(3);
+            this.Targets.Size = new System.Drawing.Size(687, 276);
+            this.Targets.TabIndex = 3;
+            this.Targets.Text = "Targets";
+            this.Targets.UseVisualStyleBackColor = true;
+            // 
+            // CurrentPriorityTargetsData
+            // 
+            this.CurrentPriorityTargetsData.AutoSize = true;
+            this.CurrentPriorityTargetsData.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CurrentPriorityTargetsData.Location = new System.Drawing.Point(480, 77);
+            this.CurrentPriorityTargetsData.Name = "CurrentPriorityTargetsData";
+            this.CurrentPriorityTargetsData.Size = new System.Drawing.Size(27, 13);
+            this.CurrentPriorityTargetsData.TabIndex = 11;
+            this.CurrentPriorityTargetsData.Text = "n/a";
+            // 
+            // CurrentPocketNumberData
+            // 
+            this.CurrentPocketNumberData.AutoSize = true;
+            this.CurrentPocketNumberData.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CurrentPocketNumberData.Location = new System.Drawing.Point(643, 12);
+            this.CurrentPocketNumberData.Name = "CurrentPocketNumberData";
+            this.CurrentPocketNumberData.Size = new System.Drawing.Size(27, 13);
+            this.CurrentPocketNumberData.TabIndex = 10;
+            this.CurrentPocketNumberData.Text = "n/a";
+            // 
+            // MissionPocketNumberlbl
+            // 
+            this.MissionPocketNumberlbl.AutoSize = true;
+            this.MissionPocketNumberlbl.Location = new System.Drawing.Point(516, 12);
+            this.MissionPocketNumberlbl.Name = "MissionPocketNumberlbl";
+            this.MissionPocketNumberlbl.Size = new System.Drawing.Size(121, 13);
+            this.MissionPocketNumberlbl.TabIndex = 9;
+            this.MissionPocketNumberlbl.Text = "Current Pocket Number:";
+            // 
+            // CurrentMissionActionData
+            // 
+            this.CurrentMissionActionData.AutoSize = true;
+            this.CurrentMissionActionData.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CurrentMissionActionData.Location = new System.Drawing.Point(140, 12);
+            this.CurrentMissionActionData.Name = "CurrentMissionActionData";
+            this.CurrentMissionActionData.Size = new System.Drawing.Size(27, 13);
+            this.CurrentMissionActionData.TabIndex = 8;
+            this.CurrentMissionActionData.Text = "n/a";
+            // 
+            // CurrentWeaponsTargetData
+            // 
+            this.CurrentWeaponsTargetData.AutoSize = true;
+            this.CurrentWeaponsTargetData.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CurrentWeaponsTargetData.Location = new System.Drawing.Point(63, 77);
+            this.CurrentWeaponsTargetData.Name = "CurrentWeaponsTargetData";
+            this.CurrentWeaponsTargetData.Size = new System.Drawing.Size(27, 13);
+            this.CurrentWeaponsTargetData.TabIndex = 7;
+            this.CurrentWeaponsTargetData.Text = "n/a";
+            // 
+            // CurrentDroneTargetData
+            // 
+            this.CurrentDroneTargetData.AutoSize = true;
+            this.CurrentDroneTargetData.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CurrentDroneTargetData.Location = new System.Drawing.Point(277, 77);
+            this.CurrentDroneTargetData.Name = "CurrentDroneTargetData";
+            this.CurrentDroneTargetData.Size = new System.Drawing.Size(27, 13);
+            this.CurrentDroneTargetData.TabIndex = 6;
+            this.CurrentDroneTargetData.Text = "n/a";
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(235, 51);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(110, 13);
+            this.label20.TabIndex = 3;
+            this.label20.Text = "Current Drone Target:";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(436, 51);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(77, 13);
+            this.label14.TabIndex = 2;
+            this.label14.Text = "PriorityTargets:";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 130);
+            this.label4.Location = new System.Drawing.Point(7, 51);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(172, 13);
-            this.label4.TabIndex = 124;
-            this.label4.Text = "SalvageBookmarksBehavior State:";
+            this.label4.Size = new System.Drawing.Size(127, 13);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "Current Weapons Target:";
             // 
-            // comboBox3
+            // label1
             // 
-            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(9, 151);
-            this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(130, 21);
-            this.comboBox3.TabIndex = 123;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(19, 12);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(115, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Current Mission Action:";
             // 
             // CombatMissionsBehaviorComboBox
             // 
             this.CombatMissionsBehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.CombatMissionsBehaviorComboBox.FormattingEnabled = true;
-            this.CombatMissionsBehaviorComboBox.Location = new System.Drawing.Point(9, 91);
+            this.CombatMissionsBehaviorComboBox.Location = new System.Drawing.Point(46, 30);
             this.CombatMissionsBehaviorComboBox.Name = "CombatMissionsBehaviorComboBox";
-            this.CombatMissionsBehaviorComboBox.Size = new System.Drawing.Size(130, 21);
+            this.CombatMissionsBehaviorComboBox.Size = new System.Drawing.Size(170, 21);
             this.CombatMissionsBehaviorComboBox.TabIndex = 121;
-            this.CombatMissionsBehaviorComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatMissionsBehaviorComboBox_SelectedIndexChanged_1);
+            this.CombatMissionsBehaviorComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatMissionsBehaviorComboBoxSelectedIndexChanged);
             this.CombatMissionsBehaviorComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 74);
+            this.label2.Location = new System.Drawing.Point(2, 33);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(156, 13);
+            this.label2.Size = new System.Drawing.Size(45, 13);
             this.label2.TabIndex = 120;
-            this.label2.Text = "CombatMissionsBehavior State:";
+            this.label2.Text = "Mission:";
             // 
-            // QuestorStateComboBox2
+            // QuestorStateComboBox
             // 
-            this.QuestorStateComboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.QuestorStateComboBox2.FormattingEnabled = true;
-            this.QuestorStateComboBox2.Location = new System.Drawing.Point(9, 35);
-            this.QuestorStateComboBox2.Name = "QuestorStateComboBox2";
-            this.QuestorStateComboBox2.Size = new System.Drawing.Size(130, 21);
-            this.QuestorStateComboBox2.TabIndex = 119;
-            this.QuestorStateComboBox2.SelectedIndexChanged += new System.EventHandler(this.QuestorStateComboBox2_SelectedIndexChanged);
+            this.QuestorStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.QuestorStateComboBox.FormattingEnabled = true;
+            this.QuestorStateComboBox.Location = new System.Drawing.Point(46, 3);
+            this.QuestorStateComboBox.Name = "QuestorStateComboBox";
+            this.QuestorStateComboBox.Size = new System.Drawing.Size(170, 21);
+            this.QuestorStateComboBox.TabIndex = 119;
+            this.QuestorStateComboBox.SelectedIndexChanged += new System.EventHandler(this.QuestorStateComboBoxSelectedIndexChanged);
             // 
-            // label1
+            // QuestorStatelbl
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(75, 13);
-            this.label1.TabIndex = 119;
-            this.label1.Text = "Questor State:";
+            this.QuestorStatelbl.AutoSize = true;
+            this.QuestorStatelbl.Location = new System.Drawing.Point(2, 6);
+            this.QuestorStatelbl.Name = "QuestorStatelbl";
+            this.QuestorStatelbl.Size = new System.Drawing.Size(47, 13);
+            this.QuestorStatelbl.TabIndex = 119;
+            this.QuestorStatelbl.Text = "Questor:";
+            // 
+            // buttonOpenSchedulesXML
+            // 
+            this.buttonOpenSchedulesXML.Location = new System.Drawing.Point(527, 86);
+            this.buttonOpenSchedulesXML.Name = "buttonOpenSchedulesXML";
+            this.buttonOpenSchedulesXML.Size = new System.Drawing.Size(156, 23);
+            this.buttonOpenSchedulesXML.TabIndex = 123;
+            this.buttonOpenSchedulesXML.Text = "Open Current Schedules XML";
+            this.buttonOpenSchedulesXML.UseVisualStyleBackColor = true;
+            this.buttonOpenSchedulesXML.Click += new System.EventHandler(this.ButtonOpenSchedulesXMLClick);
+            // 
+            // buttonOpenCharacterXML
+            // 
+            this.buttonOpenCharacterXML.Location = new System.Drawing.Point(527, 57);
+            this.buttonOpenCharacterXML.Name = "buttonOpenCharacterXML";
+            this.buttonOpenCharacterXML.Size = new System.Drawing.Size(156, 23);
+            this.buttonOpenCharacterXML.TabIndex = 122;
+            this.buttonOpenCharacterXML.Text = "Open Current Character XML";
+            this.buttonOpenCharacterXML.UseVisualStyleBackColor = true;
+            this.buttonOpenCharacterXML.Click += new System.EventHandler(this.ButtonOpenCharacterXMLClick);
+            // 
+            // buttonQuestormanager
+            // 
+            this.buttonQuestormanager.Location = new System.Drawing.Point(367, 86);
+            this.buttonQuestormanager.Name = "buttonQuestormanager";
+            this.buttonQuestormanager.Size = new System.Drawing.Size(154, 23);
+            this.buttonQuestormanager.TabIndex = 124;
+            this.buttonQuestormanager.Text = "QuestorManager";
+            this.buttonQuestormanager.UseVisualStyleBackColor = true;
+            this.buttonQuestormanager.Click += new System.EventHandler(this.ButtonQuestormanagerClick);
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(19, 77);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(38, 13);
+            this.label21.TabIndex = 12;
+            this.label21.Text = "Name:";
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(236, 77);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(38, 13);
+            this.label22.TabIndex = 13;
+            this.label22.Text = "Name:";
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(436, 77);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(38, 13);
+            this.label23.TabIndex = 14;
+            this.label23.Text = "Name:";
+            // 
+            // lblDistanceWeaponsTarget
+            // 
+            this.lblDistanceWeaponsTarget.AutoSize = true;
+            this.lblDistanceWeaponsTarget.Location = new System.Drawing.Point(6, 100);
+            this.lblDistanceWeaponsTarget.Name = "lblDistanceWeaponsTarget";
+            this.lblDistanceWeaponsTarget.Size = new System.Drawing.Size(52, 13);
+            this.lblDistanceWeaponsTarget.TabIndex = 15;
+            this.lblDistanceWeaponsTarget.Text = "Distance:";
+            // 
+            // lblDistanceDroneTarget
+            // 
+            this.lblDistanceDroneTarget.AutoSize = true;
+            this.lblDistanceDroneTarget.Location = new System.Drawing.Point(222, 100);
+            this.lblDistanceDroneTarget.Name = "lblDistanceDroneTarget";
+            this.lblDistanceDroneTarget.Size = new System.Drawing.Size(52, 13);
+            this.lblDistanceDroneTarget.TabIndex = 16;
+            this.lblDistanceDroneTarget.Text = "Distance:";
+            // 
+            // lblDistance3
+            // 
+            this.lblDistance3.AutoSize = true;
+            this.lblDistance3.Location = new System.Drawing.Point(422, 100);
+            this.lblDistance3.Name = "lblDistance3";
+            this.lblDistance3.Size = new System.Drawing.Size(52, 13);
+            this.lblDistance3.TabIndex = 17;
+            this.lblDistance3.Text = "Distance:";
             // 
             // QuestorfrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.ClientSize = new System.Drawing.Size(782, 405);
+            this.ClientSize = new System.Drawing.Size(699, 403);
+            this.Controls.Add(this.buttonQuestormanager);
+            this.Controls.Add(this.buttonOpenSchedulesXML);
+            this.Controls.Add(this.buttonOpenCharacterXML);
             this.Controls.Add(this.buttonOpenMissionXML);
-            this.Controls.Add(this.tabInterface1);
+            this.Controls.Add(this.Tabs);
             this.Controls.Add(this.buttonSettingsXML);
             this.Controls.Add(this.buttonOpenLogDirectory);
             this.Controls.Add(this.buttonQuestorStatistics);
-            this.Controls.Add(this.buttonQuestormanager);
+            this.Controls.Add(this.CombatMissionsBehaviorComboBox);
             this.Controls.Add(this.lblCurrentPocketAction);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.QuestorStateComboBox);
+            this.Controls.Add(this.QuestorStatelbl);
             this.Controls.Add(this.lblPocketAction);
             this.Controls.Add(this.lblCurrentMissionInfo);
             this.Controls.Add(this.lblMissionName);
             this.Controls.Add(this.chkShowDetails);
             this.Controls.Add(this.Disable3DCheckBox);
             this.Controls.Add(this.PauseCheckBox);
-            this.Controls.Add(this.StartButton);
-            this.Controls.Add(this.QuestorStateComboBox);
-            this.Controls.Add(this.lblQuestorState);
             this.Controls.Add(this.lblDamageType);
             this.Controls.Add(this.DamageTypeComboBox);
             this.Controls.Add(this.AutoStartCheckBox);
@@ -774,13 +904,15 @@
             this.Load += new System.EventHandler(this.FrmMainLoad);
             this.Console.ResumeLayout(false);
             this.Console.PerformLayout();
-            this.tabInterface1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
+            this.Tabs.ResumeLayout(false);
+            this.States.ResumeLayout(false);
+            this.States.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.Targets.ResumeLayout(false);
+            this.Targets.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -792,9 +924,6 @@
         private System.Windows.Forms.Timer tUpdateUI;
         private System.Windows.Forms.ComboBox DamageTypeComboBox;
         private System.Windows.Forms.Label lblDamageType;
-        private System.Windows.Forms.Label lblQuestorState;
-        private System.Windows.Forms.ComboBox QuestorStateComboBox;
-        private System.Windows.Forms.Button StartButton;
         private System.Windows.Forms.CheckBox PauseCheckBox;
         private System.Windows.Forms.CheckBox Disable3DCheckBox;
         //private System.Windows.Forms.Button chkTraveler;
@@ -804,7 +933,6 @@
         private System.Windows.Forms.Label lblCurrentMissionInfo;
         private System.Windows.Forms.Label lblPocketAction;
         private System.Windows.Forms.Label lblCurrentPocketAction;
-        private System.Windows.Forms.Button buttonQuestormanager;
         private System.Windows.Forms.Button buttonQuestorStatistics;
         private System.Windows.Forms.Button buttonSettingsXML;
         private System.Windows.Forms.Button buttonOpenMissionXML;
@@ -820,8 +948,8 @@
         private System.Windows.Forms.TabPage Console;
         private System.Windows.Forms.TextBox txtComand;
         private System.Windows.Forms.TextBox txtExtConsole;
-        private System.Windows.Forms.TabControl tabInterface1;
-        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabControl Tabs;
+        private System.Windows.Forms.TabPage States;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label16;
@@ -841,27 +969,41 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.ComboBox UnloadStateComboBox;
         private System.Windows.Forms.ComboBox ArmStateComboBox;
-        private System.Windows.Forms.ComboBox MissionActionStateComboBox;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.ComboBox CombatMissionStateComboBox;
+        private System.Windows.Forms.ComboBox StorylineStateComboBox;
+        private System.Windows.Forms.ComboBox CombatMissionCtrlStateComboBox;
         private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.ComboBox MissionStateComboBox;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox comboBox4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox comboBox3;
         private System.Windows.Forms.ComboBox CombatMissionsBehaviorComboBox;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox QuestorStateComboBox2;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox QuestorStateComboBox;
+        private System.Windows.Forms.Label QuestorStatelbl;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label label11;
-        //private System.Windows.Forms.Label lblQuestorMode;
-        //public System.Windows.Forms.ComboBox comboBoxQuestorMode;
+        private System.Windows.Forms.TabPage Schedule;
+        private System.Windows.Forms.Button buttonOpenSchedulesXML;
+        private System.Windows.Forms.Button buttonOpenCharacterXML;
+        private System.Windows.Forms.Button buttonQuestormanager;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TabPage Targets;
+        private System.Windows.Forms.Label CurrentPriorityTargetsData;
+        private System.Windows.Forms.Label CurrentPocketNumberData;
+        private System.Windows.Forms.Label MissionPocketNumberlbl;
+        private System.Windows.Forms.Label CurrentMissionActionData;
+        private System.Windows.Forms.Label CurrentWeaponsTargetData;
+        private System.Windows.Forms.Label CurrentDroneTargetData;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblDistance3;
+        private System.Windows.Forms.Label lblDistanceDroneTarget;
+        private System.Windows.Forms.Label lblDistanceWeaponsTarget;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.Label label21;
     }
 }
 

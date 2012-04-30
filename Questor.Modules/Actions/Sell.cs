@@ -10,15 +10,10 @@ namespace Questor.Modules.Actions
 
     public class Sell
     {
-        public StateSell State { get; set; }
-
         public int Item { get; set; }
         public int Unit { get; set; }
 
         private DateTime _lastAction;
-
-
-
 
         public void ProcessState()
         {
@@ -26,17 +21,17 @@ namespace Questor.Modules.Actions
             DirectContainer hangar = Cache.Instance.DirectEve.GetItemHangar();
             DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
 
-            switch (State)
+            switch (_States.CurrentSellState)
             {
-                case StateSell.Idle:
-                case StateSell.Done:
+                case SellState.Idle:
+                case SellState.Done:
                     break;
 
-                case StateSell.Begin:
-                    State = StateSell.StartQuickSell;
+                case SellState.Begin:
+                    _States.CurrentSellState = SellState.StartQuickSell;
                     break;
 
-                case StateSell.StartQuickSell:
+                case SellState.StartQuickSell:
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 1)
                         break;
@@ -74,10 +69,10 @@ namespace Questor.Modules.Actions
                         break;
                     }
 
-                    State = StateSell.WaitForSellWindow;
+                    _States.CurrentSellState = SellState.WaitForSellWindow;
                     break;
 
-                case StateSell.WaitForSellWindow:
+                case SellState.WaitForSellWindow:
 
 
                     //if (sellWindow == null || !sellWindow.IsReady || sellWindow.Item.ItemId != Item)
@@ -87,10 +82,10 @@ namespace Questor.Modules.Actions
                     _lastAction = DateTime.Now;
 
                     Logging.Log("Sell: Inspecting sell order for " + Item);
-                    State = StateSell.InspectOrder;
+                    _States.CurrentSellState = SellState.InspectOrder;
                     break;
 
-                case StateSell.InspectOrder:
+                case SellState.InspectOrder:
                     // Let the order window stay open for 2 seconds
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 2)
                         break;
@@ -100,7 +95,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("Sell: No order available for " + Item);
 
                         sellWindow.Cancel();
-                        State = StateSell.WaitingToFinishQuickSell;
+                        _States.CurrentSellState = SellState.WaitingToFinishQuickSell;
                         break;
                     }
 
@@ -112,17 +107,17 @@ namespace Questor.Modules.Actions
 
 
                     _lastAction = DateTime.Now;
-                    State = StateSell.WaitingToFinishQuickSell;
+                    _States.CurrentSellState = SellState.WaitingToFinishQuickSell;
                     break;
 
-                case StateSell.WaitingToFinishQuickSell:
+                case SellState.WaitingToFinishQuickSell:
                     if (sellWindow == null || !sellWindow.IsReady || sellWindow.Item.ItemId != Item)
                     {
                         DirectWindow modal = Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.IsModal);
                         if (modal != null)
                             modal.Close();
 
-                        State = StateSell.Done;
+                        _States.CurrentSellState = SellState.Done;
                         break;
                     }
                     break;

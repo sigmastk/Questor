@@ -8,27 +8,27 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
-namespace Questor.Modules.Actions
+using System;
+using System.Linq;
+using System.Xml.Linq;
+using System.IO;
+using DirectEve;
+using System.Collections.Generic;
+using Questor.Modules.Lookup;
+using Questor.Modules.Logging;
+using Questor.Modules.States;
+using Questor.Modules.Caching;
+
+namespace QuestorManager.Actions
 {
-    using System;
-    using System.Linq;
-    using System.Xml.Linq;
-    using System.IO;
-    using DirectEve;
-    using global::Questor.Modules.Lookup;
-    using global::Questor.Modules.States;
-    using global::Questor.Modules.Caching;
-
-
     public class ValueDump
-    { /*
-        public ValueDumpState State { get; set; }
-
-        private MainForm _form;
+    { // /*
+        
+        private QuestorManagerUI _form;
         Random ramdom = new Random();
 
         private InvType _currentMineral;
-        private ItemCache _currentItem;
+        private ItemCache2 _currentItem;
         private DateTime _lastExecute = DateTime.MinValue;
         private bool value_process = false;
 
@@ -40,7 +40,7 @@ namespace Questor.Modules.Actions
             }
         }
 
-        public ValueDump(MainForm form1)
+        public ValueDump(QuestorManagerUI form1)
         {
             _form = form1;
         }
@@ -52,11 +52,11 @@ namespace Questor.Modules.Actions
             DirectContainer hangar = Cache.Instance.DirectEve.GetItemHangar();
             DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
             DirectReprocessingWindow reprorcessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
-            //bool block;
+            bool block;
 
             int randomNumber = ramdom.Next(2, 4);
 
-            switch (State)
+            switch (_States.CurrentValueDumpState)
             {
 
                 case ValueDumpState.Idle:
@@ -68,17 +68,17 @@ namespace Questor.Modules.Actions
                     {
                         _form.cbxSell.Checked = false;
                         value_process = true;
-                        State = ValueDumpState.GetItems;
+                        _States.CurrentValueDumpState = ValueDumpState.GetItems;
                     }
                     else if(_form.RefineCheckBox.Checked && value_process)
                     {
                         _form.RefineCheckBox.Checked = false;
                         _form.cbxSell.Checked = true;
                         value_process = false;
-                        State = ValueDumpState.GetItems;
+                        _States.CurrentValueDumpState = ValueDumpState.GetItems;
                     }
                     else
-                        State = ValueDumpState.GetItems;
+                        _States.CurrentValueDumpState = ValueDumpState.GetItems;
                     break;
 
                 case ValueDumpState.CheckMineralPrices:
@@ -87,13 +87,13 @@ namespace Questor.Modules.Actions
                     {
                         if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > 5)
                         {
-                            State = ValueDumpState.SaveMineralPrices;
+                            _States.CurrentValueDumpState = ValueDumpState.SaveMineralPrices;
                             if (marketWindow != null)
                                 marketWindow.Close();
                         }
                     }
                     else
-                        State = ValueDumpState.GetMineralPrice;
+                        _States.CurrentValueDumpState = ValueDumpState.GetMineralPrice;
                     
                     break;
 
@@ -126,13 +126,13 @@ namespace Questor.Modules.Actions
                         _currentMineral.LastUpdate = DateTime.Now;
 
                         Logging.Log("ValueDump: No orders found for " + _currentMineral.Name);
-                        State = ValueDumpState.CheckMineralPrices;
+                        _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
                     }
 
                     // Take top 5 orders, average the buy price and consider that median-buy (it's not really median buy but its what we want)
                     _currentMineral.MedianBuy = marketWindow.BuyOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId).OrderByDescending(o => o.Price).Take(5).Average(o => o.Price);
                     _currentMineral.LastUpdate = DateTime.Now;
-                    State = ValueDumpState.CheckMineralPrices;
+                    _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
 
                     Logging.Log("ValueDump: Average price for " + _currentMineral.Name + " is " + _currentMineral.MedianBuy.Value.ToString("#,##0.00"));
                     break;
@@ -144,8 +144,8 @@ namespace Questor.Modules.Actions
                     foreach (InvType type in _form.InvTypesById.Values.OrderBy(i => i.Id))
                         xdoc.Root.Add(type.Save());
                     xdoc.Save(InvTypesPath);
-          
-                    State = ValueDumpState.Idle;
+
+                    _States.CurrentValueDumpState = ValueDumpState.Idle;
                     break;
 
                 case ValueDumpState.GetItems:
@@ -171,13 +171,13 @@ namespace Questor.Modules.Actions
                     _form.Items.Clear();
                     List<DirectItem> hangarItems = hangar.Items;
                     if (hangarItems != null)
-                        _form.Items.AddRange(hangarItems.Where(i => i.ItemId > 0 && i.MarketGroupId > 0 && i.Quantity > 0).Select(i => new ItemCache(i, _form.RefineCheckBox.Checked)));
+                        _form.Items.AddRange(hangarItems.Where(i => i.ItemId > 0 && i.MarketGroupId > 0 && i.Quantity > 0).Select(i => new ItemCache2(i, _form.RefineCheckBox.Checked)));
 
-                    State = ValueDumpState.UpdatePrices;
+                    _States.CurrentValueDumpState = ValueDumpState.UpdatePrices;
                     break;
 
                 case ValueDumpState.UpdatePrices:
-                    foreach (ItemCache item in _form.Items)
+                    foreach (ItemCache2 item in _form.Items)
                     {
                         InvType invType;
                         if (!_form.InvTypesById.TryGetValue(item.TypeId, out invType))
@@ -187,7 +187,7 @@ namespace Questor.Modules.Actions
                         }
 
                         item.InvType = invType;
-                        foreach (ItemCache material in item.RefineOutput)
+                        foreach (ItemCache2 material in item.RefineOutput)
                         {
                             if (!_form.InvTypesById.TryGetValue(material.TypeId, out invType))
                             {
@@ -212,16 +212,16 @@ namespace Questor.Modules.Actions
                             _form.ItemsToSell_unsorted.AddRange(_form.Items.Where(i => i.InvType != null && i.InvType.MinSell.HasValue));
 
                         _form.ItemsToSell = _form.ItemsToSell_unsorted.OrderBy(i => i.Name).ToList();
-                        State = ValueDumpState.NextItem;
+                        _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     }
                     else if (_form.RefineCheckBox.Checked)
                     {
                         _form.ItemsToSell_unsorted.AddRange(_form.Items.Where(i => i.InvType != null && i.InvType.MaxBuy.HasValue));
                         _form.ItemsToSell = _form.ItemsToSell_unsorted.OrderBy(i => i.Name).ToList();
-                        State = ValueDumpState.NextItem;
+                        _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     }
                     else
-                        State = ValueDumpState.Done;
+                        _States.CurrentValueDumpState = ValueDumpState.Done;
 
                     break;
 
@@ -230,9 +230,9 @@ namespace Questor.Modules.Actions
                     if (_form.ItemsToSell.Count == 0)
                     {
                         if (_form.ItemsToRefine.Count != 0)
-                            State = ValueDumpState.RefineItems;
+                            _States.CurrentValueDumpState = ValueDumpState.RefineItems;
                         else
-                            State = ValueDumpState.Done;
+                            _States.CurrentValueDumpState = ValueDumpState.Done;
                         break;
                     }
                     block = false;
@@ -261,7 +261,7 @@ namespace Questor.Modules.Actions
                     if (block)
                         break;
 
-                    State = ValueDumpState.StartQuickSell;
+                    _States.CurrentValueDumpState = ValueDumpState.StartQuickSell;
                     break;
 
                 case ValueDumpState.StartQuickSell:
@@ -290,11 +290,11 @@ namespace Questor.Modules.Actions
                             break;
                         }
 
-                        State = ValueDumpState.WaitForSellWindow;
+                        _States.CurrentValueDumpState = ValueDumpState.WaitForSellWindow;
                     }
                     else
                     {
-                        State = ValueDumpState.InspectRefinery;
+                        _States.CurrentValueDumpState = ValueDumpState.InspectRefinery;
                     }
                     break;
 
@@ -306,7 +306,7 @@ namespace Questor.Modules.Actions
                     _lastExecute = DateTime.Now;
 
                     Logging.Log("ValueDump: Inspecting sell order for " + _currentItem.Name);
-                    State = ValueDumpState.InspectOrder;
+                    _States.CurrentValueDumpState = ValueDumpState.InspectOrder;
                     break;
 
                 case ValueDumpState.InspectOrder:
@@ -319,7 +319,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("ValueDump: No order available for " + _currentItem.Name);
 
                         sellWindow.Cancel();
-                        State = ValueDumpState.WaitingToFinishQuickSell;
+                        _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                         break;
                     }
 
@@ -339,7 +339,7 @@ namespace Questor.Modules.Actions
                             Logging.Log("ValueDump: Not underselling item " + _currentItem.Name + " [Min sell price: " + _currentItem.InvType.MinSell.Value.ToString("#,##0.00") + "][Sell price: " + price.ToString("#,##0.00") + "][" + perc.ToString("0%") + "]");
 
                             sellWindow.Cancel();
-                            State = ValueDumpState.WaitingToFinishQuickSell;
+                            _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                             break;
                         }
                     }
@@ -360,7 +360,7 @@ namespace Questor.Modules.Actions
                         _form.ItemsToSell.Add(_currentItem);
 
                     _lastExecute = DateTime.Now;
-                    State = ValueDumpState.WaitingToFinishQuickSell;
+                    _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                     break;
 
                 case ValueDumpState.InspectRefinery:
@@ -383,8 +383,8 @@ namespace Questor.Modules.Actions
                         Logging.Log("Selling gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPrice_r.ToString("#,##0.00") + "]");
                     }*/
 
-        /*         _lastExecute = DateTime.Now;
-                    State = ValueDumpState.NextItem;
+                    _lastExecute = DateTime.Now;
+                    _States.CurrentValueDumpState = ValueDumpState.NextItem;
 
                     break;
 
@@ -395,7 +395,7 @@ namespace Questor.Modules.Actions
                         if (modal != null)
                             modal.Close();
 
-                        State = ValueDumpState.NextItem;
+                        _States.CurrentValueDumpState = ValueDumpState.NextItem;
                         break;
                     }
                     break;
@@ -440,7 +440,7 @@ namespace Questor.Modules.Actions
                         reprorcessingWindow.Reprocess();
                         _lastExecute = DateTime.Now;
                         Logging.Log("Waiting 17 second");
-                        State = ValueDumpState.WaitingToBack;
+                        _States.CurrentValueDumpState = ValueDumpState.WaitingToBack;
                     }
                     break;
 
@@ -448,15 +448,15 @@ namespace Questor.Modules.Actions
                     if(DateTime.Now.Subtract(_lastExecute).TotalSeconds > 17 && value_process)
                     {
                         if(value_process)
-                            State = ValueDumpState.Begin;
+                            _States.CurrentValueDumpState = ValueDumpState.Begin;
                         else
-                            State = ValueDumpState.Done;
+                            _States.CurrentValueDumpState = ValueDumpState.Done;
                     }
                  break;
             }
 
         }
-         * */
+        
     }
         
 }

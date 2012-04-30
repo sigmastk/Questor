@@ -1,5 +1,4 @@
 ﻿//NOT FINISHED DON'T USE
-
 namespace Questor.Modules.Actions
 {
     using System.Linq;
@@ -12,15 +11,13 @@ namespace Questor.Modules.Actions
     {
         //private DateTime _lastExecute;
 
-        public ScanInteractionState State { get; set; }
-
         //public List<DirectScanResult> Result;
 
         public void ProcessState()
         {
             DirectScannerWindow scannerWindow = Cache.Instance.Windows.OfType<DirectScannerWindow>().FirstOrDefault();
 
-            switch(State)
+            switch(_States.CurrentScanInteractionState)
             {
                 case ScanInteractionState.Idle:
                     //_lastExecute = DateTime.Now;
@@ -30,7 +27,7 @@ namespace Questor.Modules.Actions
                     Logging.Log("ScanInteraction: Closing Scan Window");
                     if (scannerWindow != null) scannerWindow.Close();
 
-                    State = ScanInteractionState.Idle;
+                    _States.CurrentScanInteractionState = ScanInteractionState.Idle;
 
                     break;
                 case ScanInteractionState.Scan:
@@ -54,7 +51,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 default:
-                    State = ScanInteractionState.Idle;
+                    _States.CurrentScanInteractionState = ScanInteractionState.Idle;
                     break;
             }
         }

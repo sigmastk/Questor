@@ -1,4 +1,4 @@
-﻿namespace Questor.Storylines
+﻿namespace Questor.Modules.States
 {
     public enum StorylineState
     {

@@ -1,7 +1,7 @@
 ﻿
 namespace Questor.Modules.States
 {
-    public enum StateGrab
+    public enum GrabState
     {
         Idle,
         Done,

@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -20,7 +18,6 @@ namespace Questor.Modules.BackgroundTasks
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
-
 
     public class Salvage
     {
@@ -45,8 +42,6 @@ namespace Questor.Modules.BackgroundTasks
         public bool LootEverything { get; set; }
         public int ReserveCargoCapacity { get; set; }
         public List<Ammo> Ammo { get; set; }
-
-        public SalvageState State { get; set; }
 
         /// <summary>
         ///   Activates tractorbeam on targeted wrecks
@@ -278,7 +273,7 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Cache.Instance.NextLootAction > DateTime.Now) return;
 
-            if (!Cache.OpenCargoHold("Salvage")) return;
+            if (!Cache.Instance.OpenCargoHold("Salvage")) return;
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
@@ -526,27 +521,27 @@ namespace Questor.Modules.BackgroundTasks
             // Nothing to salvage in stations
             if (Cache.Instance.InStation)
             {
-               State = SalvageState.Idle;
+               _States.CurrentSalvageState = SalvageState.Idle;
                return;
             }
 
             if (!Cache.Instance.InSpace)
             {
-                State = SalvageState.Idle;
+                _States.CurrentSalvageState = SalvageState.Idle;
                 return;
             }
 
             // What? No ship entity?
             if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
             {
-                State = SalvageState.Idle;
+                _States.CurrentSalvageState = SalvageState.Idle;
                 return;
             }
 
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InWarp)
             {
-                State = SalvageState.Idle;
+                _States.CurrentSalvageState = SalvageState.Idle;
                 return;
             }
 
@@ -554,24 +549,24 @@ namespace Questor.Modules.BackgroundTasks
             // why not? seems like we might be able to ninja-salvage with a covert-ops hauler with some additional coding (someday?)
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
             {
-                State = SalvageState.Idle;
+                _States.CurrentSalvageState = SalvageState.Idle;
                 return;
             }
 
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            switch (State)
+            switch (_States.CurrentSalvageState)
             {
                 case SalvageState.TargetWrecks:
                     TargetWrecks();
 
                     // Next state
-                    State = SalvageState.LootWrecks;
+                    _States.CurrentSalvageState = SalvageState.LootWrecks;
                     break;
 
                 case SalvageState.LootWrecks:
                     LootWrecks();
 
-                    State = SalvageState.SalvageWrecks;
+                    _States.CurrentSalvageState = SalvageState.SalvageWrecks;
                     break;
 
                 case SalvageState.SalvageWrecks:
@@ -579,14 +574,14 @@ namespace Questor.Modules.BackgroundTasks
                     ActivateSalvagers();
 
                     // Default action
-                    State = SalvageState.TargetWrecks;
+                    _States.CurrentSalvageState = SalvageState.TargetWrecks;
                     if (cargo.IsReady && cargo.Items.Any() && Cache.Instance.NextSalvageAction < DateTime.Now)
                     {
                         // Check if there are actually duplicates
                         bool duplicates = cargo.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
                         if (duplicates)
                         {
-                            State = SalvageState.StackItems;
+                            _States.CurrentSalvageState = SalvageState.StackItems;
                             Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItems_seconds);
                         }
                     }
@@ -599,7 +594,7 @@ namespace Questor.Modules.BackgroundTasks
                         cargo.StackAll();
 
                     Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItemsDelayBeforeResuming_seconds);
-                    State = SalvageState.WaitForStacking;
+                    _States.CurrentSalvageState = SalvageState.WaitForStacking;
                     break;
 
                 case SalvageState.WaitForStacking:
@@ -610,7 +605,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
                         Logging.Log("Salvage: Done stacking");
-                        State = SalvageState.TargetWrecks;
+                        _States.CurrentSalvageState = SalvageState.TargetWrecks;
                         break;
                     }
 
@@ -620,7 +615,7 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.DirectEve.UnlockItems();
 
                         Logging.Log("Salvage: Done stacking");
-                        State = SalvageState.TargetWrecks;
+                        _States.CurrentSalvageState = SalvageState.TargetWrecks;
                         break;
                     }
                     break;
@@ -640,14 +635,14 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName) &&
                         !Cache.Instance.InWarp)
                     {
-                        State = SalvageState.TargetWrecks;
+                        _States.CurrentSalvageState = SalvageState.TargetWrecks;
                         return;
                     }
                     break;
 
                 default:
                     // Unknown state, goto first state
-                    State = SalvageState.TargetWrecks;
+                    _States.CurrentSalvageState = SalvageState.TargetWrecks;
                     break;
             }
         }

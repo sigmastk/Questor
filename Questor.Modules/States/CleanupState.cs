@@ -6,6 +6,5 @@ namespace Questor.Modules.States
         Idle,
         CheckModalWindows,
         CheckWindowsThatDontBelongInSpace,
-        Done
     }
 }

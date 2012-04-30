@@ -1,5 +1,4 @@
-﻿//NOT FINISH DON'T USE
-namespace Questor.Modules.States
+﻿namespace Questor.Modules.States
 {
     public enum ScanInteractionState
     {

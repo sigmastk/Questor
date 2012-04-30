@@ -13,55 +13,9 @@ namespace Questor.Modules.BackgroundTasks
 
    public class Cleanup
    {
-      public CleanupState State { get; set; }
       private DateTime _lastCleanupAction;
-      private DateTime _lastChatWindowAction;
-      private bool _newprivateconvowindowhandled;
-      //private Audio _localalarm;
-      private string _localalarmmp3 = "test.mp3";
-      //private Audio _convoalarm;
-      private string _convoalarmmp3 = "test.mp3";
-      //private Audio _miscalarm;
-      private string _miscalarmmp3 = "test.mp3";
-      //private  Audio _music;
-
-
-      #region Play WAV
-      /// <summary>
-      /// Plays a .wav File with the Option to Repeat.
-      /// </summary>
-      /// <param name="location">The Location to the Sound File.</param>
-      /// <param name="repeat">True to Repeat, False to Play Once.</param>
-      public  void PlayWAV(String location, Boolean repeat)
-      {
-          //Declare player as a new SoundPlayer with SoundLocation as the sound location
-          System.Media.SoundPlayer player = new System.Media.SoundPlayer(location);
-          //If the user has Repeat equal to true
-          if (repeat == true)
-          {
-              //Play the sound continuously
-              player.PlayLooping();
-          }
-          else
-          {
-              //Play the sound once
-              player.Play();
-              System.Media.SystemSound sound = System.Media.SystemSounds.Beep;
-              sound.Play();
-          }
-      }
-      #endregion
-      #region Play MP3
-      /// <summary>
-      /// Plays a .mp3 File.
-      /// </summary>
-      /// <param name="location">The Location to the Sound File.</param>
-      public  void PlayMP3(String location)
-      {
-          //_music = new Microsoft.DirectX.AudioVideoPlayback.Audio(location);
-          //_music.Play();
-      }
-      #endregion
+      //private DateTime _lastChatWindowAction;
+      //private bool _newprivateconvowindowhandled;
 
       private  void BeginClosingQuestor()
       {
@@ -135,16 +89,13 @@ namespace Questor.Modules.BackgroundTasks
 
       public void ProcessState()
       {
-         //Cleanup State should only run every 10 seconds
-         if (DateTime.Now.Subtract(_lastCleanupAction).TotalSeconds < 10)
-              return;
-
-         _lastCleanupAction = DateTime.Now;
-                        
-         switch (State)
+         switch (_States.CurrentCleanupState)
          {
             case CleanupState.Idle:
-               State = CleanupState.CheckModalWindows;
+               //Cleanup State should only run every 10 seconds
+               if (DateTime.Now.Subtract(_lastCleanupAction).TotalSeconds < 10)
+                  return;
+               _States.CurrentCleanupState = CleanupState.CheckModalWindows;
                break;
 
             case CleanupState.CheckModalWindows:
@@ -277,7 +228,7 @@ namespace Questor.Modules.BackgroundTasks
                      }
                   }
                }
-               State = CleanupState.CheckWindowsThatDontBelongInSpace;
+               _States.CurrentCleanupState = CleanupState.CheckWindowsThatDontBelongInSpace;
                break;
             
              case CleanupState.CheckWindowsThatDontBelongInSpace:
@@ -294,17 +245,13 @@ namespace Questor.Modules.BackgroundTasks
                        }
                    }
                }
-               State = CleanupState.Done;
+               _lastCleanupAction = DateTime.Now;
+               _States.CurrentCleanupState = CleanupState.Idle;
                break;
             
-             case CleanupState.Done:
-               _lastCleanupAction = DateTime.Now;
-               State = CleanupState.Idle;
-               break;
-
             default:
                // Next state
-               State = CleanupState.Idle;
+               _States.CurrentCleanupState = CleanupState.Idle;
                break;
          }
       }

@@ -27,29 +27,15 @@ namespace Questor
     public class Questor
     {
         private readonly QuestorfrmMain m_Parent;
-        //private readonly AgentInteraction _agentInteraction;
-        //private readonly Arm _arm;
-        //private readonly SwitchShip _switch;
-        //private readonly Combat _combat;
-        //private readonly CourierMission _courier;
         private readonly LocalWatch _localwatch;
-        //private readonly ScanInteraction _scanInteraction;
         private readonly Defense _defense;
         private readonly DirectEve _directEve;
-        //private readonly Drones _drones;
-
+        
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
-        //private readonly Panic _panic;
-        //private readonly Storyline _storyline;
         private readonly Cleanup _cleanup;
-        //private readonly Statistics _statistics;
-
-        //private readonly Salvage _salvage;
-        //private readonly Traveler _traveler;
-        //private readonly UnloadLoot _unloadLoot;
-
+        
         public DateTime LastFrame;
         public DateTime LastAction;
         //private readonly Random _random;
@@ -72,16 +58,12 @@ namespace Questor
 
             _defense = new Defense();
             _localwatch = new LocalWatch();
-            //_scanInteraction = new ScanInteraction();
-            //_combat = new Combat();
-            //_missionController = new MissionController();
-            //_drones = new Drones();
+            _combatMissionsBehavior = new CombatMissionsBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
-            //_statistics = new Statistics();
-
+            
             // State fixed on ExecuteMission
-            State = QuestorState.Idle;
+            _States.CurrentQuestorState = QuestorState.Idle;
 
             _directEve = new DirectEve();
             Cache.Instance.DirectEve = _directEve;
@@ -92,11 +74,12 @@ namespace Questor
             Cache.Instance.StartTime = Program.startTime;
             Cache.Instance.QuestorStarted_DateTime = DateTime.Now;
             
+            //foreach (string state in Enum.GetNames(typeof(CombatMissionsBehaviorState)))
+            //    QuestorfrmMain.MainBehaviorComboBox.Items.Add(state);
+            //QuestorfrmMain.lblQuestorState.Text = "CombatMissionsBehaviorState";
             //CombatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
+
             
-            //_combatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
-            //_combatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
-            //_combatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
             // get the current process
             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
             // get the physical mem usage
@@ -110,8 +93,6 @@ namespace Questor
             _directEve.OnFrame += OnFrame;
         }
 
-        public QuestorState State { get; set; }
-
         private bool _closeQuestorCMDUplink = true;
         public bool CloseQuestorflag = true;
         private DateTime CloseQuestorDelay { get; set; }
@@ -122,7 +103,7 @@ namespace Questor
         public void DebugCombatMissionsBehaviorStates()
         {
             if (Settings.Instance.DebugStates)
-                Logging.Log("CombatMissionsBehavior.State = " + State);
+                Logging.Log("CombatMissionsBehavior.State = " + _States.CurrentQuestorState);
         }
 
         //public void DebugPanicstates()
@@ -144,7 +125,12 @@ namespace Questor
                 Logging.Log(whatWeAreTiming + " took " + _watch.ElapsedMilliseconds + "ms");
         }
 
-        
+        public static void BeginClosingQuestor()
+        {
+            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
+            _States.CurrentQuestorState = QuestorState.CloseQuestor;
+        }
+
         /*
         public void RecallDrones()
         {
@@ -237,10 +223,76 @@ namespace Questor
 
         */
 
+        public static void CheckEVEStatus()
+        {
+            // get the current process
+            Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+
+            // get the physical mem usage (this only runs between missions)
+            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+            Logging.Log("CombatMissionsBehavior: EVE instance: totalMegaBytesOfMemoryUsed - " +
+                        Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB");
+
+            // If Questor window not visible, schedule a restart of questor in the uplink so that the GUI will start normally
+
+            /*
+             * 
+             if (!m_Parent.Visible)
+            //GUI isn't visible and CloseQuestorflag is true, so that his code block only runs once
+            {
+                //m_Parent.Visible = true; //this does not work for some reason - innerspace issue?
+                Cache.Instance.ReasonToStopQuestor =
+                    "The Questor GUI is not visible: did EVE get restarted due to a crash or lag?";
+                Logging.Log(Cache.Instance.ReasonToStopQuestor);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.SessionState = "Exiting";
+                BeginClosingQuestor();
+            }
+            else 
+          
+             */
+
+            if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) &&
+                        Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
+            {
+                Logging.Log(
+                    "CombatMissionsBehavior: Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " +
+                    Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB");
+                Cache.Instance.ReasonToStopQuestor =
+                    "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " +
+                    Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
+                if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "logoff")
+                {
+                    Cache.Instance.CloseQuestorCMDLogoff = true;
+                    Cache.Instance.CloseQuestorCMDExitGame = false;
+                    Cache.Instance.SessionState = "LoggingOff";
+                    BeginClosingQuestor();
+                    return;
+                }
+                if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "exit")
+                {
+                    Cache.Instance.CloseQuestorCMDLogoff = false;
+                    Cache.Instance.CloseQuestorCMDExitGame = true;
+                    Cache.Instance.SessionState = "Exiting";
+                    BeginClosingQuestor();
+                    return;
+                }
+                Logging.Log(
+                    "CombatMissionsBehavior: EVEProcessMemoryCeilingLogofforExit was not set to exit or logoff - doing nothing ");
+            }
+            else
+            {
+                Cache.Instance.SessionState = "Running";
+            }
+        }
+
+
         private void OnFrame(object sender, EventArgs e)
         {
             var watch = new Stopwatch();
             Cache.Instance.LastFrame = DateTime.Now;
+
             // Only pulse state changes every 1.5s
             if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
                 return;
@@ -344,7 +396,7 @@ namespace Questor
                             Cache.Instance.CloseQuestorCMDExitGame = true;
                             Cache.Instance.SessionState = "Exiting";
                         }
-                        //BeginClosingQuestor();
+                        BeginClosingQuestor();
                         return;
                     }
                 }
@@ -373,9 +425,9 @@ namespace Questor
 
             if (Cache.Instance.SessionState == "Quitting")
             {
-                if (State != QuestorState.CloseQuestor)
+                if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
-                    //BeginClosingQuestor();
+                    BeginClosingQuestor();
                 }
             }
 
@@ -387,7 +439,7 @@ namespace Questor
             DebugPerformanceStopandDisplayTimer("Cleanup.ProcessState");
 
             if (Settings.Instance.DebugStates)
-                Logging.Log("Cleanup.State = " + _cleanup.State);
+                Logging.Log("Cleanup.State = " + _States.CurrentCleanupState);
 
             // Done
             // Cleanup State: ProcessState
@@ -397,7 +449,7 @@ namespace Questor
                 return;
 
             //DirectAgentMission mission;
-            switch (State)
+            switch (_States.CurrentQuestorState)
             {
                 case QuestorState.Idle:
                     // Every 5 min of idle check and make sure we aren't supposed to stop...
@@ -414,9 +466,9 @@ namespace Questor
                             Cache.Instance.CloseQuestorCMDLogoff = false;
                             Cache.Instance.CloseQuestorCMDExitGame = true;
                             Cache.Instance.SessionState = "Exiting";
-                            if (State == QuestorState.Idle)
+                            if (_States.CurrentQuestorState == QuestorState.Idle)
                             {
-                                //BeginClosingQuestor();
+                                BeginClosingQuestor();
                             }
                             return;
                         }
@@ -430,9 +482,9 @@ namespace Questor
                                 Cache.Instance.CloseQuestorCMDLogoff = false;
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.SessionState = "Exiting";
-                                if (State == QuestorState.Idle)
+                                if (_States.CurrentQuestorState == QuestorState.Idle)
                                 {
-                                    //BeginClosingQuestor();
+                                    BeginClosingQuestor();
                                 }
                                 return;
                             }
@@ -443,38 +495,39 @@ namespace Questor
 
                     if (Settings.Instance.AutoStart)
                     {
-                        if (State == QuestorState.Idle)
+                        if (_States.CurrentQuestorState == QuestorState.Idle)
                         {
-                            State = QuestorState.Start;
+                            _States.CurrentQuestorState = QuestorState.Start;
                         }
                         return;
                     }
                     break;
 
-                case QuestorState.CombatMissionsBehavior:
+                case QuestorState.CombatMissionsBehavior: 
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
-                    if (CombatMissionsBehavior.State == CombatMissionsBehaviorState.Idle)
+                    if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Idle)
                     {
-                        CombatMissionsBehavior.State = CombatMissionsBehaviorState.Idle;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                     }
                            _combatMissionsBehavior.ProcessState();
+
                     break;
 
                 case QuestorState.Start:
                     if (Settings.Instance.CharacterMode.ToLower() == "combat missions" || Settings.Instance.CharacterMode.ToLower() == "dps")
                     {
-                        if (State == QuestorState.Start)
+                        if (_States.CurrentQuestorState == QuestorState.Start)
                         {
                             Logging.Log("Questor: Start Mission Behavior");
-                            State = QuestorState.CombatMissionsBehavior;
+                            _States.CurrentQuestorState = QuestorState.CombatMissionsBehavior;
                         }
                         break;
                     }
                     if (Settings.Instance.CharacterMode.ToLower() == "salvage")
                     {
-                        if (State == QuestorState.Start)
+                        if (_States.CurrentQuestorState == QuestorState.Start)
                         {
                             Logging.Log("Questor: Start Salvaging Behavior");
                             //State = QuestorState.SalvageBehavior;
@@ -510,6 +563,7 @@ namespace Questor
 
                 
                 case QuestorState.CloseQuestor:
+                    Cache.Instance.SessionState = "Quitting!!"; //so that IF we changed the state we would not be caught in a loop of re-entering closequestor
                     if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
                     {
                         Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -687,9 +741,9 @@ namespace Questor
                     Logging.Log("EVEProcessMemoryCeiling: " + Settings.Instance.EVEProcessMemoryCeiling);
                     Logging.Log("EVEProcessMemoryCielingLogofforExit: " +
                                 Settings.Instance.EVEProcessMemoryCeilingLogofforExit);
-                    if (State == QuestorState.DebugCloseQuestor)
+                    if (_States.CurrentQuestorState == QuestorState.DebugCloseQuestor)
                     {
-                        State = QuestorState.Error;
+                        _States.CurrentQuestorState = QuestorState.Error;
                     }
                     return;
 
@@ -713,9 +767,9 @@ namespace Questor
                         Logging.Log("Debug_Questor_WindowNames: [" + window.Name + "]");
                         Logging.Log("Debug_WindowTypes: [" + window.Html + "]");
                     }
-                    if (State == QuestorState.DebugWindows)
+                    if (_States.CurrentQuestorState == QuestorState.DebugWindows)
                     {
-                        State = QuestorState.Error;
+                        _States.CurrentQuestorState = QuestorState.Error;
                     }
                     return;
                 

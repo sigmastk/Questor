@@ -7,7 +7,7 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
-namespace Questor
+namespace Questor.Modules.States
 {
     public enum QuestorState
     {

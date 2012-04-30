@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Questor.Modules.States
 {
-        public enum StateBuyLPI
+        public enum BuyLPIState
         {
             Idle,
             Begin,
