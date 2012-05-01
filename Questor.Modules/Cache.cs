@@ -1664,7 +1664,7 @@ namespace Questor.Modules
 
         public DirectContainer ItemHangar { get; set; }
 
-        public static bool OpenItemsHangar(String module)
+        public bool OpenItemsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
                 return false;
@@ -1696,7 +1696,7 @@ namespace Questor.Modules
 
         public DirectContainer CargoHold { get; set; }
 
-        public static bool OpenCargoHold(String module)
+        public bool OpenCargoHold(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
             {
@@ -1735,7 +1735,7 @@ namespace Questor.Modules
 
         public DirectContainer ShipHangar { get; set; }
 
-        public static bool OpenShipsHangar(String module)
+        public bool OpenShipsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenShipHangarAction)
                 return false;
@@ -1909,7 +1909,7 @@ namespace Questor.Modules
 
         public DirectContainer LootContainer { get; set; }
 
-        public static bool OpenLootContainer(String module)
+        public bool OpenLootContainer(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
                 return false;
@@ -1917,7 +1917,7 @@ namespace Questor.Modules
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
-                    if (!Cache.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
 
                     var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
                     if (firstlootcontainer != null)
@@ -1946,7 +1946,7 @@ namespace Questor.Modules
 
         public DirectContainer LootHangar { get; set; }
 
-        public static bool OpenLootHangar(String module)
+        public bool OpenLootHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
                 return false;
@@ -2015,7 +2015,7 @@ namespace Questor.Modules
 
         public DirectContainer AmmoHangar { get; set; }
 
-        public static bool OpenAmmoHangar(String module)
+        public bool OpenAmmoHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
                 return false;
@@ -2085,7 +2085,7 @@ namespace Questor.Modules
 
         public DirectContainer DroneBay { get; set; }
 
-        public static bool OpenDroneBay(String module)
+        public bool OpenDroneBay(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenDroneBayAction)
             {
@@ -2175,7 +2175,7 @@ namespace Questor.Modules
             {
                 if (!string.IsNullOrEmpty(containerInSpace))
                 {
-                    if (!Cache.OpenCargoHold("Cache.OpenContainerInSpace")) return false;
+                    if (!Cache.Instance.OpenCargoHold("Cache.OpenContainerInSpace")) return false;
 
                     // Open a container in range
                     foreach (EntityCache containerEntity in Cache.Instance.Containers.Where(e => e.Distance <= (int)Distance.SafeScoopRange & e.Name == containerInSpace))

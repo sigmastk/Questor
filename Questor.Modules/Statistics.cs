@@ -71,7 +71,7 @@
         {
            // Ammo Consumption statistics
            // Is cargo open?
-           if(!Cache.OpenCargoHold("Statistics: AmmoConsumptionStats")) return false;
+           if (!Cache.Instance.OpenCargoHold("Statistics: AmmoConsumptionStats")) return false;
 
            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
            IEnumerable<DirectItem> ammoCargo = Cache.Instance.CargoHold.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
@@ -95,7 +95,7 @@
                {
                   if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
                   {
-                     if (!Cache.OpenDroneBay("Statistics.WriteDroneStatsLog")) return false;
+                     if (!Cache.Instance.OpenDroneBay("Statistics.WriteDroneStatsLog")) return false;
                      InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
                      Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                      Logging.Log("Statistics.WriteDroneStatsLog: Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString(CultureInfo.InvariantCulture));

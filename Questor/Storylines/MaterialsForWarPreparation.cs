@@ -27,7 +27,7 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if(!Cache.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.Arm;
+            if (!Cache.Instance.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.Arm;
             
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
@@ -70,7 +70,7 @@ namespace Questor.Storylines
             int orequantity = Settings.Instance.MaterialsForWarOreQty; //999
 
             // Open the item hangar
-            if (!Cache.OpenItemsHangar("MaterialsForWarPreperation")) return StorylineState.PreAcceptMission;
+            if (!Cache.Instance.OpenItemsHangar("MaterialsForWarPreperation")) return StorylineState.PreAcceptMission;
 
             // Is there a market window?
             DirectMarketWindow marketWindow = directEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();

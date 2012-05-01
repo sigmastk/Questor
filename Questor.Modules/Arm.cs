@@ -77,7 +77,7 @@ namespace Questor.Modules
                 case ArmState.SwitchToSalvageShip:
                     if (DateTime.Now > Cache.Instance.NextArmAction) //default 10 seconds
                     {
-                        if (!Cache.OpenShipsHangar("Arm")) break;
+                       if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
                         if (State == ArmState.OpenShipHangar)
                         {
@@ -261,9 +261,9 @@ namespace Questor.Modules
 
                 case ArmState.OpenCargo:
                     // Is CargoBay  and AmmoHangar open?
-                    if (!Cache.OpenAmmoHangar("Arm")) break;
+                    if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
 
-                    if (!Cache.OpenCargoHold("Arm")) break;
+                    if (!Cache.Instance.OpenCargoHold("Arm")) break;
 
                     if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                     {
@@ -415,11 +415,11 @@ namespace Questor.Modules
                     break;
 
                 case ArmState.MoveDrones:
-                    if (!Cache.OpenShipsHangar("Arm")) break;
-                    
-                    if (!Cache.OpenDroneBay("Arm")) break;
-                    
-                    if (!Cache.OpenAmmoHangar("Arm")) break;
+                    if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+
+                    if (!Cache.Instance.OpenDroneBay("Arm")) break;
+
+                    if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
                     
                     
                     DirectItem drone;
@@ -459,9 +459,9 @@ namespace Questor.Modules
                     break;
 
                 case ArmState.MoveItems:
-                    if (!Cache.OpenCargoHold("Arm")) break;
-  
-                    if (!Cache.OpenAmmoHangar("Arm")) break;
+                    if (!Cache.Instance.OpenCargoHold("Arm")) break;
+
+                    if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
                         
                     
                     string bringItem = Cache.Instance.BringMissionItem;
@@ -470,7 +470,7 @@ namespace Questor.Modules
 
                     if (!_missionItemMoved)
                     {
-                        if (!Cache.OpenAmmoHangar("Arm")) break;
+                       if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
                         DirectItem missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                         if (missionItem == null)
                            missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
@@ -542,7 +542,7 @@ namespace Questor.Modules
                     if (DateTime.Now < Cache.Instance.NextArmAction)
                         break;
 
-                    if (!Cache.OpenCargoHold("Arm")) break;
+                    if (!Cache.Instance.OpenCargoHold("Arm")) break;
                     
                     if (Cache.Instance.CargoHold.Items.Count == 0)
                         break;

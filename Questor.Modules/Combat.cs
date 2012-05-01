@@ -177,7 +177,7 @@ namespace Questor.Modules
         public bool ReloadAmmo(ModuleCache weapon, EntityCache entity)
         {
             // We need the cargo bay open for both reload actions
-            if (!Cache.OpenCargoHold("Questor: ReloadAmmo")) return false;
+            if (!Cache.Instance.OpenCargoHold("Questor: ReloadAmmo")) return false;
 
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity) : ReloadNormalAmmo(weapon, entity);
         }

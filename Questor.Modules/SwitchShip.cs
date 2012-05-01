@@ -33,7 +33,7 @@ namespace Questor.Modules
 
                 case SwitchShipState.OpenShipHangar:
                     // Is the ship hangar open?
-                    if (!Cache.OpenShipsHangar("SwitchShip")) break;
+                    if (!Cache.Instance.OpenShipsHangar("SwitchShip")) break;
 
                     Logging.Log("SwitchShip: Activating combat ship");
 

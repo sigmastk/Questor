@@ -1594,7 +1594,7 @@ namespace Questor
                     }
                     else
                     {
-                        if (!Cache.OpenCargoHold("Questor: Salvage")) break;
+                        if (!Cache.Instance.OpenCargoHold("Questor: Salvage")) break;
                         
                         if (Settings.Instance.UnloadLootAtStation && salvageCargo.IsReady && (salvageCargo.Capacity - salvageCargo.UsedCapacity) < 100)
                         {
@@ -1986,7 +1986,7 @@ namespace Questor
                     //I think this should be repurposed and renamed to better operate in 0.0 or lowsec with a station in local
                     Cache.Instance.OpenWrecks = true;
 
-                    if (!Cache.OpenCargoHold("Questor: SalvageOnly")) break;
+                    if (!Cache.Instance.OpenCargoHold("Questor: SalvageOnly")) break;
 
                     if (!Cache.Instance.UnlootedContainers.Any())
                     {
@@ -2070,7 +2070,7 @@ namespace Questor
                         break;
                     }
 
-                    if (!Cache.OpenCargoHold("Questor: SalvageOnlyBookmarksinLocal")) break;
+                    if (!Cache.Instance.OpenCargoHold("Questor: SalvageOnlyBookmarksinLocal")) break;
 
                     if (Settings.Instance.UnloadLootAtStation && salvageOnlyBookmarksCargo.IsReady && (salvageOnlyBookmarksCargo.Capacity - salvageOnlyBookmarksCargo.UsedCapacity) < 100)
                     {

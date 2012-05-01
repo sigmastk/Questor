@@ -36,7 +36,7 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.Begin:
-                    if (!Cache.OpenCargoHold("UnloadLoot")) break;
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) break;
                     if (DateTime.Now < _nextUnloadAction)
                     {
                         Logging.Log("Unloadloot will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds,0) + " ] sec");
@@ -51,7 +51,7 @@ namespace Questor.Modules
                 case UnloadLootState.OpenLootHangar:
                     // Is the hangar open?
                     //Logging.Log("UnloadLoot: Opening Loot Hangar");
-                    if(!Cache.OpenLootHangar("UnloadLoot")) break;
+                    if (!Cache.Instance.OpenLootHangar("UnloadLoot")) break;
 
                     State = UnloadLootState.OpenShipsCargo;
                     break;
@@ -59,7 +59,7 @@ namespace Questor.Modules
                 case UnloadLootState.OpenShipsCargo:
                     // Is cargo open?
                     //Logging.Log("UnloadLoot: Opening Ships Hangar");
-                    if (!Cache.OpenCargoHold("UnloadLoot")) break;
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) break;
 
                     if (Cache.Instance.CorpAmmoHangar != null)
                     {
@@ -80,7 +80,7 @@ namespace Questor.Modules
 
                 case UnloadLootState.OpenAmmoHangar:
                     // Is cargo open?
-                    if (!Cache.OpenAmmoHangar("UnloadLoot")) break;
+                    if (!Cache.Instance.OpenAmmoHangar("UnloadLoot")) break;
 
                     if (Settings.Instance.MoveCommonMissionCompletionItemsToAmmoHangar == true)
                     {
@@ -95,8 +95,8 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.MoveCommonMissionCompletionItemsToAmmoHangar:
-                    if (!Cache.OpenCargoHold("UnloadLoot")) return;
-                    if (!Cache.OpenAmmoHangar("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenAmmoHangar("UnloadLoot")) return;
                     //
                     // how do we get IsMissionItem to work for us here? (see ItemCache)
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
@@ -109,8 +109,8 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.MoveCommonMissionCompletionitems:
-                    if (!Cache.OpenCargoHold("UnloadLoot")) return;
-                    if (!Cache.OpenItemsHangar("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenItemsHangar("UnloadLoot")) return;
                     //
                     // how do we get IsMissionItem to work for us here? (see ItemCache)
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
@@ -123,9 +123,9 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.MoveLoot:
-                    if (!Cache.OpenCargoHold("UnloadLoot")) return;
-                    if (!Cache.OpenLootHangar("UnloadLoot")) return;
-                    if (!Cache.OpenLootContainer("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenLootHangar("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenLootContainer("UnloadLoot")) return;
 
                     IEnumerable<DirectItem> lootToMove = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() != Cache.Instance.BringMissionItem && !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId));
                     foreach (DirectItem item in lootToMove)
@@ -169,7 +169,7 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.MoveAmmo:
-                    if (!Cache.OpenAmmoHangar("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenAmmoHangar("UnloadLoot")) return;
 
                     Logging.Log("UnloadLoot: Moving Ammo to AmmoHangar [" + Cache.Instance.AmmoHangar.Window.Name + "]");
                     // Move the mission item & ammo to the ammo hangar
@@ -181,7 +181,7 @@ namespace Questor.Modules
                     break;
 
                 case UnloadLootState.WaitForMove:
-                    if (!Cache.OpenCargoHold("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
                     
                     if (Cache.Instance.CargoHold.Items.Count != 0)
                     {

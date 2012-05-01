@@ -171,7 +171,7 @@ namespace Questor.Modules
             if (!Cache.Instance.InSpace)
                 return;
 
-            if (!Cache.OpenCargoHold("Scoop")) return;
+            if (!Cache.Instance.OpenCargoHold("Scoop")) return;
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
