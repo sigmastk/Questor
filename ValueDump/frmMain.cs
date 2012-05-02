@@ -30,7 +30,10 @@ namespace ValueDump
         private List<ItemCache> ItemsToRefine { get; set; }
         private ValueDumpState State { get; set; }
         private DirectEve DirectEve { get; set; }
-        private static double _delay { get; set; }
+        private static double _marketlookupdelay { get; set; }
+        private static double _marketsellorderdelay { get; set; }
+        private static double _marketbuyorderdelay { get; set; }
+
 
         public string InvTypesPath
         {
@@ -50,8 +53,8 @@ namespace ValueDump
             InitializeComponent();
 
             InvTypesById = new Dictionary<int, InvType>();
-            var invTypes = XDocument.Load(InvTypesPath);
-            foreach (var element in invTypes.Root.Elements("invtype"))
+            XDocument invTypes = XDocument.Load(InvTypesPath);
+            foreach (XElement element in invTypes.Root.Elements("invtype"))
                 InvTypesById.Add((int) element.Attribute("id"), new InvType(element));
 
             Items = new List<ItemCache>();
@@ -60,7 +63,9 @@ namespace ValueDump
 
             DirectEve = new DirectEve();
             DirectEve.OnFrame += OnFrame;
-            _delay = 5;
+            _marketlookupdelay = 3;
+            _marketsellorderdelay = 5;
+            _marketbuyorderdelay = 5;
         }
 
         private InvType _currentMineral;
@@ -80,10 +85,10 @@ namespace ValueDump
             if (State == ValueDumpState.Idle)
                 return;
 
-            var marketWindow = DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
-            var hangar = DirectEve.GetItemHangar();
-            var sellWindow = DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
-            var reprorcessingWindow = DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
+            DirectMarketWindow marketWindow = DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            DirectContainer hangar = DirectEve.GetItemHangar();
+            DirectMarketActionWindow sellWindow = DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
+            DirectReprocessingWindow reprorcessingWindow = DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
             switch (State)
             {
                 case ValueDumpState.CheckMineralPrices:
@@ -95,7 +100,7 @@ namespace ValueDump
                         //_currentMineral = InvTypesById.Values.FirstOrDefault(i => i.Id == 20236 && i.LastUpdate < DateTime.Now.AddMinutes(-1));
                     if (_currentMineral == null)
                     {
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _delay)
+                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _marketlookupdelay)
                         {
                             State = ValueDumpState.SaveMineralPrices;
                             if (marketWindow != null)
@@ -107,7 +112,7 @@ namespace ValueDump
                         //State = ValueDumpState.GetMineralPrice;
                         if (marketWindow == null)
                         {
-                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _delay)
+                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _marketlookupdelay)
                             {
                                 DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
                                 _lastExecute = DateTime.Now;
@@ -120,7 +125,7 @@ namespace ValueDump
 
                         if (marketWindow.DetailTypeId != _currentMineral.Id)
                         {
-                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < _delay)
+                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < _marketlookupdelay)
                                 return;
 
                             Log("Loading orders for " + _currentMineral.Name);
@@ -142,10 +147,10 @@ namespace ValueDump
                         //_currentMineral.MedianBuy = marketWindow.BuyOrders.Where(o => o.StationId == DirectEve.Session.StationId).OrderByDescending(o => o.Price).Take(5).Average(o => o.Price);
 
                         // Take top 1% orders and count median-buy price (no botter covers more than 1% Jita orders anyway)
-                        var orders = marketWindow.BuyOrders.Where(o => o.StationId == DirectEve.Session.StationId && o.MinimumVolume == 1).OrderByDescending(o => o.Price).ToList();
-                        var totalAmount = orders.Sum(o => (double)o.VolumeRemaining);
+                        List<DirectOrder> orders = marketWindow.BuyOrders.Where(o => o.StationId == DirectEve.Session.StationId && o.MinimumVolume == 1).OrderByDescending(o => o.Price).ToList();
+                        double totalAmount = orders.Sum(o => (double)o.VolumeRemaining);
                         double amount = 0, value = 0, count = 0;
-                        for (var i = 0; i < orders.Count(); i++)
+                        for (int i = 0; i < orders.Count(); i++)
                         {
                             amount += orders[i].VolumeRemaining;
                             value += orders[i].VolumeRemaining * orders[i].Price;
@@ -169,7 +174,7 @@ namespace ValueDump
                         orders = marketWindow.SellOrders.Where(o => o.StationId == DirectEve.Session.StationId).OrderBy(o => o.Price).ToList();
                         totalAmount = orders.Sum(o => (double)o.VolumeRemaining);
                         amount = 0; value = 0; count = 0;
-                        for (var i = 0; i < orders.Count(); i++)
+                        for (int i = 0; i < orders.Count(); i++)
                         {
                             amount += orders[i].VolumeRemaining;
                             value += orders[i].VolumeRemaining * orders[i].Price;
@@ -197,22 +202,22 @@ namespace ValueDump
                     Log("Updating reprocess prices");
 
                     // a quick price check table
-                    var MineralPrices = new Dictionary<string, double>();
-                    foreach (var i in InvTypesById.Values)
+                    Dictionary<string, double> mineralPrices = new Dictionary<string, double>();
+                    foreach (InvType i in InvTypesById.Values)
                         if (InvType.Minerals.Contains(i.Name))
 #if manual
-                            MineralPrices.Add(i.Name, i.MedianSell ?? 0);
+                            mineralPrices.Add(i.Name, i.MedianSell ?? 0);
 #else
                             MineralPrices.Add(i.Name, i.MedianBuy ?? 0);
 #endif
 
                     double temp;
-                    foreach (var i in InvTypesById.Values)
+                    foreach (InvType i in InvTypesById.Values)
                     {
                         temp = 0;
-                        foreach (var m in InvType.Minerals)
+                        foreach (string m in InvType.Minerals)
                             if (i.Reprocess[m].HasValue && i.Reprocess[m] > 0)
-                                temp += i.Reprocess[m].Value * MineralPrices[m];
+                                temp += i.Reprocess[m].Value * mineralPrices[m];
                         if (temp > 0)
                             i.ReprocessValue = temp;
                         else
@@ -221,8 +226,8 @@ namespace ValueDump
 
                     Log("Saving InvTypes.xml");
 
-                    var xdoc = new XDocument(new XElement("invtypes"));
-                    foreach (var type in InvTypesById.Values.OrderBy(i => i.Id))
+                    XDocument xdoc = new XDocument(new XElement("invtypes"));
+                    foreach (InvType type in InvTypesById.Values.OrderBy(i => i.Id))
                         xdoc.Root.Add(type.Save());
                     xdoc.Save(InvTypesPath);
 
@@ -233,7 +238,7 @@ namespace ValueDump
                     if (hangar.Window == null)
                     {
                         // No, command it to open
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _delay)
+                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _marketlookupdelay)
                         {
                             Log("Opening hangar");
                             DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
@@ -250,7 +255,7 @@ namespace ValueDump
 
                     // Clear out the old
                     Items.Clear();
-                    var hangarItems = hangar.Items;
+                    List<DirectItem> hangarItems = hangar.Items;
                     if (hangarItems != null)
                         Items.AddRange(hangarItems.Where(i => i.ItemId > 0 && i.Quantity > 0).Select(i => new ItemCache(i, RefineCheckBox.Checked)));
 
@@ -260,7 +265,7 @@ namespace ValueDump
                 case ValueDumpState.UpdatePrices:
                     bool updated = false;
 
-                    foreach (var item in Items)
+                    foreach (ItemCache item in Items)
                     {
                         InvType invType;
                         if (!InvTypesById.TryGetValue(item.TypeId, out invType))
@@ -274,7 +279,7 @@ namespace ValueDump
                         item.InvType = invType;
 
                         bool updItem = false;
-                        foreach(var material in item.RefineOutput)
+                        foreach(ItemCache material in item.RefineOutput)
                         {
                             if (!InvTypesById.TryGetValue(material.TypeId, out invType))
                             {
@@ -283,8 +288,8 @@ namespace ValueDump
                             }
                             material.InvType = invType;
 
-                            var matsPerItem = (double) material.Quantity / item.PortionSize;
-                            var exists = InvTypesById[(int)item.TypeId].Reprocess[material.Name].HasValue;
+                            double matsPerItem = (double) material.Quantity / item.PortionSize;
+                            bool exists = InvTypesById[(int)item.TypeId].Reprocess[material.Name].HasValue;
                             if ((!exists && matsPerItem > 0) || (exists && InvTypesById[(int)item.TypeId].Reprocess[material.Name] != matsPerItem))
                             {
                                 if (exists)
@@ -340,7 +345,7 @@ namespace ValueDump
                     _currentItem = ItemsToSell[0];
                     ItemsToSell.RemoveAt(0);
 
-                    // Dont sell containers
+                    // Do not sell containers
                     if (_currentItem.GroupId == 448)
                     {
                         Log("Skipping " + _currentItem.Name);
@@ -355,7 +360,7 @@ namespace ValueDump
                         break;
                     _lastExecute = DateTime.Now;
 
-                    var directItem = hangar.Items.FirstOrDefault(i => i.ItemId == _currentItem.Id);
+                    DirectItem directItem = hangar.Items.FirstOrDefault(i => i.ItemId == _currentItem.Id);
                     if (directItem == null)
                     {
                         Log("Item " + _currentItem.Name + " no longer exists in the hanger");
@@ -393,7 +398,7 @@ namespace ValueDump
                     if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < 2)
                         break;
 
-                    if (!sellWindow.OrderId.HasValue || !sellWindow.Price.HasValue || !sellWindow.RemainingVolume.HasValue)
+                    if (sellWindow != null && (!sellWindow.OrderId.HasValue || !sellWindow.Price.HasValue || !sellWindow.RemainingVolume.HasValue))
                     {
                         Log("No order available for " + _currentItem.Name);
 
@@ -402,9 +407,9 @@ namespace ValueDump
                         break;
                     }
 
-                    var price = sellWindow.Price.Value;
-                    var quantity = (int)Math.Min(_currentItem.Quantity - _currentItem.QuantitySold, sellWindow.RemainingVolume.Value);
-                    var totalPrice = quantity*price;
+                    double price = sellWindow.Price.Value;
+                    int quantity = (int)Math.Min(_currentItem.Quantity - _currentItem.QuantitySold, sellWindow.RemainingVolume.Value);
+                    double totalPrice = quantity*price;
 
                     string otherPrices = " ";
                     if (_currentItem.InvType.MedianBuy.HasValue)
@@ -414,8 +419,8 @@ namespace ValueDump
 
                     if (RefineCheckBox.Checked)
                     {
-                        var portions = quantity/_currentItem.PortionSize;
-                        var refinePrice = _currentItem.RefineOutput.Any() ? _currentItem.RefineOutput.Sum(m => m.Quantity*m.InvType.MedianBuy ?? 0)*portions : 0;
+                        int portions = quantity/_currentItem.PortionSize;
+                        double refinePrice = _currentItem.RefineOutput.Any() ? _currentItem.RefineOutput.Sum(m => m.Quantity*m.InvType.MedianBuy ?? 0)*portions : 0;
                         refinePrice *= (double)RefineEfficiencyInput.Value / 100;
 
                         otherPrices += "[Refine price: " + refinePrice.ToString("#,##0.00") + "]";
@@ -444,8 +449,8 @@ namespace ValueDump
                             break;
                         }
 
-                        var perc = price/_currentItem.InvType.MedianBuy.Value;
-                        var total = _currentItem.InvType.MedianBuy.Value*_currentItem.Quantity;
+                        double perc = price/_currentItem.InvType.MedianBuy.Value;
+                        double total = _currentItem.InvType.MedianBuy.Value*_currentItem.Quantity;
                         // If percentage < 85% and total price > 1m isk then skip this item (we don't undersell)
                         if (perc < 0.85 && total > 1000000)
                         {
@@ -468,7 +473,7 @@ namespace ValueDump
                     Log("Selling " + quantity + " of " + _currentItem.Name + " [Sell price: " + (price * quantity).ToString("#,##0.00") + "]" + otherPrices);
                     sellWindow.Accept();
 
-                    // Requeue to check again
+                    // Re-queue to check again
                     if (_currentItem.QuantitySold < _currentItem.Quantity)
                         ItemsToSell.Add(_currentItem);
 
@@ -479,7 +484,7 @@ namespace ValueDump
                 case ValueDumpState.WaitingToFinishQuickSell:
                     if (sellWindow == null || !sellWindow.IsReady || sellWindow.Item.ItemId != _currentItem.Id)
                     {
-                        var modal = DirectEve.Windows.FirstOrDefault(w => w.IsModal);
+                        DirectWindow modal = DirectEve.Windows.FirstOrDefault(w => w.IsModal);
                         if (modal != null)
                             modal.Close();
 
@@ -491,9 +496,9 @@ namespace ValueDump
                 case ValueDumpState.RefineItems:
                     if (reprorcessingWindow == null)
                     {
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _delay)
+                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _marketlookupdelay)
                         {
-                            var refineItems = hangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
+                            IEnumerable<DirectItem> refineItems = hangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
                             DirectEve.ReprocessStationItems(refineItems);
 
                             _lastExecute = DateTime.Now;
@@ -503,7 +508,7 @@ namespace ValueDump
 
                     if (reprorcessingWindow.NeedsQuote)
                     {
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _delay)
+                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _marketlookupdelay)
                         {
                             reprorcessingWindow.GetQuotes();
                             _lastExecute = DateTime.Now;
@@ -520,7 +525,7 @@ namespace ValueDump
                     }
                     
                     // Wait another 5 seconds to view the quote and then reprocess the stuff
-                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _delay)
+                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > _marketlookupdelay)
                     {
                         // TODO: We should wait for the items to appear in our hangar and then sell them...
                         reprorcessingWindow.Reprocess();
@@ -548,9 +553,9 @@ namespace ValueDump
             }
 
             lvItems.Items.Clear();
-            foreach (var item in Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
+            foreach (ItemCache item in Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
             {
-                var listItem = new ListViewItem(item.Name);
+                ListViewItem listItem = new ListViewItem(item.Name);
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.Quantity));
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.QuantitySold));
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy));
@@ -629,6 +634,16 @@ namespace ValueDump
 
             lvItems.ListViewItemSorter = oCompare;
         
+        }
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lvItems_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
