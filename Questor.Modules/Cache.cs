@@ -1769,7 +1769,7 @@ namespace Questor.Modules
 
         public DirectContainer CorpAmmoHangar { get; set; }
 
-        public static bool OpenCorpAmmoHangar(String module)
+        public bool OpenCorpAmmoHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpAmmoHangarAction)
                 return false;
@@ -1817,7 +1817,7 @@ namespace Questor.Modules
 
         public DirectContainer CorpLootHangar { get; set; }
 
-        public static bool OpenCorpLootHangar(String module)
+        public bool OpenCorpLootHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
                 return false;
@@ -1868,7 +1868,7 @@ namespace Questor.Modules
 
         public DirectContainer CorpBookmarkHangar { get; set; }
 
-        public static bool OpenCorpBookmarkHangar(String module)
+        public bool OpenCorpBookmarkHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCorpBookmarkHangarAction)
                 return false;
@@ -1987,7 +1987,31 @@ namespace Questor.Modules
                         return false;
                     }
                 }
+                else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                {
+                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+
+                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    if (firstlootcontainer != null)
+                    {
+                        long lootContainerID = firstlootcontainer.ItemId;
+                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
+                        Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    }
                 else
+                {
+                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
+                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
+                        if (firstothercontainer != null)
+                        {
+                            
+                            if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
+                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
+                            return false;
+                        }
+                    }
+                }
+                else //use local items hangar
                 {
                     Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
                     if (Cache.Instance.LootHangar == null)
@@ -2139,7 +2163,7 @@ namespace Questor.Modules
         
         public DirectWindow JournalWindow { get; set; }
 
-        public static bool OpenJournalWindow(String module)
+        public bool OpenJournalWindow(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenJournalWindowAction)
                 return false;
@@ -2166,7 +2190,7 @@ namespace Questor.Modules
 
         public DirectContainer ContainerInSpace { get; set; }
 
-        public static bool OpenContainerInSpace(String module, String containerInSpace)
+        public bool OpenContainerInSpace(String module, String containerInSpace)
         {
             if (DateTime.Now < Cache.Instance.NextOpenContainerInSpaceAction)
                 return false;

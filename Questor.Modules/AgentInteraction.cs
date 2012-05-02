@@ -272,7 +272,7 @@ namespace Questor.Modules
          }
          
          //open the journal window
-         if (!Cache.OpenJournalWindow("AgentInteraction")) return;
+         if (!Cache.Instance.OpenJournalWindow("AgentInteraction")) return;
 
          Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
          if (Cache.Instance.Mission == null)
