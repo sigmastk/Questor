@@ -1571,6 +1571,26 @@ namespace Questor.Modules
         }
 
         /// <summary>
+       ///   Calculate distance from entity
+       /// </summary>
+       /// <param name = "x"></param>
+       /// <param name = "y"></param>
+       /// <param name = "z"></param>
+       /// <param name="entity"> </param>
+       /// <returns></returns>
+       public double DistanceFromEntity(double x, double y, double z, DirectEntity entity)
+        {
+           if (entity == null)
+              return double.MaxValue;
+
+           double curX = entity.X;
+           double curY = entity.Y;
+           double curZ = entity.Z;
+
+           return Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z));
+        }
+
+        /// <summary>
         ///   Create a bookmark
         /// </summary>
         /// <param name = "label"></param>
