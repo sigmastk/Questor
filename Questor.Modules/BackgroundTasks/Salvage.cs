@@ -31,7 +31,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
-        public static Dictionary<long, DateTime> _openedContainers;
+        public Dictionary<long, DateTime> _openedContainers;
 
         public Salvage()
         {
@@ -87,6 +87,7 @@ namespace Questor.Modules.BackgroundTasks
             double tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
             List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.Distance < tractorBeamRange).ToList();
 
+            int tractorsProcessedThisTick = 0;
 
             for (int i = tractorBeams.Count - 1; i >= 0; i--)
             {
@@ -100,8 +101,15 @@ namespace Questor.Modules.BackgroundTasks
                 if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
                 {
                     tractorBeam.Click();
+                    tractorsProcessedThisTick++;
                     Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                    if (tractorsProcessedThisTick < 2)
+                        continue;
+                    else
+                    {
+                        tractorsProcessedThisTick = 0;
                     return;
+                }
                 }
                 // Remove the tractor beam as a possible beam to activate
                 tractorBeams.RemoveAt(i);
@@ -127,7 +135,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 Logging.Log("Salvage: Activating tractorbeam [" + tractorBeam.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
                 Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
-                return;
+                continue;
             }
         }
 
@@ -148,7 +156,7 @@ namespace Questor.Modules.BackgroundTasks
 
             if (wrecks.Count == 0)
                 return;
-
+            int salvagersProcessedThisTick = 0;
             foreach (ModuleCache salvager in salvagers)
             {
                 if (salvager.IsActive || salvager.InLimboState)
@@ -161,8 +169,15 @@ namespace Questor.Modules.BackgroundTasks
 
                 Logging.Log("Salvage: Activating salvager [" + salvager.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
                 salvager.Activate(wreck.Id);
+                salvagersProcessedThisTick++;
                 Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                if (salvagersProcessedThisTick < 2)
                 continue;
+                else
+                {
+                    salvagersProcessedThisTick = 0;
+                    return;
+                }
             }
         }
 
@@ -198,7 +213,7 @@ namespace Questor.Modules.BackgroundTasks
                     Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] on the ignore list, ignoring.");
                     wreck.UnlockTarget();
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                    return;
+                    continue;
                 }
 
                 if(!Cache.Instance.SalvageAll)
@@ -208,7 +223,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] within loot range,wreck is empty, or wreck is on our blacklist, unlocking container.");
                         wreck.UnlockTarget();
                         Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                        return;
+                        continue;
                     }
                 }
 
@@ -221,7 +236,7 @@ namespace Questor.Modules.BackgroundTasks
                     Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] within loot range, unlocking container.");
                     wreck.UnlockTarget();
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                    return;
+                    continue;
                 }
             }
 
@@ -237,6 +252,7 @@ namespace Questor.Modules.BackgroundTasks
             if (tractorBeams.Count > 0)
                 tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
 
+            int wrecksProcessedThisTick = 0;
             IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
             foreach (EntityCache wreck in wrecks.Where(w => !Cache.Instance.IgnoreTargets.Contains(w.Name.Trim())))
             {
@@ -282,6 +298,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 wreck.LockTarget();
                 wreckTargets.Add(wreck);
+                wrecksProcessedThisTick++;
                 //_nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_miliseconds);
                 if(Cache.Instance.MissionLoot)
                 {
