@@ -214,26 +214,27 @@ namespace Questor.Behaviors
 
         private void AvoidBumpingThings()
         {
-            if (!Cache.Instance.InSpace)
-                return;
-           // anti bump
-           EntityCache bigObjects = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.GroupId == (int)Group.SpawnContainer).OrderBy(t => t.Distance).FirstOrDefault();
-           //
            // always shoot at NPCs while getting un-hung
            //
+            if (Cache.Instance.InSpace)
+            {
            _combat.ProcessState();
 
            //
            // only use drones if warp scrambled as we do not want to leave them behind accidentally
            //
-           if (Cache.Instance.InSpace && Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
            {
               _drones.ProcessState();
            }
+            }
+            else return;
+
+          
            //
            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
            //
-            if (!Cache.Instance.InSpace || bigObjects == null || bigObjects.Distance >= (int) Distance.TooCloseToStructure)
+            if ((Cache.Instance.BigObjects.FirstOrDefault() == null) || (Cache.Instance.BigObjects.FirstOrDefault().Distance >= (int)Distance.TooCloseToStructure))
             {
                 //we are no longer "too close" and can proceed. 
             }
@@ -241,8 +242,8 @@ namespace Questor.Behaviors
             {
                 if (DateTime.Now > Cache.Instance.NextOrbit)
                 {
-                    bigObjects.Orbit((int) Distance.SafeDistancefromStructure);
-                    Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState + ": initiating Orbit of [" + bigObjects.Name +
+                    Cache.Instance.BigObjects.FirstOrDefault().Orbit((int)Distance.SafeDistancefromStructure);
+                    Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState + ": initiating Orbit of [" + Cache.Instance.BigObjects.FirstOrDefault().Name +
                                 "] orbiting at [" + Cache.Instance.OrbitDistance + "]");
                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
                 }
@@ -1170,33 +1171,7 @@ namespace Questor.Behaviors
                             break;
                         }
                         //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
-                        EntityCache closestWreck = Cache.Instance.UnlootedContainers.First();
-                        if (Math.Round(closestWreck.Distance, 0) > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
-                        {
-                            if (closestWreck.Distance > (int)Distance.WarptoDistance)
-                            {
-                                if (DateTime.Now > Cache.Instance.NextWarpTo)
-                                {
-                                    Logging.Log("CombatMissionsBehavior.Salvage: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                                    closestWreck.WarpTo();
-                                    Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
-                                }
-                            }
-                            else
-                            {
-                                if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
-                                {
-                                    Logging.Log("CombatMissionsBehavior.Salvage: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
-                                    closestWreck.Approach();
-                                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
-                                }
-                            }
-                        }
-                        else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
-                        {
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                            Logging.Log("CombatMissionsBehavior.Salvage: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
-                        }
+                        Salvage.MoveIntoRangeOfWrecks();
                         try
                         {
                             // Overwrite settings, as the 'normal' settings do not apply

@@ -43,6 +43,37 @@ namespace Questor.Modules.BackgroundTasks
         public int ReserveCargoCapacity { get; set; }
         public List<Ammo> Ammo { get; set; }
 
+        public static void MoveIntoRangeOfWrecks() // DO NOT USE THIS ANYWHERE EXCEPT A PURPOSEFUL SALVAGE BEHAVIOR! - if you use this while in combat it will make you go poof quickly. 
+        {
+            EntityCache closestWreck = Cache.Instance.UnlootedContainers.First();
+            if (Math.Round(closestWreck.Distance, 0) > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
+            {
+                if (closestWreck.Distance > (int)Distance.WarptoDistance)
+                {
+                    if (DateTime.Now > Cache.Instance.NextWarpTo)
+                    {
+                        Logging.Log("Salvage.NavigateIntorangeOfWrecks: Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
+                        closestWreck.WarpTo();
+                        Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                    }
+                }
+                else
+                {
+                    if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
+                    {
+                        Logging.Log("Salvage.NavigateIntorangeOfWrecks: Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]");
+                        closestWreck.Approach();
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    }
+                }
+            }
+            else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
+            {
+                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                Logging.Log("Salvage.NavigateIntorangeOfWrecks: Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching");
+            }
+
+        }
         /// <summary>
         ///   Activates tractorbeam on targeted wrecks
         /// </summary>

@@ -52,6 +52,11 @@ namespace Questor.Modules.Caching
         private EntityCache _approaching;
 
         /// <summary>
+        ///   BigObjects we are likely to bump into (mainly LCOs)
+        /// </summary>
+        private List<EntityCache> _bigobjects;
+
+        /// <summary>
         ///   Returns all non-empty wrecks and all containers
         /// </summary>
         private List<EntityCache> _containers;
@@ -91,6 +96,17 @@ namespace Questor.Modules.Caching
         ///   Stargate cache
         /// </summary>
         private List<EntityCache> _stargates;
+
+
+        /// <summary>
+        ///   Stargate by name
+        /// </summary>
+        private EntityCache _closeststargate;
+
+        /// <summary>
+        ///   Stargate by name
+        /// </summary>
+        private EntityCache _stargate;
 
         /// <summary>
         ///   Targeted by cache
@@ -1041,6 +1057,24 @@ namespace Questor.Modules.Caching
         {
             get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int) Group.Stargate).ToList()); }
         }
+        public EntityCache ClosestStargate
+        {
+            get { return _closeststargate ?? (_closeststargate = Entities.FirstOrDefault(e => e.GroupId == (int)Group.Stargate)); }
+        }
+
+        public EntityCache StargateByName (string locationName)
+        {
+            {
+                return _stargate ??
+                       (_stargate =
+                        Cache.Instance.EntitiesByName(locationName).FirstOrDefault(
+                            e => e.GroupId == (int) Group.Stargate));
+            }
+        }
+        public IEnumerable<EntityCache> BigObjects
+        {
+            get { return _bigobjects ?? (_bigobjects = Entities.Where(e => e.GroupId == (int)Group.LargeCollidableStructure || e.GroupId == (int)Group.Stargate || e.GroupId == (int)Group.SpawnContainer || e.GroupId == (int)Group.CargoContainer || e.GroupId == (int)Group.Wreck && e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList()); }
+        }
 
         public EntityCache Star
         {
@@ -1178,7 +1212,7 @@ namespace Questor.Modules.Caching
             return Entities.Where(e => e.Name == name).ToList();
         }
         /// <summary>
-        ///   Return entities by name
+        ///   Return entity by name
         /// </summary>
         /// <param name = "name"></param>
         /// <returns></returns>
@@ -1985,7 +2019,31 @@ namespace Questor.Modules.Caching
                         return false;
                     }
                 }
+                else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                {
+                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+
+                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    if (firstlootcontainer != null)
+                    {
+                        long lootContainerID = firstlootcontainer.ItemId;
+                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
+                        Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    }
                 else
+                    {
+                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
+                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
+                        if (firstothercontainer != null)
+                        {
+                            
+                            if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
+                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
+                            return false;
+                        }
+                    }
+                }
+                else //use local items hangar
                 {
                     Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
                     if (Cache.Instance.LootHangar == null)

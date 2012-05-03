@@ -440,29 +440,38 @@ namespace Questor
             //
             // Current Weapons Target
             //
-            if (Cache.Instance.MissionName != string.Empty & (TargetingCache.CurrentWeaponsTarget != null))
-            {
-                string newlblCombatTargettext = "[ " + TargetingCache.CurrentWeaponsTarget.Name + " ][" + TargetingCache.CurrentWeaponsTarget.Id + "][" + Math.Round(TargetingCache.CurrentWeaponsTarget.Distance / 1000, 0) + "k][" + TargetingCache.CurrentWeaponsTarget.Health + "TH][" + TargetingCache.CurrentWeaponsTarget.ShieldPct + "S%][" + Math.Round(TargetingCache.CurrentWeaponsTarget.ArmorPct, 0) + "A%][" + Math.Round(TargetingCache.CurrentWeaponsTarget.StructurePct, 0) + "H%][" + TargetingCache.CurrentWeaponsTarget.TargetValue.GetValueOrDefault(-1) + "value]";
-                if (CurrentWeaponsTargetData.Text != newlblCombatTargettext)
-                    CurrentWeaponsTargetData.Text = newlblCombatTargettext;
-            }
-            else
-            {
-                CurrentWeaponsTargetData.Text = "[ ]";
-            }
+            //if (Cache.Instance.MissionName != string.Empty & (TargetingCache.CurrentWeaponsTarget != null))
+            //{
+            //    string newlblCombatTargettext = "" +
+            //                                    "[ " + TargetingCache.CurrentWeaponsTarget.Name + " ][" 
+            //                                         + TargetingCache.CurrentWeaponsTarget.Id + "][" 
+            //                                         + Math.Round(TargetingCache.CurrentWeaponsTarget.Distance / 1000, 0) + "k][" 
+            //                                         + TargetingCache.CurrentWeaponsTarget.Health + "TH][" 
+            //                                         + TargetingCache.CurrentWeaponsTarget.ShieldPct + "S%][" 
+            //                                         + Math.Round(TargetingCache.CurrentWeaponsTarget.ArmorPct, 0) + "A%][" 
+            //                                         + Math.Round(TargetingCache.CurrentWeaponsTarget.StructurePct, 0) + "H%][" 
+            //                                         + TargetingCache.CurrentWeaponsTarget.TargetValue.GetValueOrDefault(-1) + "value]";
+            //
+            //    if (CurrentWeaponsTargetData.Text != newlblCombatTargettext)
+            //        CurrentWeaponsTargetData.Text = newlblCombatTargettext;
+            //}
+            //else
+            //{
+            //    CurrentWeaponsTargetData.Text = "[ ]";
+            //}
             //
             // Current Drones Target   
             //
-            if (Cache.Instance.MissionName != string.Empty && (TargetingCache.CurrentDronesTarget != null))
-            {
-                string newlblDroneTargettext = "[ " + TargetingCache.CurrentDronesTarget.Name + " ][" + TargetingCache.CurrentDronesTarget.Id + "][" + Math.Round(TargetingCache.CurrentDronesTarget.Distance / 1000, 0) + "k][" + TargetingCache.CurrentDronesTarget.Health + "TH][" + TargetingCache.CurrentDronesTarget.ShieldPct + "S%][" + Math.Round(TargetingCache.CurrentDronesTarget.ArmorPct, 0) + "A%][" + Math.Round(TargetingCache.CurrentDronesTarget.StructurePct, 0) + "H%][" + TargetingCache.CurrentDronesTarget.TargetValue.GetValueOrDefault(-1) + "value]";
-                if (CurrentDroneTargetData.Text != newlblDroneTargettext)
-                    CurrentDroneTargetData.Text = newlblDroneTargettext;
-            }
-            else
-            {
-                CurrentDroneTargetData.Text = "[ ]";
-            }
+            //if (Cache.Instance.MissionName != string.Empty && (TargetingCache.CurrentDronesTarget != null))
+            //{
+            //    string newlblDroneTargettext = "[ " + TargetingCache.CurrentDronesTarget.Name + " ][" + TargetingCache.CurrentDronesTarget.Id + "][" + Math.Round(TargetingCache.CurrentDronesTarget.Distance / 1000, 0) + "k][" + TargetingCache.CurrentDronesTarget.Health + "TH][" + TargetingCache.CurrentDronesTarget.ShieldPct + "S%][" + Math.Round(TargetingCache.CurrentDronesTarget.ArmorPct, 0) + "A%][" + Math.Round(TargetingCache.CurrentDronesTarget.StructurePct, 0) + "H%][" + TargetingCache.CurrentDronesTarget.TargetValue.GetValueOrDefault(-1) + "value]";
+            //    if (CurrentDroneTargetData.Text != newlblDroneTargettext)
+            //        CurrentDroneTargetData.Text = newlblDroneTargettext;
+            //}
+            //else
+            //{
+            //    CurrentDroneTargetData.Text = "[ ]";
+            //}
 
             //
             // Current Pocket Number   
