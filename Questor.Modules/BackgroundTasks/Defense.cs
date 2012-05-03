@@ -192,7 +192,7 @@ namespace Questor.Modules.BackgroundTasks
                 activate &= !module.IsActive;
 
                 // Should we deactivate the module?
-                bool deactivate = !Cache.Instance.IsApproachingOrOrbiting;
+                bool deactivate = !Cache.Instance.IsApproaching;
                 deactivate &= module.IsActive;
                 deactivate &= (!Cache.Instance.Entities.Any(e => e.IsAttacking) || !Settings.Instance.SpeedTank);
                 // !!!!!!!!!!!!!!!!!!!
