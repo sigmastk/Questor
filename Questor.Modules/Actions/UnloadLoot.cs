@@ -232,16 +232,16 @@ namespace Questor.Modules.Actions
                         break;
                     if (((Cache.Instance.ItemHangar != null) && Cache.Instance.ItemHangar.IsValid) && Cache.Instance.ItemHangar.IsReady)
                     {
-                        //Logging.Log("UnloadLoot: Item Hangar exists, waiting for it to  be valid and ready");
-                        //_nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        //if (Cache.Instance.ItemHangar.IsValid && Cache.Instance.ItemHangar.IsReady)
-                        //{
+                        Logging.Log("UnloadLoot: Item Hangar exists, waiting for it to  be valid and ready");
+                        _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                        if (Cache.Instance.ItemHangar.IsValid && Cache.Instance.ItemHangar.IsReady)
+                        {
                             _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                             _lastUnloadAction = DateTime.Now;
                             Logging.Log("UnloadLoot: Stacking items in Item Hangar: resuming in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " sec ]");
                             Cache.Instance.ItemHangar.StackAll();
                             _States.CurrentUnloadLootState = UnloadLootState.StackAmmoHangar;
-                        //}
+                        }
                     }            
                     break;
 
@@ -254,19 +254,20 @@ namespace Questor.Modules.Actions
                         // Stack everything
                     if (Cache.Instance.AmmoHangar != null)
                         {
-                        //Logging.Log("UnloadLoot: Ammo hangar defined, waiting for it to  be valid and ready");
-                        //Logging.Log("Cache.AmmoHangar.IsValid [ " + Cache.Instance.AmmoHangar.IsValid.ToString(CultureInfo.InvariantCulture) + " ]");
-                        //Logging.Log("Cache.AmmoHangar.IsReady [ " + Cache.Instance.AmmoHangar.IsReady.ToString(CultureInfo.InvariantCulture) + " ]");
+                        Logging.Log("UnloadLoot: Ammo hangar defined, waiting for it to  be ready");
+                        Logging.Log("Cache.Instance.AmmoHangar.Window.IsReady [ " +Cache.Instance.AmmoHangar.Window.IsReady.ToString(CultureInfo.InvariantCulture) + " ]");
+                        //Logging.Log("Cache.Instance.AmmoHangar.IsValid [ " + Cache.Instance.AmmoHangar.IsValid.ToString(CultureInfo.InvariantCulture) + " ]");
+                        //Logging.Log("Cache.Instance.AmmoHangar.IsReady [ " + Cache.Instance.AmmoHangar.IsReady.ToString(CultureInfo.InvariantCulture) + " ]");
                         
                         //_nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        //if (Cache.Instance.AmmoHangar.IsValid && Cache.Instance.AmmoHangar.IsReady)
-                        //{
+                        if (Cache.Instance.AmmoHangar.Window.IsReady)
+                        {
                             _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                             _lastUnloadAction = DateTime.Now;
                             Logging.Log("UnloadLoot: Stacking items in Ammo Hangar: resuming in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " sec ]");
-                            Cache.Instance.AmmoHangar.StackAll();
+                            Cache.Instance.StackAmmoHangar("UnloadLoot:");
                             _States.CurrentUnloadLootState = UnloadLootState.StackLootHangar;
-                        //}
+                        }
                         }
                     break;
 
@@ -279,39 +280,20 @@ namespace Questor.Modules.Actions
                     // Stack everything
                     if (Cache.Instance.LootHangar != null)
                         {
-                        //Logging.Log("UnloadLoot: Loot Hangar defined, waiting for it to  be valid and ready");
-                        //_nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        //if (Cache.Instance.LootHangar.IsValid && Cache.Instance.LootHangar.IsReady)
-                        //{
+                        Logging.Log("UnloadLoot: Loot Hangar defined, waiting for it to  be ready");
+                        Logging.Log("Cache.Instance.LootHangar.Window.IsReady [ " + Cache.Instance.LootHangar.Window.IsReady.ToString(CultureInfo.InvariantCulture) + " ]");
+                        //Logging.Log("Cache.Instance.LootHangar.IsValid [ " + Cache.Instance.LootHangar.IsValid.ToString(CultureInfo.InvariantCulture) + " ]");
+                        //Logging.Log("Cache.Instance.LootHangar.IsReady [ " + Cache.Instance.LootHangar.IsReady.ToString(CultureInfo.InvariantCulture) + " ]");
                             _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                            _lastUnloadAction = DateTime.Now;
-                            Logging.Log("UnloadLoot: Stacking items in Loot Hangar: resuming in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " sec ]");
-                            Cache.Instance.LootHangar.StackAll();
-                            _States.CurrentUnloadLootState = UnloadLootState.StackLootContainer;
-                        //}
-                        }
-                    break;
-
-                case UnloadLootState.StackLootContainer:
-                    if (Settings.Instance.LootContainer != string.Empty)
+                        if (Cache.Instance.LootHangar.Window.IsReady)
                     {
-                        // Don't stack until 5 seconds after the cargo has cleared
-                        if (DateTime.Now < _nextUnloadAction)
-                            break;
-
-                        // Stack everything
-                        if (Cache.Instance.LootContainer != null) 
-                        {
-                            //if (Cache.Instance.LootContainer.IsValid && Cache.Instance.LootContainer.IsReady)
-                            //{
                                 _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                                 _lastUnloadAction = DateTime.Now;
-                                Logging.Log("UnloadLoot: Stacking items in loot container: resuming in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " sec ]");
-                                Cache.Instance.LootContainer.StackAll();                            
-                            //}
+                            Logging.Log("UnloadLoot: Stacking items in Loot Hangar: resuming in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " sec ]");
+                            Cache.Instance.StackLootHangar("UnloadLoot:");
+                            _States.CurrentUnloadLootState = UnloadLootState.WaitForStacking;
                         }
                     }
-                    _States.CurrentUnloadLootState = UnloadLootState.WaitForStacking;
                     break;
 
                 case UnloadLootState.WaitForStacking:
