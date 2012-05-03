@@ -29,7 +29,7 @@ namespace Questor.Modules
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
-        public static Dictionary<long, DateTime> _openedContainers;
+        public Dictionary<long, DateTime> _openedContainers;
 
         public Salvage()
         {
@@ -56,6 +56,7 @@ namespace Questor.Modules
             double tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
             List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.Distance < tractorBeamRange).ToList();
 
+            int tractorsProcessedThisTick = 0;
 
             for (int i = tractorBeams.Count - 1; i >= 0; i--)
             {
@@ -69,8 +70,15 @@ namespace Questor.Modules
                 if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
                 {
                     tractorBeam.Click();
+                    tractorsProcessedThisTick++;
                     Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
-                    return;
+                    if (tractorsProcessedThisTick < 2)
+                        continue;
+                    else
+                    {
+                        tractorsProcessedThisTick = 0;
+                        return;
+                    }
                 }
                 // Remove the tractor beam as a possible beam to activate
                 tractorBeams.RemoveAt(i);
@@ -96,7 +104,7 @@ namespace Questor.Modules
 
                 Logging.Log("Salvage: Activating tractorbeam [" + tractorBeam.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
                 Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
-                return;
+                continue;
             }
         }
 
@@ -117,10 +125,10 @@ namespace Questor.Modules
 
             if (wrecks.Count == 0)
                 return;
-
+            int salvagersProcessedThisTick = 0;
             foreach (ModuleCache salvager in salvagers)
             {
-                if (salvager.IsActive || salvager.IsDeactivating || salvager.InLimboState || !salvager.IsActivatable)
+                if (salvager.IsActive || salvager.InLimboState)
                     continue;
 
                 // Spread the salvagers around
@@ -130,8 +138,15 @@ namespace Questor.Modules
 
                 Logging.Log("Salvage: Activating salvager [" + salvager.ItemId + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]");
                 salvager.Activate(wreck.Id);
+                salvagersProcessedThisTick++;
                 Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                if (salvagersProcessedThisTick < 2)
                 continue;
+                else
+                {
+                    salvagersProcessedThisTick = 0;
+                    return;
+                }
             }
         }
 
@@ -167,7 +182,7 @@ namespace Questor.Modules
                     Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] on the ignore list, ignoring.");
                     wreck.UnlockTarget();
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                    return;
+                    continue;
                 }
 
                 if(!Cache.Instance.SalvageAll)
@@ -177,7 +192,7 @@ namespace Questor.Modules
                         Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] within loot range,wreck is empty, or wreck is on our blacklist, unlocking container.");
                         wreck.UnlockTarget();
                         Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                        return;
+                        continue;
                     }
                 }
 
@@ -190,7 +205,7 @@ namespace Questor.Modules
                     Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] within loot range, unlocking container.");
                     wreck.UnlockTarget();
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                    return;
+                    continue;
                 }
             }
 
@@ -206,6 +221,7 @@ namespace Questor.Modules
             if (tractorBeams.Count > 0)
                 tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
 
+            int wrecksProcessedThisTick = 0;
             IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
             foreach (EntityCache wreck in wrecks.Where(w => !Cache.Instance.IgnoreTargets.Contains(w.Name.Trim())))
             {
@@ -251,6 +267,7 @@ namespace Questor.Modules
 
                 wreck.LockTarget();
                 wreckTargets.Add(wreck);
+                wrecksProcessedThisTick++;
                 //_nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_miliseconds);
                 if(Cache.Instance.MissionLoot)
                 {
@@ -269,6 +286,8 @@ namespace Questor.Modules
         /// </summary>
         private void LootWrecks()
         {
+            bool debugLootWrecks = false;
+
             if (Cache.Instance.NextLootAction > DateTime.Now) return;
 
             if (!Cache.Instance.OpenCargoHold("Salvage")) return;
@@ -300,7 +319,22 @@ namespace Questor.Modules
                 // Does it no longer exist or is it out of transfer range or its looted
                 if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
                 {
+                    if (debugLootWrecks)
+                    {
+                        if (containerEntity != null && containerEntity.Distance > (int) Distance.SafeScoopRange)
+                            Logging.Log("Salvage: Closing loot window [" + window.ItemId +
+                                        "] container out of scoop range");
+                        if (containerEntity != null && Cache.Instance.LootedContainers.Contains(containerEntity.Id))
+                            Logging.Log("Salvage: Closing loot window [" + window.ItemId +
+                                        "] container already is list of LootedContainers");
+                        if (containerEntity == null)
+                            Logging.Log("Salvage: Closing loot window [" + window.ItemId +
+                                        "] the container no longer exists: containerEntity is null");
+                    }
+                    else if (!debugLootWrecks)
+                    {
                    Logging.Log("Salvage: Closing loot window [" + window.ItemId + "]");
+                    }
                    window.Close();
                    continue;
                 }
@@ -464,7 +498,10 @@ namespace Questor.Modules
                 // We already opened the loot window
                 DirectContainerWindow window = lootWindows.FirstOrDefault(w => w.ItemId == containerEntity.Id);
                 if (window != null)
+                {
+                   if (debugLootWrecks) Logging.Log("Salvage.LootWrecks: We have already looted [" + containerEntity.Id + "]");
                     continue;
+                }
 
                 // Ignore open request within 10 seconds
                 if (_openedContainers.ContainsKey(containerEntity.Id) && DateTime.Now.Subtract(_openedContainers[containerEntity.Id]).TotalSeconds < 10)
@@ -472,7 +509,10 @@ namespace Questor.Modules
 
                 // Don't even try to open a wreck if you are speed tanking and you aren't processing a loot action
                 if (Settings.Instance.SpeedTank && Cache.Instance.OpenWrecks == false)
+                {
+                   if (debugLootWrecks) Logging.Log("Salvage.LootWrecks: SpeedTank is true and OpenWrecks is false [" + containerEntity.Id + "]");
                     continue;
+                }
 
                 // Don't even try to open a wreck if you are specified LootEverything as false and you aren't processing a loot action
                 //      this is currently commented out as it would keep golems and other non-speed tanked ships from looting the field as they cleared
