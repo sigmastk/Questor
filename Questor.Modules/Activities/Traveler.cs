@@ -126,7 +126,7 @@ namespace Questor.Modules.Activities
 
                 // Warp to, approach or jump the stargate
                 EntityCache entity = entities.First();
-                if (entity.Distance < (int)Distance.DecloakRange)
+                if (entity.Distance < (int)Distance.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
                 {
                     Logging.Log("Traveler: Jumping to [" + locationName + "]", Logging.green);
                     entity.Jump();
@@ -164,6 +164,9 @@ namespace Questor.Modules.Activities
                     break;
 
                 case TravelerState.Traveling:
+                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway. 
+                        return;
+
                     if (Destination == null)
                     {
                         _States.CurrentTravelerState = TravelerState.Error;
