@@ -394,6 +394,17 @@ namespace Questor.Behaviors
                         if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Idle) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
                         break;
                     }
+                    else
+                    {
+                        _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                        _States.CurrentArmState = ArmState.Idle;
+                        _States.CurrentDroneState = DroneState.Idle;
+                        _States.CurrentSalvageState = SalvageState.Idle;
+                        _States.CurrentStorylineState = StorylineState.Idle;
+                        _States.CurrentTravelerState = TravelerState.Idle; 
+                        _States.CurrentUnloadLootState = UnloadLootState.Idle;
+                        _States.CurrentTravelerState = TravelerState.Idle;
+                    }
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                     if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
