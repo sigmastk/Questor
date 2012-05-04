@@ -72,7 +72,7 @@ namespace Questor.Modules.Activities
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": StartOrbiting: Target in range");
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
-                            Logging.Log("We are not approaching nor orbiting");
+                            Logging.Log("CombatMissionCtrl.NavigateIntoRange: We are not approaching nor orbiting");
                             var orbitStructure = true;
                             var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
 
@@ -156,7 +156,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMission." + _pocketActions[_currentAction] + ": StartOrbiting: Target in range");
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
-                            Logging.Log("We are not approaching nor orbiting");
+                            Logging.Log("CombatMissionCtrl.NavigateToObject: We are not approaching nor orbiting");
                             var orbitStructure = true;
                             var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
 
@@ -784,6 +784,12 @@ namespace Questor.Modules.Activities
                 closest = targets.OrderByDescending(t => t.Distance).First();
 
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
+            if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == closest.Id))
+            {
+               //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+               Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + closest.Name + "][ID: " + closest.Id + "] as a priority target");
+               Cache.Instance.AddPriorityTargets(new[] { closest }, Priority.PriorityKillTarget);
+            }
         }
 
         private void KillAction(Actions.Action action)
@@ -867,6 +873,12 @@ namespace Questor.Modules.Activities
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
                     //panic handles adding any priority targets and combat will prefer to kill any priority targets
+                   if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
+                   {
+                      //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                      Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
+                      Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
+                   }
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]");
@@ -951,7 +963,12 @@ namespace Questor.Modules.Activities
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
                     //panic handles adding any priority targets and combat will prefer to kill any priority targets
-
+                   if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
+                   {
+                      //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                      Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
+                      Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
+                   }
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
                     {
                         if (!(target.IsTarget || target.IsTargeting)) //This target is not targeted and need to target it
