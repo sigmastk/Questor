@@ -24,12 +24,14 @@ namespace Questor.Modules.Lookup
             DamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)ammo.Attribute("damageType"));
             Range = (int)ammo.Attribute("range");
             Quantity = (int)ammo.Attribute("quantity");
+            Description = (string)ammo.Attribute("description") ?? (string)ammo.Attribute("typeId");
         }
 
         public int TypeId { get; private set; }
         public DamageType DamageType { get; private set; }
         public int Range { get; private set; }
         public int Quantity { get; set; }
+        public string Description { get; set; }
 
         public Ammo Clone()
         {
@@ -38,6 +40,7 @@ namespace Questor.Modules.Lookup
             ammo.DamageType = DamageType;
             ammo.Range = Range;
             ammo.Quantity = Quantity;
+            ammo.Description = Description;
             return ammo;
         }
     }

@@ -502,7 +502,7 @@ namespace Questor.Modules.Actions
                         if (ammo == null)
                             continue;
 
-                        Logging.Log("Arm: Moving Ammo [" + item.TypeName + "] to CargoHold");
+                        Logging.Log("Arm: Moving Ammo  [" + item.TypeName + "] from [" + Cache.Instance.AmmoHangar.Window.Name + "] to CargoHold");
 
                         int moveQuantity = Math.Min(item.Quantity, ammo.Quantity);
                         moveQuantity = Math.Max(moveQuantity, 1);
@@ -530,7 +530,7 @@ namespace Questor.Modules.Actions
                         if (AmmoToLoad.Count > 0)
                             foreach (Ammo ammo in AmmoToLoad)
                             {
-                                Logging.Log("Arm: Missing ammo with TypeId [" + ammo.TypeId + "]");
+                                Logging.Log("Arm: Missing ammo [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]");
                             }
 
                         if (!_missionItemMoved)
