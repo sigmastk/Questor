@@ -950,6 +950,7 @@
   <invtype id="2063" name="Planet (Plasma)" groupid="7" baseprice="0" volume="1" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:42.0614-05:00" />
   <invtype id="2064" name="EVE Gate" groupid="995" baseprice="0" volume="1" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:42.0614-05:00" />
   <invtype id="2073" name="Micro Organisms" groupid="1035" baseprice="0" volume="0.01" capacity="0" portionsize="1" mediansell="1.96" medianall="1.00" lastupdate="2012-03-12T01:00:42.0614-05:00" />
+  <invtype id="2076" name="Gate Key" groupid="474" baseprice="0" volume="5" capacity="0" portionsize="1" medianbuy="500000.00" mediansell="500000.00" medianall="500000.00" lastupdate="2012-03-12T01:00:42.9184-05:00" />
   <invtype id="2078" name="Zephyr" groupid="1022" baseprice="5000" volume="5000" capacity="10" portionsize="1" medianbuy="7911111.11" mediansell="34990000.00" medianall="18272997.50" lastupdate="2012-03-12T01:00:42.9184-05:00" />
   <invtype id="2083" name="Protoinvtype Iris Probe Launcher" groupid="481" baseprice="2" volume="5" capacity="0.8" portionsize="1" lastupdate="2012-03-12T01:00:42.9184-05:00" />
   <invtype id="2096" name="Caldari Supercarrier Wreckage" groupid="226" baseprice="0" volume="0" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:42.9184-05:00" />
