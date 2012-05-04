@@ -1,5 +1,4 @@
-﻿#define manual
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -8,6 +7,8 @@
 //    http://www.thehackerwithin.com/license.htm)
 //  </copyright>
 //-------------------------------------------------------------------------------
+
+#define manual
 
 namespace ValueDump
 {

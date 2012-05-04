@@ -317,7 +317,7 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private void LootWrecks()
         {
-            bool debugLootWrecks = true;
+            bool debugLootWrecks = false;
 
             if (Cache.Instance.NextLootAction > DateTime.Now) return;
 
@@ -405,8 +405,8 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
 
                     // Do we want to loot other items?
-                    //if (!isMissionItem && !LootEverything)
-                    //    continue;
+                    if (!isMissionItem && !LootEverything)
+                        continue;
 
                     // Do not pick up items that cannot enter in a freighter container (unless its the mission item)
                     // Note: some mission items that are alive have been allowed to be 
@@ -534,7 +534,7 @@ namespace Questor.Modules.BackgroundTasks
                    continue;
                 }
 
-               // Ignore open request within 10 seconds
+                // Ignore open request within 10 seconds
                 if (_openedContainers.ContainsKey(containerEntity.Id) && DateTime.Now.Subtract(_openedContainers[containerEntity.Id]).TotalSeconds < 10)
                     continue;
 
@@ -545,11 +545,11 @@ namespace Questor.Modules.BackgroundTasks
                    continue;
                 }
 
-               // Don't even try to open a wreck if you are specified LootEverything as false and you aren't processing a loot action
+                // Don't even try to open a wreck if you are specified LootEverything as false and you aren't processing a loot action
                 //      this is currently commented out as it would keep golems and other non-speed tanked ships from looting the field as they cleared
                 //      missions, but NOT stick around after killing things to clear it ALL. Looteverything==false does NOT mean loot nothing
-                //if (Settings.Instance.LootEverything == false && Cache.Instance.OpenWrecks == false)
-                //    continue;
+                if (Settings.Instance.LootEverything == false && Cache.Instance.OpenWrecks == false)
+                    continue;
 
                 // Open the container
                 Logging.Log("Salvage: Opening container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "]");
@@ -562,10 +562,6 @@ namespace Questor.Modules.BackgroundTasks
 
         public void ProcessState()
         {
-            //Salvage State should only run every x seconds
-            //if (_nextSalvageAction > DateTime.Now)
-            //    return;
-
             // Nothing to salvage in stations
             if (Cache.Instance.InStation)
             {
