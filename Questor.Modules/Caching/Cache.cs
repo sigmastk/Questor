@@ -1018,7 +1018,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                Logging.Log(DirectEve.ActiveShip.Entity.Mode.ToString(CultureInfo.InvariantCulture));
+                //Logging.Log("Cache.IsApproaching: " + DirectEve.ActiveShip.Entity.Mode.ToString(CultureInfo.InvariantCulture));
                 return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1;
             }
         }
