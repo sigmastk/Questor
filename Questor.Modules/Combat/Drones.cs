@@ -310,12 +310,12 @@ namespace Questor.Modules.Combat
                             Recall = true;
                         }
 
-                        if (!Recall & (Cache.Instance.IsMissionPocketDone))
+                        if (!Recall & (Cache.Instance.IsMissionPocketDone) && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                         {
                             Logging.Log("Drones: Recalling drones because we are done with this pocket.");
                             Recall = true;
                         }
-                        else if ((!Recall & _shieldPctTotal > GetShieldPctTotal()))
+                        else if ((!Recall & _shieldPctTotal > GetShieldPctTotal() && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe)))
                         {
                             Logging.Log("Drones: Recalling drones because drones have lost some shields! [Old: " +
                                         _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") +
@@ -358,21 +358,21 @@ namespace Questor.Modules.Combat
                                 lowCapWarning = Settings.Instance.DroneRecallCapacitorPct;
                             }
 
-                            if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning)
+                            if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                             {
                                 Logging.Log("Drones: Recalling drones due to shield [" +
                                             Cache.Instance.DirectEve.ActiveShip.ShieldPercentage + "%] below [" +
                                             lowShieldWarning + "%] minimum");
                                 Recall = true;
                             }
-                            else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning)
+                            else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                             {
                                 Logging.Log("Drones: Recalling drones due to armor [" +
                                             Cache.Instance.DirectEve.ActiveShip.ArmorPercentage + "%] below [" +
                                             lowArmorWarning + "%] minimum");
                                 Recall = true;
                             }
-                            else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning)
+                            else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                             {
                                 Logging.Log("Drones: Recalling drones due to capacitor [" +
                                             Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "%] below [" +
