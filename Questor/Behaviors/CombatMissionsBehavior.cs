@@ -244,7 +244,7 @@ namespace Questor.Behaviors
                 {
                     Cache.Instance.BigObjects.FirstOrDefault().Orbit((int)Distance.SafeDistancefromStructure);
                     Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState + ": initiating Orbit of [" + Cache.Instance.BigObjects.FirstOrDefault().Name +
-                                "] orbiting at [" + Cache.Instance.OrbitDistance + "]");
+                                "] orbiting at [" + Distance.SafeDistancefromStructure + "]");
                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
                 }
                 return; //we are still too close, do not continue through the rest until we are not "too close" anymore
@@ -370,7 +370,7 @@ namespace Questor.Behaviors
                         if (Cache.Instance.ExitWhenIdle && !Settings.Instance.AutoStart)
                         {
                             Cache.Instance.ReasonToStopQuestor = "Settings: ExitWhenIdle is true, and we are idle... exiting";
-                            Logging.Log(Cache.Instance.ReasonToStopQuestor);
+                            Logging.Log("ReasonToStopQuestor" + Cache.Instance.ReasonToStopQuestor);
                             Settings.Instance.AutoStart = false;
                             Cache.Instance.CloseQuestorCMDLogoff = false;
                             Cache.Instance.CloseQuestorCMDExitGame = true;
