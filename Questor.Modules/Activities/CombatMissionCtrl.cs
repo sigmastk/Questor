@@ -400,9 +400,7 @@ namespace Questor.Modules.Activities
             if (!int.TryParse(action.GetParameterValue("priority"), out priority))
                 priority = (int)range;
 
-            // Add any warp scramblers to the priority list
-            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), Priority.WarpScrambler);
-
+            //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
             // Is there a priority target out of range?
             EntityCache target = Cache.Instance.PriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
@@ -424,11 +422,7 @@ namespace Questor.Modules.Activities
                 // Lock target if within weapons range
                 if (target.Distance < range)
                 {
-                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
-                    {
-                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
-                        Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
-                    }
+                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         Combat.ReloadAll();
@@ -512,11 +506,7 @@ namespace Questor.Modules.Activities
                 // Lock priority target if within weapons range
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
-                    {
-                        Logging.Log("CombatMission." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
-                        Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
-                    }
+                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
                     {
                         if (target.IsTarget || target.IsTargeting) //This target is already targeted no need to target it again
@@ -793,11 +783,7 @@ namespace Questor.Modules.Activities
             if (nottheclosest)
                 closest = targets.OrderByDescending(t => t.Distance).First();
 
-            if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == closest.Id))
-            {
-                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away] as a priority target");
-                Cache.Instance.AddPriorityTargets(new[] { closest }, Priority.PriorityKillTarget);
-            }
+            //panic handles adding any priority targets and combat will prefer to kill any priority targets
         }
 
         private void KillAction(Actions.Action action)
@@ -880,11 +866,7 @@ namespace Questor.Modules.Activities
 
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
-                    {
-                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
-                        Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
-                    }
+                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]");
@@ -968,11 +950,7 @@ namespace Questor.Modules.Activities
 
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.Id == target.Id))
-                    {
-                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": Adding [" + target.Name + "][ID: " + target.Id + "] as a priority target");
-                        Cache.Instance.AddPriorityTargets(new[] { target }, Priority.PriorityKillTarget);
-                    }
+                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
                     {

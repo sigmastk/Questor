@@ -664,8 +664,8 @@ namespace Questor.Modules.Combat
                     Logging.Log("Combat: Targeting priority target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]");
                     entity.LockTarget();
                     highValueTargets.Add(entity);
-                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
-                    return;
+                    //Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    continue;
                 }
             }
 
