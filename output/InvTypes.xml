@@ -1560,7 +1560,8 @@
   <invtype id="2890" name="200mm AutoCannon II Blueprint" groupid="135" baseprice="9999999" volume="0.01" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:50.1144-05:00" />
   <invtype id="2897" name="220mm Vulcan AutoCannon II" groupid="55" baseprice="305136" volume="10" capacity="2" portionsize="1" medianbuy="1221125.41" mediansell="1396900.00" medianall="1289990.00" lastupdate="2012-03-12T01:00:50.1144-05:00" />
   <invtype id="2898" name="220mm Vulcan AutoCannon II Blueprint" groupid="135" baseprice="9999999" volume="0.01" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:50.1144-05:00" />
-  <invtype id="2899" name="Custom Circuitry" groupid="314" baseprice="8000000" volume="0.1" capacity="0" portionsize="1" lastupdate="0001-01-01T00:00:00" />
+  <invtype id="2899" name="Custom Circuitry" groupid="314" baseprice="8000000" volume="0.1" capacity="0" portionsize="1" medianbuy="5000.00" mediansell="5000.00" medianall="5000.00" lastupdate="0001-01-01T00:00:00" />
+  <invtype id="2900" name="Recovered Data Core" groupid="314" baseprice="5000" volume="1" capacity="0" portionsize="1" medianbuy="5000.00" mediansell="5000.00" medianall="5000.00" lastupdate="2012-03-12T01:00:50.1144-05:00" />
   <invtype id="2905" name="250mm Light Artillery Cannon II" groupid="55" baseprice="132664" volume="5" capacity="0.1" portionsize="1" medianbuy="726000.37" mediansell="919999.98" medianall="798993.44" lastupdate="2012-03-12T01:00:50.1144-05:00" />
   <invtype id="2906" name="250mm Light Artillery Cannon II Blueprint" groupid="135" baseprice="9999999" volume="0.01" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:50.1144-05:00" />
   <invtype id="2913" name="425mm AutoCannon II" groupid="55" baseprice="373210" volume="10" capacity="1.5" portionsize="1" medianbuy="1470000.01" mediansell="1572566.13" medianall="1572089.98" lastupdate="2012-03-12T01:00:50.1144-05:00" />
