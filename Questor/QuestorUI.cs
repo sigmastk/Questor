@@ -550,17 +550,6 @@ namespace Questor
             Cache.Instance.DamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
         }
         
-        //private void MainBehaviorStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    if (_States.CurrentQuestorState != null && _States.CurrentQuestorState != QuestorState.Idle)
-        //    {
-        //        if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-        //        {
-        //           _States.CurrentCombatMissionBehaviorState = (CombatMissionsBehaviorState)Enum.Parse(typeof (CombatMissionsBehaviorState), MainBehaviorComboBox.Text);
-        //        }
-        //    }
-        //}
-
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)
         {
             Cache.Instance.Paused = PauseCheckBox.Checked;
@@ -700,6 +689,26 @@ namespace Questor
             _States.CurrentStorylineState = (StorylineState)Enum.Parse(typeof(StorylineState), StorylineStateComboBox.Text);
         }
         
+        private void ArmStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentArmState = (ArmState)Enum.Parse(typeof(ArmState), ArmStateComboBox.Text);
+        }
+
+        private void UnloadStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentUnloadLootState = (UnloadLootState)Enum.Parse(typeof(UnloadLootState), UnloadStateComboBox.Text);
+        }
+
+        private void TravelerStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentTravelerState = (TravelerState)Enum.Parse(typeof(TravelerState), TravelerStateComboBox.Text);
+        }
+
+        private void AgentInteractionStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentAgentInteractionState = (AgentInteractionState)Enum.Parse(typeof(AgentInteractionState), AgentInteractionStateComboBox.Text);
+        }
+
         private void TxtExtConsoleTextChanged(object sender, EventArgs e)
         {
 

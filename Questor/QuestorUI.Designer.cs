@@ -399,6 +399,7 @@
             this.SalvageStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.SalvageStateComboBox.TabIndex = 161;
             this.SalvageStateComboBox.SelectedIndexChanged += new System.EventHandler(this.SalvageStateComboBoxSelectedIndexChanged);
+            this.SalvageStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label10
             // 
@@ -418,6 +419,7 @@
             this.LocalWatchStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.LocalWatchStateComboBox.TabIndex = 159;
             this.LocalWatchStateComboBox.SelectedIndexChanged += new System.EventHandler(this.LocalWatchStateComboBoxSelectedIndexChanged);
+            this.LocalWatchStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label9
             // 
@@ -437,6 +439,7 @@
             this.CleanupStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.CleanupStateComboBox.TabIndex = 157;
             this.CleanupStateComboBox.SelectedIndexChanged += new System.EventHandler(this.CleanupStateComboBoxSelectedIndexChanged);
+            this.CleanupStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label8
             // 
@@ -456,6 +459,7 @@
             this.DronesStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.DronesStateComboBox.TabIndex = 155;
             this.DronesStateComboBox.SelectedIndexChanged += new System.EventHandler(this.DronesStateComboBoxSelectedIndexChanged);
+            this.DronesStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // CombatStateComboBox
             // 
@@ -466,6 +470,7 @@
             this.CombatStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.CombatStateComboBox.TabIndex = 154;
             this.CombatStateComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatStateComboBoxSelectedIndexChanged);
+            this.CombatStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // PanicStateComboBox
             // 
@@ -476,6 +481,7 @@
             this.PanicStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.PanicStateComboBox.TabIndex = 153;
             this.PanicStateComboBox.SelectedIndexChanged += new System.EventHandler(this.PanicStateComboBoxSelectedIndexChanged);
+            this.PanicStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // panel1
             // 
@@ -514,6 +520,8 @@
             this.AgentInteractionStateComboBox.Name = "AgentInteractionStateComboBox";
             this.AgentInteractionStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.AgentInteractionStateComboBox.TabIndex = 167;
+            this.AgentInteractionStateComboBox.SelectedIndexChanged += new System.EventHandler(this.AgentInteractionStateComboBoxSelectedIndexChanged);
+            this.AgentInteractionStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // TravelerStateComboBox
             // 
@@ -523,6 +531,8 @@
             this.TravelerStateComboBox.Name = "TravelerStateComboBox";
             this.TravelerStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.TravelerStateComboBox.TabIndex = 166;
+            this.TravelerStateComboBox.SelectedIndexChanged += new System.EventHandler(this.TravelerStateComboBoxSelectedIndexChanged);
+            this.TravelerStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label17
             // 
@@ -541,6 +551,8 @@
             this.UnloadStateComboBox.Name = "UnloadStateComboBox";
             this.UnloadStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.UnloadStateComboBox.TabIndex = 164;
+            this.UnloadStateComboBox.SelectedIndexChanged += new System.EventHandler(this.UnloadStateComboBoxSelectedIndexChanged);
+            this.UnloadStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // ArmStateComboBox
             // 
@@ -550,6 +562,8 @@
             this.ArmStateComboBox.Name = "ArmStateComboBox";
             this.ArmStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.ArmStateComboBox.TabIndex = 163;
+            this.ArmStateComboBox.SelectedIndexChanged += new System.EventHandler(this.ArmStateComboBoxSelectedIndexChanged);
+            this.ArmStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // StorylineStateComboBox
             // 
@@ -560,6 +574,7 @@
             this.StorylineStateComboBox.Size = new System.Drawing.Size(130, 21);
             this.StorylineStateComboBox.TabIndex = 162;
             this.StorylineStateComboBox.SelectedIndexChanged += new System.EventHandler(this.StorylineStateComboBoxSelectedIndexChanged);
+            this.StorylineStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // CombatMissionCtrlStateComboBox
             // 
@@ -775,6 +790,7 @@
             this.QuestorStateComboBox.Size = new System.Drawing.Size(170, 21);
             this.QuestorStateComboBox.TabIndex = 119;
             this.QuestorStateComboBox.SelectedIndexChanged += new System.EventHandler(this.QuestorStateComboBoxSelectedIndexChanged);
+            this.QuestorStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // QuestorStatelbl
             // 
@@ -874,7 +890,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.ClientSize = new System.Drawing.Size(699, 403);
+            this.ClientSize = new System.Drawing.Size(356, 96);
             this.Controls.Add(this.buttonQuestormanager);
             this.Controls.Add(this.buttonOpenSchedulesXML);
             this.Controls.Add(this.buttonOpenCharacterXML);
