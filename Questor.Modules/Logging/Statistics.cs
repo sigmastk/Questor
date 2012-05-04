@@ -164,7 +164,7 @@ namespace Questor.Modules.Logging
                  File.AppendAllText(Settings.Instance.SessionsLogFile, line);
 
                  Cache.Instance.SessionState = "";
-                 Logging.Log("Statistics: Writing session data to [ " + Settings.Instance.SessionsLogFile);
+                 Logging.Log("Statistics: Writing session data to [ " + Settings.Instance.SessionsLogFile + " ]");
               }
            }
         }

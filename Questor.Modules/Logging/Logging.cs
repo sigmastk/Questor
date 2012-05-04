@@ -39,8 +39,8 @@ namespace Questor.Modules.Logging
         //public  void Log(string line)
         public static void Log(string line, string color = Logging.white)
         {
-            //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, color + line));
-            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
+            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, color + line));
+            //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
             Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line + "\r\n");
             Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line + "\r\n");
             if (Settings.Instance.SaveConsoleLog)
