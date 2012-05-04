@@ -1,19 +1,20 @@
-﻿using System;
+﻿
+namespace Questor.Storylines
+{
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DirectEve;
-using Questor.Behaviors;
-using Questor.Modules.Actions;
-using Questor.Modules.Activities;
-using Questor.Modules.BackgroundTasks;
-using Questor.Modules.Caching;
-using Questor.Modules.Combat;
-using Questor.Modules.Logging;
-using Questor.Modules.Lookup;
-using Questor.Modules.States;
+    using global::Questor.Behaviors;
+    using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Activities;
+    using global::Questor.Modules.BackgroundTasks;
+    using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
+    using global::Questor.Modules.Logging;
+    using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.States;
 
-namespace Questor.Storylines
-{
     public class GenericCombatStoryline : IStoryline
     {
 
@@ -244,6 +245,11 @@ namespace Questor.Storylines
 
                 case GenericCombatStorylineState.GotoMission:
                     var missionDestination = _traveler.Destination as MissionBookmarkDestination;
+                    //
+                    // if we have no destination yet... OR if missionDestination.AgentId != storyline.CurrentStorylineAgentId
+                    //
+                    //if (missionDestination != null) Logging.Log("GenericCombatStoryline: missionDestination.AgentId [" + missionDestination.AgentId + "] " + "and storyline.CurrentStorylineAgentId [" + storyline.CurrentStorylineAgentId + "]");
+                    //if (missionDestination == null) Logging.Log("GenericCombatStoryline: missionDestination.AgentId [ NULL ] " + "and storyline.CurrentStorylineAgentId [" + storyline.CurrentStorylineAgentId + "]");
                     if (missionDestination == null || missionDestination.AgentId != storyline.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
                     {
                         const string nameOfBookmark = "Encounter";

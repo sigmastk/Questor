@@ -161,7 +161,6 @@ namespace Questor.Storylines
 
         private void BringSpoilsOfWar()
         {
-            DirectEve directEve = Cache.Instance.DirectEve;
             if (_nextAction > DateTime.Now)
                 return;
 
@@ -208,18 +207,23 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.Arm:
+                    //Logging.Log("Storyline: Arm");
                     _States.CurrentStorylineState = _storyline.Arm(this);
                     break;
 
                 case StorylineState.GotoAgent:
+                    //Logging.Log("Storyline: GotoAgent");
                     GotoAgent(StorylineState.PreAcceptMission);
                     break;
 
                 case StorylineState.PreAcceptMission:
+                    //Logging.Log("Storyline: PreAcceptMission-!!");
+                    _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                     _States.CurrentStorylineState = _storyline.PreAcceptMission(this);
                     break;
 
                 case StorylineState.AcceptMission:
+                    //Logging.Log("Storyline: AcceptMission!!-");
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
                         Logging.Log("AgentInteraction: Start conversation [Start Mission]");
