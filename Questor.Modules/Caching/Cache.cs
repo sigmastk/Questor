@@ -410,17 +410,17 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextOpenDroneBayAction;
+        private DateTime _nextDroneBayAction;
 
-        public DateTime NextOpenDroneBayAction
+        public DateTime NextDroneBayAction
         {
             get
             {
-                return _nextOpenDroneBayAction;
+                return _nextDroneBayAction;
             }
             set
             {
-                _nextOpenDroneBayAction = value;
+                _nextDroneBayAction = value;
                 _lastAction = DateTime.Now;
             }
         }
@@ -1259,11 +1259,19 @@ namespace Questor.Modules.Caching
             // Get the missions
             DirectAgentMission missionforbookmarkinfo = GetAgentMission(agentId);
             if (missionforbookmarkinfo == null)
+            {
+                Logging.Log("Cache.DirectAgentMissionBookmark: missionforbookmarkinfo [null] <---bad  parameters passed to us:  agentid [" + agentId + "] startswith [" + startsWith + "]");
                 return null;
+            }
 
             // Did we accept this mission?
             if (missionforbookmarkinfo.State != (int) MissionState.Accepted || missionforbookmarkinfo.AgentId != agentId)
+            {
+                //Logging.Log("missionforbookmarkinfo.State: [" + missionforbookmarkinfo.State.ToString(CultureInfo.InvariantCulture) + "]");
+                //Logging.Log("missionforbookmarkinfo.AgentId: [" + missionforbookmarkinfo.AgentId.ToString(CultureInfo.InvariantCulture) + "]");
+                //Logging.Log("agentId: [" + agentId.ToString(CultureInfo.InvariantCulture) + "]");
                 return null;
+            }
 
             return missionforbookmarkinfo.Bookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));
         }
@@ -1726,6 +1734,100 @@ namespace Questor.Modules.Caching
             return false;
         }
 
+        public bool OpenItemsHangarAsLootHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
+
+                if (Cache.Instance.LootHangar == null)
+                    return false;
+
+                // Is the items hangar open?
+                if (Cache.Instance.LootHangar.Window == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                    Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
+                    Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                "sec]");
+                    return false;
+                }
+                if (!Cache.Instance.LootHangar.IsReady)
+                    return false;
+                if (Cache.Instance.LootHangar.IsReady)
+                    return true;
+            }
+            return false;
+        }
+        
+        public bool OpenItemsHangarAsAmmoHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
+
+                if (Cache.Instance.AmmoHangar == null)
+                    return false;
+
+                // Is the items hangar open?
+                if (Cache.Instance.AmmoHangar.Window == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                    Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
+                    Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                "sec]");
+                    return false;
+                }
+                if (!Cache.Instance.AmmoHangar.IsReady)
+                    return false;
+                if (Cache.Instance.AmmoHangar.IsReady)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool StackItemsHangarAsLootHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
+                Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3,5));
+                Logging.Log(module + ": Stacking Item Hangar: waiting [" +
+                            Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                            "sec]");
+                Cache.Instance.LootHangar.StackAll();
+                return true;
+            }
+            return false;
+        }
+
+        public bool StackItemsHangarAsAmmoHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenItemHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!Cache.Instance.OpenItemsHangarAsAmmoHangar("Cache.StackItemsHangar")) return false;
+                Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                Logging.Log(module + ": Stacking Item Hangar: waiting [" +
+                            Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                            "sec]");
+                Cache.Instance.AmmoHangar.StackAll();
+                return true;
+            }
+            return false;
+        }
+        
         public DirectContainer CargoHold { get; set; }
 
         public bool OpenCargoHold(String module)
@@ -1735,7 +1837,7 @@ namespace Questor.Modules.Caching
                 if (DateTime.Now.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
                 {
                     Logging.Log(module + ": Opening CargoHold: waiting [" +
-                                Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
                                 "sec]");
                 }
                 return false;
@@ -1763,6 +1865,19 @@ namespace Questor.Modules.Caching
                     return true;
             }
             return false;
+        }
+
+        public bool StackCargoHold(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
+                    return false;
+           
+            if (!Cache.Instance.OpenCargoHold("Cache.StackCargoHold")) return false;
+            Logging.Log(module + ": Stacking CargoHold: waiting [" +
+                        Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                        "sec]");
+            Cache.Instance.CargoHold.StackAll();
+            return true;
         }
 
         public DirectContainer ShipHangar { get; set; }
@@ -1799,7 +1914,25 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public DirectContainer CorpAmmoHangar { get; set; }
+        public bool StackShipsHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenShipHangarAction)
+                return false;
+
+            if (Cache.Instance.InStation)
+            {
+                if (!Cache.Instance.OpenShipsHangar("Cache.StackShipsHangar")) return false;
+                Cache.Instance.NextOpenShipHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                Logging.Log(module + ": Stacking Ship Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenShipHangarAction.Subtract(DateTime.Now).TotalSeconds,
+                                           0) + "sec]");
+                Cache.Instance.ShipHangar.StackAll();
+                return true;    
+            }
+            return false;
+        }
+        
+        //public DirectContainer CorpAmmoHangar { get; set; }
 
         public bool OpenCorpAmmoHangar(String module)
         {
@@ -1809,12 +1942,12 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
-                    Cache.Instance.CorpAmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
+                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
                                                     
                     // Is the corp ammo Hangar open?
-                    if (Cache.Instance.CorpAmmoHangar != null)
+                    if (Cache.Instance.AmmoHangar != null)
                     {
-                        if (Cache.Instance.CorpAmmoHangar.Window == null)
+                        if (Cache.Instance.AmmoHangar.Window == null)
                         {
                             // No, command it to open
                             Cache.Instance.DirectEve.OpenCorporationHangar();
@@ -1824,12 +1957,12 @@ namespace Questor.Modules.Caching
                                         Math.Round(Cache.Instance.NextOpenCorpAmmoHangarAction.Subtract(DateTime.Now).TotalSeconds,0) + "sec]");
                             return false;
                         }
-                        if (!Cache.Instance.CorpAmmoHangar.IsReady)
+                        if (!Cache.Instance.AmmoHangar.IsReady)
                             return false;
-                        if (Cache.Instance.CorpAmmoHangar.IsReady)
+                        if (Cache.Instance.AmmoHangar.IsReady)
                             return true;
                     }
-                    if (Cache.Instance.CorpAmmoHangar == null)
+                    if (Cache.Instance.AmmoHangar == null)
                     {
                         if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                             Logging.Log(module +
@@ -1839,7 +1972,7 @@ namespace Questor.Modules.Caching
                 }
                 else
                 {
-                    Cache.Instance.CorpAmmoHangar = null;
+                    Cache.Instance.AmmoHangar = null;
                     return true;
                 }
                 
@@ -1847,7 +1980,33 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public DirectContainer CorpLootHangar { get; set; }
+        public bool StackCorpAmmoHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpAmmoHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                {
+                    if (!Cache.Instance.OpenCorpAmmoHangar("Cache.StackCorpAmmoHangar")) return false;
+                    Cache.Instance.NextOpenAmmoHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                    Logging.Log(module + ": Stacking Corporate Ammo Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenAmmoHangarAction.Subtract(DateTime.Now).TotalSeconds,
+                                           0) + "sec]");
+                    Cache.Instance.AmmoHangar.StackAll();
+                    return true;
+                }
+                else
+                {
+                    Cache.Instance.AmmoHangar = null;
+                    return true;
+                }
+
+            }
+            return false;
+        }
+        
+        //public DirectContainer CorpLootHangar { get; set; }
 
         public bool OpenCorpLootHangar(String module)
         {
@@ -1857,13 +2016,13 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                 {
-                    Cache.Instance.CorpLootHangar =
+                    Cache.Instance.LootHangar =
                         Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.LootHangar);
 
                     // Is the corp loot Hangar open?
-                    if (Cache.Instance.CorpLootHangar != null)
+                    if (Cache.Instance.LootHangar != null)
                     {
-                        if (Cache.Instance.CorpLootHangar.Window == null)
+                        if (Cache.Instance.LootHangar.Window == null)
                         {
                             // No, command it to open
                             Cache.Instance.DirectEve.OpenCorporationHangar();
@@ -1876,12 +2035,12 @@ namespace Questor.Modules.Caching
                                             0) + "sec]");
                             return false;
                         }
-                        if (!Cache.Instance.CorpLootHangar.IsReady)
+                        if (!Cache.Instance.LootHangar.IsReady)
                             return false;
-                        if (Cache.Instance.CorpLootHangar.IsReady)
+                        if (Cache.Instance.LootHangar.IsReady)
                             return true;
                     }
-                    if (Cache.Instance.CorpLootHangar == null)
+                    if (Cache.Instance.LootHangar == null)
                     {
                         if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                             Logging.Log(module +
@@ -1891,9 +2050,25 @@ namespace Questor.Modules.Caching
                 }
                 else
                 {
-                    Cache.Instance.CorpLootHangar = null;
+                    Cache.Instance.LootHangar = null;
                     return true;
                 }
+            }
+            return false;
+        }
+
+        public bool StackCorpLootHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenCorpLootHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                if (!Cache.Instance.OpenCorpLootHangar("Cache.StackCorpLoothangar")) return false;
+                Cache.Instance.NextOpenCorpLootHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                Logging.Log(module + ": Stacking Corporate Loot Hangar: waiting [" +
+                                        Math.Round(Cache.Instance.NextOpenCorpLootHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
+                LootHangar.StackAll();
+                return true;
             }
             return false;
         }
@@ -1939,7 +2114,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public DirectContainer LootContainer { get; set; }
+        //public DirectContainer LootContainer { get; set; }
 
         public bool OpenLootContainer(String module)
         {
@@ -1949,13 +2124,13 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
-                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+                    if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenLootContainer")) return false;
 
                     var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
                     if (firstlootcontainer != null)
                     {
                         long lootContainerID = firstlootcontainer.ItemId;
-                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
+                        Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetContainer(lootContainerID);
                         Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     }
                     else
@@ -1971,6 +2146,23 @@ namespace Questor.Modules.Caching
                         }
                     }
                 }
+                return true;
+            }
+            return false;
+        }
+
+        public bool StackLootContainer(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
+                return false;
+            
+            if (Cache.Instance.InStation)
+            {
+                if (!Cache.Instance.OpenLootContainer("Cache.StackLootContainer")) return false;
+                Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                Logging.Log("Loot Container named: [ " + LootHangar.Window.Name +
+                            " ] was found and its contents are being stacked");
+                LootHangar.StackAll();
                 return true;
             }
             return false;
@@ -2017,13 +2209,13 @@ namespace Questor.Modules.Caching
                 }
                 else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
-                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
+                    if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenLootContainer")) return false;
 
                     var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
                     if (firstlootcontainer != null)
                     {
                         long lootContainerID = firstlootcontainer.ItemId;
-                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
+                        Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetContainer(lootContainerID);
                         Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     }
                     else
@@ -2068,84 +2260,20 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                if (!string.IsNullOrEmpty(Settings.Instance.LootHangar)) // Corporate hangar = LootHangar
                 {
-                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.LootHangar);
-
-                    // Is the corp loot Hangar open?
-                    if (Cache.Instance.LootHangar != null)
-                    {
-                        if (Cache.Instance.LootHangar.Window == null)
-                        {
-                            
-                            // No, command it to open
-                            Cache.Instance.DirectEve.OpenCorporationHangar();
-                            Cache.Instance.NextOpenCorpLootHangarAction =
-                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Opening Corporate Loot Hangar: waiting [" +
-                                        Math.Round(
-                                            Cache.Instance.NextOpenCorpLootHangarAction.Subtract(DateTime.Now).
-                                                TotalSeconds,
-                                            0) + "sec]");
-                            return false;
-                        }
-                        if (!Cache.Instance.LootHangar.IsReady)
-                            return false;
-                        if (Cache.Instance.LootHangar.IsReady)
+                    if (!Cache.Instance.OpenCorpLootHangar("Cache.OpenCorpLootHangar")) return false;
                             return true;
                     }
-                    if (Cache.Instance.LootHangar == null)
-                    {
-                        if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
-                            Logging.Log(module +
-                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
-                        return false;
-                    }
-                }
-                else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
-                {
-                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
-
-                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
-                    if (firstlootcontainer != null)
-                    {
-                        long lootContainerID = firstlootcontainer.ItemId;
-                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
-                        Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    }
-                else
-                    {
-                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
-                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
-                        if (firstothercontainer != null)
+                else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer)) // Freight Container in my local items hangar = LootHangar
                         {
-                            
-                            if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
-                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
-                            return false;
-                        }
-                    }
+                    if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenLItemsHangar")) return false;
+                    if (!Cache.Instance.OpenLootContainer("Cache.OpenLootContainer")) return false;
+                    return true;
                 }
-                else //use local items hangar
-                {
-                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
-                    if (Cache.Instance.LootHangar == null)
-                        return false;
-
-                    // Is the items hangar open?
-                    if (Cache.Instance.LootHangar.Window == null)
+                else // local items hangar = LootHangar
                     {
-                        // No, command it to open
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                        Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module + ": Opening Item Hangar: waiting [" +
-                                    Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]");
-                        return false;
-                    }
-                    if (!Cache.Instance.LootHangar.IsReady)
-                        return false;
-                    if (Cache.Instance.LootHangar.IsReady)
+                    if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenItemsHangar")) return false;
                         return true;
                 }
             }
@@ -2161,84 +2289,17 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                 {
-                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.LootHangar);
-
-                    // Is the corp loot Hangar open?
-                    if (Cache.Instance.LootHangar != null)
-                    {
-                        if (Cache.Instance.LootHangar.Window != null)
-                        {
-
-                            // No, command it to open
-                            
-                            Cache.Instance.NextOpenCorpLootHangarAction =
-                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Stacking Corporate Loot Hangar: waiting [" +
-                                        Math.Round(
-                                            Cache.Instance.NextOpenCorpLootHangarAction.Subtract(DateTime.Now).
-                                                TotalSeconds,
-                                            0) + "sec]");
-                            Cache.Instance.LootHangar.StackAll();
-                            return false;
-                        }
-                        if (!Cache.Instance.LootHangar.IsReady)
-                            return false;
-                        if (Cache.Instance.LootHangar.IsReady)
+                    if (!Cache.Instance.StackCorpLootHangar("Cache.StackLootHangar")) return false;
                             return true;
                     }
-                    if (Cache.Instance.LootHangar == null)
-                    {
-                        if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
-                            Logging.Log(module +
-                                        ": Stacking Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
-                        return false;
-                    }
-                }
                 else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
-                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
-
-                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
-                    if (firstlootcontainer != null)
-                    {
-                        long lootContainerID = firstlootcontainer.ItemId;
-                        Cache.Instance.LootContainer = Cache.Instance.DirectEve.GetContainer(lootContainerID);
-                        Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    }
-                    else
-                    {
-                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
-                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
-                        if (firstothercontainer != null)
-                        {
-
-                            if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
-                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
-                            return false;
-                        }
-                    }
+                    if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
+                    return true;
                 }
                 else //use local items hangar
                 {
-                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
-                    if (Cache.Instance.LootHangar == null)
-                        return false;
-
-                    // Is the items hangar open?
-                    if (Cache.Instance.LootHangar.Window == null)
-                    {
-                        // No, command it to open
-                        
-                        Cache.Instance.NextOpenItemHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module + ": Stacking Item Hangar: waiting [" +
-                                    Math.Round(Cache.Instance.NextOpenItemHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]");
-                        Cache.Instance.LootHangar.StackAll();
-                        return false;
-                    }
-                    if (!Cache.Instance.LootHangar.IsReady)
-                        return false;
-                    if (Cache.Instance.LootHangar.IsReady)
+                    if (!Cache.Instance.StackItemsHangarAsLootHangar("Cache.StackLootHangar")) return false;
                         return true;
                 }
             }
@@ -2324,60 +2385,12 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
-                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
-
-                    // Is the corp loot Hangar open?
-                    if (Cache.Instance.AmmoHangar != null)
-                    {
-                        if (Cache.Instance.AmmoHangar.Window != null)
-                        {
-
-                            // No, command it to open
-
-                            Cache.Instance.NextOpenCorpAmmoHangarAction =
-                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Stacking Corporate Ammo Hangar: waiting [" +
-                                        Math.Round(
-                                            Cache.Instance.NextOpenCorpAmmoHangarAction.Subtract(DateTime.Now).
-                                                TotalSeconds,
-                                            0) + "sec]");
-                            Cache.Instance.AmmoHangar.StackAll();
-                            return false;
-                        }
-                        if (!Cache.Instance.AmmoHangar.IsReady)
-                            return false;
-                        if (Cache.Instance.AmmoHangar.IsReady)
+                    if (!Cache.Instance.StackCorpAmmoHangar("Cache.StackAmmoHangar")) return false;
                             return true;
                     }
-                    if (Cache.Instance.AmmoHangar == null)
-                    {
-                        if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                            Logging.Log(module +
-                                        ": Stacking Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
-                        return false;
-                    }
-                }
                 else //use local items hangar
                 {
-                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
-                    if (Cache.Instance.AmmoHangar == null)
-                        return false;
-
-                    // Is the items hangar open?
-                    if (Cache.Instance.AmmoHangar.Window == null)
-                    {
-                        // No, command it to open
-
-                        Cache.Instance.NextOpenAmmoHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module + ": Stacking Ammo Hangar: waiting [" +
-                                    Math.Round(Cache.Instance.NextOpenAmmoHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]");
-                        Cache.Instance.AmmoHangar.StackAll();
-                        return false;
-                    }
-                    if (!Cache.Instance.AmmoHangar.IsReady)
-                        return false;
-                    if (Cache.Instance.AmmoHangar.IsReady)
+                    if (!Cache.Instance.StackItemsHangarAsAmmoHangar("Cache.StackAmmoHangar")) return false;
                         return true;
                 }
             }
@@ -2388,7 +2401,7 @@ namespace Questor.Modules.Caching
 
         public bool OpenDroneBay(String module)
         {
-            if (DateTime.Now < Cache.Instance.NextOpenDroneBayAction)
+            if (DateTime.Now < Cache.Instance.NextDroneBayAction)
             {
                 //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
                 return false;
@@ -2411,9 +2424,9 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.DroneBay == null)
             {
-                Cache.Instance.NextOpenDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                 Logging.Log(module + ": Opening Drone Bay: --- waiting [" +
-                                Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
                                 "sec]");
 
                 return false;
@@ -2422,10 +2435,10 @@ namespace Questor.Modules.Caching
             // Is the drone bay open?
             if (Cache.Instance.DroneBay.Window == null)
             {
-                Cache.Instance.NextOpenDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                 // No, command it to open
                 Logging.Log(module + ": Opening Drone Bay: waiting [" +
-                            Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                            Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
                             "sec]");
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
                 return false;
@@ -2440,21 +2453,16 @@ namespace Questor.Modules.Caching
         
         public bool CloseDroneBay(String module)
         {
-            if (DateTime.Now < Cache.Instance.NextOpenDroneBayAction)
+            if (DateTime.Now < Cache.Instance.NextDroneBayAction)
             {
-                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
+                //Logging.Log(module + ": Closing Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
                 return false;
             }
             if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
             {
-                Logging.Log(module + ": Opening Drone Bay: We aren't in station or space?!");
+                Logging.Log(module + ": Closing Drone Bay: We aren't in station or space?!");
                 return false;
             }
-            //if(Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == 31)
-            //{
-            //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
-            //    return false;
-            //}
             if (Cache.Instance.InStation || Cache.Instance.InSpace)
             {
                 Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
@@ -2464,10 +2472,9 @@ namespace Questor.Modules.Caching
             // Is the drone bay open? if so, close it
             if (Cache.Instance.DroneBay.Window != null)
             {
-                Cache.Instance.NextOpenDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                // No, command it to open
-                Logging.Log(module + ": Opening Drone Bay: waiting [" +
-                            Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Logging.Log(module + ": Closing Drone Bay: waiting [" +
+                            Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
                             "sec]");
                 Cache.Instance.DroneBay.Window.Close();
                 return true;
