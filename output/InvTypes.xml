@@ -1036,6 +1036,7 @@
   <invtype id="2204" name="Acolyte I Blueprint" groupid="176" baseprice="200000" volume="0.01" capacity="0" portionsize="1" mediansell="500000.00" medianall="460996.67" lastupdate="2012-03-12T01:00:44.1074-05:00" />
   <invtype id="2205" name="Acolyte II" groupid="100" baseprice="34768" volume="5" capacity="1200" portionsize="1" medianbuy="83001.08" mediansell="137999.99" medianall="128250.43" lastupdate="2012-03-12T01:00:44.1074-05:00" />
   <invtype id="2206" name="Acolyte II Blueprint" groupid="176" baseprice="9999999" volume="0.01" capacity="0" portionsize="1" medianbuy="50000.00" medianall="5025028.00" lastupdate="2012-03-12T01:00:44.1074-05:00" />
+  <invtype id="2217" name="Preacher" groupid="283" baseprice="0" volume="1" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:44.1074-05:00" />
   <invtype id="2233" name="Customs Office" groupid="1025" baseprice="0" volume="500" capacity="25000" portionsize="1" lastupdate="2012-03-12T01:00:44.1074-05:00" />
   <invtype id="2234" name="Sansha's Battletower LCO" groupid="226" baseprice="0" volume="100000000" capacity="10000" portionsize="1" lastupdate="2012-03-12T01:00:44.1074-05:00" />
   <invtype id="2252" name="Roden Station" groupid="226" baseprice="600000" volume="1" capacity="0" portionsize="1" lastupdate="2012-03-12T01:00:44.1074-05:00" />
