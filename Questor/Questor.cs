@@ -493,14 +493,12 @@ namespace Questor
                     if (Cache.Instance.StopBot)
                         return;
 
-                    if (Settings.Instance.AutoStart)
-                    {
                         if (_States.CurrentQuestorState == QuestorState.Idle)
                         {
                             _States.CurrentQuestorState = QuestorState.Start;
                         }
                         return;
-                    }
+                    
                     break;
 
                 case QuestorState.CombatMissionsBehavior: 
