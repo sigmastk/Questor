@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using DirectEve;
 using Questor.Modules.Caching;
@@ -36,7 +37,7 @@ namespace Questor.Behaviors
         //private readonly Drones _drones;
 
         private DateTime _lastPulse;
-        private DateTime _lastSalvageTrip = DateTime.MinValue;
+        private DateTime _nextSalvageTrip = DateTime.MinValue;
         private readonly Panic _panic;
         private readonly Statistics _statistics;
         private readonly Salvage _salvage;
@@ -48,7 +49,7 @@ namespace Questor.Behaviors
         private int _randomDelay;
         public static long AgentID;
         private readonly Stopwatch _watch;
-        private DateTime _lastBookmarkRefreshCheck = DateTime.MinValue;
+        private DateTime _nextBookmarkRefreshCheck = DateTime.MinValue;
 
         private double _lastX;
         private double _lastY;
@@ -373,29 +374,35 @@ namespace Questor.Behaviors
                         // Don't start a new action near downtime
                         if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute < 15)
                             break;
+
+                        //Logging.Log("DedicatedBookmarkSalvagerBehavior::: _nextBookmarksrefresh.subtract(datetime.now).totalminutes [" +
+                        //            Math.Round(DateTime.Now.Subtract(_nextBookmarkRefreshCheck).TotalMinutes,0) + "]");
                         
-                        if (_lastBookmarkRefreshCheck.Subtract(DateTime.Now).TotalMinutes > 1)
+
+                        //Logging.Log("DedicatedBookmarkSalvagerBehavior::: Next Salvage Trip Scheduled in [" +
+                        //            _nextSalvageTrip.ToString(CultureInfo.InvariantCulture) + "min]");
+
+                        if (DateTime.Now > _nextBookmarkRefreshCheck)
                         {
-                            _lastBookmarkRefreshCheck = DateTime.Now;
+                            _nextBookmarkRefreshCheck = DateTime.Now.AddMinutes(1);
                             if (Cache.Instance.InStation && (DateTime.Now > _nextBookmarksrefresh))
                             {
-                                _nextBookmarksrefresh = DateTime.Now.AddMinutes(Settings.Instance.RandomNumber5To15());
-                                Logging.Log("DedicatedBookmarkSalvageBehavior:  Refreshing Bookmarks: Next refresh in [ " + Math.Round(_nextBookmarksrefresh.Subtract(DateTime.Now).TotalMinutes, 0) + " min]");
+                                _nextBookmarksrefresh = DateTime.Now.AddMinutes(Cache.Instance.RandomNumber(4,7));
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior: Next Bookmark refresh in [" +
+                                               Math.Round(_nextBookmarksrefresh.Subtract(DateTime.Now).TotalMinutes, 0) + "min]"); 
                                 Cache.Instance.DirectEve.RefreshBookmarks();
                             }
                             else
                             {
-                                Logging.Log("DedicatedBookmarkSalvageBehavior: Next Bookmark refresh in [" + 
-                                               Math.Round(_nextBookmarksrefresh.Subtract(DateTime.Now).TotalMinutes, 0) + 
-                                               "min]");
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior: Next Bookmark refresh in [" + 
+                                               Math.Round(_nextBookmarksrefresh.Subtract(DateTime.Now).TotalMinutes, 0) + "min]");
 
-                                Logging.Log("DedicatedBookmarkSalvageBehavior: Next Salvage Trip Scheduled in [" +
-                                               _lastSalvageTrip.AddMinutes(
-                                                  (int) Time.DelayBetweenSalvagingSessions_minutes + 4) + "min]");  
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior: Next Salvage Trip Scheduled in [" +
+                                               Math.Round(_nextSalvageTrip.Subtract(DateTime.Now).TotalMinutes, 0) + "min]");  
                             }
                         }
 
-                        if (_lastSalvageTrip.Subtract(DateTime.Now).TotalMinutes > (int)Time.DelayBetweenSalvagingSessions_minutes + Cache.Instance.RandomNumber(0,4))
+                        if (DateTime.Now > _nextSalvageTrip)
                         {
                            Logging.Log("DedicatedBookmarkSalvagerBehavior.BeginAftermissionSalvaging: Starting Another Salvage Trip");
                            LastAction = DateTime.Now;
@@ -443,7 +450,7 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.LocalWatch) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.WarpOutStation;
+                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.LocalWatch) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
                     }
                     break;
 
@@ -521,6 +528,10 @@ namespace Questor.Behaviors
 
                 case DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging:
                     Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation>
+                    _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                    //we know we are connected here
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                    Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     
                     Cache.Instance.OpenWrecks = true;
                     if (_States.CurrentArmState == ArmState.Idle)
@@ -550,7 +561,7 @@ namespace Questor.Behaviors
                         if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging)
                         {
                             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark;
-                            _lastSalvageTrip = DateTime.Now;
+                            _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
                             //we know we are connected here
                             Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
