@@ -34,6 +34,8 @@ namespace Questor.Modules.Actions
       public const string Decline = "Decline";
       public const string Close = "Close";
       private DateTime _nextAgentAction;
+      bool _agentStandingsCheckFlag;  //false;
+      DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
 
       //private DateTime _waitingOnAgentResponse;
       private bool _waitingonmission;
@@ -690,10 +692,22 @@ namespace Questor.Modules.Actions
 
             case AgentInteractionState.StartConversation:
                Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
+               
+               //
+               // Standings Check: if this is a totally new agent this check will timeout after 20 seconds
+               //
+               if (DateTime.Now < _agentStandingsCheckTimeOut)
+               {
                if (((int)Cache.Instance.AgentEffectiveStandingtoMe == (int)0.00) && (AgentId == Cache.Instance.AgentId))
                {
-                   Logging.Log("AgentInteraction: Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.AgentEffectiveStandingtoMe + " and must not yet be available. retrying.");
+                       if (!_agentStandingsCheckFlag)
+                       {
+                           _agentStandingsCheckTimeOut = DateTime.Now.AddSeconds(20);
+                           _agentStandingsCheckFlag = true;
+                       }
+                       Logging.Log("AgentInteraction.StandingsCheck: Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.AgentEffectiveStandingtoMe + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.Now).Seconds,0) + " sec]");
                    return;
+                   }
                }
                Agent.InteractWith();
 
