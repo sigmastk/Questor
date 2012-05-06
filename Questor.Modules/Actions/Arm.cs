@@ -36,10 +36,10 @@ namespace Questor.Modules.Actions
 
         public List<Ammo> AmmoToLoad { get; private set; }
 
-        public bool DefaultFittingChecked = false; //flag to check for the correct default fitting before using the fitting manager
+        public bool DefaultFittingChecked; //false; //flag to check for the correct default fitting before using the fitting manager
         public bool DefaultFittingFound = true; //Did we find the default fitting?
         public bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
-        public bool UseMissionShip = false; // Were we successful in activating the mission specific ship?
+        public bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
 
         public void ProcessState()
         {
@@ -145,12 +145,12 @@ namespace Questor.Modules.Actions
                             return;
                         }
 
-                        if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName))
+                        if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName.ToLower()))
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
                                 List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName))
+                                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
                                 {
                                     Logging.Log("Arm: Making [" + ship.GivenName + "] active");
                                     ship.ActivateShip();
@@ -425,17 +425,10 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
                     
                     
-                    DirectItem drone;
-                    drone = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
+                    DirectItem drone = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
                     if (drone == null || drone.Stacksize < 1)
                     {
-                        string ammoHangarName;
-                        if (string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                            ammoHangarName = "ItemHangar";
-                        else
-                            ammoHangarName = Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture); //"Corp Hangar Ammo Tab";
-                           
-                        
+                        string ammoHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangar) ? "ItemHangar" : Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture);
                         Logging.Log("Arm: Out of drones with typeID [" + Settings.Instance.DroneTypeId + "] in [" + ammoHangarName + "]");
                         _States.CurrentArmState = ArmState.NotEnoughDrones;
                         break;
@@ -474,9 +467,8 @@ namespace Questor.Modules.Actions
                     if (!_missionItemMoved)
                     {
                         if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
-                        DirectItem missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
-                        if (missionItem == null)
-                           missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        DirectItem missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
+                                                 Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
                         if (missionItem != null && !string.IsNullOrEmpty(missionItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                         {
