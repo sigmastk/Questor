@@ -48,7 +48,7 @@ namespace Questor.Behaviors
         private int _randomDelay;
         public static long AgentID;
         private readonly Stopwatch _watch;
-        private DateTime _lastBookmarkRefreshCheck;
+        private DateTime _lastBookmarkRefreshCheck = DateTime.MinValue;
 
         private double _lastX;
         private double _lastY;
@@ -374,7 +374,7 @@ namespace Questor.Behaviors
                         if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute < 15)
                             break;
                         
-                        if (DateTime.Now.Subtract(_lastBookmarkRefreshCheck).TotalMinutes > 1)
+                        if (_lastBookmarkRefreshCheck.Subtract(DateTime.Now).TotalMinutes > 1)
                         {
                             _lastBookmarkRefreshCheck = DateTime.Now;
                             if (Cache.Instance.InStation && (DateTime.Now > _nextBookmarksrefresh))
@@ -395,7 +395,7 @@ namespace Questor.Behaviors
                             }
                         }
 
-                        if (DateTime.Now.Subtract(_lastSalvageTrip).TotalMinutes > (int)Time.DelayBetweenSalvagingSessions_minutes + Cache.Instance.RandomNumber(0,4))
+                        if (_lastSalvageTrip.Subtract(DateTime.Now).TotalMinutes > (int)Time.DelayBetweenSalvagingSessions_minutes + Cache.Instance.RandomNumber(0,4))
                         {
                            Logging.Log("DedicatedBookmarkSalvagerBehavior.BeginAftermissionSalvaging: Starting Another Salvage Trip");
                            LastAction = DateTime.Now;
