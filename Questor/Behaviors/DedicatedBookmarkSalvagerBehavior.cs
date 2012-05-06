@@ -422,7 +422,6 @@ namespace Questor.Behaviors
 
                 case DedicatedBookmarkSalvagerBehaviorState.Start:
                     Cache.Instance.OpenWrecks = true;
-                    
                     ValidateDedicatedSalvageSettings();
                     if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Start) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.LocalWatch;
                     break;
@@ -534,11 +533,14 @@ namespace Questor.Behaviors
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     
                     Cache.Instance.OpenWrecks = true;
-                    if (_States.CurrentArmState == ArmState.Idle)
-                        _States.CurrentArmState = ArmState.SwitchToSalvageShip;
+                    if (Cache.Instance.InStation)
+                    {
+                        if (_States.CurrentArmState == ArmState.Idle)
+                            _States.CurrentArmState = ArmState.SwitchToSalvageShip;
 
-                    _arm.ProcessState();
-                    if (_States.CurrentArmState == ArmState.Done)
+                        _arm.ProcessState();
+                    }
+                    if (_States.CurrentArmState == ArmState.Done || Cache.Instance.InSpace)
                     {
                         DirectBookmark bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
                         _States.CurrentArmState = ArmState.Idle;
@@ -649,7 +651,7 @@ namespace Questor.Behaviors
 
                         if (!Cache.Instance.UnlootedContainers.Any())
                         {
-                            Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: Finished salvaging the room");
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: Finished salvaging the room: removing old salvage bookmarks");
 
                             bool gatesInRoom = GateInSalvage();
                             var bookmarksinlocal = new List<DirectBookmark>(Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").
