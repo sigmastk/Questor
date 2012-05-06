@@ -559,7 +559,7 @@ namespace Questor.Behaviors
                             bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
                             if (bookmark == null)
                             {
-                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
                                 return;
                             }
                         }
@@ -658,33 +658,34 @@ namespace Questor.Behaviors
                             Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: Finished salvaging the room");
 
                             bool gatesInRoom = GateInSalvage();
-                            List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-
+                            var bookmarksinlocal = new List<DirectBookmark>(Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").
+                                                       Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
+                                                       OrderBy(b => b.CreatedOn));
                             while (true)
                             {
                                 // Remove all bookmarks from address book
-                                var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
+                                var bookmark = bookmarksinlocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
                                 if (!gatesInRoom && _gatesPresent) // if there were gates, but we've gone through them all, delete all bookmarks
-                                    bookmark = bookmarks.FirstOrDefault();
+                                    bookmark = bookmarksinlocal.FirstOrDefault();
                                 else if (gatesInRoom)
                                     break;
                                 if (bookmark == null)
                                     break;
 
                                 bookmark.Delete();
-                                bookmarks.Remove(bookmark);
+                                bookmarksinlocal.Remove(bookmark);
                                 Cache.Instance.NextRemoveBookmarkAction = DateTime.Now.AddSeconds((int)Time.RemoveBookmarkDelay_seconds);
                                 return;
                             }
 
-                            if (bookmarks.Count == 0 && !gatesInRoom)
+                            if (bookmarksinlocal.Count == 0 && !gatesInRoom)
                             {
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: We have salvaged all bookmarks, go to base");
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: We have salvaged all bookmarks in system, check other systems and if needed gotobase");
                                 Cache.Instance.SalvageAll = false;
                                 if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Salvage)
                                 {
                                     Statistics.Instance.FinishedSalvaging = DateTime.Now;
-                                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
                                 }
                                 return;
                             }
@@ -693,7 +694,7 @@ namespace Questor.Behaviors
                                 if (!gatesInRoom)
                                 {
                                     Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: Go to the next salvage bookmark");
-                                    var bookmark = bookmarks.FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ?? bookmarks.FirstOrDefault();
+                                    var bookmark = bookmarksinlocal.FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ?? bookmarksinlocal.FirstOrDefault();
                                     if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Salvage)
                                     {
                                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark;
