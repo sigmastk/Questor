@@ -65,7 +65,7 @@ namespace Questor.Storylines
                                {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
                                {"Blood Farm", new GenericCombatStoryline()},
                                {"Jealous Rivals", new GenericCombatStoryline()},
-                               //{"Quota Season", new GenericCombatStoryline()}, //why cant we pickup the Custom Circuitry? problem in salvage.cs somewhere: "salvage: Container" name: Number "contained no valuable loot"
+                               {"Quota Season", new GenericCombatStoryline()}, 
                                //{"Matriarch", new GenericCombatStoryline()},
                                //{"Diplomatic Incident", new GenericCombatStoryline()},
                                //these work but are against other factions that I generally like to avoid

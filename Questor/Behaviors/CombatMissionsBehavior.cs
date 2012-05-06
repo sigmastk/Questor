@@ -51,7 +51,7 @@ namespace Questor.Behaviors
         private readonly Random _random;
         private int _randomDelay;
         public static long AgentID;
-        private  Stopwatch _watch;
+        private readonly Stopwatch _watch;
 
         private double _lastX;
         private double _lastY;
@@ -229,12 +229,13 @@ namespace Questor.Behaviors
            }
             }
             else return;
-
-          
            //
            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
            //
-            if ((Cache.Instance.BigObjects.FirstOrDefault() == null) || (Cache.Instance.BigObjects.FirstOrDefault().Distance >= (int)Distance.TooCloseToStructure))
+            EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
+            if (thisBigObject != null)
+            {
+                if (thisBigObject.Distance >= (int) Distance.TooCloseToStructure)
             {
                 //we are no longer "too close" and can proceed. 
             }
@@ -242,12 +243,15 @@ namespace Questor.Behaviors
             {
                 if (DateTime.Now > Cache.Instance.NextOrbit)
                 {
-                    Cache.Instance.BigObjects.FirstOrDefault().Orbit((int)Distance.SafeDistancefromStructure);
-                    Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState + ": initiating Orbit of [" + Cache.Instance.BigObjects.FirstOrDefault().Name +
+                        thisBigObject.Orbit((int) Distance.SafeDistancefromStructure);
+                        Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState +
+                                    ": initiating Orbit of [" + thisBigObject.Name +
                                 "] orbiting at [" + Distance.SafeDistancefromStructure + "]");
                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
                 }
-                return; //we are still too close, do not continue through the rest until we are not "too close" anymore
+                    return;
+                    //we are still too close, do not continue through the rest until we are not "too close" anymore
+                }
             }
         }
 
@@ -684,41 +688,14 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.GotoMission:
                     Statistics.Instance.MissionLoggingCompleted = false;
                     var missionDestination = _traveler.Destination as MissionBookmarkDestination;
-                    //
-                    // this is far from complete - do not enable unless you really like writing code and debugging
-                    //
-                    //if(Cache.Instance.panic_attempts_this_mission > 0 && !Cache.Instance.MissionIsDeadspace)
-                    //{
-                    //    var bookmark = Cache.Instance.BookmarksByLabel("spot" + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
-                    //    if (bookmark == null)
-                    //    {
-                    //        States.CurrentCombatMissionBehaviorState = CombatMissionsModeState.Idle;
-                    //        return;
-                    //    }
-                    //    Traveler.ProcessState();
-                    //    if (Traveler.State == TravelerState.AtDestination)
-                    //    {
-                    //        Traveler.Destination = null;
-                    //        return;
-                    //    }
-                    //    bookmark.WarpTo(80000);
-                    //
-                    //    Cache.Instance.BookmarksByLabel("CurrentMission").OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).FirstOrDefault();
-                    //}
-                    //else
-                    //{
+                   
                     if (missionDestination == null || missionDestination.AgentId != AgentID) // We assume that this will always work "correctly" (tm)
                     {
                          const string nameOfBookmark = "Encounter";
                          Logging.Log("CombatMissionsBehavior: Setting Destination to 1st bookmark from AgentID: " + AgentID + " with [" + nameOfBookmark  + "] in the title" );
                          _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(AgentID, nameOfBookmark));
                     }
-                  //}
-                    //if (missionDestination == null)
-                    //{
-                    //    Logging.Log("Invalid bookmark loop! Mission Controller: Error");
-                    //    States.CurrentCombatMissionBehaviorState = CombatMissionsModeState.Error;
-                    //}
+                    
                     if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
                     {
                         Logging.Log("CombatMissionsBehavior.GotoMission: Priority targets found, engaging!");
@@ -732,18 +709,6 @@ namespace Questor.Behaviors
                     if (_States.CurrentTravelerState == TravelerState.AtDestination)
                     {
                         if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.ExecuteMission;
-                        //var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                        //var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.BookmarksOnGridWithMe);
-                        //// _bookmark = (Cache.Instance.BookmarksByLabel("warped off").OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).FirstOrDefault((b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.BookmarksOnGridWithMe));
-                        //if (bookmark != null)
-                        //{
-                        //    Logging.Log("QuestorState: GotoMission: Pocket already bookmarked [" + bookmark.Title + "]");
-                        //    return;
-                        //}
-                        //// No, create a bookmark
-                        //var label = string.Format("{0} {1:HHmm}", "spot", DateTime.UtcNow);
-                        //Logging.Log("QuestorState: GotoMission: Bookmarking pocket [" + label + "]");
-                        //Cache.Instance.CreateBookmark(label);
 
                         // Seeing as we just warped to the mission, start the mission controller
                         _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
@@ -1039,7 +1004,6 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.GotoSalvageBookmark:
                     _traveler.ProcessState();
                     string target = "Acceleration Gate";
-                    IEnumerable<EntityCache> targets;
                     Cache.Instance.EntitiesByName(target);
                     if (_States.CurrentTravelerState == TravelerState.AtDestination || GateInSalvage())
                     {
@@ -1316,7 +1280,7 @@ namespace Questor.Behaviors
                     List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
-                        // happens if autopilot isn't set and this questorstate is choosen manually
+                        // happens if autopilot isn't set and this questorstate is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("CombatMissionsBehavior.Traveler: No destination?");
                         if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;

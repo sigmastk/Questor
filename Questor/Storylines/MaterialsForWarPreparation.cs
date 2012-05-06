@@ -83,7 +83,9 @@ namespace Questor.Storylines
 
             if (Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity) >= orequantity)
             {
-               Logging.Log(String.Format("MaterialsForWarPreparation: We have [{0}] {1}, accepting mission", Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture), Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.TypeId == oreid).TypeName));
+                DirectItem thisOreInhangar = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.TypeId == oreid);
+                if (thisOreInhangar != null)
+                    Logging.Log(String.Format("MaterialsForWarPreparation: We have [{0}] {1}, accepting mission", Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture), thisOreInhangar.TypeName));
 
                 // Close the market window if there is one
                 if (marketWindow != null)
