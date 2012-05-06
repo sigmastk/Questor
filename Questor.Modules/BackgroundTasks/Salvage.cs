@@ -31,11 +31,11 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
-        public Dictionary<long, DateTime> _openedContainers;
+        public Dictionary<long, DateTime> OpenedContainers;
 
         public Salvage()
         {
-            _openedContainers = new Dictionary<long, DateTime>();
+            OpenedContainers = new Dictionary<long, DateTime>();
         }
 
         public int MaximumWreckTargets { get; set; }
@@ -535,7 +535,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 // Ignore open request within 10 seconds
-                if (_openedContainers.ContainsKey(containerEntity.Id) && DateTime.Now.Subtract(_openedContainers[containerEntity.Id]).TotalSeconds < 10)
+                if (OpenedContainers.ContainsKey(containerEntity.Id) && DateTime.Now.Subtract(OpenedContainers[containerEntity.Id]).TotalSeconds < 10)
                     continue;
 
                 // Don't even try to open a wreck if you are speed tanking and you aren't processing a loot action
@@ -554,7 +554,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Open the container
                 Logging.Log("Salvage: Opening container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "]");
                 containerEntity.OpenCargo();
-                _openedContainers[containerEntity.Id] = DateTime.Now;
+                OpenedContainers[containerEntity.Id] = DateTime.Now;
                 Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
                 return;
             }

@@ -30,7 +30,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
-        private Dictionary<long, DateTime> _openedContainers;
+        private readonly Dictionary<long, DateTime> _openedContainers;
 
         public Scoop()
         {

@@ -58,7 +58,7 @@ namespace Questor.Behaviors
         private double _lastZ;
         private bool _gatesPresent;
         private bool _firstStart = true;
-        public  bool Panicstatereset = false;
+        public bool Panicstatereset; //false;
         private bool ValidSettings { get; set; }
         public bool CloseQuestorflag = true;
         public string CharacterName { get; set; }

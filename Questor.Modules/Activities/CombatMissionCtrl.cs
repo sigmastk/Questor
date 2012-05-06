@@ -73,7 +73,7 @@ namespace Questor.Modules.Activities
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
                             Logging.Log("CombatMissionCtrl.NavigateIntoRange: We are not approaching nor orbiting");
-                            var orbitStructure = true;
+                            const bool orbitStructure = true;
                             var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
 
                             if (orbitStructure && structure != null)
@@ -157,7 +157,7 @@ namespace Questor.Modules.Activities
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
                             Logging.Log("CombatMissionCtrl.NavigateToObject: We are not approaching nor orbiting");
-                            var orbitStructure = true;
+                            const bool orbitStructure = true;
                             var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
 
                             if (orbitStructure && structure != null)
