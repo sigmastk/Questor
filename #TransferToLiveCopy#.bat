@@ -30,6 +30,13 @@ if "%InnerSpacePath%"=="" if "%debug%"=="true" Echo [about to query registry] In
 if "%InnerSpacePath%"=="" FOR /F "tokens=2* delims=	 " %%A IN ('REG QUERY "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\InnerSpace.exe" /v "Path"') DO (SET InnerSpacePath=%%B)
 if "%InnerSpacePath%"=="" FOR /F "tokens=2* delims=	 " %%A IN ('REG QUERY "HKCU\Software\Microsoft\IntelliPoint\AppSpecific\InnerSpace.exe" /v "Path"') DO (SET InnerSpacePath=%%B)
 if "%InnerSpacePath%"=="" FOR /F "tokens=2* delims=	 " %%A IN ('REG QUERY "HKCU\Software\Microsoft\IntelliType Pro\AppSpecific\InnerSpace.exe" /v "Path"') DO  (SET InnerSpacePath=%%B)
+if "%InnerSpacePath%"=="" if exist "%programfiles(x86)%\Innerspace\Innerspace.exe" SET InnerSpacePath = %programfiles(x86)%\Innerspace\
+if "%InnerSpacePath%"=="" if exist "%programfiles%\Innerspace\Innerspace.exe" SET InnerSpacePath = %programfiles%\Innerspace\
+if "%InnerSpacePath%"=="" if exist "%userprofile%\Documents\Innerspace\Innerspace.exe" SET InnerSpacePath = %systemdrive%\Innerspace\
+if "%InnerSpacePath%"=="" if exist "%systemdrive%\My Documents\Innerspace\Innerspace.exe" SET InnerSpacePath = %systemdrive%\Innerspace\
+if "%InnerSpacePath%"=="" if exist "%userprofile%\Innerspace\Innerspace.exe" SET InnerSpacePath = %systemdrive%\Innerspace\
+if "%InnerSpacePath%"=="" if exist "%systemdrive%\Innerspace\Innerspace.exe" SET InnerSpacePath = %systemdrive%\Innerspace\
+
 if "%InnerSpacePath%"=="" goto :ERROR
 if "%debug%"=="true" Echo [registry] After registry queries: InnerSpacePath is [ %InnerSpacePath% ] && pause
 if "%debug%"=="true" echo [remove exe] if "%InnerSpacePath:~-15%"=="\InnerSpace.exe" (set InnerSpacePath=%InnerSpacePath:~0,-15%)
