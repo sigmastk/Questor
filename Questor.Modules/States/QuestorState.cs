@@ -15,7 +15,7 @@ namespace Questor.Modules.States
         Cleanup,
         Start,
         CombatMissionsBehavior,
-        SalvageBookmarksBehavior,
+        DedicatedBookmarkSalvagerBehavior,
         TravelerBehavior,
         CourierMissionBehavior,
         CombatHelperBehavior,

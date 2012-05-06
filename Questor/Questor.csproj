@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviors\CombatMissionsBehavior.cs" />
+    <Compile Include="Behaviors\DedicatedBookmarkSalvagerBehavior.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

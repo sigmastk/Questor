@@ -1011,7 +1011,7 @@ namespace Questor.Modules.Caching
         }
         public IEnumerable<EntityCache> BigObjects
         {
-            get { return _bigobjects ?? (_bigobjects = Entities.Where(e => e.GroupId == (int)Group.LargeCollidableStructure || e.GroupId == (int)Group.Stargate || e.GroupId == (int)Group.SpawnContainer || e.GroupId == (int)Group.CargoContainer || e.GroupId == (int)Group.Wreck && e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList()); }
+            get { return _bigobjects ?? (_bigobjects = Entities.Where(e => e.GroupId == (int)Group.LargeCollidableStructure || e.GroupId == (int)Group.SpawnContainer || e.GroupId == (int)Group.CargoContainer || e.GroupId == (int)Group.Wreck && e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList()); }
         }
 
         public EntityCache Star
@@ -1232,7 +1232,7 @@ namespace Questor.Modules.Caching
         public List<DirectBookmark> BookmarksByLabel(string label)
         {
             // Does not seems to refresh the Corporate Bookmark list so it's having troubles to find Corporate Bookmarks
-            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.StartsWith(label)).ToList();
+            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.StartsWith(label)).OrderBy(f => f.LocationId).ToList();
         }
 
         /// <summary>
@@ -1554,7 +1554,7 @@ namespace Questor.Modules.Caching
         /// <param name = "label"></param>
         public void CreateBookmark(string label)
         {
-            if (Settings.Instance.CreateSalvageBookmarksIn=="Corp")
+            if (Settings.Instance.CreateSalvageBookmarksIn.ToLower()=="corp".ToLower())
                 DirectEve.CorpBookmarkCurrentLocation(label, "", null);
             else
                 DirectEve.BookmarkCurrentLocation(label, "", null);
@@ -1840,8 +1840,6 @@ namespace Questor.Modules.Caching
                     Logging.Log(module + ": Opening Ship Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
                                            0) + "sec]");
-                    
-                    
                     return false;
                 }
                 if (!Cache.Instance.ShipHangar.IsReady)

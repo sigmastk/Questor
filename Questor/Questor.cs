@@ -34,6 +34,7 @@ namespace Questor
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
+        private readonly DedicatedBookmarkSalvagerBehavior _dedicatedBookmarkSalvagerBehavior;
         private readonly Cleanup _cleanup;
         
         public DateTime LastFrame;
@@ -59,6 +60,7 @@ namespace Questor
             _defense = new Defense();
             _localwatch = new LocalWatch();
             _combatMissionsBehavior = new CombatMissionsBehavior();
+            _dedicatedBookmarkSalvagerBehavior = new DedicatedBookmarkSalvagerBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
             
@@ -513,6 +515,19 @@ namespace Questor
 
                     break;
 
+
+                case QuestorState.DedicatedBookmarkSalvagerBehavior:
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Idle)
+                    {
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                    }
+                    _dedicatedBookmarkSalvagerBehavior.ProcessState();
+
+                    break;
+
                 case QuestorState.Start:
                     if (Settings.Instance.CharacterMode.ToLower() == "combat missions" || Settings.Instance.CharacterMode.ToLower() == "dps")
                     {
@@ -528,7 +543,7 @@ namespace Questor
                         if (_States.CurrentQuestorState == QuestorState.Start)
                         {
                             Logging.Log("Questor: Start Salvaging Behavior");
-                            //State = QuestorState.SalvageBehavior;
+                            _States.CurrentQuestorState = QuestorState.DedicatedBookmarkSalvagerBehavior;
                         }
                         break;
                     }
@@ -721,7 +736,7 @@ namespace Questor
                     //}
                     //if (Settings.Instance.DebugStates)
                     //    Logging.Log("Traveler.State = " + _traveler.State);
-                    break;
+                    //break;
 
                 case QuestorState.DebugCloseQuestor:
                     //Logging.Log("ISBoxerCharacterSet: " + Settings.Instance.Lavish_ISBoxerCharacterSet);

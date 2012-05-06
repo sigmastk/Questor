@@ -26,7 +26,6 @@ namespace Questor.Modules.BackgroundTasks
 
         private DateTime _lastJettison = DateTime.MinValue;
         private DateTime _nextSalvageAction = DateTime.MinValue;
-        private DateTime _nextBookmarksrefresh = DateTime.MinValue;
 
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
@@ -665,13 +664,6 @@ namespace Questor.Modules.BackgroundTasks
                     break;
 
                 case SalvageState.Idle:
-                    if (Cache.Instance.InStation && (DateTime.Now > _nextBookmarksrefresh) && Settings.Instance.CharacterMode.ToLower() == "salvage")
-                    {
-                        _nextBookmarksrefresh = DateTime.Now.AddMinutes(Settings.Instance.RandomNumber5To15());
-                        Logging.Log("Salvage: Refreshing Bookmarks: Next refresh in [ " + Math.Round(DateTime.Now.Subtract(_nextBookmarksrefresh).TotalMinutes, 0) + " min]");
-                        Cache.Instance.DirectEve.RefreshBookmarks();
-                    }
-
                     if (Cache.Instance.InSpace &&
                         Cache.Instance.DirectEve.ActiveShip.Entity != null &&
                         !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked &&
