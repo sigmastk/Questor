@@ -271,7 +271,7 @@ namespace Questor.Modules.Caching
             get
             {
                 // Get ammo based on current damage type
-                IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType);
+                IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType).ToList();
 
                 // Is our ship's cargo available?
                 if (Cache.Instance.CargoHold.IsReady)

@@ -257,8 +257,8 @@ namespace Questor.Modules.Activities
             if (string.IsNullOrEmpty(target))
                 target = "Acceleration Gate";
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || !targets.Any())
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            if (!targets.Any())
             {
                 if (!_waiting)
                 {
@@ -555,7 +555,7 @@ namespace Questor.Modules.Activities
             if (string.IsNullOrEmpty(target))
                 target = "Acceleration Gate";
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action
@@ -593,8 +593,8 @@ namespace Questor.Modules.Activities
             if (!bool.TryParse(action.GetParameterValue("StopWhenAggressed"), out stopWhenAggressed))
                 stopWhenAggressed = false;
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || !targets.Any())
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            if (!targets.Any())
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": no entities found named [" + target + "] proceeding to next action");
                 Nextaction();
@@ -744,7 +744,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).ToList();
             if (targets.Count() == numbertoignore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": All targets gone " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
@@ -822,7 +822,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).ToList();
             if (targets.Count() == numbertoignore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));
@@ -935,7 +935,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).ToList();
             if (targets.Count() == numbertoignore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"));

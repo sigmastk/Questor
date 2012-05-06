@@ -325,7 +325,7 @@ namespace Questor.Modules.BackgroundTasks
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
-            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => w.Type == "form.LootCargoView");
+            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => w.Type == "form.LootCargoView").ToList();
             foreach (DirectContainerWindow window in lootWindows)
             {
                 // The window is not ready, then continue
@@ -339,7 +339,7 @@ namespace Questor.Modules.BackgroundTasks
                 DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.ItemId);
 
                 // List its items
-                IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i));
+                IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i)).ToList();
 
                 // Build a list of items to loot
                 var lootItems = new List<ItemCache>();

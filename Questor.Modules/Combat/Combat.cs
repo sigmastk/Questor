@@ -42,19 +42,19 @@ namespace Questor.Modules.Combat
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
 
             // Get ammo based on damage type
-            IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+            IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
 
             //check if mission specific ammo is defined
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
-                correctAmmo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType);
+                correctAmmo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
                 correctAmmo = Cache.Instance.MissionAmmo;
@@ -124,10 +124,10 @@ namespace Questor.Modules.Combat
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
 
             // Get ammo based on damage type
-            IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+            IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId));
+            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
 
             // We are out of ammo! :(
             if (!correctAmmo.Any())
@@ -191,9 +191,9 @@ namespace Questor.Modules.Combat
         {
             IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
-            correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId));
+            correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
 
             if (!correctAmmo1.Any())
                 return;
@@ -314,7 +314,7 @@ namespace Questor.Modules.Combat
             }
 
             // Get the weapons
-            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
+            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons.ToList();
 
             // TODO: Add check to see if there is better ammo to use! :)
             // Get distance of the target and compare that with the ammo currently loaded

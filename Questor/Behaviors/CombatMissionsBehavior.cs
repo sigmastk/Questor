@@ -1205,7 +1205,7 @@ namespace Questor.Behaviors
                     Cache.Instance.OpenWrecks = true;
 
                     target = "Acceleration Gate";
-                    targets = Cache.Instance.EntitiesByName(target);
+                    IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
                     if (targets == null || !targets.Any())
                     {
                         if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageUseGate)
@@ -1327,7 +1327,7 @@ namespace Questor.Behaviors
                             destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                     if (_traveler.Destination == null || _traveler.Destination.SolarSystemId != destination.Last())
                     {
-                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last());
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last()).ToList();
                         if (bookmarks != null && bookmarks.Any())
                             _traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
                         else

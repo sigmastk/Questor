@@ -60,7 +60,7 @@ namespace Questor.Modules.Lookup
                   //should this default to true?
                   //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
                   IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(
-                          e => (DamageType) Enum.Parse(typeof (DamageType), (string) e, true));
+                          e => (DamageType) Enum.Parse(typeof (DamageType), (string) e, true)).ToList();
                   if (damageTypes.Any())
                   {
                       LoadSpecificAmmo(damageTypes.Distinct());

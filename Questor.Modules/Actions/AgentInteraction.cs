@@ -379,7 +379,7 @@ namespace Questor.Modules.Actions
                   Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
                   Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //should this default to true?
                   //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
-                  IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true));
+                  IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
                   if (damageTypes.Any())
                   {
                      LoadSpecificAmmo(damageTypes.Distinct());
