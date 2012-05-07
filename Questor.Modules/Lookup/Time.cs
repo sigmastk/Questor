@@ -35,7 +35,7 @@ namespace Questor.Modules.Lookup
         DelayedGotoBase_seconds = 15,                            // Delay before going back to base, usually after a disconnect / reconnect. units: seconds. Default is 15
         WaitforBadGuytoGoAway_minutes = 25,                       // Stay docked for this amount of time before checking local again, units: minutes. Default is 5
         CloseQuestorDelayBeforeExit_seconds = 20,                // Delay before closing eve, units: seconds. Default is 20
-        QuestorBeforeLoginPulseDelay_seconds = 20,               // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule
+        QuestorBeforeLoginPulseDelay_seconds = 40,               // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule
         SwitchShipsDelay_seconds = 10,                           // Switch Ships Delay before retrying, units: seconds. Default is 10
         SwitchShipsCheck_seconds = 5,                            // Switch Ships Check to see if ship is correct, units: seconds. Default is 7
         FittingWindowLoadFittingDelay_seconds = 7,               // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
