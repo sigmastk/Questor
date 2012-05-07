@@ -310,7 +310,8 @@ namespace Questor
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
-                Cache.Instance.NextInSpaceorInStation = DateTime.Now.AddSeconds(7);
+                Cache.Instance.NextInSpaceorInStation = DateTime.Now.AddSeconds(12);
+                Cache.Instance.LastSessionChange = DateTime.Now;
                 return;
             }
 

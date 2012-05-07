@@ -216,12 +216,13 @@ namespace Questor.Behaviors
 
       private void AvoidBumpingThings()
       {
+            //if It hasn't been at least 60 seconds since we last session changed do not do anything
+            if (Cache.Instance.InStation || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
+                return;
+            //
          // always shoot at NPCs while getting un-hung
          //
-         if (Cache.Instance.InSpace)
-         {
             _combat.ProcessState();
-
             //
             // only use drones if warp scrambled as we do not want to leave them behind accidentally
             //
@@ -229,8 +230,8 @@ namespace Questor.Behaviors
             {
                _drones.ProcessState();
             }
-         }
-         else return;
+            
+            
          //
          // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
          //
