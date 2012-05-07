@@ -214,6 +214,7 @@ namespace Questor.Modules.Caching
         public bool DronesKillHighValueTargets { get; set; }
         public bool InMission { get; set; }
         public DateTime QuestorStarted_DateTime = DateTime.Now;
+        public bool MissionXMLIsAvailable { get; set; }
 
         public bool LocalSafe(int maxBad, double stand)
         {

@@ -386,7 +386,10 @@ namespace Questor.Modules.Combat
 
                     // Recall or engage
                     if (Recall)
+                    {
+                        Statistics.Instance.DroneRecalls++;
                         _States.CurrentDroneState = DroneState.Recalling;
+                    }
                     else
                     {
                         EngageTarget();

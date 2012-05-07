@@ -1,4 +1,4 @@
-﻿
+
 namespace Questor.Modules.Logging
 {
    using System;
@@ -27,6 +27,7 @@ namespace Questor.Modules.Logging
         public int LootValue { get; set; }
         public int LoyaltyPoints { get; set; }
         public int LostDrones { get; set; }
+        public int DroneRecalls { get; set; }
         public int AmmoConsumption { get; set; }
         public int AmmoValue { get; set; }
         public int MissionsThisSession { get; set; }
@@ -111,9 +112,12 @@ namespace Questor.Modules.Logging
                      Logging.Log("Statistics.WriteDroneStatsLog: Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString(CultureInfo.InvariantCulture));
 
                      if (!File.Exists(Settings.Instance.DroneStatslogFile))
-                           File.AppendAllText(Settings.Instance.DroneStatslogFile, "Mission;Number of lost drones\r\n");
-                     string droneline = Cache.Instance.MissionName + ";";
-                     droneline += Statistics.Instance.LostDrones + ";\r\n";
+                           File.AppendAllText(Settings.Instance.DroneStatslogFile, "Date;Mission;Number of lost drones;# of Recalls\r\n");
+                     string droneline = DateTime.Now.ToShortDateString() + ";";
+                     droneline += DateTime.Now.ToShortTimeString() + ";"; 
+                     droneline += Cache.Instance.MissionName + ";";
+                     droneline += Statistics.Instance.LostDrones + ";";
+                     droneline += + Statistics.Instance.DroneRecalls + ";\r\n";
                      File.AppendAllText(Settings.Instance.DroneStatslogFile, droneline);
                      Statistics.Instance.DroneLoggingCompleted = true;
                   }
@@ -273,8 +277,6 @@ namespace Questor.Modules.Logging
             Cache.Instance.RepairCycleTimeThisPocket = 0;
             Cache.Instance.WrecksThisMission += Cache.Instance.WrecksThisPocket;
             Cache.Instance.WrecksThisPocket = 0;
-
-            Statistics.Instance.LostDrones = 0;
         }
 
         public static void WriteMissionStatistics()
@@ -367,6 +369,7 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics: Total LP after mission:  [" + Cache.Instance.Agent.LoyaltyPoints + "]");
                 Logging.Log("Statistics: Total LP before mission: [" + Statistics.Instance.LoyaltyPoints + "]");
                 Logging.Log("Statistics: LostDrones: [" + Statistics.Instance.LostDrones + "]");
+                Logging.Log("Statistics: DroneRecalls: [" + Statistics.Instance.DroneRecalls + "]");
                 Logging.Log("Statistics: AmmoConsumption: [" + Statistics.Instance.AmmoConsumption + "]");
                 Logging.Log("Statistics: AmmoValue: [" + Statistics.Instance.AmmoConsumption + "]");
                 Logging.Log("Statistics: Panic Attempts: [" + Cache.Instance.PanicAttemptsThisMission + "]");
@@ -374,6 +377,7 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics: Lowest Armor %: [" +  Math.Round(Cache.Instance.LowestArmorPercentageThisMission,0) + "]");
                 Logging.Log("Statistics: Lowest Capacitor %: [" +  Math.Round(Cache.Instance.LowestCapacitorPercentageThisMission,0) + "]");
                 Logging.Log("Statistics: Repair Cycle Time: [" +  Cache.Instance.RepairCycleTimeThisMission + "]");
+                Logging.Log("Statistics: MissionXMLIsAvailable: [" + Cache.Instance.MissionXMLIsAvailable + "]");
                 Logging.Log("Statistics: the stats below may not yet be correct and need some TLC");
                 Logging.Log("Statistics: Time Spent Reloading: [" +  Cache.Instance.TimeSpentReloading_seconds + "sec]");
                 Logging.Log("Statistics: Time Spent IN Mission: [" +  Cache.Instance.TimeSpentInMission_seconds + "sec]");
@@ -438,7 +442,7 @@ namespace Questor.Modules.Logging
 
                     // Write the header
                     if (!File.Exists(Settings.Instance.MissionStats3LogFile))
-                        File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;\r\n");
+                        File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;DroneRecalls;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;MissionXMLAvailable;\r\n");
 
                     // Build the line
                     string line3 = DateTime.Now + ";";                                                                                           // Date
@@ -447,6 +451,7 @@ namespace Questor.Modules.Logging
                     line3 += ((long)(Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth)) + ";";                                         // Isk
                     line3 += ((long)Statistics.Instance.LootValue) + ";";                                                                        // Loot
                     line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                               // LP
+                    line3 += ((int)Statistics.Instance.DroneRecalls) + ";";                                                                        // Lost Drones
                     line3 += ((int)Statistics.Instance.LostDrones) + ";";                                                                        // Lost Drones
                     line3 += ((int)Statistics.Instance.AmmoConsumption) + ";";                                                                   // Ammo Consumption
                     line3 += ((int)Statistics.Instance.AmmoValue) + ";";                                                                         // Ammo Value
@@ -456,7 +461,9 @@ namespace Questor.Modules.Logging
                     line3 += ((int)Cache.Instance.LowestCapacitorPercentageThisMission) + ";";                                                   // Lowest Capacitor %
                     line3 += ((int)Cache.Instance.RepairCycleTimeThisMission) + ";";                                                             // repair Cycle Time
                     line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";     // After Mission Salvaging Time
-                    line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";\r\n"; // Total Time, Mission + After Mission Salvaging (if any)
+                    line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";"; // Total Time, Mission + After Mission Salvaging (if any)
+                    line3 += Cache.Instance.MissionXMLIsAvailable.ToString(CultureInfo.InvariantCulture) + ";";
+                    line3 += "\r\n"; 
 
                     // The mission is finished
                     Logging.Log("Statistics: writing mission log3 to  [ " + Settings.Instance.MissionStats3LogFile + " ]");
@@ -471,6 +478,7 @@ namespace Questor.Modules.Logging
                 Statistics.Instance.StartedMission = DateTime.Now;
                 Statistics.Instance.FinishedMission = DateTime.Now; //this may need to be reset to DateTime.MinValue, but that was causing other issues...
                 Cache.Instance.MissionName = string.Empty;
+                Statistics.Instance.DroneRecalls = 0;
                 Statistics.Instance.LostDrones = 0;
                 Statistics.Instance.AmmoConsumption = 0;
                 Statistics.Instance.AmmoValue = 0;

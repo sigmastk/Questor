@@ -364,7 +364,8 @@ namespace Questor.Modules.Actions
             Cache.Instance.MissionAmmo = new List<Ammo>();
             if (File.Exists(missionXmlPath))
             {
-               Logging.Log("AgentInteraction: Loading mission xml [" + missionName + "]");
+               Logging.Log("AgentInteraction: Loading mission xml [" + missionName + "] from [" + missionXmlPath + "]");
+               Cache.Instance.MissionXMLIsAvailable = true;
                //
                // this loads the settings global to the mission, NOT individual pockets
                //
@@ -390,6 +391,11 @@ namespace Questor.Modules.Actions
                {
                    Logging.Log("AgentInteraction: Error parsing damage types for mission [" + Cache.Instance.Mission.Name + "], " + ex.Message);
                }
+            }
+            else
+            {
+                Logging.Log("AgentInteraction: Missing mission xml [" + missionName + "] from [" + missionXmlPath + "] !!!");
+                Cache.Instance.MissionXMLIsAvailable = false;
             }
 
             if (!loadedAmmo)
