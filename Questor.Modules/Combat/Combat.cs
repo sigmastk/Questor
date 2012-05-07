@@ -712,20 +712,21 @@ namespace Questor.Modules.Combat
 
         public void ProcessState()
         {
-
-            if (Cache.Instance.InStation ||// There is really no combat in stations (yet)
+            if (_States.CurrentCombatState != CombatState.Idle &&
+                (Cache.Instance.InStation ||// There is really no combat in stations (yet)
                 !Cache.Instance.InSpace || // if we are not in space yet, wait...
                 Cache.Instance.DirectEve.ActiveShip.Entity == null || // What? No ship entity?
                 Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
-                Cache.Instance.InWarp) //you cant do combat while warping!
+                Cache.Instance.InWarp)) //you cant do combat while warping!
             {
                 _States.CurrentCombatState = CombatState.Idle;
+                return;
             }
 
             //
             // only the ship defined in CombatShipName will do combat: we assume all other ships are non-combat ships!!!!
             //
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower())
+            if (Cache.Instance.InSpace && (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower()))
             {
                 _States.CurrentCombatState = CombatState.Idle;
             }
