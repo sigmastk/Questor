@@ -827,7 +827,7 @@ namespace Questor.Behaviors
                     List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
-                        // happens if autopilot isn't set and this questorstate is choosen manually
+                        // happens if autopilot isn't set and this questorstate is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("DedicatedBookmarkSalvagerBehavior.Traveler: No destination?");
                         if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Traveler) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Error;
