@@ -176,12 +176,6 @@ namespace Questor.Modules.Combat
                 return;
             }
 
-            // Update health values
-            _shieldPctTotal = GetShieldPctTotal();
-            _armorPctTotal = GetArmorPctTotal();
-            _structurePctTotal = GetStructurePctTotal();
-            _lastDroneCount = Cache.Instance.ActiveDrones.Count();
-
             switch (_States.CurrentDroneState)
             {
                 case DroneState.WaitingForTargets:
@@ -435,6 +429,11 @@ namespace Questor.Modules.Combat
                     TargetingCache.CurrentDronesTarget = null;
                     break;
             }
+            // Update health values
+            _shieldPctTotal = GetShieldPctTotal();
+            _armorPctTotal = GetArmorPctTotal();
+            _structurePctTotal = GetStructurePctTotal();
+            _lastDroneCount = Cache.Instance.ActiveDrones.Count();
         }
     }
 }
