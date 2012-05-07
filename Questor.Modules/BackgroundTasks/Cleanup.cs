@@ -178,7 +178,7 @@ namespace Questor.Modules.BackgroundTasks
                         //
                         sayyes |= window.Html.Contains("objectives requiring a total capacity");
                         sayyes |= window.Html.Contains("your ship only has space for");
-                        sayyes |= window.Html.Contains("delete bookmark");
+                        sayyes |= window.Html.Contains("Are you sure you want to remove location");
                         //
                         // Modal Dialogs the need "no" pressed
                         //
