@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 // Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -82,6 +82,7 @@ namespace Questor.Modules.Lookup
         //
         public bool DebugStates { get; set; }
         public bool DebugPerformance { get; set; }
+        public bool DetailedCurrentTargetHealthLogging { get; set; }
 
         //
         // Misc Settings
@@ -458,6 +459,7 @@ namespace Questor.Modules.Lookup
                   //enables more console logging having to do with the sub-states within each state
                DebugPerformance = (bool?) xml.Element("debugPerformance") ?? false;
                   //enabled more console logging having to do with the time it takes to execute each state
+               DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? false;
                //
                // Misc Settings
                //
@@ -556,7 +558,7 @@ namespace Questor.Modules.Lookup
                UseGatesInSalvage = (bool?) xml.Element("useGatesInSalvage") ?? false;
                   // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
                CreateSalvageBookmarks = (bool?) xml.Element("createSalvageBookmarks") ?? false;
-               CreateSalvageBookmarksIn = (string) xml.Element("createSalvageBookmarksIn") ?? "Player";
+               CreateSalvageBookmarksIn = (string) xml.Element("createSalvageBookmarksIn") ?? "Player"; //Player or Corp
                   //other setting is "Corp"
                BookmarkPrefix = (string) xml.Element("bookmarkPrefix") ?? "Salvage:";
                MinimumWreckCount = (int?) xml.Element("minimumWreckCount") ?? 1;

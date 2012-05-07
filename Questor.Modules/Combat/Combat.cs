@@ -282,7 +282,7 @@ namespace Questor.Modules.Combat
             }
 
             // Return best possible target
-            return Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false);
+            return Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false,"Combat");
         }
 
         /// <summary> Activate weapons

@@ -8,6 +8,8 @@
   <debugStates>false</debugStates>  <!-- default is false -->
   <!-- debugPerformance: creates more verbose logging: use for debugging purposes only -->
   <debugPerformance>false</debugPerformance>  <!-- default is false -->
+  <!-- debugCurrentTarget: Shows detailed Shields and Armor levels for the currenttarget as things get killed (or not) -->  
+  <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->

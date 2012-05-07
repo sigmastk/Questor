@@ -1580,8 +1580,9 @@ namespace Questor.Modules.Caching
         /// <param name="currentTarget"></param>
         /// <param name="distance"></param>
         /// <param name="lowValueFirst"></param>
+        /// <param name="callingroutine"> </param>
         /// <returns></returns>
-        public EntityCache GetBestTarget(EntityCache currentTarget, double distance, bool lowValueFirst)
+        public EntityCache GetBestTarget(EntityCache currentTarget, double distance, bool lowValueFirst, string callingroutine)
         {
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target
@@ -1600,6 +1601,30 @@ namespace Questor.Modules.Caching
             // Is our current target any other priority target?
             if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id))
                 return currentTarget;
+
+            if (Settings.Instance.DetailedCurrentTargetHealthLogging)
+            {
+                if (currentTarget != null)
+                    if (currentTarget.ArmorPct != null)
+                        if (currentTarget.ShieldPct != null)
+                        {
+                            //
+                            // assign shields and armor (hull?) to local and to targetingcache variables - compare them to each other
+                            // to see if we need to send another log message to the console, if the values havent changed no need to log it.
+                            //
+                            Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget is [" + currentTarget.Name +                           //name
+                                        "][" + (Math.Round(currentTarget.Distance/1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
+                                        "k][Shield%:[" + Math.Round(currentTarget.ShieldPct*100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
+                                        "][Armor%:[" + Math.Round(currentTarget.ArmorPct*100, 0).ToString(CultureInfo.InvariantCulture) +"]"); //armor
+                            
+                        }
+            }
+            // Is our current target already in armor? keep shooting the same target if so...
+            if (currentTarget != null && currentTarget.ArmorPct * 100 < 60)
+            {
+                //Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget has less than 60% armor, keep killing this target");
+                return currentTarget;
+            }
 
             // Get the closest priority target
             target = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);

@@ -80,12 +80,12 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.DronesKillHighValueTargets)
             {
                 // Return best possible high value target
-                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, false);
+                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, false,"Drones");
             }
             else
             {
                 // Return best possible low value target
-                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, true);
+                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, true,"Drones");
             }
         }
 
