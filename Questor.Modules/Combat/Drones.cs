@@ -41,6 +41,7 @@ namespace Questor.Modules.Combat
         private double _shieldPctTotal;
         private double _structurePctTotal;
         public bool Recall; //false
+        public bool WarpScrambled; //false
        
         private double GetShieldPctTotal()
         {
@@ -286,10 +287,16 @@ namespace Questor.Modules.Combat
                     }
                     else
                     {
-                        if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe) && Recall)
+                        if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
                             Logging.Log("Drones: Overriding drone recall, we are scrambled!");
                             Recall = false;
+                            WarpScrambled = true;
+                        }
+                        else
+                        {
+                            //Logging.Log("Drones: We are not warp scrambled at the moment...");
+                            WarpScrambled = false;
                         }
                     }
 
@@ -304,12 +311,12 @@ namespace Questor.Modules.Combat
                             Recall = true;
                         }
 
-                        if (!Recall & (Cache.Instance.IsMissionPocketDone))
+                        if (!Recall & (Cache.Instance.IsMissionPocketDone) && !WarpScrambled)
                         {
                             Logging.Log("Drones: Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because we are done with this pocket.");
                             Recall = true;
                         }
-                        else if ((!Recall & _shieldPctTotal > GetShieldPctTotal()))
+                        else if (!Recall & (_shieldPctTotal > GetShieldPctTotal()))
                         {
                             Logging.Log("Drones: Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because drones have lost some shields! [Old: " +
                                         _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") +
