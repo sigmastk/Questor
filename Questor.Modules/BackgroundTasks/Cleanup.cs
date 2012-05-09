@@ -136,16 +136,6 @@ namespace Questor.Modules.BackgroundTasks
                         // Server going down
                         close |= window.Html.Contains("Please make sure your characters are out of harm");
                         close |= window.Html.Contains("the servers are down for 30 minutes each day for maintenance and updates");
-                        if (window.Html.Contains("The socket was closed"))
-                        {
-                           Logging.Log("Cleanup: This window indicates we are disconnected: Content of modal window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]");
-                           //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdLogOff); //this causes the questor window to not re-appear
-                           Cache.Instance.CloseQuestorCMDLogoff = false;
-                           Cache.Instance.CloseQuestorCMDExitGame = true;
-                           Cache.Instance.ReasonToStopQuestor = "The socket was closed";
-                           Cache.Instance.SessionState = "Quitting";
-                           break;
-                        }
 
                         // In space "shit"
                         close |= window.Html.Contains("Item cannot be moved back to a loot container.");
