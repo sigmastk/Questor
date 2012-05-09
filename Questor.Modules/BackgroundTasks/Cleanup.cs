@@ -120,6 +120,8 @@ namespace Questor.Modules.BackgroundTasks
                      bool restart = false;
                      bool gotobasenow = false;
                      bool sayyes = false;
+                     bool needhumanintervention = false;
+                     
                      //bool sayno = false;
                      if (!string.IsNullOrEmpty(window.Html))
                      {
@@ -128,6 +130,9 @@ namespace Questor.Modules.BackgroundTasks
                         // dock now to avoid problems
                         gotobasenow |= window.Html.Contains("for a short unscheduled reboot");
 
+                        //errors that are repeatable and unavoidable even after a restart of eve/questor
+                        needhumanintervention = window.Html.Contains("Please check your mission journal for further information.");
+                        
                         // Server going down
                         close |= window.Html.Contains("Please make sure your characters are out of harm");
                         close |= window.Html.Contains("the servers are down for 30 minutes each day for maintenance and updates");
@@ -227,6 +232,40 @@ namespace Questor.Modules.BackgroundTasks
                         window.Close();
                         continue;
                      }
+                    if (needhumanintervention)
+                    {
+                        Statistics.Instance.MissionCompletionErrors++;
+                        Logging.Log("Cleanup: This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3");
+                        window.Close();
+                        if (Statistics.Instance.MissionCompletionErrors > 3 && Cache.Instance.InStation)
+                        {
+                            if (Cache.Instance.MissionXMLIsAvailable)
+                            {
+                                Logging.Log("Cleanup: ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!");
+                                Settings.Instance.AutoStart = false;
+                                //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
+                                //Cache.Instance.CloseQuestorCMDLogoff = false;
+                                //Cache.Instance.CloseQuestorCMDExitGame = true;
+                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
+                                //Cache.Instance.SessionState = "Exiting";
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                                
+                            }
+                            else
+                            {
+                                Logging.Log("Cleanup: ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!");
+                                Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
+                                //Cache.Instance.CloseQuestorCMDLogoff = false;
+                                //Cache.Instance.CloseQuestorCMDExitGame = true;
+                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
+                                //Cache.Instance.SessionState = "Exiting";
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;    
+                            }
+                            
+                            
+                        }
+                        break;
+                    }
                   }
                }
                _States.CurrentCleanupState = CleanupState.CheckWindowsThatDontBelongInSpace;

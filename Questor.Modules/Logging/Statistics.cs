@@ -31,6 +31,7 @@ namespace Questor.Modules.Logging
         public int AmmoConsumption { get; set; }
         public int AmmoValue { get; set; }
         public int MissionsThisSession { get; set; }
+        public int MissionCompletionErrors { get; set; }
 
         public bool MissionLoggingCompleted = false;
         public bool DroneLoggingCompleted = false;
@@ -378,6 +379,7 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics: Lowest Capacitor %: [" +  Math.Round(Cache.Instance.LowestCapacitorPercentageThisMission,0) + "]");
                 Logging.Log("Statistics: Repair Cycle Time: [" +  Cache.Instance.RepairCycleTimeThisMission + "]");
                 Logging.Log("Statistics: MissionXMLIsAvailable: [" + Cache.Instance.MissionXMLIsAvailable + "]");
+                Logging.Log("Statistics: MissionCompletionerrors: [" + Statistics.Instance.MissionCompletionErrors + "]");
                 Logging.Log("Statistics: the stats below may not yet be correct and need some TLC");
                 Logging.Log("Statistics: Time Spent Reloading: [" +  Cache.Instance.TimeSpentReloading_seconds + "sec]");
                 Logging.Log("Statistics: Time Spent IN Mission: [" +  Cache.Instance.TimeSpentInMission_seconds + "sec]");
@@ -483,6 +485,7 @@ namespace Questor.Modules.Logging
                 Statistics.Instance.AmmoConsumption = 0;
                 Statistics.Instance.AmmoValue = 0;
                 Statistics.Instance.DroneLoggingCompleted = false;
+                Statistics.Instance.MissionCompletionErrors = 0;
 
                 Cache.Instance.PanicAttemptsThisMission = 0;
                 Cache.Instance.LowestShieldPercentageThisMission = 101;
