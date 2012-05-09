@@ -606,7 +606,7 @@ namespace Questor.Behaviors
                         // found NPCs that will likely kill out fragile salvage boat!
                         List<DirectBookmark> missionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                         Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage: could not be completed because of NPCs left in the mission: deleting salvage bookmarks");
-                        bool _deleteBookmarkWithNpc_tmp = false;
+                        bool _deleteBookmarkWithNpc_tmp = true;
                         if (_deleteBookmarkWithNpc_tmp)
                         {
                             while (true)
