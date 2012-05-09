@@ -170,11 +170,14 @@
   <walletbalancechangelogoffdelay>40</walletbalancechangelogoffdelay><!-- default is 40 -->
   <!-- EVEProcessMemoryCieling: If this instance of EVE consumes more than the stated MB of Memory close eve when in station between missions-->
   <EVEProcessMemoryCeiling>1150</EVEProcessMemoryCeiling><!-- default is 1150-->
-  <!-- These two options are mutually exclusive: choose ONE: -->
+  <!-- These three options are mutually exclusive: choose ONE: -->
   <!-- When questor has to quit (walletbalance or eveprocessmemoryceiling or <insert reason here> questor will try to initiate a timedcommand to the innerspace uplink to restart the session -->
-  <!-- it needs to know if you want to launch the session using the innerspace profile or the ISBoxer Character Set-->
+  <!-- it needs to know if you want to launch the session using the innerspace profile or the ISBoxer Character Set or just execute an arbitrary OS command-->
   <CloseQuestorCMDUplinkInnerspaceProfile>true</CloseQuestorCMDUplinkInnerspaceProfile>  <!-- default is: true -->
   <CloseQuestorCMDUplinkIsboxerCharacterSet>false</CloseQuestorCMDUplinkIsboxerCharacterSet>  <!-- default is: false -->
+  <CloseQuestorArbitraryOSCmd>false</CloseQuestorArbitraryOSCmd> <!-- default is: false -->
+  <CloseQuestorOSCmdContents></CloseQuestorOSCmdContents> <!-- contains the command to be executed, must be valid in a cmd shell executed in the IS directory -->
+
 
   <!--                                                -->
   <!--        WRECKS SETTINGS        -->

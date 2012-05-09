@@ -183,6 +183,8 @@ namespace Questor.Modules.Lookup
         public string EVEProcessMemoryCeilingLogofforExit { get; set; }
         public bool CloseQuestorCMDUplinkInnerspaceProfile { get; set; }
         public bool CloseQuestorCMDUplinkIsboxerCharacterSet { get; set; }
+        public bool CloseQuestorArbitraryOSCmd { get; set; }
+        public string CloseQuestorOSCmdContents { get; set; }
         public int SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 240;
 
         public string LavishIsBoxerCharacterSet { get; set; }
@@ -579,6 +581,10 @@ namespace Questor.Modules.Lookup
 
                CloseQuestorCMDUplinkInnerspaceProfile = (bool?)xml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
                CloseQuestorCMDUplinkIsboxerCharacterSet = (bool?) xml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
+               
+               CloseQuestorArbitraryOSCmd = (bool?) xml.Element("CloseQuestorArbitraryOSCmd") ?? false; //true or false
+               CloseQuestorOSCmdContents = (string)xml.Element("CloseQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: CloseQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+               //the above setting can be set to any script or commands available on the system. make sure you test it from a command prompt while in your .net programs directory
 
                Walletbalancechangelogoffdelay = (int?) xml.Element("walletbalancechangelogoffdelay") ?? 30;
                WalletbalancechangelogoffdelayLogofforExit = (string) xml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
