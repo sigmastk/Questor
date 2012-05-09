@@ -1012,7 +1012,7 @@ namespace Questor.Modules.Caching
         }
         public IEnumerable<EntityCache> BigObjects
         {
-            get { return _bigobjects ?? (_bigobjects = Entities.Where(e => e.GroupId == (int)Group.LargeCollidableStructure || e.GroupId == (int)Group.SpawnContainer || e.GroupId == (int)Group.CargoContainer || e.GroupId == (int)Group.Wreck && e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList()); }
+            get { return _bigobjects ?? (_bigobjects = Entities.Where(e => e.GroupId == (int)Group.LargeCollidableStructure || e.GroupId == (int)Group.SpawnContainer && e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList()); }
         }
 
         public EntityCache Star
