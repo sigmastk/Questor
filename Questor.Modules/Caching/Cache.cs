@@ -2086,19 +2086,20 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
-                    if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenLootContainer")) return false;
+                    if (!Cache.Instance.OpenItemsHangar("Cache.OpenLootContainer")) return false;
 
-                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
                     if (firstlootcontainer != null)
                     {
                         long lootContainerID = firstlootcontainer.ItemId;
                         Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetContainer(lootContainerID);
                         Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        return true;
                     }
                     else
                     {
                         Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
-                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
+                        var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
                         if (firstothercontainer != null)
                         {
                             
