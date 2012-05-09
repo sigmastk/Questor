@@ -223,7 +223,7 @@ namespace Questor.Modules.Combat
 
                 _lastWeaponReload[weapon.ItemId] = DateTime.Now;
 
-                if (charge != null && weapon.Charge.TypeId == charge.TypeId)
+                if (weapon.Charge != null && (charge != null && weapon.Charge.TypeId == charge.TypeId))
                 {
                     Logging.Log("Combat: ReloadAll [" + weapon.ItemId + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]");
 
