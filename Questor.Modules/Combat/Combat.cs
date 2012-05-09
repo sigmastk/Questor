@@ -111,7 +111,7 @@ namespace Questor.Modules.Combat
                     Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
                     Cache.Instance.LastLoggingAction = DateTime.Now;
                 }
-                Logging.Log("Combat: Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000,0) +"k]"));
+                Logging.Log("Combat: Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000,0) +"k]");
                 weapon.ChangeAmmo(charge);
             }
 
