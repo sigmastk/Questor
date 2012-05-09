@@ -93,6 +93,11 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _stations;
 
         /// <summary>
+        ///   Station cache
+        /// </summary>
+        private EntityCache _closeststation;
+
+        /// <summary>
         ///   Stargate cache
         /// </summary>
         private List<EntityCache> _stargates;
@@ -977,6 +982,11 @@ namespace Questor.Modules.Caching
             get { return _stations ?? (_stations = Entities.Where(e => e.CategoryId == (int) CategoryID.Station).ToList()); }
         }
 
+        public EntityCache ClosestStation
+        {
+           get { return _closeststation ?? (_closeststation = _stations.OrderBy(s => s.Distance).FirstOrDefault()); }
+        }
+
         public EntityCache StationByName(string stationName)
         {
             EntityCache _station = Stations.First(x => x.Name.ToLower() == stationName.ToLower());
@@ -998,7 +1008,7 @@ namespace Questor.Modules.Caching
         }
         public EntityCache ClosestStargate
         {
-            get { return _closeststargate ?? (_closeststargate = Entities.FirstOrDefault(e => e.GroupId == (int)Group.Stargate)); }
+           get { return _closeststargate ?? (_closeststargate = _stargates.OrderBy(s => s.Distance).FirstOrDefault()); }
         }
 
         public EntityCache StargateByName (string locationName)

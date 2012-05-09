@@ -235,25 +235,28 @@ namespace Questor.Behaviors
          //
          // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
          //
-         EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-         if (thisBigObject != null)
+         if (Cache.Instance.ClosestStargate.Distance > 20000 || Cache.Instance.ClosestStation.Distance > 10000)
          {
-            if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
+            EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
+            if (thisBigObject != null)
             {
-               //we are no longer "too close" and can proceed.
-            }
-            else
-            {
-               if (DateTime.Now > Cache.Instance.NextOrbit)
+               if (thisBigObject.Distance >= (int) Distance.TooCloseToStructure)
                {
-                  thisBigObject.Orbit((int)Distance.SafeDistancefromStructure);
-                  Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState +
-                              ": initiating Orbit of [" + thisBigObject.Name +
-                          "] orbiting at [" + Distance.SafeDistancefromStructure + "]");
-                  Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                  //we are no longer "too close" and can proceed.
                }
-               return;
-               //we are still too close, do not continue through the rest until we are not "too close" anymore
+               else
+               {
+                  if (DateTime.Now > Cache.Instance.NextOrbit)
+                  {
+                     thisBigObject.Orbit((int) Distance.SafeDistancefromStructure);
+                     Logging.Log("CombatMissionsBehavior: " + _States.CurrentCombatMissionBehaviorState +
+                                 ": initiating Orbit of [" + thisBigObject.Name +
+                                 "] orbiting at [" + Distance.SafeDistancefromStructure + "]");
+                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
+                  }
+                  return;
+                  //we are still too close, do not continue through the rest until we are not "too close" anymore
+               }
             }
          }
       }
