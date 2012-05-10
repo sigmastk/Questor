@@ -301,20 +301,17 @@ namespace Questor
             _lastPulse = DateTime.Now;
 
             // Session is not ready yet, do not continue
-            if (!Cache.Instance.DirectEve.Session.IsReady)
-                return;
-
-            if (Cache.Instance.DirectEve.Session.IsReady)
-                Cache.Instance.LastSessionIsReady = DateTime.Now;
-            
-            // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
-                Cache.Instance.NextInSpaceorInStation = DateTime.Now.AddSeconds(12);
-                Cache.Instance.LastSessionChange = DateTime.Now;
-                return;
+               Cache.Instance.NextInSpaceorInStation = DateTime.Now.AddSeconds(12);
+               Cache.Instance.LastSessionChange = DateTime.Now;
+               return;
             }
-
+            else
+            {
+               Cache.Instance.LastSessionIsReady = DateTime.Now;
+            }
+                 
             if (DateTime.Now < Cache.Instance.NextInSpaceorInStation)
                 return;
 
