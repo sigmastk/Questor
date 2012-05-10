@@ -64,6 +64,7 @@
         <parameter name="Quantity" value="30"></parameter>
       </action>
       <action name="Done"></action>
+	  <action name="SalvageBookmark"></action>
     </pocket>
   </pockets>
 </Missions>
