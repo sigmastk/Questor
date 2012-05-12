@@ -1,5 +1,4 @@
-﻿
-namespace Questor.Modules.Actions
+﻿namespace Questor.Modules.Actions
 {
     using System;
     using System.Collections.Generic;
@@ -12,7 +11,9 @@ namespace Questor.Modules.Actions
     public class Drop
     {
         public int Item { get; set; }
+
         public int Unit { get; set; }
+
         public string Hangar { get; set; }
 
         private DateTime _lastAction;
@@ -29,7 +30,6 @@ namespace Questor.Modules.Actions
                 _hangar = Cache.Instance.DirectEve.GetShipHangar();
             else
                 _hangar = Cache.Instance.DirectEve.GetCorporationHangar(Hangar);
-
 
             switch (_States.CurrentDropState)
             {
@@ -57,7 +57,6 @@ namespace Questor.Modules.Actions
                         }
                         if (!_hangar.IsReady)
                             break;
-            
                     }
                     else if ("Ship Hangar" == Hangar)
                     {
@@ -70,20 +69,20 @@ namespace Questor.Modules.Actions
                         if (!_hangar.IsReady)
                             break;
                     }
-                    else 
+                    else
                     {
                         if (_hangar.Window == null)
-                            {
-                                // No, command it to open
-                                Cache.Instance.DirectEve.OpenCorporationHangar();
-                                break;
-                            }
+                        {
+                            // No, command it to open
+                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            break;
+                        }
 
                         if (!_hangar.IsReady)
                             break;
                     }
 
-                    Logging.Log("Drop: Opening Hangar");
+                    Logging.Log("Drop", "Opening Hangar", Logging.white);
                     _States.CurrentDropState = DropState.OpenCargo;
                     break;
 
@@ -102,11 +101,8 @@ namespace Questor.Modules.Actions
                     if (!cargo.IsReady)
                         break;
 
-                    Logging.Log("Drop: Opening Cargo Hold");
-                    if (Item == 00)
-                        _States.CurrentDropState = DropState.AllItems;
-                    else
-                        _States.CurrentDropState = DropState.MoveItems;
+                    Logging.Log("Drop", "Opening Cargo Hold", Logging.white);
+                    _States.CurrentDropState = Item == 00 ? DropState.AllItems : DropState.MoveItems;
 
                     break;
 
@@ -121,7 +117,7 @@ namespace Questor.Modules.Actions
                         if (DropItem != null)
                         {
                             _hangar.Add(DropItem, DropItem.Quantity);
-                            Logging.Log("Drop: Moving all the items");
+                            Logging.Log("Drop", "Moving all the items", Logging.white);
                             _lastAction = DateTime.Now;
                             _States.CurrentDropState = DropState.WaitForMove;
                         }
@@ -132,7 +128,7 @@ namespace Questor.Modules.Actions
                         if (DropItem != null)
                         {
                             _hangar.Add(DropItem, Unit);
-                            Logging.Log("Drop: Moving item");
+                            Logging.Log("Drop", "Moving item", Logging.white);
                             _lastAction = DateTime.Now;
                             _States.CurrentDropState = DropState.WaitForMove;
                         }
@@ -145,15 +141,14 @@ namespace Questor.Modules.Actions
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 2)
                         break;
 
-                        List<DirectItem> AllItem = cargo.Items;
-                        if (AllItem != null)
-                        {
-                            _hangar.Add(AllItem);
-                            Logging.Log("Drop: Moving item");
-                            _lastAction = DateTime.Now;
-                            _States.CurrentDropState = DropState.WaitForMove;
-                        }
-
+                    List<DirectItem> AllItem = cargo.Items;
+                    if (AllItem != null)
+                    {
+                        _hangar.Add(AllItem);
+                        Logging.Log("Drop", "Moving item", Logging.white);
+                        _lastAction = DateTime.Now;
+                        _States.CurrentDropState = DropState.WaitForMove;
+                    }
 
                     break;
 
@@ -170,16 +165,14 @@ namespace Questor.Modules.Actions
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
-
                         _States.CurrentDropState = DropState.StackItemsHangar;
                         break;
                     }
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds > 120)
                     {
-                        Logging.Log("Drop: Moving items timed out, clearing item locks");
+                        Logging.Log("Drop", "Moving items timed out, clearing item locks", Logging.white);
                         Cache.Instance.DirectEve.UnlockItems();
-
 
                         _States.CurrentDropState = DropState.StackItemsHangar;
                         break;
@@ -194,16 +187,13 @@ namespace Questor.Modules.Actions
                     // Stack everything
                     if (_hangar != null)
                     {
-                        Logging.Log("Drop: Stacking items");
+                        Logging.Log("Drop", "Stacking items", Logging.white);
                         _hangar.StackAll();
                         _lastAction = DateTime.Now;
                     }
 
-
-
                     _States.CurrentDropState = DropState.WaitForStacking;
                     break;
-
 
                 case DropState.WaitForStacking:
                     // Wait 5 seconds after stacking
@@ -212,30 +202,22 @@ namespace Questor.Modules.Actions
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
-                        Logging.Log("Drop: Done");
+                        Logging.Log("Drop", "Done", Logging.white);
                         _States.CurrentDropState = DropState.Done;
                         break;
                     }
 
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds > 120)
                     {
-                        Logging.Log("Drop: Stacking items timed out, clearing item locks");
+                        Logging.Log("Drop", "Stacking items timed out, clearing item locks", Logging.white);
                         Cache.Instance.DirectEve.UnlockItems();
 
-                        Logging.Log("Drop: Done");
+                        Logging.Log("Drop", "Done", Logging.white);
                         _States.CurrentDropState = DropState.Done;
                         break;
                     }
                     break;
-
-                   
-
             }
-
-
         }
-
-
-
     }
 }

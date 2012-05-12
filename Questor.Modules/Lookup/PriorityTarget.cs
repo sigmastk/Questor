@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-
-
 namespace Questor.Modules.Lookup
 {
     using global::Questor.Modules.Caching;
@@ -17,18 +15,14 @@ namespace Questor.Modules.Lookup
     public class PriorityTarget
     {
         private EntityCache _entity;
+
         public long EntityID { get; set; }
+
         public Priority Priority { get; set; }
 
         public EntityCache Entity
         {
-            get
-            {
-                if (_entity == null)
-                    _entity = Cache.Instance.EntityById(EntityID);
-
-                return _entity;
-            }
+            get { return _entity ?? (_entity = Cache.Instance.EntityById(EntityID)); }
         }
 
         public void ClearCache()

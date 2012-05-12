@@ -16,11 +16,11 @@ namespace QuestorSettings
     public partial class QuestorSettingsUI : Form
     {
         string Localpath = Application.StartupPath;
+
         public string file { get; set; }
 
         public QuestorSettingsUI()
         {
-
             InitializeComponent();
             Refres();
         }
@@ -46,7 +46,6 @@ namespace QuestorSettings
             lblmessage.Text = "";
             file = Localpath + "\\" + cmbXML.SelectedItem.ToString();
             ReadXML(file);
-
         }
 
         private void ReadXML(string File)
@@ -80,7 +79,6 @@ namespace QuestorSettings
             if (blacklist != null)
                 foreach (XElement mission in blacklist.Elements("mission"))
                     txtblacklist.Text += ((string)mission) + "\r\n";
-
 
             txtcombatShipName.Text = (string)xml.Element("combatShipName");
             txtmaximumHighValueTargets.Text = (string)xml.Element("maximumHighValueTargets");
@@ -129,7 +127,6 @@ namespace QuestorSettings
             cmbafterMissionSalvaging.Text = (string)xml.Element("afterMissionSalvaging");
             cmbunloadLootAtStation.Text = (string)xml.Element("unloadLootAtStation");
 
-
             txtactivateRepairModules.Text = (string)xml.Element("activateRepairModules");
             txtdeactivateRepairModules.Text = (string)xml.Element("deactivateRepairModules");
             txtminimumShieldPct.Text = (string)xml.Element("minimumShieldPct");
@@ -152,20 +149,16 @@ namespace QuestorSettings
             txtlongRangeDroneRecallArmorPct.Text = (string)xml.Element("longRangeDroneRecallArmorPct");
             txtlongRangeDroneRecallCapacitorPct.Text = (string)xml.Element("longRangeDroneRecallCapacitorPct");
 
-
             txtinvasionMinimumDelay.Text = (string)xml.Element("invasionMinimumDelay");
             txtinvasionRandomDelay.Text = (string)xml.Element("invasionRandomDelay");
             txtfrigateInvasionLimit.Text = (string)xml.Element("frigateInvasionLimit");
             txtcruiserInvasionLimit.Text = (string)xml.Element("cruiserInvasionLimit");
             txtbattlecruiserInvasionLimit.Text = (string)xml.Element("battlecruiserInvasionLimit");
             txtbattleshipInvasionLimit.Text = (string)xml.Element("battleshipInvasionLimit");
-
-
         }
 
         private void cmdSave_Click(object sender, EventArgs e)
         {
-
             string file = Localpath + "\\" + cmbXML.Text;
             string strXml = "<Settings>";
 
@@ -199,7 +192,6 @@ namespace QuestorSettings
                 strXml += "<mission>" + linea + "</mission>";
             strXml += "</blacklist>";
 
-
             //Settings Combat
             strXml += "<!--Settings Combat-->";
             strXml += "<combatShipName>" + txtcombatShipName.Text + "</combatShipName>";
@@ -224,7 +216,6 @@ namespace QuestorSettings
                 strXml += "<factionfitting faction='" + Convert.ToString(DGV1.Rows[o].Cells["Column6"].Value) + "' fitting='" + Convert.ToString(DGV1.Rows[o].Cells["Column5"].Value) + "' />";
             strXml += "</factionfittings>";
 
-
             //Settings Salvage
             strXml += "<!--Settings Salvage-->";
             strXml += "<salvageShipName>" + txtsalvageShipName.Text + "</salvageShipName>";
@@ -236,7 +227,6 @@ namespace QuestorSettings
             strXml += "<afterMissionSalvaging>" + cmbafterMissionSalvaging.Text + "</afterMissionSalvaging>";
             strXml += "<unloadLootAtStation>" + cmbunloadLootAtStation.Text + "</unloadLootAtStation>";
 
-
             //Settings Defense
             strXml += "<!--Settings Defense-->";
             strXml += "<activateRepairModules>" + txtactivateRepairModules.Text + "</activateRepairModules>";
@@ -247,7 +237,6 @@ namespace QuestorSettings
             strXml += "<safeShieldPct>" + txtsafeShieldPct.Text + "</safeShieldPct>";
             strXml += "<safeArmorPct>" + txtsafeArmorPct.Text + "</safeArmorPct>";
             strXml += "<safeCapacitorPct>" + txtsafeCapacitorPct.Text + "</safeCapacitorPct>";
-
 
             //Settings Drones
             strXml += "<!--Settings Drones-->";
@@ -264,7 +253,6 @@ namespace QuestorSettings
             strXml += "<longRangeDroneRecallArmorPct>" + txtlongRangeDroneRecallArmorPct.Text + "</longRangeDroneRecallArmorPct>";
             strXml += "<longRangeDroneRecallCapacitorPct>" + txtlongRangeDroneRecallCapacitorPct.Text + "</longRangeDroneRecallCapacitorPct>";
 
-
             //Settings Invasion
             strXml += "<!--Settings Invasion-->";
             strXml += "<invasionRandomDelay>" + txtinvasionRandomDelay.Text + "</invasionRandomDelay>";
@@ -274,7 +262,6 @@ namespace QuestorSettings
             strXml += "<battlecruiserInvasionLimit>" + txtbattlecruiserInvasionLimit.Text + "</battlecruiserInvasionLimit>";
             strXml += "<battleshipInvasionLimit>" + txtbattleshipInvasionLimit.Text + "</battleshipInvasionLimit>";
 
-
             strXml += "</Settings>";
 
             XElement xml = XElement.Parse(strXml);
@@ -282,7 +269,6 @@ namespace QuestorSettings
             FileXml.Save(file);
             lblmessage.ForeColor = System.Drawing.ColorTranslator.FromHtml("Green");
             lblmessage.Text = "Save as " + cmbXML.Text;
-
         }
 
         private void cmbuseDrones_SelectedIndexChanged(object sender, EventArgs e)
@@ -348,7 +334,7 @@ namespace QuestorSettings
 
         private void linkLabel12_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            MessageBox.Show(@"<!-- Loot everything or only mission loot, if turned off empty loot-actions are ignored 
+            MessageBox.Show(@"<!-- Loot everything or only mission loot, if turned off empty loot-actions are ignored
        and the action is finished as soon as the mission item is in the ship's cargo, if turned
        on then the bot will loot all wrecks/cans before finishing the loot-action -->");
         }
@@ -390,7 +376,7 @@ namespace QuestorSettings
 
         private void linkLabel20_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            MessageBox.Show(@"<!-- If the weapon has less then minimumAmmoCharges, the weapon is forced to reload 
+            MessageBox.Show(@"<!-- If the weapon has less then minimumAmmoCharges, the weapon is forced to reload
        before attacking a new target -->");
         }
 
@@ -411,8 +397,8 @@ namespace QuestorSettings
 
         private void linkLabel24_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            MessageBox.Show(@"<!-- When defining ammo here, do NOT define them by the damage that the ammo does 
-       but define them based on the ammo you want to use when the bot faces rats weak 
+            MessageBox.Show(@"<!-- When defining ammo here, do NOT define them by the damage that the ammo does
+       but define them based on the ammo you want to use when the bot faces rats weak
        to the damageType, each damage type HAS to be present at least once! -->");
         }
 
@@ -450,7 +436,7 @@ namespace QuestorSettings
         {
             MessageBox.Show(@"  <!-- Create salvage bookmarks once a pocket has been cleared and there are wrecks/cans left
                                         Note: All salvage bookmarks will be in this naming format:  BookmarkPrefix [time]
-                                        Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked 
+                                        Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked
                                         Warning: The bot could become slow with a lot of salvage-bookmarks, make sure that
                                         after mission salvaging is enabled or that you manually delete bookmarks! -->");
         }
@@ -467,8 +453,8 @@ namespace QuestorSettings
 
         private void linkLabel34_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            MessageBox.Show(@"  <!-- After-mission salvaging, this will cause the bot to visit all salvage bookmarks 
-                                        with the salvage ship and pickup loot / salvage wrecks 
+            MessageBox.Show(@"  <!-- After-mission salvaging, this will cause the bot to visit all salvage bookmarks
+                                        with the salvage ship and pickup loot / salvage wrecks
                                         Note: After mission salvaging will *only* take place if there are *no* accepted missions left ! -->");
         }
 
@@ -627,6 +613,5 @@ namespace QuestorSettings
         {
             System.Diagnostics.Process.Start(Localpath);
         }
-
     }
 }

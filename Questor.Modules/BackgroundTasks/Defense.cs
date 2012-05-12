@@ -8,9 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-
-
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -59,7 +56,7 @@ namespace Questor.Modules.BackgroundTasks
                     EntityCache stuffThatMayDecloakMe = Cache.Instance.Entities.Where(t => t.Name != Cache.Instance.DirectEve.Me.Name || t.IsBadIdea || t.IsContainer || t.IsNpc || t.IsPlayer).OrderBy(t => t.Distance).FirstOrDefault();
                     if (stuffThatMayDecloakMe != null && (stuffThatMayDecloakMe.Distance <= (int)Distance.SafeToCloakDistance)) //if their is anything within 2300m do not attempt to cloak
                     {
-                        if (stuffThatMayDecloakMe.Distance != 0)
+                        if ((int)stuffThatMayDecloakMe.Distance != 0)
                         {
                             //Logging.Log(StuffThatMayDecloakMe.Name + " is very close at: " + StuffThatMayDecloakMe.Distance + " meters");
                             continue;
@@ -71,7 +68,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 module.Click();
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
-                Logging.Log("Defense: Defensive module activated: [" + module.ItemId + "] waiting [" + Math.Round(Cache.Instance.NextActivateSupportModules.Subtract(DateTime.Now).TotalSeconds,0) + " sec]");
+                Logging.Log("Defense", "Defensive module activated: [" + module.ItemId + "] waiting [" + Math.Round(Cache.Instance.NextActivateSupportModules.Subtract(DateTime.Now).TotalSeconds, 0) + " sec]", Logging.white);
                 continue;
             }
         }
@@ -132,14 +129,14 @@ namespace Questor.Modules.BackgroundTasks
                     if (module.GroupId == (int)Group.ShieldBoosters)
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                        Logging.Log("Defense: Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + module.ItemId + "] activated");
+                        Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + module.ItemId + "] activated", Logging.white);
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                        Logging.Log("Defense: Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + module.ItemId + "] activated");
+                        Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + module.ItemId + "] activated", Logging.white);
                     }
-                    
+
                     //Logging.Log("LowestShieldPercentage(pocket) [ " + Cache.Instance.lowest_shield_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestArmorPercentage(pocket) [ " + Cache.Instance.lowest_armor_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestCapacitorPercentage(pocket) [ " + Cache.Instance.lowest_capacitor_percentage_this_pocket + " ] ");
@@ -158,15 +155,13 @@ namespace Questor.Modules.BackgroundTasks
                     if (module.GroupId == (int)Group.ShieldBoosters)
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                        Logging.Log("Defense: Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + module.ItemId + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.Now).TotalSeconds, 0) + "] sec reactivation delay");
-                    
+                        Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + module.ItemId + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.Now).TotalSeconds, 0) + "] sec reactivation delay", Logging.white);
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                        Logging.Log("Defense: Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + module.ItemId + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.Now).TotalSeconds, 0) + "] sec reactivation delay");
-                    
-                    } 
+                        Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + module.ItemId + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.Now).TotalSeconds, 0) + "] sec reactivation delay", Logging.white);
+                    }
                     //Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)watch.Elapsed);
                     //Cache.Instance.repair_cycle_time_this_mission = Cache.Instance.repair_cycle_time_this_mission + watch.Elapsed.TotalMinutes;
                     continue;
@@ -233,7 +228,7 @@ namespace Questor.Modules.BackgroundTasks
             // Thank god stations are safe ! :)
             if (Cache.Instance.InStation)
                 return;
-            
+
             if (!Cache.Instance.InSpace)
             {
                 _lastSessionChange = DateTime.Now;
@@ -249,7 +244,7 @@ namespace Questor.Modules.BackgroundTasks
 
             if (DateTime.Now.Subtract(_lastSessionChange).TotalSeconds < 7)
             {
-                Logging.Log("Defense: we just completed a session change less than 7 seconds ago... waiting.");
+                Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.white);
                 return;
             }
 

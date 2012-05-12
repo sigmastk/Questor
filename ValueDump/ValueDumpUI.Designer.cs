@@ -1,6 +1,6 @@
 ﻿namespace ValueDump
 {
-    partial class frmMain
+    partial class ValueDumpUI
     {
         /// <summary>
         /// Required designer variable.

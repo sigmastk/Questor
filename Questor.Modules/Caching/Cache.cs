@@ -1,12 +1,14 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
+
+using InnerSpaceAPI;
 
 namespace Questor.Modules.Caching
 {
@@ -67,6 +69,11 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _entities;
 
         /// <summary>
+        ///   Damaged drones
+        /// </summary>
+        public IEnumerable<EntityCache> DamagedDrones;
+
+        /// <summary>
         ///   Entities by Id
         /// </summary>
         private readonly Dictionary<long, EntityCache> _entitiesById;
@@ -82,6 +89,7 @@ namespace Questor.Modules.Caching
         public List<PriorityTarget> _priorityTargets;
 
         public String _priorityTargets_text;
+
         /// <summary>
         ///   Star cache
         /// </summary>
@@ -101,7 +109,6 @@ namespace Questor.Modules.Caching
         ///   Stargate cache
         /// </summary>
         private List<EntityCache> _stargates;
-
 
         /// <summary>
         ///   Stargate by name
@@ -144,17 +151,23 @@ namespace Questor.Modules.Caching
 
         public Cache()
         {
+            string line = "Cache: new cache instance being instantiated";
+            //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
+            line = string.Empty;
+
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             ShipTargetValues = new List<ShipTargetValue>();
             XDocument values = XDocument.Load(Path.Combine(path, "ShipTargetValues.xml"));
-            foreach (XElement value in values.Root.Elements("ship"))
-                ShipTargetValues.Add(new ShipTargetValue(value));
+            if (values.Root != null)
+                foreach (XElement value in values.Root.Elements("ship"))
+                    ShipTargetValues.Add(new ShipTargetValue(value));
 
             InvTypesById = new Dictionary<int, InvType>();
             XDocument invTypes = XDocument.Load(Path.Combine(path, "InvTypes.xml"));
-            foreach (XElement element in invTypes.Root.Elements("invtype"))
-                InvTypesById.Add((int) element.Attribute("id"), new InvType(element));
+            if (invTypes.Root != null)
+                foreach (XElement element in invTypes.Root.Elements("invtype"))
+                    InvTypesById.Add((int)element.Attribute("id"), new InvType(element));
 
             _priorityTargets = new List<PriorityTarget>();
             LastModuleTargetIDs = new Dictionary<long, long>();
@@ -202,9 +215,13 @@ namespace Questor.Modules.Caching
         public bool LootAlreadyUnloaded = false;
         public bool MissionLoot = false;
         public bool SalvageAll = false;
+
         public double Wealth { get; set; }
+
         public double WealthatStartofPocket { get; set; }
+
         public int PocketNumber { get; set; }
+
         public bool OpenWrecks = false;
         public bool NormalApproch = true;
         public bool CourierMission = false;
@@ -216,10 +233,16 @@ namespace Questor.Modules.Caching
         public int TimeSpentInMissionInRange = 0;
         public int TimeSpentInMissionOutOfRange = 0;
         public DirectAgentMission Mission;
+
         public bool DronesKillHighValueTargets { get; set; }
+
         public bool InMission { get; set; }
+
         public DateTime QuestorStarted_DateTime = DateTime.Now;
+
         public bool MissionXMLIsAvailable { get; set; }
+
+        public string missionXmlPath { get; set; }
 
         public bool LocalSafe(int maxBad, double stand)
         {
@@ -227,18 +250,18 @@ namespace Questor.Modules.Caching
             var local = (DirectChatWindow)GetWindowByName("Local");
             foreach (DirectCharacter localMember in local.Members)
             {
-                float[] alliance = {DirectEve.Standings.GetPersonalRelationship(localMember.AllianceId), DirectEve.Standings.GetCorporationRelationship(localMember.AllianceId), DirectEve.Standings.GetAllianceRelationship(localMember.AllianceId)};
-                float[] corporation = {DirectEve.Standings.GetPersonalRelationship(localMember.CorporationId), DirectEve.Standings.GetCorporationRelationship(localMember.CorporationId), DirectEve.Standings.GetAllianceRelationship(localMember.CorporationId)};
-                float[] personal = {DirectEve.Standings.GetPersonalRelationship(localMember.CharacterId), DirectEve.Standings.GetCorporationRelationship(localMember.CharacterId), DirectEve.Standings.GetAllianceRelationship(localMember.CharacterId)};
+                float[] alliance = { DirectEve.Standings.GetPersonalRelationship(localMember.AllianceId), DirectEve.Standings.GetCorporationRelationship(localMember.AllianceId), DirectEve.Standings.GetAllianceRelationship(localMember.AllianceId) };
+                float[] corporation = { DirectEve.Standings.GetPersonalRelationship(localMember.CorporationId), DirectEve.Standings.GetCorporationRelationship(localMember.CorporationId), DirectEve.Standings.GetAllianceRelationship(localMember.CorporationId) };
+                float[] personal = { DirectEve.Standings.GetPersonalRelationship(localMember.CharacterId), DirectEve.Standings.GetCorporationRelationship(localMember.CharacterId), DirectEve.Standings.GetAllianceRelationship(localMember.CharacterId) };
 
                 if (alliance.Min() <= stand || corporation.Min() <= stand || personal.Min() <= stand)
                 {
-                    Logging.Log("Cache.LocalSafe: Bad Standing Pilot Detected: [ " + localMember.Name + "] " + " [ " + number + " ] so far... of [ " + maxBad + " ] allowed");
+                    Logging.Log("Cache.LocalSafe", "Bad Standing Pilot Detected: [ " + localMember.Name + "] " + " [ " + number + " ] so far... of [ " + maxBad + " ] allowed", Logging.orange);
                     number++;
                 }
                 if (number > maxBad)
                 {
-                    Logging.Log("Cache.LocalSafe: [" + number + "] Bad Standing pilots in local, We should stay in station");
+                    Logging.Log("Cache.LocalSafe", "[" + number + "] Bad Standing pilots in local, We should stay in station", Logging.orange);
                     return false;
                 }
             }
@@ -306,11 +329,15 @@ namespace Questor.Modules.Caching
         ///   Used for Drones to know that it should retract drones
         /// </summary>
         public bool IsMissionPocketDone { get; set; }
+
         public string ExtConsole { get; set; }
+
         public string ConsoleLog { get; set; }
+
         public bool IsAgentLoop { get; set; }
+
         private string _agentName = "";
-        
+
         private DateTime _nextOpenContainerInSpaceAction;
 
         public DateTime NextOpenContainerInSpaceAction
@@ -371,7 +398,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-
         private DateTime _nextDroneBayAction;
 
         public DateTime NextDroneBayAction
@@ -389,12 +415,12 @@ namespace Questor.Modules.Caching
 
         private DateTime _nextOpenHangarAction;
 
-       public DateTime NextOpenHangarAction
+        public DateTime NextOpenHangarAction
         {
-          get { return _nextOpenHangarAction; }
+            get { return _nextOpenHangarAction; }
             set
             {
-             _nextOpenHangarAction = value;
+                _nextOpenHangarAction = value;
                 _lastAction = DateTime.Now;
             }
         }
@@ -758,25 +784,44 @@ namespace Questor.Modules.Caching
         public DateTime LastLoggingAction = DateTime.MinValue;
 
         public DateTime LastSessionChange = DateTime.Now;
+
         public bool Paused { get; set; }
+
         public int RepairCycleTimeThisPocket { get; set; }
+
         public int PanicAttemptsThisPocket { get; set; }
+
         public double LowestShieldPercentageThisMission { get; set; }
+
         public double LowestArmorPercentageThisMission { get; set; }
+
         public double LowestCapacitorPercentageThisMission { get; set; }
+
         public double LowestShieldPercentageThisPocket { get; set; }
+
         public double LowestArmorPercentageThisPocket { get; set; }
+
         public double LowestCapacitorPercentageThisPocket { get; set; }
+
         public int PanicAttemptsThisMission { get; set; }
+
         public DateTime StartedBoosting { get; set; }
+
         public int RepairCycleTimeThisMission { get; set; }
+
         public DateTime LastKnownGoodConnectedTime { get; set; }
+
         public long TotalMegaBytesOfMemoryUsed { get; set; }
+
         public double MyWalletBalance { get; set; }
+
         public string CurrentPocketAction { get; set; }
+
         public float AgentEffectiveStandingtoMe;
         public bool Missionbookmarktimerset = false;
         public DateTime Missionbookmarktimeout = DateTime.MaxValue;
+
+        public string AgentStationID { get; set; }
 
         public string CurrentAgent
         {
@@ -785,7 +830,7 @@ namespace Questor.Modules.Caching
                 if (_agentName == "")
                 {
                     _agentName = SwitchAgent;
-                    Logging.Log("CurrentAgent: [ " + CurrentAgent + " ] AgentID [ " + AgentId + "]");
+                    Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]", Logging.white);
                 }
 
                 return _agentName;
@@ -804,6 +849,7 @@ namespace Questor.Modules.Caching
                 if (agent == null)
                 {
                     agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                    Cache.Instance.AgentStationID = Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId);
                     IsAgentLoop = true; //this literally means we have no agents available at the moment (decline timer likely)
                 }
                 else
@@ -837,7 +883,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<ModuleCache> Modules
         {
-            get { return _modules ?? (_modules = DirectEve.Modules.Select(m => new ModuleCache(m)).ToList()); }
+            get { return _modules ?? (_modules = DirectEve.Modules.Select(m => new ModuleCache(m, 0)).ToList()); }
         }
 
         //
@@ -849,52 +895,61 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.MissionWeaponGroupId != 0)
                     return Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
-                else return Modules.Where(m => 
+                else return Modules.Where(m =>
                     m.GroupId == Settings.Instance.WeaponGroupId); // ||
-                    //m.GroupId == (int)Group.ProjectileWeapon || 
-                    //m.GroupId == (int)Group.EnergyWeapon ||
-                    //m.GroupId == (int)Group.HybridWeapon || 
-                    //m.GroupId == (int)Group.CruiseMissileLaunchers ||
-                    //m.GroupId == (int)Group.RocketLaunchers ||
-                    //m.GroupId == (int)Group.StandardMissileLaunchers ||
-                    //m.GroupId == (int)Group.TorpedoLaunchers ||
-                    //m.GroupId == (int)Group.AssaultMissilelaunchers ||
-                    //m.GroupId == (int)Group.HeavyMissilelaunchers ||
-                    //m.GroupId == (int)Group.DefenderMissilelaunchers);
+                //m.GroupId == (int)Group.ProjectileWeapon ||
+                //m.GroupId == (int)Group.EnergyWeapon ||
+                //m.GroupId == (int)Group.HybridWeapon ||
+                //m.GroupId == (int)Group.CruiseMissileLaunchers ||
+                //m.GroupId == (int)Group.RocketLaunchers ||
+                //m.GroupId == (int)Group.StandardMissileLaunchers ||
+                //m.GroupId == (int)Group.TorpedoLaunchers ||
+                //m.GroupId == (int)Group.AssaultMissilelaunchers ||
+                //m.GroupId == (int)Group.HeavyMissilelaunchers ||
+                //m.GroupId == (int)Group.DefenderMissilelaunchers);
             }
         }
 
         public IEnumerable<EntityCache> Containers
         {
-            get { return _containers ?? (_containers = Entities.Where( e =>
-                            e.IsContainer && e.HaveLootRights && (e.GroupId != (int) Group.Wreck || !e.IsWreckEmpty) &&
-                            (e.Name != (String) "Abandoned Container")).
-                            ToList()); }
+            get
+            {
+                return _containers ?? (_containers = Entities.Where(e =>
+                          e.IsContainer && e.HaveLootRights && (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
+                          (e.Name != (String)"Abandoned Container")).
+                          ToList());
+            }
         }
 
         public IEnumerable<EntityCache> Wrecks
         {
-            get { return _containers ?? (_containers = Entities.Where(e => (e.GroupId != (int) Group.Wreck)).ToList()); }
+            get { return _containers ?? (_containers = Entities.Where(e => (e.GroupId != (int)Group.Wreck)).ToList()); }
         }
 
         public IEnumerable<EntityCache> UnlootedContainers
         {
-            get { return _unlootedContainers ?? (_unlootedContainers = Entities.Where(e =>
-                            e.IsContainer && 
-                            e.HaveLootRights &&
-                            (!LootedContainers.Contains(e.Id) || e.GroupId == (int) Group.Wreck)).OrderBy(
-                                e => e.Distance).
-                                ToList()); }
+            get
+            {
+                return _unlootedContainers ?? (_unlootedContainers = Entities.Where(e =>
+                          e.IsContainer &&
+                          e.HaveLootRights &&
+                          (!LootedContainers.Contains(e.Id) || e.GroupId == (int)Group.Wreck)).OrderBy(
+                              e => e.Distance).
+                              ToList());
+            }
         }
 
         //This needs to include items you can steal from (thus gain aggro)
         public IEnumerable<EntityCache> UnlootedWrecksAndSecureCans
         {
-            get { return _unlootedWrecksAndSecureCans ?? (_unlootedWrecksAndSecureCans = Entities.Where(e =>
-                            (e.GroupId == (int) Group.Wreck || e.GroupId == (int) Group.SecureContainer ||
-                             e.GroupId == (int) Group.AuditLogSecureContainer ||
-                             e.GroupId == (int) Group.FreightContainer) && !e.IsWreckEmpty).OrderBy(e => e.Distance).
-                            ToList()); }
+            get
+            {
+                return _unlootedWrecksAndSecureCans ?? (_unlootedWrecksAndSecureCans = Entities.Where(e =>
+                          (e.GroupId == (int)Group.Wreck || e.GroupId == (int)Group.SecureContainer ||
+                           e.GroupId == (int)Group.AuditLogSecureContainer ||
+                           e.GroupId == (int)Group.FreightContainer) && !e.IsWreckEmpty).OrderBy(e => e.Distance).
+                          ToList());
+            }
         }
 
         public IEnumerable<EntityCache> Targets
@@ -979,12 +1034,12 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Stations
         {
-            get { return _stations ?? (_stations = Entities.Where(e => e.CategoryId == (int) CategoryID.Station).ToList()); }
+            get { return _stations ?? (_stations = Entities.Where(e => e.CategoryId == (int)CategoryID.Station).ToList()); }
         }
 
         public EntityCache ClosestStation
         {
-           get { return _closeststation ?? (_closeststation = _stations.OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault()); }
+            get { return _closeststation ?? (_closeststation = Entities.Where(e => e.CategoryId == (int)CategoryID.Station).ToList().OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault()); }
         }
 
         public EntityCache StationByName(string stationName)
@@ -1004,30 +1059,39 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Stargates
         {
-            get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int) Group.Stargate).ToList()); }
+            get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList()); }
         }
+
         public EntityCache ClosestStargate
         {
             get { return _closeststargate ?? (_closeststargate = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList().OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault()); }
         }
 
-        public EntityCache StargateByName (string locationName)
+        public EntityCache StargateByName(string locationName)
         {
             {
                 return _stargate ??
                        (_stargate =
                         Cache.Instance.EntitiesByName(locationName).FirstOrDefault(
-                            e => e.GroupId == (int) Group.Stargate));
+                            e => e.GroupId == (int)Group.Stargate));
             }
         }
+
         public IEnumerable<EntityCache> BigObjects
         {
-            get { return _bigobjects ?? (_bigobjects = Entities.Where(e => e.GroupId == (int)Group.LargeCollidableStructure || e.GroupId == (int)Group.SpawnContainer && e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList()); }
+            get
+            {
+                return _bigobjects ?? (_bigobjects = Entities.Where(e =>
+                       e.GroupId == (int)Group.LargeCollidableStructure ||
+                       e.TypeId == 21609 || //Dysfunctional Solar Harvester in Gone Berserk (not an LCO)
+                       e.GroupId == (int)Group.SpawnContainer &&
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+            }
         }
 
         public EntityCache Star
         {
-            get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int) CategoryID.Celestial && e.GroupId == (int) Group.Star)); }
+            get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
         }
 
         public IEnumerable<EntityCache> PriorityTargets
@@ -1081,6 +1145,12 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public string BringMissionItem { get; private set; }
 
+        public int BringMissionItemQuantity { get; private set; }
+
+        public string BringOptionalMissionItem { get; private set; }
+
+        public int BringOptionalMissionItemQuantity { get; private set; }
+
         public string Fitting { get; set; } // stores name of the final fitting we want to use
 
         public string MissionShip { get; set; } //stores name of mission specific ship
@@ -1100,8 +1170,11 @@ namespace Questor.Modules.Caching
         public bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
 
         public List<Ammo> MissionAmmo;
+
         public int MissionWeaponGroupId { get; set; }
+
         public bool? MissionUseDrones { get; set; }
+
         public bool StopTimeSpecified { get; set; }
 
         public DateTime StopTime { get; set; }
@@ -1160,6 +1233,7 @@ namespace Questor.Modules.Caching
         {
             return Entities.Where(e => e.Name == name).ToList();
         }
+
         /// <summary>
         ///   Return entity by name
         /// </summary>
@@ -1209,12 +1283,12 @@ namespace Questor.Modules.Caching
             DirectAgentMission missionforbookmarkinfo = GetAgentMission(agentId);
             if (missionforbookmarkinfo == null)
             {
-                Logging.Log("Cache.DirectAgentMissionBookmark: missionforbookmarkinfo [null] <---bad  parameters passed to us:  agentid [" + agentId + "] startswith [" + startsWith + "]");
+                Logging.Log("Cache.DirectAgentMissionBookmark", "missionforbookmarkinfo [null] <---bad  parameters passed to us:  agentid [" + agentId + "] startswith [" + startsWith + "]", Logging.white);
                 return null;
             }
 
             // Did we accept this mission?
-            if (missionforbookmarkinfo.State != (int) MissionState.Accepted || missionforbookmarkinfo.AgentId != agentId)
+            if (missionforbookmarkinfo.State != (int)MissionState.Accepted || missionforbookmarkinfo.AgentId != agentId)
             {
                 //Logging.Log("missionforbookmarkinfo.State: [" + missionforbookmarkinfo.State.ToString(CultureInfo.InvariantCulture) + "]");
                 //Logging.Log("missionforbookmarkinfo.AgentId: [" + missionforbookmarkinfo.AgentId.ToString(CultureInfo.InvariantCulture) + "]");
@@ -1316,8 +1390,8 @@ namespace Questor.Modules.Caching
             if (missiondetails != null)
             {
                 string missionName = FilterPath(missiondetails.Name);
-                string missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
-                if (!File.Exists(missionXmlPath))
+                Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+                if (!File.Exists(Cache.Instance.missionXmlPath))
                 {
                     //No mission file but we need to set some cache settings
                     OrbitDistance = Settings.Instance.OrbitDistance;
@@ -1329,7 +1403,7 @@ namespace Questor.Modules.Caching
                 //
                 try
                 {
-                    XDocument xdoc = XDocument.Load(missionXmlPath);
+                    XDocument xdoc = XDocument.Load(Cache.Instance.missionXmlPath);
                     if (xdoc.Root != null)
                     {
                         XElement xElement = xdoc.Root.Element("pockets");
@@ -1338,21 +1412,21 @@ namespace Questor.Modules.Caching
                             IEnumerable<XElement> pockets = xElement.Elements("pocket");
                             foreach (XElement pocket in pockets)
                             {
-                                if ((int) pocket.Attribute("id") != pocketId)
+                                if ((int)pocket.Attribute("id") != pocketId)
                                     continue;
 
                                 if (pocket.Element("damagetype") != null)
-                                    DamageType = (DamageType) Enum.Parse(typeof (DamageType), (string) pocket.Element("damagetype"), true);
+                                    DamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)pocket.Element("damagetype"), true);
 
                                 if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
                                 {
-                                    OrbitDistance = (int) pocket.Element("orbitdistance");
-                                    Logging.Log(string.Format("Cache: Using Mission Orbit distance {0}",OrbitDistance));
+                                    OrbitDistance = (int)pocket.Element("orbitdistance");
+                                    Logging.Log("Cache", "Using Mission Orbit distance [" + OrbitDistance + "]", Logging.white);
                                 }
                                 else //Otherwise, use value defined in charname.xml file
                                 {
                                     OrbitDistance = Settings.Instance.OrbitDistance;
-                                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+                                    Logging.Log("Cache", "Using Settings Orbit distance [" + OrbitDistance + "]", Logging.white);
                                 }
                                 if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
                                 {
@@ -1383,7 +1457,7 @@ namespace Questor.Modules.Caching
                                         else
                                         {
                                             foreach (XElement parameter in element.Elements("parameter"))
-                                                action.AddParameter((string) parameter.Attribute("name"), (string) parameter.Attribute("value"));
+                                                action.AddParameter((string)parameter.Attribute("name"), (string)parameter.Attribute("value"));
                                         }
                                         actions.Add(action);
                                     }
@@ -1405,13 +1479,13 @@ namespace Questor.Modules.Caching
                     // if we reach this code there is no mission XML file, so we set some things -- Assail
 
                     OrbitDistance = Settings.Instance.OrbitDistance;
-                    Logging.Log(string.Format("Cache: Using Settings Orbit distance {0}", OrbitDistance));
+                    Logging.Log("Cache", "Using Settings Orbit distance [" + Settings.Instance.OrbitDistance + "]", Logging.white);
 
                     return new Actions.Action[0];
                 }
                 catch (Exception ex)
                 {
-                    Logging.Log("Error loading mission XML file [" + ex.Message + "]");
+                    Logging.Log("Cache", "Error loading mission XML file [" + ex.Message + "]", Logging.orange);
                     return new Actions.Action[0];
                 }
             }
@@ -1429,6 +1503,7 @@ namespace Questor.Modules.Caching
             // Clear out old items
             MissionItems.Clear();
             BringMissionItem = string.Empty;
+            BringOptionalMissionItem = string.Empty;
 
             DirectAgentMission missiondetailsformittionitems = GetAgentMission(agentId);
             if (missiondetailsformittionitems == null)
@@ -1462,7 +1537,7 @@ namespace Questor.Modules.Caching
                     }
                     else if (!string.IsNullOrEmpty(FactionFit))
                         Fitting = FactionFit;
-                    Logging.Log("Cache: Mission: " + missionFitting.Mission + " - Faction: " + FactionName + " - Fitting: " + missionFit + " - Ship: " + missionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings);
+                    Logging.Log("Cache", "Mission: " + missionFitting.Mission + " - Faction: " + FactionName + " - Fitting: " + missionFit + " - Ship: " + missionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings, Logging.white);
                     MissionShip = missionShip;
                 }
                 else if (!string.IsNullOrEmpty(FactionFit)) // if no mission fittings defined, try to match by faction
@@ -1473,25 +1548,34 @@ namespace Questor.Modules.Caching
             }
 
             string missionName = FilterPath(missiondetailsformittionitems.Name);
-            string missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
-            if (!File.Exists(missionXmlPath))
+            Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+            if (!File.Exists(Cache.Instance.missionXmlPath))
                 return;
 
             try
             {
-                XDocument xdoc = XDocument.Load(missionXmlPath);
+                XDocument xdoc = XDocument.Load(Cache.Instance.missionXmlPath);
                 IEnumerable<string> items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
                 MissionItems.AddRange(items);
 
                 if (xdoc.Root != null) BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
                 BringMissionItem = BringMissionItem.ToLower();
 
+                if (xdoc.Root != null) BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
+                BringMissionItemQuantity = BringMissionItemQuantity;
+
+                if (xdoc.Root != null) BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
+                BringOptionalMissionItem = BringOptionalMissionItem.ToLower();
+
+                if (xdoc.Root != null) BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
+                BringOptionalMissionItemQuantity = BringOptionalMissionItemQuantity;
+
                 //load fitting setting from the mission file
                 //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";
             }
             catch (Exception ex)
             {
-                Logging.Log("Error loading mission XML file [" + ex.Message + "]");
+                Logging.Log("Cache", "Error loading mission XML file [" + ex.Message + "]", Logging.orange);
             }
         }
 
@@ -1516,7 +1600,7 @@ namespace Questor.Modules.Caching
                 if (_priorityTargets.Any(pt => pt.EntityID == target.Id))
                     continue;
 
-                _priorityTargets.Add(new PriorityTarget {EntityID = target.Id, Priority = priority});
+                _priorityTargets.Add(new PriorityTarget { EntityID = target.Id, Priority = priority });
             }
         }
 
@@ -1536,27 +1620,27 @@ namespace Questor.Modules.Caching
             double curY = DirectEve.ActiveShip.Entity.Y;
             double curZ = DirectEve.ActiveShip.Entity.Z;
 
-            return Math.Sqrt((curX - x)*(curX - x) + (curY - y)*(curY - y) + (curZ - z)*(curZ - z));
+            return Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z));
         }
 
-       /// <summary>
-       ///   Calculate distance from entity
-       /// </summary>
-       /// <param name = "x"></param>
-       /// <param name = "y"></param>
-       /// <param name = "z"></param>
-       /// <param name="entity"> </param>
-       /// <returns></returns>
-       public double DistanceFromEntity(double x, double y, double z, DirectEntity entity)
+        /// <summary>
+        ///   Calculate distance from entity
+        /// </summary>
+        /// <param name = "x"></param>
+        /// <param name = "y"></param>
+        /// <param name = "z"></param>
+        /// <param name="entity"> </param>
+        /// <returns></returns>
+        public double DistanceFromEntity(double x, double y, double z, DirectEntity entity)
         {
-           if (entity == null)
-              return double.MaxValue;
+            if (entity == null)
+                return double.MaxValue;
 
-           double curX = entity.X;
-           double curY = entity.Y;
-           double curZ = entity.Z;
+            double curX = entity.X;
+            double curY = entity.Y;
+            double curZ = entity.Z;
 
-           return Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z));
+            return Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z));
         }
 
         /// <summary>
@@ -1565,7 +1649,7 @@ namespace Questor.Modules.Caching
         /// <param name = "label"></param>
         public void CreateBookmark(string label)
         {
-            if (Settings.Instance.CreateSalvageBookmarksIn.ToLower()=="corp".ToLower())
+            if (Settings.Instance.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
                 DirectEve.CorpBookmarkCurrentLocation(label, "", null);
             else
                 DirectEve.BookmarkCurrentLocation(label, "", null);
@@ -1612,22 +1696,41 @@ namespace Questor.Modules.Caching
             if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id))
                 return currentTarget;
 
+            bool currentTargetHealthLogNow = true;
             if (Settings.Instance.DetailedCurrentTargetHealthLogging)
             {
-                if (currentTarget != null)
-                    if (currentTarget.ArmorPct != null)
-                        if (currentTarget.ShieldPct != null)
+                if (currentTarget != null && (int)currentTarget.Id != (int)TargetingCache.CurrentTargetID)
+                    if ((int)currentTarget.ArmorPct == 0 && (int)currentTarget.ShieldPct == 0 && (int)currentTarget.StructurePct == 0)
+                    {
+                        //assume that any NPC with no shields, armor or hull is dead or does not yet have valid data associated with it
+                    }
+                    else
+                    {
+                        //
+                        // assign shields and armor to targetingcache variables - compare them to each other
+                        // to see if we need to send another log message to the console, if the values have not changed no need to log it.
+                        //
+                        if ((int)currentTarget.ShieldPct >= TargetingCache.CurrentTargetShieldPct ||
+                            (int)currentTarget.ArmorPct >= TargetingCache.CurrentTargetArmorPct ||
+                            (int)currentTarget.StructurePct >= TargetingCache.CurrentTargetStructurePct)
                         {
-                            //
-                            // assign shields and armor (hull?) to local and to targetingcache variables - compare them to each other
-                            // to see if we need to send another log message to the console, if the values havent changed no need to log it.
-                            //
-                            Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget is [" + currentTarget.Name +                           //name
-                                        "][" + (Math.Round(currentTarget.Distance/1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
-                                        "k][Shield%:[" + Math.Round(currentTarget.ShieldPct*100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
-                                        "][Armor%:[" + Math.Round(currentTarget.ArmorPct*100, 0).ToString(CultureInfo.InvariantCulture) +"]"); //armor
-                            
+                            currentTargetHealthLogNow = false;
                         }
+                        //
+                        // now that we are done comparing - assign new values for this tick
+                        //
+                        TargetingCache.CurrentTargetShieldPct = (int)currentTarget.ShieldPct;
+                        TargetingCache.CurrentTargetArmorPct = (int)currentTarget.ArmorPct;
+                        TargetingCache.CurrentTargetStructurePct = (int)currentTarget.StructurePct;
+                        if (currentTargetHealthLogNow)
+                        {
+                            Logging.Log(callingroutine, ".GetBestTarget: CurrentTarget is [" + currentTarget.Name +                              //name
+                                        "][" + (Math.Round(currentTarget.Distance / 1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
+                                        "k][Shield%:[" + Math.Round(currentTarget.ShieldPct * 100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
+                                        "][Armor%:[" + Math.Round(currentTarget.ArmorPct * 100, 0).ToString(CultureInfo.InvariantCulture) + "]" //armor
+                                        , Logging.white);
+                        }
+                    }
             }
             // Is our current target already in armor? keep shooting the same target if so...
             if (currentTarget != null && currentTarget.ArmorPct * 100 < 60)
@@ -1646,7 +1749,98 @@ namespace Questor.Modules.Caching
                 return currentTarget;
 
             // Get all entity targets
-            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure);
+            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
+
+            /*
+             *
+             *
+            //
+            //Start of Current EWar Effects On Me (below)
+            //
+            //Dampening
+            TargetingCache.EntitiesDampeningMe = targets.Where(e => e.IsSensorDampeningMe).ToList();
+            TargetingCache.EntitiesDampeningMe_text = String.Empty;
+            foreach (EntityCache entityDampeningMe in TargetingCache.EntitiesDampeningMe)
+            {
+                TargetingCache.EntitiesDampeningMe_text = TargetingCache.EntitiesDampeningMe_text + " [" +
+                                                          entityDampeningMe.Name + "][" +
+                                                          Math.Round(entityDampeningMe.Distance / 1000, 0) +
+                                                          "k] , ";
+            }
+
+            //Neutralizing
+            TargetingCache.EntitiesNeutralizingMe = targets.Where(e => e.IsNeutralizingMe).ToList();
+            TargetingCache.EntitiesNeutralizingMe_text = String.Empty;
+            foreach (EntityCache entityNeutralizingMe in TargetingCache.EntitiesNeutralizingMe)
+            {
+                TargetingCache.EntitiesNeutralizingMe_text = TargetingCache.EntitiesNeutralizingMe_text + " [" +
+                                                             entityNeutralizingMe.Name + "][" +
+                                                             Math.Round(entityNeutralizingMe.Distance / 1000, 0) +
+                                                             "k] , ";
+            }
+
+            //TargetPainting
+            TargetingCache.EntitiesTargetPatingingMe = targets.Where(e => e.IsTargetPaintingMe).ToList();
+            TargetingCache.EntitiesTargetPaintingMe_text = String.Empty;
+            foreach (EntityCache entityTargetpaintingMe in TargetingCache.EntitiesTargetPatingingMe)
+            {
+                TargetingCache.EntitiesTargetPaintingMe_text = TargetingCache.EntitiesTargetPaintingMe_text + " [" +
+                                                               entityTargetpaintingMe.Name + "][" +
+                                                               Math.Round(entityTargetpaintingMe.Distance / 1000, 0) +
+                                                               "k] , ";
+                ;
+            }
+
+            //TrackingDisrupting
+            TargetingCache.EntitiesTrackingDisruptingMe = targets.Where(e => e.IsTrackingDisruptingMe).ToList();
+            TargetingCache.EntitiesTrackingDisruptingMe_text = String.Empty;
+            foreach (EntityCache entityTrackingDisruptingMe in TargetingCache.EntitiesTrackingDisruptingMe)
+            {
+                TargetingCache.EntitiesTrackingDisruptingMe_text = TargetingCache.EntitiesTrackingDisruptingMe_text +
+                                                                   " [" + entityTrackingDisruptingMe.Name + "][" +
+                                                                   Math.Round(entityTrackingDisruptingMe.Distance / 1000, 0) +
+                                                                   "k] , ";
+            }
+
+            //Jamming (ECM)
+            TargetingCache.EntitiesJammingMe = targets.Where(e => e.IsJammingMe).ToList();
+            TargetingCache.EntitiesJammingMe_text = String.Empty;
+            foreach (EntityCache entityJammingMe in TargetingCache.EntitiesJammingMe)
+            {
+                TargetingCache.EntitiesJammingMe_text = TargetingCache.EntitiesJammingMe_text + " [" +
+                                                        entityJammingMe.Name + "][" +
+                                                        Math.Round(entityJammingMe.Distance / 1000, 0) +
+                                                        "k] , ";
+            }
+
+            //Warp Disrupting (and warp scrambling)
+            TargetingCache.EntitiesWarpDisruptingMe = targets.Where(e => e.IsWarpScramblingMe).ToList();
+            TargetingCache.EntitiesWarpDisruptingMe_text = String.Empty;
+            foreach (EntityCache entityWarpDisruptingMe in TargetingCache.EntitiesWarpDisruptingMe)
+            {
+                TargetingCache.EntitiesWarpDisruptingMe_text = TargetingCache.EntitiesWarpDisruptingMe_text + " [" +
+                                                               entityWarpDisruptingMe.Name + "][" +
+                                                               Math.Round(entityWarpDisruptingMe.Distance / 1000, 0) +
+                                                               "k] , ";
+            }
+
+            //Webbing
+            TargetingCache.EntitiesWebbingMe = targets.Where(e => e.IsWebbingMe).ToList();
+            TargetingCache.EntitiesWebbingMe_text = String.Empty;
+            foreach (EntityCache entityWebbingMe in TargetingCache.EntitiesWebbingMe)
+            {
+                TargetingCache.EntitiesWebbingMe_text = TargetingCache.EntitiesWebbingMe_text + " [" +
+                                                        entityWebbingMe.Name + "][" +
+                                                        Math.Round(entityWebbingMe.Distance / 1000, 0) +
+                                                        "k] , ";
+            }
+            //
+            //End of Current EWar Effects On Me (above)
+            //
+
+             *
+             *
+             */
 
             // Get the closest high value target
             EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
@@ -1688,16 +1882,16 @@ namespace Questor.Modules.Caching
 
                 if (Cache.Instance.ItemHangar == null)
                     return false;
-                
+
                 // Is the items hangar open?
                 if (Cache.Instance.ItemHangar.Window == null)
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                     Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                    Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                    Logging.Log(module, "Opening Item Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                "sec]");
+                                "sec]", Logging.white);
                     return false;
                 }
                 if (!Cache.Instance.ItemHangar.IsReady)
@@ -1725,9 +1919,9 @@ namespace Questor.Modules.Caching
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                     Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                    Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                    Logging.Log(module, "Opening Item Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                "sec]");
+                                "sec]", Logging.white);
                     return false;
                 }
                 if (!Cache.Instance.LootHangar.IsReady)
@@ -1737,7 +1931,7 @@ namespace Questor.Modules.Caching
             }
             return false;
         }
-        
+
         public bool OpenItemsHangarAsAmmoHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
@@ -1755,9 +1949,9 @@ namespace Questor.Modules.Caching
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                     Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                    Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                    Logging.Log(module, "Opening Item Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                "sec]");
+                                "sec]", Logging.white);
                     return false;
                 }
                 if (!Cache.Instance.AmmoHangar.IsReady)
@@ -1775,10 +1969,10 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.InStation)
             {
                 if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
-                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3,5));
-                Logging.Log(module + ": Stacking Item Hangar: waiting [" +
+                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                Logging.Log(module, "Stacking Item Hangar: waiting [" +
                             Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                            "sec]");
+                            "sec]", Logging.white);
                 Cache.Instance.LootHangar.StackAll();
                 return true;
             }
@@ -1793,15 +1987,15 @@ namespace Questor.Modules.Caching
             {
                 if (!Cache.Instance.OpenItemsHangarAsAmmoHangar("Cache.StackItemsHangar")) return false;
                 Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                Logging.Log(module + ": Stacking Item Hangar: waiting [" +
+                Logging.Log(module, "Stacking Item Hangar: waiting [" +
                             Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                            "sec]");
+                            "sec]", Logging.white);
                 Cache.Instance.AmmoHangar.StackAll();
                 return true;
             }
             return false;
         }
-        
+
         public DirectContainer CargoHold { get; set; }
 
         public bool OpenCargoHold(String module)
@@ -1810,9 +2004,9 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.Now.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
                 {
-                    Logging.Log(module + ": Opening CargoHold: waiting [" +
+                    Logging.Log(module, "Opening CargoHold: waiting [" +
                                 Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                "sec]");
+                                "sec]", Logging.white);
                 }
                 return false;
             }
@@ -1820,16 +2014,16 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
             {
                 Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
-                
+
                 // Is cargohold open?
                 if (Cache.Instance.CargoHold.Window == null)
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module + ": Opening Cargohold of active ship: waiting [" +
+                    Logging.Log(module, "Opening Cargohold of active ship: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                "sec]");
+                                "sec]", Logging.white);
                     return false;
                 }
 
@@ -1844,12 +2038,12 @@ namespace Questor.Modules.Caching
         public bool StackCargoHold(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
-                    return false;
-           
+                return false;
+
             if (!Cache.Instance.OpenCargoHold("Cache.StackCargoHold")) return false;
-            Logging.Log(module + ": Stacking CargoHold: waiting [" +
+            Logging.Log(module, "Stacking CargoHold: waiting [" +
                         Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                        "sec]");
+                        "sec]", Logging.white);
             Cache.Instance.CargoHold.StackAll();
             return true;
         }
@@ -1871,11 +2065,11 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.ShipHangar.Window == null)
                 {
                     // No, command it to open
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar); 
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
                     Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module + ": Opening Ship Hangar: waiting [" +
+                    Logging.Log(module, "Opening Ship Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
-                                           0) + "sec]");
+                                           0) + "sec]", Logging.white);
                     return false;
                 }
                 if (!Cache.Instance.ShipHangar.IsReady)
@@ -1895,15 +2089,15 @@ namespace Questor.Modules.Caching
             {
                 if (!Cache.Instance.OpenShipsHangar("Cache.StackShipsHangar")) return false;
                 Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                Logging.Log(module + ": Stacking Ship Hangar: waiting [" +
+                Logging.Log(module, "Stacking Ship Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
-                                           0) + "sec]");
+                                           0) + "sec]", Logging.white);
                 Cache.Instance.ShipHangar.StackAll();
-                return true;    
+                return true;
             }
             return false;
         }
-        
+
         //public DirectContainer CorpAmmoHangar { get; set; }
 
         public bool OpenCorpAmmoHangar(String module)
@@ -1915,7 +2109,7 @@ namespace Questor.Modules.Caching
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
                     Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
-                                                    
+
                     // Is the corp ammo Hangar open?
                     if (Cache.Instance.AmmoHangar != null)
                     {
@@ -1925,8 +2119,8 @@ namespace Questor.Modules.Caching
                             Cache.Instance.DirectEve.OpenCorporationHangar();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Opening Corporate Hangar: waiting [" +
-                                        Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,0) + "sec]");
+                            Logging.Log(module, "Opening Corporate Hangar: waiting [" +
+                                        Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.white);
                             return false;
                         }
                         if (!Cache.Instance.AmmoHangar.IsReady)
@@ -1937,8 +2131,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.AmmoHangar == null)
                     {
                         if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                            Logging.Log(module +
-                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                            Logging.Log(module, "Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?", Logging.orange);
                         return false;
                     }
                 }
@@ -1947,7 +2140,6 @@ namespace Questor.Modules.Caching
                     Cache.Instance.AmmoHangar = null;
                     return true;
                 }
-                
             }
             return false;
         }
@@ -1962,9 +2154,9 @@ namespace Questor.Modules.Caching
                 {
                     if (!Cache.Instance.OpenCorpAmmoHangar("Cache.StackCorpAmmoHangar")) return false;
                     Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                    Logging.Log(module + ": Stacking Corporate Ammo Hangar: waiting [" +
+                    Logging.Log(module, "Stacking Corporate Ammo Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
-                                           0) + "sec]");
+                                           0) + "sec]", Logging.white);
                     Cache.Instance.AmmoHangar.StackAll();
                     return true;
                 }
@@ -1973,11 +2165,10 @@ namespace Questor.Modules.Caching
                     Cache.Instance.AmmoHangar = null;
                     return true;
                 }
-
             }
             return false;
         }
-        
+
         //public DirectContainer CorpLootHangar { get; set; }
 
         public bool OpenCorpLootHangar(String module)
@@ -2000,11 +2191,11 @@ namespace Questor.Modules.Caching
                             Cache.Instance.DirectEve.OpenCorporationHangar();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Opening Corporate Hangar: waiting [" +
+                            Logging.Log(module, "Opening Corporate Hangar: waiting [" +
                                         Math.Round(
                                             Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).
                                                 TotalSeconds,
-                                            0) + "sec]");
+                                            0) + "sec]", Logging.white);
                             return false;
                         }
                         if (!Cache.Instance.LootHangar.IsReady)
@@ -2015,8 +2206,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.LootHangar == null)
                     {
                         if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
-                            Logging.Log(module +
-                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                            Logging.Log(module, "Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?", Logging.orange);
                         return false;
                     }
                 }
@@ -2037,8 +2227,8 @@ namespace Questor.Modules.Caching
             {
                 if (!Cache.Instance.OpenCorpLootHangar("Cache.StackCorpLoothangar")) return false;
                 Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                Logging.Log(module + ": Stacking Corporate Loot Hangar: waiting [" +
-                                        Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
+                Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" +
+                                        Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.white);
                 LootHangar.StackAll();
                 return true;
             }
@@ -2065,10 +2255,10 @@ namespace Questor.Modules.Caching
                         Cache.Instance.DirectEve.OpenCorporationHangar();
                         Cache.Instance.NextOpenCorpBookmarkHangarAction =
                             DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                        Logging.Log(module + ": Opening Corporate Hangar: waiting [" +
+                        Logging.Log(module, "Opening Corporate Hangar: waiting [" +
                                     Math.Round(
                                         Cache.Instance.NextOpenCorpBookmarkHangarAction.Subtract(DateTime.Now).TotalSeconds,
-                                        0) + "sec]");
+                                        0) + "sec]", Logging.white);
                         return false;
                     }
                     if (!Cache.Instance.CorpBookmarkHangar.IsReady)
@@ -2079,7 +2269,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.CorpBookmarkHangar == null)
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
-                        Logging.Log(module + ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                        Logging.Log(module, "Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?", Logging.orange);
                     return false;
                 }
             }
@@ -2108,13 +2298,12 @@ namespace Questor.Modules.Caching
                     }
                     else
                     {
-                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
+                        Logging.Log(module, "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]", Logging.orange);
                         var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
                         if (firstothercontainer != null)
                         {
-                            
                             if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
-                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
+                                Logging.Log(module, "we did however find a container named [ " + firstothercontainer.GivenName + " ]", Logging.orange);
                             return false;
                         }
                     }
@@ -2128,13 +2317,13 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
                 return false;
-            
+
             if (Cache.Instance.InStation)
             {
                 if (!Cache.Instance.OpenLootContainer("Cache.StackLootContainer")) return false;
                 Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                Logging.Log("Loot Container named: [ " + LootHangar.Window.Name +
-                            " ] was found and its contents are being stacked");
+                Logging.Log(module, "Loot Container named: [ " + LootHangar.Window.Name +
+                            " ] was found and its contents are being stacked", Logging.white);
                 LootHangar.StackAll();
                 return true;
             }
@@ -2159,24 +2348,22 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.LootHangar.Window != null)
                         {
-
                             // if open command it to close
                             Cache.Instance.LootHangar.Window.Close();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Closing Corporate Loot Hangar: waiting [" +
+                            Logging.Log(module, "Closing Corporate Loot Hangar: waiting [" +
                                         Math.Round(
                                             Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).
                                                 TotalSeconds,
-                                            0) + "sec]");
+                                            0) + "sec]", Logging.white);
                             return false;
                         }
                     }
                     if (Cache.Instance.LootHangar == null)
                     {
                         if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
-                            Logging.Log(module +
-                                        ": Closing Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                            Logging.Log(module, "Closing Corporate Hangar: failed! No Corporate Hangar in this station! lag?", Logging.orange);
                         return false;
                     }
                 }
@@ -2193,13 +2380,12 @@ namespace Questor.Modules.Caching
                     }
                     else
                     {
-                        Logging.Log(module + "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]");
+                        Logging.Log(module, "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]", Logging.orange);
                         var firstothercontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null);
                         if (firstothercontainer != null)
                         {
-
                             if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
-                                Logging.Log(module + " we did however find a container named [ " + firstothercontainer.GivenName + " ]");
+                                Logging.Log(module, "we did however find a container named [ " + firstothercontainer.GivenName + " ]", Logging.white);
                             return false;
                         }
                     }
@@ -2216,9 +2402,9 @@ namespace Questor.Modules.Caching
                         // if open command it to close
                         Cache.Instance.LootHangar.Window.Close();
                         Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module + ": Closing Item Hangar: waiting [" +
+                        Logging.Log(module, "Closing Item Hangar: waiting [" +
                                     Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]");
+                                    "sec]", Logging.white);
                         return false;
                     }
                 }
@@ -2236,18 +2422,18 @@ namespace Questor.Modules.Caching
                 if (!string.IsNullOrEmpty(Settings.Instance.LootHangar)) // Corporate hangar = LootHangar
                 {
                     if (!Cache.Instance.OpenCorpLootHangar("Cache.OpenCorpLootHangar")) return false;
-                            return true;
-                    }
+                    return true;
+                }
                 else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer)) // Freight Container in my local items hangar = LootHangar
-                        {
+                {
                     if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenLItemsHangar")) return false;
                     if (!Cache.Instance.OpenLootContainer("Cache.OpenLootContainer")) return false;
                     return true;
                 }
                 else // local items hangar = LootHangar
-                    {
+                {
                     if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.OpenItemsHangar")) return false;
-                        return true;
+                    return true;
                 }
             }
             return false;
@@ -2263,8 +2449,8 @@ namespace Questor.Modules.Caching
                 if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                 {
                     if (!Cache.Instance.StackCorpLootHangar("Cache.StackLootHangar")) return false;
-                            return true;
-                    }
+                    return true;
+                }
                 else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                 {
                     if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
@@ -2273,7 +2459,7 @@ namespace Questor.Modules.Caching
                 else //use local items hangar
                 {
                     if (!Cache.Instance.StackItemsHangarAsLootHangar("Cache.StackLootHangar")) return false;
-                        return true;
+                    return true;
                 }
             }
             return false;
@@ -2302,11 +2488,11 @@ namespace Questor.Modules.Caching
                             Cache.Instance.DirectEve.OpenCorporationHangar();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module + ": Opening Corporate Ammo Hangar: waiting [" +
+                            Logging.Log(module, "Opening Corporate Ammo Hangar: waiting [" +
                                         Math.Round(
                                             Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).
                                                 TotalSeconds,
-                                            0) + "sec]");
+                                            0) + "sec]", Logging.white);
                             return false;
                         }
                         if (!Cache.Instance.AmmoHangar.IsReady)
@@ -2317,8 +2503,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.AmmoHangar == null)
                     {
                         if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                            Logging.Log(module +
-                                        ": Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?");
+                            Logging.Log(module, "Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?", Logging.orange);
                         return false;
                     }
                 }
@@ -2335,9 +2520,9 @@ namespace Questor.Modules.Caching
                         // No, command it to open
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                         Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module + ": Opening Item Hangar: waiting [" +
+                        Logging.Log(module, "Opening Item Hangar: waiting [" +
                                     Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]");
+                                    "sec]", Logging.white);
                         return false;
                     }
                     if (!Cache.Instance.AmmoHangar.IsReady)
@@ -2359,12 +2544,12 @@ namespace Questor.Modules.Caching
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
                     if (!Cache.Instance.StackCorpAmmoHangar("Cache.StackAmmoHangar")) return false;
-                            return true;
-                    }
+                    return true;
+                }
                 else //use local items hangar
                 {
                     if (!Cache.Instance.StackItemsHangarAsAmmoHangar("Cache.StackAmmoHangar")) return false;
-                        return true;
+                    return true;
                 }
             }
             return false;
@@ -2381,7 +2566,7 @@ namespace Questor.Modules.Caching
             }
             if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
             {
-                Logging.Log(module + ": Opening Drone Bay: We aren't in station or space?!");
+                Logging.Log(module, "Opening Drone Bay: We aren't in station or space?!", Logging.orange);
                 return false;
             }
             //if(Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == 31)
@@ -2398,9 +2583,9 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.DroneBay == null)
             {
                 Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                Logging.Log(module + ": Opening Drone Bay: --- waiting [" +
+                Logging.Log(module, "Opening Drone Bay: --- waiting [" +
                                 Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                "sec]");
+                                "sec]", Logging.white);
 
                 return false;
             }
@@ -2410,9 +2595,9 @@ namespace Questor.Modules.Caching
             {
                 Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                 // No, command it to open
-                Logging.Log(module + ": Opening Drone Bay: waiting [" +
+                Logging.Log(module, "Opening Drone Bay: waiting [" +
                             Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                            "sec]");
+                            "sec]", Logging.white);
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
                 return false;
             }
@@ -2423,7 +2608,7 @@ namespace Questor.Modules.Caching
 
             return false;
         }
-        
+
         public bool CloseDroneBay(String module)
         {
             if (DateTime.Now < Cache.Instance.NextDroneBayAction)
@@ -2433,7 +2618,7 @@ namespace Questor.Modules.Caching
             }
             if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
             {
-                Logging.Log(module + ": Closing Drone Bay: We aren't in station or space?!");
+                Logging.Log(module, "Closing Drone Bay: We aren't in station or space?!", Logging.orange);
                 return false;
             }
             if (Cache.Instance.InStation || Cache.Instance.InSpace)
@@ -2446,15 +2631,15 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.DroneBay.Window != null)
             {
                 Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                Logging.Log(module + ": Closing Drone Bay: waiting [" +
+                Logging.Log(module, "Closing Drone Bay: waiting [" +
                             Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                            "sec]");
+                            "sec]", Logging.white);
                 Cache.Instance.DroneBay.Window.Close();
                 return true;
             }
             return true;
         }
-        
+
         public DirectWindow JournalWindow { get; set; }
 
         public bool OpenJournalWindow(String module)
@@ -2465,16 +2650,16 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.InStation)
             {
                 Cache.Instance.JournalWindow = Cache.Instance.GetWindowByName("journal");
-                
+
                 // Is the journal window open?
                 if (Cache.Instance.JournalWindow == null)
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
                     Cache.Instance.NextOpenJournalWindowAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(15, 30));
-                    Logging.Log(module + ": Opening Journal Window: waiting [" +
+                    Logging.Log(module, "Opening Journal Window: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenJournalWindowAction.Subtract(DateTime.Now).TotalSeconds,
-                                           0) + "sec]");
+                                           0) + "sec]", Logging.white);
                     return false;
                 }
                 return true; //if JournalWindow is not null then the window must be open.

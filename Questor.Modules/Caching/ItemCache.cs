@@ -2,14 +2,11 @@
 //  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
-//    Please look in the accompanying license.htm file for the license that 
-//    applies to this source code. (a copy can also be found at: 
+//    Please look in the accompanying license.htm file for the license that
+//    applies to this source code. (a copy can also be found at:
 //    http://www.thehackerwithin.com/license.htm)
 //  </copyright>
 //-------------------------------------------------------------------------------
-
-
-
 
 namespace Questor.Modules.Caching
 {
@@ -18,6 +15,7 @@ namespace Questor.Modules.Caching
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
 
+    /*
     public class ItemCache2
     {
         public ItemCache2(DirectItem item, bool cacheRefineOutput)
@@ -32,7 +30,7 @@ namespace Questor.Modules.Caching
             Capacity = item.Capacity;
             MarketGroupId = item.MarketGroupId;
             PortionSize = item.PortionSize;
-            
+
             Quantity = item.Quantity;
             QuantitySold = 0;
 
@@ -64,13 +62,17 @@ namespace Questor.Modules.Caching
 
         public List<ItemCache2> RefineOutput { get; private set; }
     }
+     * */
 
     public class ItemCache
     {
         public ItemCache(DirectItem item, bool cacheRefineOutput)
         {
-            
-
+            BasePrice = item.BasePrice;
+            Capacity = item.Capacity;
+            MarketGroupId = item.MarketGroupId;
+            PortionSize = item.PortionSize;
+            QuantitySold = 0;
             RefineOutput = new List<ItemCache>();
             if (cacheRefineOutput)
             {
@@ -78,13 +80,31 @@ namespace Questor.Modules.Caching
                     RefineOutput.Add(new ItemCache(i, false));
             }
         }
+
+        //public InvType InvType { get; set; }
+
+        //public long Id { get; private set; }
+        //public string Name { get; private set; }
+
+        //public int TypeId { get; private set; }
+        public int GroupId { get; private set; }
+
         public double BasePrice { get; private set; }
+
+        //public double Volume { get; private set; }
         public double Capacity { get; private set; }
+
         public int MarketGroupId { get; private set; }
+
         public int PortionSize { get; private set; }
+
+        //public int Quantity { get; private set; }
         public int QuantitySold { get; set; }
 
+        public double? StationBuy { get; set; }
+
         public List<ItemCache> RefineOutput { get; private set; }
+
         private readonly DirectItem _directItem;
 
         public ItemCache(DirectItem item)
@@ -240,8 +260,8 @@ namespace Questor.Modules.Caching
                 // Create a new InvType if its unknown
                 if (!Cache.Instance.InvTypesById.ContainsKey(TypeId))
                 {
-                    Logging.Log("ItemCache: Unknown TypeID for [" + Name + "][" + TypeId + "]");
-                    //Cache.Instance.InvTypesById[TypeId] = new Questor.Modules.Actions.InvType(this);
+                    Logging.Log("ItemCache", "Unknown TypeID for [" + Name + "][" + TypeId + "]", Logging.orange);
+                    Cache.Instance.InvTypesById[TypeId] = new Questor.Modules.Lookup.InvType(this);
                 }
 
                 return Cache.Instance.InvTypesById[TypeId];

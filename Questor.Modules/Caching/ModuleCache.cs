@@ -10,6 +10,7 @@
 
 namespace Questor.Modules.Caching
 {
+    using System;
     using System.Collections.Generic;
     using DirectEve;
     using Questor.Modules.Lookup;
@@ -17,10 +18,34 @@ namespace Questor.Modules.Caching
     public class ModuleCache
     {
         private readonly DirectModule _module;
+        private double _reloadTimeThisMission;
+        private DateTime _activatedTimeStamp;
 
-        public ModuleCache(DirectModule module)
+        public ModuleCache(DirectModule module, double reloadTimeThisMission = 0, DateTime activatedTimeStamp = default(DateTime))
         {
             _module = module;
+            _reloadTimeThisMission = reloadTimeThisMission;
+            _activatedTimeStamp = activatedTimeStamp;
+        }
+
+        public double ReloadTimeThisMission
+        {
+            get { return _reloadTimeThisMission; }
+            set
+            {
+                _reloadTimeThisMission = value;
+                return;
+            }
+        }
+
+        public DateTime ActivatedTimeStamp
+        {
+            get { return _activatedTimeStamp; }
+            set
+            {
+                _activatedTimeStamp = value;
+                return;
+            }
         }
 
         public int TypeId
@@ -98,6 +123,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
         }
+
         public bool IsEnergyWeapon
         {
             get { return GroupId == (int)Group.EnergyWeapon; }

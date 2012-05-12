@@ -1,14 +1,12 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
-
-
 
 namespace Questor.Modules.Lookup
 {
@@ -34,9 +32,9 @@ namespace Questor.Modules.Lookup
             DateTime stopTime;
             if (start != null)
             {
-               if (!DateTime.TryParseExact(start, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out startTime))
+                if (!DateTime.TryParseExact(start, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out startTime))
                 {
-                    Logging.Log("[CharSchedule] " + Name + ": Couldn't parse starttime.");
+                    Logging.Log("CharSchedule", Name + ": Couldn't parse starttime.", Logging.red);
                     startTime = DateTime.Now.AddSeconds(20);
                 }
                 else
@@ -44,7 +42,7 @@ namespace Questor.Modules.Lookup
             }
             else
             {
-                Logging.Log("[CharSchedule] No start time specified. Starting now.");
+                Logging.Log("CharSchedule", "No start time specified. Starting now.", Logging.orange);
                 startTime = DateTime.Now.AddSeconds(20);
             }
             Start = startTime;
@@ -53,7 +51,7 @@ namespace Questor.Modules.Lookup
             {
                 if (!DateTime.TryParseExact(stop, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out stopTime))
                 {
-                    Logging.Log("[CharSchedule] " + Name + ": Couldn't parse stoptime.");
+                    Logging.Log("CharSchedule", Name + ": Couldn't parse stoptime.", Logging.red);
                     stopTime = DateTime.Now.AddHours(24);
                 }
                 else
@@ -61,7 +59,7 @@ namespace Questor.Modules.Lookup
             }
             else
             {
-                Logging.Log("[CharSchedule] No stop time specified.");
+                Logging.Log("CharSchedule", "No stop time specified.", Logging.red);
                 stopTime = DateTime.Now.AddHours(24);
             }
             Stop = stopTime;
@@ -75,15 +73,20 @@ namespace Questor.Modules.Lookup
                 RunTime = -1;
         }
 
-
-
         public string User { get; private set; }
+
         public string PW { get; private set; }
+
         public string Name { get; private set; }
+
         public DateTime Start { get; set; }
+
         public DateTime Stop { get; set; }
+
         public double RunTime { get; set; }
+
         public bool StopTimeSpecified { get; set; }
+
         public bool StartTimeSpecified { get; set; }
     }
 }

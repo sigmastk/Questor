@@ -21,7 +21,9 @@ namespace Questor.Modules.Lookup
         }
 
         public string Name { get; private set; }
+
         public int GroupId { get; private set; }
+
         public int TargetValue { get; private set; }
     }
 }

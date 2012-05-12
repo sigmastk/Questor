@@ -5,10 +5,10 @@ using System.Windows.Forms;
 
 namespace QuestorSettings
 {
-    static class QuestorSettings
+    internal static class QuestorSettings
     {
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

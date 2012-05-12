@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -14,14 +14,14 @@ namespace Questor.Modules.Actions
     using DirectEve;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Caching;
-    
+
     public class SolarSystemDestination2 : TravelerDestination
     {
         private DateTime _nextAction;
 
         public SolarSystemDestination2(long solarSystemId)
         {
-            Logging.Log("QuestorManager.SolarSystemDestination: Destination set to solar system id [" + solarSystemId + "]");
+            Logging.Log("QuestorManager.SolarSystemDestination", "Destination set to solar system id [" + solarSystemId + "]", Logging.white);
             SolarSystemId = solarSystemId;
         }
 
@@ -32,7 +32,7 @@ namespace Questor.Modules.Actions
             {
                 if (_nextAction < DateTime.Now)
                 {
-                    Logging.Log("QuestorManager.SolarSystemDestination: Exiting station");
+                    Logging.Log("QuestorManager.SolarSystemDestination", "Exiting station", Logging.white);
 
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
                     _nextAction = DateTime.Now.AddSeconds(30);
@@ -43,7 +43,7 @@ namespace Questor.Modules.Actions
             }
 
             // The task was to get to the solar system, we're threre :)
-            Logging.Log("QuestorManager.SolarSystemDestination: Arrived in system");
+            Logging.Log("QuestorManager.SolarSystemDestination", "Arrived in system", Logging.white);
             return true;
         }
     }

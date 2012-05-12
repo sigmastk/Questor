@@ -16,7 +16,7 @@ namespace Questor.Modules.Lookup
         RemoveBookmarkDelay_seconds = 2,                         // Delay between each removal of a bookmark
         QuestorPulse_milliseconds = 1000,                        // Used to delay the next pulse, units: milliseconds. Default is 1500
         DefenceDelay_milliseconds = 1500,                        // Delay between defence actions
-        AfterburnerDelay_milliseconds = 1000,                    //
+        AfterburnerDelay_milliseconds = 3500,                    //
         RepModuleDelay_milliseconds = 2500,                      //
         ApproachDelay_seconds = 15,                              //
         TargetDelay_milliseconds = 1000,                         //
@@ -51,7 +51,7 @@ namespace Questor.Modules.Lookup
         SalvageDelayBetweenActions_milliseconds = 1500,             //
         TravelerExitStationAmIInSpaceYet_seconds = 17,           // Traveler - Exit Station before you are in space delay, units: seconds. Default is 7
         TravelerNoStargatesFoundRetryDelay_seconds = 15,         // Traveler could not find any stargates, retry when this time has elapsed, units: seconds. Default is 15
-        TravelerJumpedGateNextCommandDelay_seconds = 6,          // Traveler jumped a gate - delay before assuming we have loaded grid, units: seconds. Default is 15
+        TravelerJumpedGateNextCommandDelay_seconds = 8,          // Traveler jumped a gate - delay before assuming we have loaded grid, units: seconds. Default is 15
         TravelerInWarpedNextCommandDelay_seconds = 15,           // Traveler is in warp - delay before processing another command, units: seconds. Default is 15
         WrecksDisappearAfter_minutes = 110,                      // used to determine how long a wreck will be in space: usually to delay salvaging until a later time, units: minutes. Default is 120 minutes (2 hours)
         AverageTimeToCompleteAMission_minutes = 40,              // average time for all missions, all races, all shiptypes (guestimated)... it is used to determine when to do things like salvage. units: minutes. Default is 30

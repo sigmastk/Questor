@@ -1,10 +1,9 @@
-﻿
-namespace Questor.Storylines
+﻿namespace Questor.Storylines
 {
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using DirectEve;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using DirectEve;
     using global::Questor.Behaviors;
     using global::Questor.Modules.Actions;
     using global::Questor.Modules.Activities;
@@ -17,7 +16,6 @@ using DirectEve;
 
     public class GenericCombatStoryline : IStoryline
     {
-
         private long _agentId;
         private readonly List<Ammo> _neededAmmo;
 
@@ -29,7 +27,7 @@ using DirectEve;
         private readonly Drones _drones;
         private readonly Salvage _salvage;
         private readonly Statistics _statistics;
-        
+
         private GenericCombatStorylineState _state;
 
         public GenericCombatStorylineState State
@@ -112,10 +110,10 @@ using DirectEve;
 
                 return StorylineState.GotoAgent;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Something went wrong!
-                Logging.Log("GenericCombatStoryline: Something went wrong, blacklist this agent [" + ex.Message + "]");
+                Logging.Log("GenericCombatStoryline", "Something went wrong, blacklist this agent [" + ex.Message + "]", Logging.orange);
                 return StorylineState.BlacklistAgent;
             }
         }
@@ -144,7 +142,7 @@ using DirectEve;
             {
                 if (_agentInteraction.Agent.Window != null)
                     _agentInteraction.Agent.Window.Close();
-                Logging.Log("GenericCombatStoryline: Mission offer is in a Low Security System"); //do storyline missions in lowsec get blacklisted by: "public StorylineState Arm(Storyline storyline)"?
+                Logging.Log("GenericCombatStoryline", "Mission offer is in a Low Security System", Logging.orange); //do storyline missions in lowsec get blacklisted by: "public StorylineState Arm(Storyline storyline)"?
                 throw new Exception("Low security systems");
             }
 
@@ -198,7 +196,7 @@ using DirectEve;
         /// <returns></returns>
         public StorylineState ExecuteMission(Storyline storyline)
         {
-            switch(_state)
+            switch (_state)
             {
                 case GenericCombatStorylineState.WarpOutStation:
                     DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
@@ -206,7 +204,7 @@ using DirectEve;
 
                     if (warpOutBookMark == null)
                     {
-                        Logging.Log("WarpOut: No Bookmark");
+                        Logging.Log("GenericCombatStoryline.WarpOut", "No Bookmark", Logging.orange);
                         if (_state == GenericCombatStorylineState.WarpOutStation)
                         {
                             _state = GenericCombatStorylineState.GotoMission;
@@ -216,7 +214,7 @@ using DirectEve;
                     {
                         if (_traveler.Destination == null)
                         {
-                            Logging.Log("WarpOut: Warp at " + warpOutBookMark.Title);
+                            Logging.Log("GenericCombatStoryline.WarpOut", "Warp at " + warpOutBookMark.Title, Logging.white);
                             _traveler.Destination = new BookmarkDestination(warpOutBookMark);
                             Cache.Instance.DoNotBreakInvul = true;
                         }
@@ -224,7 +222,7 @@ using DirectEve;
                         _traveler.ProcessState();
                         if (_States.CurrentTravelerState == TravelerState.AtDestination)
                         {
-                            Logging.Log("WarpOut: Safe!");
+                            Logging.Log("GenericCombatStoryline.WarpOut", "Safe!", Logging.white);
                             Cache.Instance.DoNotBreakInvul = false;
                             if (_state == GenericCombatStorylineState.WarpOutStation)
                             {
@@ -235,7 +233,7 @@ using DirectEve;
                     }
                     else
                     {
-                        Logging.Log("WarpOut: No Bookmark in System");
+                        Logging.Log("GenericCombatStoryline.WarpOut", "o Bookmark in System", Logging.white);
                         if (_state == GenericCombatStorylineState.WarpOutStation)
                         {
                             _state = GenericCombatStorylineState.GotoMission;
@@ -253,13 +251,13 @@ using DirectEve;
                     if (missionDestination == null || missionDestination.AgentId != storyline.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
                     {
                         const string nameOfBookmark = "Encounter";
-                        Logging.Log("GenericCombatStoryline: Setting Destination to 1st bookmark from AgentID: [" + storyline.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title");
+                        Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + storyline.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.white);
                         _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(storyline.CurrentStorylineAgentId, nameOfBookmark));
                     }
 
                     if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
                     {
-                        Logging.Log("GenericCombatStoryline: Priority targets found while traveling, engaging!");
+                        Logging.Log("GenericCombatStoryline", "Priority targets found while traveling, engaging!", Logging.white);
                         _combat.ProcessState();
                     }
 
@@ -285,7 +283,7 @@ using DirectEve;
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
 
-                        Logging.Log("GenericCombatStoryline: Out of Ammo!");
+                        Logging.Log("GenericCombatStoryline", "Out of Ammo!", Logging.orange);
                         return StorylineState.ReturnToAgent;
                     }
 
@@ -302,7 +300,7 @@ using DirectEve;
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
 
-                        Logging.Log("MissionController: Error");
+                        Logging.Log("MissionController", "Error", Logging.red);
                         return StorylineState.ReturnToAgent;
                     }
                     break;

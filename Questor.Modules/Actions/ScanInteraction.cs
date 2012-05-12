@@ -17,14 +17,14 @@ namespace Questor.Modules.Actions
         {
             DirectScannerWindow scannerWindow = Cache.Instance.Windows.OfType<DirectScannerWindow>().FirstOrDefault();
 
-            switch(_States.CurrentScanInteractionState)
+            switch (_States.CurrentScanInteractionState)
             {
                 case ScanInteractionState.Idle:
                     //_lastExecute = DateTime.Now;
                     break;
                 case ScanInteractionState.Done:
 
-                    Logging.Log("ScanInteraction: Closing Scan Window");
+                    Logging.Log("ScanInteraction", "Closing Scan Window", Logging.white);
                     if (scannerWindow != null) scannerWindow.Close();
 
                     _States.CurrentScanInteractionState = ScanInteractionState.Idle;
@@ -32,14 +32,14 @@ namespace Questor.Modules.Actions
                     break;
                 case ScanInteractionState.Scan:
 
-                    if(scannerWindow == null)
+                    if (scannerWindow == null)
                     {
-                        Logging.Log("ScanInteraction: Open Scan Window");
+                        Logging.Log("ScanInteraction", "Open Scan Window", Logging.white);
 
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenScanner);
                         break;
                     }
-                    if(!scannerWindow.IsReady)
+                    if (!scannerWindow.IsReady)
                         return;
 
                     //Not Finish don't use
@@ -55,6 +55,5 @@ namespace Questor.Modules.Actions
                     break;
             }
         }
-
     }
 }

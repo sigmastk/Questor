@@ -17,7 +17,9 @@
         }
 
         public string Name { get; private set; }
+
         public int Priorit { get; private set; }
+
         public DateTime DeclineTimer { get; set; }
     }
 }

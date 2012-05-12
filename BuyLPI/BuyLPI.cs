@@ -34,14 +34,14 @@ namespace BuyLPI
         {
             if (args.Length == 0)
             {
-                Logging.Log("Syntax:");
-                Logging.Log("DotNet BuyLPI BuyLPI <TypeName or TypeId> [Quantity]");
-                Logging.Log("(Quantity is optional)");
-                Logging.Log("");
-                Logging.Log("Example:");
-                Logging.Log("DotNet BuyLPI BuyLPI \"Caldari Navy Mjolnir Torpedo\" 10");
-                Logging.Log("*OR*");
-                Logging.Log("DotNet BuyLPI BuyLPI 27339 10");
+                Logging.Log("BuyLPI", "Syntax:", Logging.white);
+                Logging.Log("BuyLPI", "DotNet BuyLPI BuyLPI <TypeName or TypeId> [Quantity]", Logging.white);
+                Logging.Log("BuyLPI", "(Quantity is optional)", Logging.white);
+                Logging.Log("BuyLPI", "", Logging.white);
+                Logging.Log("BuyLPI", "Example:", Logging.white);
+                Logging.Log("BuyLPI", "DotNet BuyLPI BuyLPI \"Caldari Navy Mjolnir Torpedo\" 10", Logging.white);
+                Logging.Log("BuyLPI", "*OR*", Logging.white);
+                Logging.Log("BuyLPI", "DotNet BuyLPI BuyLPI 27339 10", Logging.white);
                 return;
             }
 
@@ -55,13 +55,13 @@ namespace BuyLPI
                 int dummy;
                 if (!int.TryParse(args[1], out dummy))
                 {
-                    Logging.Log("BuyLPI: Quantity must be an integer, 0 - " + int.MaxValue);
+                    Logging.Log("BuyLPI", "Quantity must be an integer, 0 - " + int.MaxValue, Logging.white);
                     return;
                 }
 
                 if (dummy < 0)
                 {
-                    Logging.Log("BuyLPI: Quantity must be a positive number");
+                    Logging.Log("BuyLPI", "Quantity must be a positive number", Logging.white);
                     return;
                 }
 
@@ -69,7 +69,7 @@ namespace BuyLPI
                 _totalquantityoforders = dummy;
             }
 
-            Logging.Log("BuyLPI: Starting BuyLPI...");
+            Logging.Log("BuyLPI", "Starting BuyLPI...", Logging.white);
             _directEve = new DirectEve();
             _directEve.OnFrame += OnFrame;
 
@@ -78,7 +78,7 @@ namespace BuyLPI
                 Thread.Sleep(50);
 
             _directEve.Dispose();
-            Logging.Log("BuyLPI: BuyLPI finished.");
+            Logging.Log("BuyLPI", "BuyLPI finished.", Logging.white);
         }
 
         private static void OnFrame(object sender, EventArgs eventArgs)
@@ -98,7 +98,7 @@ namespace BuyLPI
                 _nextAction = DateTime.Now.AddMilliseconds(WaitMillis);
                 _directEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
 
-                Logging.Log("BuyLPI: Opening item hangar");
+                Logging.Log("BuyLPI", "Opening item hangar", Logging.white);
                 return;
             }
 
@@ -108,7 +108,7 @@ namespace BuyLPI
                 _nextAction = DateTime.Now.AddMilliseconds(WaitMillis);
                 _directEve.ExecuteCommand(DirectCmd.OpenLpstore);
 
-                Logging.Log("BuyLPI: Opening loyalty point store");
+                Logging.Log("BuyLPI", "Opening loyalty point store", Logging.white);
                 return;
             }
 
@@ -121,7 +121,7 @@ namespace BuyLPI
             {
                 if (_loyaltyPointTimeout < DateTime.Now)
                 {
-                    Logging.Log("BuyLPI: It seems we have no loyalty points left");
+                    Logging.Log("BuyLPI", "It seems we have no loyalty points left", Logging.white);
 
                     _done = true;
                     return;
@@ -135,7 +135,7 @@ namespace BuyLPI
             DirectLoyaltyPointOffer offer = lpstore.Offers.FirstOrDefault(o => o.TypeId.ToString(CultureInfo.InvariantCulture) == _type || String.Compare(o.TypeName, _type, StringComparison.OrdinalIgnoreCase) == 0);
             if (offer == null)
             {
-                Logging.Log("BuyLPI: Can't find offer with type name/id: {0}!", _type);
+                Logging.Log("BuyLPI", "Can't find offer with type name/id: {0}!", _type);
 
                 _done = true;
                 return;
@@ -144,7 +144,7 @@ namespace BuyLPI
             // Check LP
             if (_lastLoyaltyPoints < offer.LoyaltyPointCost)
             {
-                Logging.Log("BuyLPI: Not enough loyalty points left");
+                Logging.Log("BuyLPI", "Not enough loyalty points left", Logging.white);
 
                 _done = true;
                 return;
@@ -153,7 +153,7 @@ namespace BuyLPI
             // Check ISK
             if (_directEve.Me.Wealth < offer.IskCost)
             {
-                Logging.Log("BuyLPI: Not enough ISK left");
+                Logging.Log("BuyLPI", "Not enough ISK left", Logging.white);
 
                 _done = true;
                 return;
@@ -165,15 +165,17 @@ namespace BuyLPI
                 DirectItem item = hangar.Items.FirstOrDefault(i => i.TypeId == requiredItem.TypeId);
                 if (item == null || item.Quantity < requiredItem.Quantity)
                 {
-                    Logging.Log("BuyLPI: Missing [" + requiredItem.Quantity + "] x [" +
-                                                    requiredItem.TypeName + "]");
+                    Logging.Log("BuyLPI", "Missing [" + requiredItem.Quantity + "] x [" +
+                                                    requiredItem.TypeName + "]", Logging.white);
                     _done = true;
                     return;
                 }
             }
 
             // All passed, accept offer
-            Logging.Log("BuyLPI: Accepting " + offer.TypeName + " [ " + _quantity.Value + " ] of [ " + _totalquantityoforders.Value + " ] orders and will cost another [" + Math.Round(((offer.IskCost * _quantity.Value)/(double)1000000),2) + "mil isk]"); 
+            if (_quantity != null)
+                if (_totalquantityoforders != null)
+                    Logging.Log("BuyLPI", "Accepting " + offer.TypeName + " [ " + _quantity.Value + " ] of [ " + _totalquantityoforders.Value + " ] orders and will cost another [" + Math.Round(((offer.IskCost * _quantity.Value) / (double)1000000), 2) + "mil isk]", Logging.white);
             offer.AcceptOffer();
 
             // Set next action + loyalty point timeout
@@ -185,7 +187,7 @@ namespace BuyLPI
                 _quantity = _quantity.Value - 1;
                 if (_quantity.Value <= 0)
                 {
-                    Logging.Log("Quantity limit reached");
+                    Logging.Log("BuyLPI", "Quantity limit reached", Logging.white);
 
                     _done = true;
                     return;

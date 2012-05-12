@@ -50,6 +50,7 @@
             this.SearchResults = new System.Windows.Forms.ListView();
             this.NameHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TypeHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.JumpsHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SearchLabel = new System.Windows.Forms.Label();
             this.RefreshBookmarksButton = new System.Windows.Forms.Button();
             this.SearchTextBox = new System.Windows.Forms.TextBox();
@@ -188,7 +189,7 @@
             this.cmbXML.Size = new System.Drawing.Size(121, 21);
             this.cmbXML.TabIndex = 29;
             this.cmbXML.Text = "Select Jobs";
-            this.cmbXML.SelectedIndexChanged += new System.EventHandler(this.cmbXML_SelectedIndexChanged);
+            this.cmbXML.SelectedIndexChanged += new System.EventHandler(this.CmbXMLSelectedIndexChanged);
             // 
             // bttnSaveTask
             // 
@@ -198,7 +199,7 @@
             this.bttnSaveTask.TabIndex = 28;
             this.bttnSaveTask.Text = "Save Task";
             this.bttnSaveTask.UseVisualStyleBackColor = true;
-            this.bttnSaveTask.Click += new System.EventHandler(this.bttnSaveTask_Click);
+            this.bttnSaveTask.Click += new System.EventHandler(this.BttnSaveTaskClick);
             // 
             // chkPause
             // 
@@ -210,7 +211,7 @@
             this.chkPause.TabIndex = 27;
             this.chkPause.Text = "Pause";
             this.chkPause.UseVisualStyleBackColor = true;
-            this.chkPause.CheckedChanged += new System.EventHandler(this.chkPause_CheckedChanged);
+            this.chkPause.CheckedChanged += new System.EventHandler(this.ChkPauseCheckedChanged);
             // 
             // bttnDelete
             // 
@@ -220,7 +221,7 @@
             this.bttnDelete.TabIndex = 26;
             this.bttnDelete.Text = "Delete";
             this.bttnDelete.UseVisualStyleBackColor = true;
-            this.bttnDelete.Click += new System.EventHandler(this.bttnDelete_Click);
+            this.bttnDelete.Click += new System.EventHandler(this.BttnDeleteClick);
             // 
             // bttnDown
             // 
@@ -230,7 +231,7 @@
             this.bttnDown.TabIndex = 25;
             this.bttnDown.Text = "Down";
             this.bttnDown.UseVisualStyleBackColor = true;
-            this.bttnDown.Click += new System.EventHandler(this.bttnDown_Click);
+            this.bttnDown.Click += new System.EventHandler(this.BttnDownClick);
             // 
             // bttnUP
             // 
@@ -240,7 +241,7 @@
             this.bttnUP.TabIndex = 24;
             this.bttnUP.Text = "Up";
             this.bttnUP.UseVisualStyleBackColor = true;
-            this.bttnUP.Click += new System.EventHandler(this.bttnUP_Click);
+            this.bttnUP.Click += new System.EventHandler(this.BttnUpClick);
             // 
             // BttnStart
             // 
@@ -331,27 +332,34 @@
             // 
             this.SearchResults.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.NameHeader,
-            this.TypeHeader});
+            this.TypeHeader,
+            this.JumpsHeader});
             this.SearchResults.FullRowSelect = true;
             this.SearchResults.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.SearchResults.HideSelection = false;
-            this.SearchResults.Location = new System.Drawing.Point(10, 35);
+            this.SearchResults.Location = new System.Drawing.Point(10, 34);
             this.SearchResults.MultiSelect = false;
             this.SearchResults.Name = "SearchResults";
             this.SearchResults.Size = new System.Drawing.Size(627, 173);
             this.SearchResults.TabIndex = 17;
             this.SearchResults.UseCompatibleStateImageBehavior = false;
             this.SearchResults.View = System.Windows.Forms.View.Details;
+            this.SearchResults.SelectedIndexChanged += new System.EventHandler(this.SearchResults_SelectedIndexChanged);
             // 
             // NameHeader
             // 
             this.NameHeader.Text = "Name";
-            this.NameHeader.Width = 400;
+            this.NameHeader.Width = 317;
             // 
             // TypeHeader
             // 
             this.TypeHeader.Text = "Type";
             this.TypeHeader.Width = 200;
+            // 
+            // JumpsHeader
+            // 
+            this.JumpsHeader.Text = "Jumps";
+            this.JumpsHeader.Width = 200;
             // 
             // SearchLabel
             // 
@@ -380,7 +388,7 @@
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(543, 20);
             this.SearchTextBox.TabIndex = 16;
-            this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
+            this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBoxTextChanged);
             // 
             // BttnAddTraveler
             // 
@@ -427,7 +435,7 @@
             this.txtNameCorp.Name = "txtNameCorp";
             this.txtNameCorp.Size = new System.Drawing.Size(102, 20);
             this.txtNameCorp.TabIndex = 3;
-            this.txtNameCorp.TextChanged += new System.EventHandler(this.txtNameCorp_TextChanged);
+            this.txtNameCorp.TextChanged += new System.EventHandler(this.TxtNameCorpTextChanged);
             // 
             // rbttnCorp
             // 
@@ -438,7 +446,7 @@
             this.rbttnCorp.TabIndex = 2;
             this.rbttnCorp.Text = "Corp Hangar:";
             this.rbttnCorp.UseVisualStyleBackColor = true;
-            this.rbttnCorp.CheckedChanged += new System.EventHandler(this.rbttnCorp_CheckedChanged);
+            this.rbttnCorp.CheckedChanged += new System.EventHandler(this.RbttnCorpCheckedChanged);
             // 
             // rbttnShip
             // 
@@ -449,7 +457,7 @@
             this.rbttnShip.TabIndex = 1;
             this.rbttnShip.Text = "Ship Hangar";
             this.rbttnShip.UseVisualStyleBackColor = true;
-            this.rbttnShip.CheckedChanged += new System.EventHandler(this.rbttnShip_CheckedChanged);
+            this.rbttnShip.CheckedChanged += new System.EventHandler(this.RbttnShipCheckedChanged);
             // 
             // rbttnLocal
             // 
@@ -462,7 +470,7 @@
             this.rbttnLocal.TabStop = true;
             this.rbttnLocal.Text = "Local Hangar";
             this.rbttnLocal.UseVisualStyleBackColor = true;
-            this.rbttnLocal.CheckedChanged += new System.EventHandler(this.rbttnLocal_CheckedChanged);
+            this.rbttnLocal.CheckedChanged += new System.EventHandler(this.RbttnLocalCheckedChanged);
             // 
             // groupBox3
             // 
@@ -493,7 +501,7 @@
             this.bttnTaskMakeShip.TabIndex = 12;
             this.bttnTaskMakeShip.Text = "Add Task";
             this.bttnTaskMakeShip.UseVisualStyleBackColor = true;
-            this.bttnTaskMakeShip.Click += new System.EventHandler(this.bttnTaskMakeShip_Click);
+            this.bttnTaskMakeShip.Click += new System.EventHandler(this.BttnTaskMakeShipClick);
             // 
             // txtNameShip
             // 
@@ -522,7 +530,7 @@
             this.bttnTaskAllItems.TabIndex = 11;
             this.bttnTaskAllItems.Text = "Add Task";
             this.bttnTaskAllItems.UseVisualStyleBackColor = true;
-            this.bttnTaskAllItems.Click += new System.EventHandler(this.bttnTaskAllItems_Click);
+            this.bttnTaskAllItems.Click += new System.EventHandler(this.BttnTaskAllItemsClick);
             // 
             // cmbAllMode
             // 
@@ -571,7 +579,7 @@
             this.BttnTaskForItem.TabIndex = 1;
             this.BttnTaskForItem.Text = "Add Task";
             this.BttnTaskForItem.UseVisualStyleBackColor = true;
-            this.BttnTaskForItem.Click += new System.EventHandler(this.BttnTaskForItem_Click_1);
+            this.BttnTaskForItem.Click += new System.EventHandler(this.BttnTaskForItemClick1);
             // 
             // LstItems
             // 
@@ -643,7 +651,7 @@
             this.txtSearchItems.Name = "txtSearchItems";
             this.txtSearchItems.Size = new System.Drawing.Size(247, 20);
             this.txtSearchItems.TabIndex = 7;
-            this.txtSearchItems.TextChanged += new System.EventHandler(this.txtSearchItems_TextChanged);
+            this.txtSearchItems.TextChanged += new System.EventHandler(this.TxtSearchItemsTextChanged);
             // 
             // label3
             // 
@@ -843,7 +851,7 @@
             this.bttnTaskValueDump.TabIndex = 14;
             this.bttnTaskValueDump.Text = "Add Task";
             this.bttnTaskValueDump.UseVisualStyleBackColor = true;
-            this.bttnTaskValueDump.Click += new System.EventHandler(this.bttnTaskValueDump_Click);
+            this.bttnTaskValueDump.Click += new System.EventHandler(this.BttnTaskValueDumpClick);
             // 
             // tabPage5
             // 
@@ -969,7 +977,7 @@
             this.bttnTaskLPI.TabIndex = 6;
             this.bttnTaskLPI.Text = "Add Task";
             this.bttnTaskLPI.UseVisualStyleBackColor = true;
-            this.bttnTaskLPI.Click += new System.EventHandler(this.bttnTaskLPI_Click);
+            this.bttnTaskLPI.Click += new System.EventHandler(this.BttnTaskLPIClick);
             // 
             // lstItemsRequiered
             // 
@@ -1009,7 +1017,7 @@
             this.bttnRefreshLPI.TabIndex = 4;
             this.bttnRefreshLPI.Text = "Search";
             this.bttnRefreshLPI.UseVisualStyleBackColor = true;
-            this.bttnRefreshLPI.Click += new System.EventHandler(this.bttnRefreshLPI_Click);
+            this.bttnRefreshLPI.Click += new System.EventHandler(this.BttnRefreshLPIClick);
             // 
             // txtSearchLPI
             // 
@@ -1017,7 +1025,7 @@
             this.txtSearchLPI.Name = "txtSearchLPI";
             this.txtSearchLPI.Size = new System.Drawing.Size(180, 20);
             this.txtSearchLPI.TabIndex = 3;
-            this.txtSearchLPI.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtSearchLPI_KeyPress);
+            this.txtSearchLPI.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtSearchLPIKeyPress);
             // 
             // label11
             // 
@@ -1041,7 +1049,7 @@
             this.lstbuyLPI.TabIndex = 1;
             this.lstbuyLPI.UseCompatibleStateImageBehavior = false;
             this.lstbuyLPI.View = System.Windows.Forms.View.Details;
-            this.lstbuyLPI.SelectedIndexChanged += new System.EventHandler(this.lstbuyLPI_SelectedIndexChanged);
+            this.lstbuyLPI.SelectedIndexChanged += new System.EventHandler(this.LstbuyLPISelectedIndexChanged);
             // 
             // columnHeader8
             // 
@@ -1083,7 +1091,7 @@
             this.bttnTaskLineCmd.TabIndex = 2;
             this.bttnTaskLineCmd.Text = "Add Task";
             this.bttnTaskLineCmd.UseVisualStyleBackColor = true;
-            this.bttnTaskLineCmd.Click += new System.EventHandler(this.bttnTaskLineCmd_Click);
+            this.bttnTaskLineCmd.Click += new System.EventHandler(this.BttnTaskLineCmdClick);
             // 
             // label17
             // 
@@ -1102,14 +1110,14 @@
             this.txtCmdLine.Size = new System.Drawing.Size(468, 20);
             this.txtCmdLine.TabIndex = 0;
             // 
-            // MainForm
+            // QuestorManagerUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(654, 270);
             this.Controls.Add(this.tabControl1);
             this.MaximizeBox = false;
-            this.Name = "MainForm";
+            this.Name = "QuestorManagerUI";
             this.Text = "Questor Manager";
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
@@ -1151,6 +1159,7 @@
         private System.Windows.Forms.ListView SearchResults;
         private System.Windows.Forms.ColumnHeader NameHeader;
         private System.Windows.Forms.ColumnHeader TypeHeader;
+        private System.Windows.Forms.ColumnHeader JumpsHeader;
         private System.Windows.Forms.Label SearchLabel;
         private System.Windows.Forms.Button RefreshBookmarksButton;
         private System.Windows.Forms.TextBox SearchTextBox;

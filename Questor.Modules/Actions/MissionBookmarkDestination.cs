@@ -1,9 +1,9 @@
 ﻿// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-// 
-//     Please look in the accompanying license.htm file for the license that 
-//     applies to this source code. (a copy can also be found at: 
+//
+//     Please look in the accompanying license.htm file for the license that
+//     applies to this source code. (a copy can also be found at:
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
@@ -15,7 +15,7 @@ namespace Questor.Modules.Actions
     using DirectEve;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Caching;
-    
+
     public class MissionBookmarkDestination2 : TravelerDestination
     {
         private DateTime _nextAction;
@@ -24,7 +24,7 @@ namespace Questor.Modules.Actions
         {
             if (bookmark == null)
             {
-                Logging.Log("QuestorManager.MissionBookmarkDestination: Invalid mission bookmark!");
+                Logging.Log("QuestorManager.MissionBookmarkDestination", "Invalid mission bookmark!", Logging.red);
 
                 AgentId = -1;
                 Title = null;
@@ -32,7 +32,7 @@ namespace Questor.Modules.Actions
                 return;
             }
 
-            Logging.Log("QuestorManager.MissionBookmarkDestination: Destination set to mission bookmark [" + bookmark.Title + "]");
+            Logging.Log("QuestorManager.MissionBookmarkDestination", "Destination set to mission bookmark [" + bookmark.Title + "]", Logging.white);
             AgentId = bookmark.AgentId ?? -1;
             Title = bookmark.Title;
             SolarSystemId = bookmark.SolarSystemId ?? -1;
@@ -44,6 +44,7 @@ namespace Questor.Modules.Actions
         }
 
         public long AgentId { get; set; }
+
         public string Title { get; set; }
 
         private static DirectAgentMissionBookmark GetMissionBookmark(long agentId, string title)
@@ -52,7 +53,7 @@ namespace Questor.Modules.Actions
             if (mission == null)
                 return null;
 
-            return mission.Bookmarks.FirstOrDefault(b => b.Title == title);
+            return mission.Bookmarks.FirstOrDefault(b => b.Title.ToLower() == title.ToLower());
         }
 
         public override bool PerformFinalDestinationTask()

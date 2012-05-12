@@ -2,8 +2,8 @@
 //  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
-//    Please look in the accompanying license.htm file for the license that 
-//    applies to this source code. (a copy can also be found at: 
+//    Please look in the accompanying license.htm file for the license that
+//    applies to this source code. (a copy can also be found at:
 //    http://www.thehackerwithin.com/license.htm)
 //  </copyright>
 //-------------------------------------------------------------------------------
@@ -25,11 +25,13 @@ namespace Questor
     using global::Questor.Modules.Lookup;
     using DirectEve;
 
-   internal static class Program
+    internal static class Program
     {
         private static bool _done;
         private static DirectEve _directEve;
+
         public static List<CharSchedule> CharSchedules { get; private set; }
+
         private static int _pulsedelay = (int)Time.QuestorBeforeLoginPulseDelay_seconds;
 
         public static DateTime AppStarted = DateTime.Now;
@@ -37,8 +39,8 @@ namespace Questor
         private static string _password;
         private static string _character;
         private static string _scriptFile;
-        private static bool   _loginOnly;
-        private static bool   _showHelp;
+        private static bool _loginOnly;
+        private static bool _showHelp;
         private static int _maxRuntime;
         private static bool _chantlingScheduler;
 
@@ -47,6 +49,7 @@ namespace Questor
         private static double _minutesToStart;
         private static bool _readyToStarta;
         private static bool _readyToStart;
+        private static bool _humaninterventionrequired;
 
         static readonly System.Timers.Timer Timer = new System.Timers.Timer();
         private const int RandStartDelay = 30; //Random startup delay in minutes
@@ -58,10 +61,10 @@ namespace Questor
 
         public static DateTime startTime
         {
-           get 
-           {
-              return _startTime; 
-           }
+            get
+            {
+                return _startTime;
+            }
         }
 
         public static int MaxRuntime
@@ -76,7 +79,7 @@ namespace Questor
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-      private static void Main(string[] args)
+        private static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
             var p = new OptionSet {
@@ -102,24 +105,24 @@ namespace Questor
             }
             catch (OptionException e)
             {
-                Logging.Log("questor: ");
-                Logging.Log(e.Message);
-                Logging.Log("Try `questor --help' for more information.");
+                Logging.Log("Startup", "questor: ", Logging.white);
+                Logging.Log("Startup", e.Message, Logging.white);
+                Logging.Log("Startup", "Try `questor --help' for more information.", Logging.white);
                 return;
             }
-                _readyToStart = true;
+            _readyToStart = true;
 
             if (_showHelp)
             {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
                 p.WriteOptionDescriptions(sw);
-                Logging.Log(sw.ToString());
+                Logging.Log("Startup", sw.ToString(), Logging.white);
                 return;
             }
 
             if (_chantlingScheduler && string.IsNullOrEmpty(_character))
             {
-                Logging.Log("Error: to use chantling's scheduler, you also need to provide a character name!");
+                Logging.Log("Startup", "Error: to use chantling's scheduler, you also need to provide a character name!", Logging.red);
                 return;
             }
 
@@ -131,9 +134,9 @@ namespace Questor
                 CharSchedules = new List<CharSchedule>();
                 if (path != null)
                 {
-                XDocument values = XDocument.Load(Path.Combine(path, "Schedules.xml"));
+                    XDocument values = XDocument.Load(Path.Combine(path, "Schedules.xml"));
                     if (values.Root != null)
-                    foreach (XElement value in values.Root.Elements("char"))
+                        foreach (XElement value in values.Root.Elements("char"))
                             CharSchedules.Add(new CharSchedule(value));
                 }
                 //
@@ -142,16 +145,16 @@ namespace Questor
                 CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.Name == _character);
                 if (schedule == null)
                 {
-                    Logging.Log("[Startup] Error - character not found!");
+                    Logging.Log("Startup", "Error - character not found!", Logging.red);
                     return;
                 }
                 else
                 {
-                    Logging.Log("[Startup] User: " + schedule.User + " PW: " + schedule.PW + " Name: " + schedule.Name + " Start: " + schedule.Start + " Stop: " +
-                             schedule.Stop + " RunTime: " + schedule.RunTime);
+                    Logging.Log("Startup", "User: " + schedule.User + " PW: " + schedule.PW + " Name: " + schedule.Name + " Start: " + schedule.Start + " Stop: " +
+                             schedule.Stop + " RunTime: " + schedule.RunTime, Logging.white);
                     if (schedule.User == null || schedule.PW == null)
                     {
-                        Logging.Log("[Startup] Error - Login details not specified in Schedules.xml!");
+                        Logging.Log("Startup", "Error - Login details not specified in Schedules.xml!", Logging.red);
                         return;
                     }
                     else
@@ -163,68 +166,67 @@ namespace Questor
 
                     if (schedule.StartTimeSpecified)
                         _startTime = _startTime.AddSeconds(R.Next(0, (RandStartDelay * 60)));
-                     
-                        //_scheduledstartTime = schedule.Start;
-                        ScheduledstopTime = schedule.Stop;
-                        StopTime = schedule.Stop;
 
-                        //if ((DateTime.Now > _scheduledstopTime))
-                        //{
-                        //	_startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
-                        //	_readyToStarta = false;
-                        //}
-                        if ((DateTime.Now > _startTime))
-						{
-							if ((DateTime.Now.Subtract( _startTime).TotalMinutes < 1200 )) //if we're less than x hours past start time, start now
-							{
-								_startTime = DateTime.Now;
-								_readyToStarta = true;
-							}
-							else
-								_startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
-						}
-						else
-							if ((_startTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
-							{
-								_startTime = DateTime.Now;
-								_readyToStarta = true;
-							}
+                    //_scheduledstartTime = schedule.Start;
+                    ScheduledstopTime = schedule.Stop;
+                    StopTime = schedule.Stop;
 
-						if (StopTime < _startTime)
-							StopTime = StopTime.AddDays(1);
+                    //if ((DateTime.Now > _scheduledstopTime))
+                    //{
+                    //	_startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
+                    //	_readyToStarta = false;
+                    //}
+                    if ((DateTime.Now > _startTime))
+                    {
+                        if ((DateTime.Now.Subtract(_startTime).TotalMinutes < 1200)) //if we're less than x hours past start time, start now
+                        {
+                            _startTime = DateTime.Now;
+                            _readyToStarta = true;
+                        }
+                        else
+                            _startTime = _startTime.AddDays(1); //otherwise, start tomorrow at start time
+                    }
+                    else
+                        if ((_startTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
+                        {
+                            _startTime = DateTime.Now;
+                            _readyToStarta = true;
+                        }
 
-						if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
-                            StopTime = _startTime.AddMinutes(schedule.RunTime); //minutes of runtime
-                        
-                        if (schedule.RunTime < 10 && schedule.RunTime > 0)     //if runtime is 10 or less, assume they meant hours
-                            StopTime = _startTime.AddHours(schedule.RunTime);   //hours of runtime
+                    if (StopTime < _startTime)
+                        StopTime = StopTime.AddDays(1);
 
-						string stopTimeText = "No stop time specified";
-						StopTimeSpecified = schedule.StopTimeSpecified;
-						if (StopTimeSpecified)
-							stopTimeText = StopTime.ToString(CultureInfo.InvariantCulture);
+                    if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
+                        StopTime = _startTime.AddMinutes(schedule.RunTime); //minutes of runtime
 
-						Logging.Log("[Startup] Start Time: " + _startTime + " - Stop Time: " + stopTimeText);
+                    if (schedule.RunTime < 10 && schedule.RunTime > 0)     //if runtime is 10 or less, assume they meant hours
+                        StopTime = _startTime.AddHours(schedule.RunTime);   //hours of runtime
 
-						if (!_readyToStarta)
-						{
-							_minutesToStart = _startTime.Subtract(DateTime.Now).TotalMinutes;
-							Logging.Log("[Startup] Starting at " + _startTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.");
-							Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
-							if (_minutesToStart > 0)
-								Timer.Interval = (int)(_minutesToStart * 60000);
-							else
-								Timer.Interval = 1000;
-							Timer.Enabled = true;
-							Timer.Start();
+                    string stopTimeText = "No stop time specified";
+                    StopTimeSpecified = schedule.StopTimeSpecified;
+                    if (StopTimeSpecified)
+                        stopTimeText = StopTime.ToString(CultureInfo.InvariantCulture);
 
-						}
-						else
-						{
-							_readyToStart = true;
-							Logging.Log("[Startup] Already passed start time.  Starting in 15 seconds.");
-                            System.Threading.Thread.Sleep(15000);
-						}
+                    Logging.Log("Startup", " Start Time: " + _startTime + " - Stop Time: " + stopTimeText, Logging.white);
+
+                    if (!_readyToStarta)
+                    {
+                        _minutesToStart = _startTime.Subtract(DateTime.Now).TotalMinutes;
+                        Logging.Log("Startup", "Starting at " + _startTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.", Logging.yellow);
+                        Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
+                        if (_minutesToStart > 0)
+                            Timer.Interval = (int)(_minutesToStart * 60000);
+                        else
+                            Timer.Interval = 1000;
+                        Timer.Enabled = true;
+                        Timer.Start();
+                    }
+                    else
+                    {
+                        _readyToStart = true;
+                        Logging.Log("Startup", "Already passed start time.  Starting in 15 seconds.", Logging.white);
+                        System.Threading.Thread.Sleep(15000);
+                    }
                 }
                 //
                 // chantling scheduler (above)
@@ -267,9 +269,9 @@ namespace Questor
             Application.Run(new QuestorfrmMain());
         }
 
-      private static void OnFrame(object sender, EventArgs e)
+        private static void OnFrame(object sender, EventArgs e)
         {
-            if (!_readyToStart)
+            if (!_readyToStart || _humaninterventionrequired)
             {
                 //Logging.Log("if (!_readyToStart) then return");
                 return;
@@ -292,7 +294,7 @@ namespace Questor
             // If the session is ready, then we are done :)
             if (_directEve.Session.IsReady)
             {
-                Logging.Log("[Startup] We've successfully logged in");
+                Logging.Log("Startup", "We've successfully logged in", Logging.white);
                 _done = true;
                 return;
             }
@@ -300,18 +302,18 @@ namespace Questor
             // We shouldn't get any window
             if (_directEve.Windows.Count != 0)
             {
-                foreach(var window in _directEve.Windows)
+                foreach (var window in _directEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
-                    Logging.Log("[Startup] windowtitles:" + window.Name + "::" + window.Html);
+                    Logging.Log("Startup", "windowtitles:" + window.Name + "::" + window.Html, Logging.white);
                     //
                     // Close these windows and continue
                     //
                     if (window.Name == "telecom")
                     {
-                        Logging.Log("Questor: Closing telecom message...");
-                        Logging.Log("Questor: Content of telecom window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]");
+                        Logging.Log("Startup", "Closing telecom message...", Logging.yellow);
+                        Logging.Log("Startup", "Content of telecom window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.yellow);
                         window.Close();
                         continue;
                     }
@@ -321,9 +323,14 @@ namespace Questor
                     if (window.Name == "modal")
                     {
                         bool close = false;
-						bool restart = false;
+                        bool restart = false;
+                        bool needhumanintervention = false;
+
                         if (!string.IsNullOrEmpty(window.Html))
                         {
+                            //errors that are repeatable and unavoidable even after a restart of eve/questor
+                            needhumanintervention = window.Html.Contains("reason: Account subscription expired");
+
                             // Server going down
                             //Logging.Log("[Startup] (1) close is: " + close);
                             close |= window.Html.Contains("Please make sure your characters are out of harms way");
@@ -331,7 +338,7 @@ namespace Questor
                             close |= window.Html.Contains("accepting connections");
                             close |= window.Html.Contains("Could not connect");
                             close |= window.Html.Contains("The connection to the server was closed");
-                            close |= window.Html.Contains("server was closed"); 
+                            close |= window.Html.Contains("server was closed");
                             close |= window.Html.Contains("Unable to connect to the selected server. Please check the address and try again.");
                             close |= window.Html.Contains("make sure your characters are out of harm");
                             close |= window.Html.Contains("Connection to server lost");
@@ -372,18 +379,31 @@ namespace Questor
 
                         if (restart)
                         {
-                            Logging.Log("Startup: Restarting eve...");
-                            Logging.Log("Startup: Content of modal window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]");
+                            Logging.Log("Startup", "Restarting eve...", Logging.red);
+                            Logging.Log("Startup", "Content of modal window (HTML): [" +
+                                        (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.red);
                             _directEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                             continue;
                         }
 
                         if (close)
                         {
-                            Logging.Log("Questor: Closing modal window...");
-                            Logging.Log("Questor: Content of modal window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]");
+                            Logging.Log("Startup", "Closing modal window...", Logging.yellow);
+                            Logging.Log("Startup", "Content of modal window (HTML): [" +
+                                        (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.yellow);
                             window.Close();
                             continue;
+                        }
+                        if (needhumanintervention)
+                        {
+                            Logging.Log("Startup", "ERROR! - Human Intervention is required in this case: halting all login attempts - ERROR!", Logging.red);
+                            Logging.Log("Startup", "window.Name is: " + window.Name, Logging.red);
+                            Logging.Log("Startup", "window.Caption is: " + window.Caption, Logging.red);
+                            Logging.Log("Startup", "window.ID is: " + window.Id, Logging.red);
+                            Logging.Log("Startup", "window.Html is: " + window.Html, Logging.red);
+                            Logging.Log("Startup", "ERROR! - Human Intervention is required in this case: halting all login attempts - ERROR!", Logging.red);
+                            _humaninterventionrequired = true;
+                            return;
                         }
                     }
 
@@ -391,11 +411,11 @@ namespace Questor
                         continue;
                     if (window.Name == "telecom")
                         continue;
-                    Logging.Log("[Startup] We've got an unexpected window, auto login halted.");
-                    Logging.Log("[Startup] window.Name is: " + window.Name);
-                    Logging.Log("[Startup] window.Caption is: " + window.Caption);
-                    Logging.Log("[Startup] window.ID is: " + window.Id);
-                    Logging.Log("[Startup] window.Html is: " + window.Html);
+                    Logging.Log("Startup", "We've got an unexpected window, auto login halted.", Logging.red);
+                    Logging.Log("Startup", "window.Name is: " + window.Name, Logging.red);
+                    Logging.Log("Startup", "window.Caption is: " + window.Caption, Logging.red);
+                    Logging.Log("Startup", "window.ID is: " + window.Id, Logging.red);
+                    Logging.Log("Startup", "window.Html is: " + window.Html, Logging.red);
                     _done = true;
                     return;
                 }
@@ -413,17 +433,17 @@ namespace Questor
 
                     if (info == null)
                     {
-                        Logging.Log("DirectEve.RunScript() doesn't exist.  Upgrade DirectEve.dll!");
+                        Logging.Log("Startup", "DirectEve.RunScript() doesn't exist.  Upgrade DirectEve.dll!", Logging.red);
                     }
                     else
                     {
-                        Logging.Log(string.Format("Running {0}...", _scriptFile));
+                        Logging.Log("Startup", string.Format("Running {0}...", _scriptFile), Logging.white);
                         info.Invoke(_directEve, new Object[] { _scriptFile });
                     }
                 }
                 catch (System.Exception ex)
                 {
-                    Logging.Log(string.Format("Exception {0}...", ex));
+                    Logging.Log("Startup", string.Format("Exception {0}...", ex), Logging.white);
                     _done = true;
                 }
                 finally
@@ -437,9 +457,9 @@ namespace Questor
             {
                 if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 15)
                 {
-                    Logging.Log("[Startup] Login account [" + _username + "]");
+                    Logging.Log("Startup", "Login account [" + _username + "]", Logging.white);
                     _directEve.Login.Login(_username, _password);
-                    Logging.Log("[Startup] Waiting for Character Selection Screen");
+                    Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.white);
                     _pulsedelay = (int)Time.QuestorBeforeLoginPulseDelay_seconds;
                     return;
                 }
@@ -454,20 +474,19 @@ namespace Questor
                         if (slot.CharId.ToString(CultureInfo.InvariantCulture) != _character && System.String.Compare(slot.CharName, _character, System.StringComparison.OrdinalIgnoreCase) != 0)
                             continue;
 
-                        Logging.Log("[Startup] Activating character [" + slot.CharName + "]");
+                        Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.white);
                         slot.Activate();
                         return;
                     }
-                    Logging.Log("[Startup1] Character id/name [" + _character + "] not found, retrying in 10 seconds");
+                    Logging.Log("Startup", "Character id/name [" + _character + "] not found, retrying in 10 seconds", Logging.white);
                 }
-                Logging.Log("[Startup2] Character id/name [" + _character + "] not found, retrying in 10 seconds");
             }
         }
 
         private static void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
         {
             Timer.Stop();
-            Logging.Log("[Startup] Timer elapsed.  Starting now.");
+            Logging.Log("Startup", "Timer elapsed.  Starting now.", Logging.white);
             _readyToStart = true;
             _readyToStarta = true;
         }

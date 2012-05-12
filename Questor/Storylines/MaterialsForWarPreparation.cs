@@ -23,21 +23,21 @@ namespace Questor.Storylines
         public StorylineState Arm(Storyline storyline)
         {
             if (_nextAction > DateTime.Now)
-                return StorylineState.Arm; 
-            
+                return StorylineState.Arm;
+
             // Are we in a shuttle?  Yes, go to the agent
             DirectEve directEve = Cache.Instance.DirectEve;
             if (directEve.ActiveShip.GroupId == 31)
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if(!Cache.Instance.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.Arm;
+            if (!Cache.Instance.OpenShipsHangar("MaterialsForWarPreperation")) return StorylineState.Arm;
 
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == 31);
             if (item != null)
             {
-                Logging.Log("MaterialsForWarPreparation: Switching to shuttle");
+                Logging.Log("MaterialsForWarPreparation", "Switching to shuttle", Logging.white);
 
                 _nextAction = DateTime.Now.AddSeconds(10);
 
@@ -46,7 +46,7 @@ namespace Questor.Storylines
             }
             else
             {
-                Logging.Log("MaterialsForWarPreparation: No shuttle found, going in active ship");
+                Logging.Log("MaterialsForWarPreparation", "No shuttle found, going in active ship", Logging.white);
                 return StorylineState.GotoAgent;
             }
         }
@@ -61,14 +61,12 @@ namespace Questor.Storylines
             if (_nextAction > DateTime.Now)
                 return StorylineState.PreAcceptMission;
 
-
             // the ore and ore quantity can be stored in the char.xml this is to facility mission levels other than 4.
             //The defaults are for level 4 so it will not break for those people that dont include these in their settings file
             //  Level 1         <MaterialsForWarOreID>1230</MaterialsForWarOreID>
             //                  <MaterialsForWarOreQty>999</MaterialsForWarOreQty>
             //  Level 4         <MaterialsForWarOreID>20</MaterialsForWarOreID>
             //                  <MaterialsForWarOreQty>8000</MaterialsForWarOreQty>
-
 
             int oreid = Settings.Instance.MaterialsForWarOreID; //1230;
             int orequantity = Settings.Instance.MaterialsForWarOreQty; //999
@@ -85,7 +83,7 @@ namespace Questor.Storylines
             {
                 DirectItem thisOreInhangar = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.TypeId == oreid);
                 if (thisOreInhangar != null)
-                    Logging.Log(String.Format("MaterialsForWarPreparation: We have [{0}] {1}, accepting mission", Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture), thisOreInhangar.TypeName));
+                    Logging.Log("MaterialsForWarPreparation", "We have [" + Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture) + "] " + thisOreInhangar.TypeName + " accepting mission", Logging.white);
 
                 // Close the market window if there is one
                 if (marketWindow != null)
@@ -99,7 +97,7 @@ namespace Questor.Storylines
             {
                 _nextAction = DateTime.Now.AddSeconds(10);
 
-                Logging.Log("MaterialsForWarPreparation: Opening market window");
+                Logging.Log("MaterialsForWarPreparation", "Opening market window", Logging.white);
 
                 directEve.ExecuteCommand(DirectCmd.OpenMarket);
                 return StorylineState.PreAcceptMission;
@@ -115,7 +113,7 @@ namespace Questor.Storylines
                 // No, load the ore orders
                 marketWindow.LoadTypeId(oreid);
 
-                Logging.Log("MaterialsForWarPreparation: Loading market window");
+                Logging.Log("MaterialsForWarPreparation", "Loading market window", Logging.white);
 
                 _nextAction = DateTime.Now.AddSeconds(5);
                 return StorylineState.PreAcceptMission;
@@ -123,13 +121,13 @@ namespace Questor.Storylines
 
             // Get the median sell price
             InvType type = Cache.Instance.InvTypesById[20];
-            double? maxPrice = type.MedianSell*4;
+            double? maxPrice = type.MedianSell * 4;
 
             // Do we have orders that sell enough ore for the mission?
             IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == directEve.Session.StationId && o.Price < maxPrice).ToList();
             if (!orders.Any() || orders.Sum(o => o.VolumeRemaining) < orequantity)
             {
-                Logging.Log("MaterialsForWarPreparation: Not enough (reasonably priced) ore available! Blacklisting agent for this Questor session!");
+                Logging.Log("MaterialsForWarPreparation", "Not enough (reasonably priced) ore available! Blacklisting agent for this Questor session!", Logging.orange);
 
                 // Close the market window
                 marketWindow.Close();
@@ -150,7 +148,7 @@ namespace Questor.Storylines
                     int remaining = Math.Min(neededQuantity, order.VolumeRemaining);
                     order.Buy(remaining, DirectOrderRange.Station);
 
-                    Logging.Log("MaterialsForWarPreparation: Buying [" + remaining + "] ore");
+                    Logging.Log("MaterialsForWarPreparation", "Buying [" + remaining + "] ore", Logging.white);
 
                     // Wait for the order to go through
                     _nextAction = DateTime.Now.AddSeconds(10);

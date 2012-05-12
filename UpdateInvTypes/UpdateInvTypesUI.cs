@@ -1,7 +1,4 @@
-﻿
-
-
-namespace UpdateInvTypes
+﻿namespace UpdateInvTypes
 {
     using System.IO;
     using System.Xml.Linq;
@@ -17,7 +14,7 @@ namespace UpdateInvTypes
         private bool _doUpdate;
         private bool _updating;
         private readonly List<InvType> _invTypes;
-        
+
         public string InvTypesPath
         {
             get
@@ -31,7 +28,7 @@ namespace UpdateInvTypes
             InitializeComponent();
 
             _invTypes = new List<InvType>();
-            
+
             XDocument invTypes = XDocument.Load(InvTypesPath);
             if (invTypes.Root != null)
                 foreach (XElement element in invTypes.Root.Elements("invtype"))
@@ -69,10 +66,10 @@ namespace UpdateInvTypes
             _updating = true;
             try
             {
-                IEnumerable<InvType> types = _invTypes.Skip(Progress.Value).Take(Progress.Step);
+                IEnumerable<InvType> types = _invTypes.Skip(Progress.Value).Take(Progress.Step).ToList();
                 try
                 {
-                    IEnumerable<InvType> needUpdating = types.Where(type => !type.LastUpdate.HasValue || DateTime.Now.Subtract(type.LastUpdate.Value).TotalDays > 4 );
+                    IEnumerable<InvType> needUpdating = types.Where(type => !type.LastUpdate.HasValue || DateTime.Now.Subtract(type.LastUpdate.Value).TotalDays > 4).ToList();
                     if (chkfast.Checked)
                         needUpdating = types.Where(type => !type.LastUpdate.HasValue || DateTime.Now.Subtract(type.LastUpdate.Value).TotalMinutes > 2);
 
@@ -89,7 +86,7 @@ namespace UpdateInvTypes
 
                         if (prices.Root != null && (string)prices.Root.Attribute("method") != "marketstat_xml")
                         {
-                            Logging.Log("Invalid XML Method");
+                            Logging.Log("UpdateInvTypes", "Invalid XML Method", Logging.red);
                             throw new Exception("Invalid XML method");
                         }
 
@@ -122,7 +119,7 @@ namespace UpdateInvTypes
                     }
                     catch (Exception ex)
                     {
-                        Logging.Log("Invalid XML Method in marketstat_xml [" + ex.Message + "]");
+                        Logging.Log("UpdateInvTypes", "Invalid XML Method in marketstat_xml [" + ex.Message + "]", Logging.red);
                         return;
                     }
                 }

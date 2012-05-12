@@ -46,7 +46,7 @@
             this.lblPocketAction = new System.Windows.Forms.Label();
             this.lblCurrentPocketAction = new System.Windows.Forms.Label();
             this.buttonQuestorStatistics = new System.Windows.Forms.Button();
-            this.buttonSettingsXML = new System.Windows.Forms.Button();
+            this.buttonQuestorSettings = new System.Windows.Forms.Button();
             this.buttonOpenMissionXML = new System.Windows.Forms.Button();
             this.buttonOpenLogDirectory = new System.Windows.Forms.Button();
             this.Console = new System.Windows.Forms.TabPage();
@@ -85,6 +85,12 @@
             this.label3 = new System.Windows.Forms.Label();
             this.Schedule = new System.Windows.Forms.TabPage();
             this.Targets = new System.Windows.Forms.TabPage();
+            this.lblDistance3 = new System.Windows.Forms.Label();
+            this.lblDistanceDroneTarget = new System.Windows.Forms.Label();
+            this.lblDistanceWeaponsTarget = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
             this.CurrentPriorityTargetsData = new System.Windows.Forms.Label();
             this.CurrentPocketNumberData = new System.Windows.Forms.Label();
             this.MissionPocketNumberlbl = new System.Windows.Forms.Label();
@@ -95,6 +101,23 @@
             this.label14 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.EWar = new System.Windows.Forms.TabPage();
+            this.dataEntitiesTargetPaintingMe = new System.Windows.Forms.Label();
+            this.lblTargetPaintingMe = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.lblTitleEWar = new System.Windows.Forms.Label();
+            this.dataEntitiesDampening = new System.Windows.Forms.Label();
+            this.lblDampeningMe = new System.Windows.Forms.Label();
+            this.dataEntitiesTrackingDisruptingMe = new System.Windows.Forms.Label();
+            this.lblTrackingDisruptingMe = new System.Windows.Forms.Label();
+            this.dataEntitiesNeutralizingMe = new System.Windows.Forms.Label();
+            this.lblWebbingMe = new System.Windows.Forms.Label();
+            this.dataEntitiesWebbingMe = new System.Windows.Forms.Label();
+            this.lblNeutralizingMe = new System.Windows.Forms.Label();
+            this.dataEntitiesJammingMe = new System.Windows.Forms.Label();
+            this.lblJammingMe = new System.Windows.Forms.Label();
+            this.dataEntitiesWarpDisruptingMe = new System.Windows.Forms.Label();
+            this.lblWarpDisrupingMe = new System.Windows.Forms.Label();
             this.CombatMissionsBehaviorComboBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.QuestorStateComboBox = new System.Windows.Forms.ComboBox();
@@ -102,18 +125,13 @@
             this.buttonOpenSchedulesXML = new System.Windows.Forms.Button();
             this.buttonOpenCharacterXML = new System.Windows.Forms.Button();
             this.buttonQuestormanager = new System.Windows.Forms.Button();
-            this.label21 = new System.Windows.Forms.Label();
-            this.label22 = new System.Windows.Forms.Label();
-            this.label23 = new System.Windows.Forms.Label();
-            this.lblDistanceWeaponsTarget = new System.Windows.Forms.Label();
-            this.lblDistanceDroneTarget = new System.Windows.Forms.Label();
-            this.lblDistance3 = new System.Windows.Forms.Label();
             this.Console.SuspendLayout();
             this.Tabs.SuspendLayout();
             this.States.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.Targets.SuspendLayout();
+            this.EWar.SuspendLayout();
             this.SuspendLayout();
             // 
             // AutoStartCheckBox
@@ -238,14 +256,15 @@
             this.buttonQuestorStatistics.UseVisualStyleBackColor = true;
             this.buttonQuestorStatistics.Click += new System.EventHandler(this.ButtonQuestorStatisticsClick);
             // 
-            // buttonSettingsXML
+            // buttonQuestorSettings
             // 
-            this.buttonSettingsXML.Location = new System.Drawing.Point(527, 28);
-            this.buttonSettingsXML.Name = "buttonSettingsXML";
-            this.buttonSettingsXML.Size = new System.Drawing.Size(156, 23);
-            this.buttonSettingsXML.TabIndex = 110;
-            this.buttonSettingsXML.Text = "QuestorSettings";
-            this.buttonSettingsXML.UseVisualStyleBackColor = true;
+            this.buttonQuestorSettings.Location = new System.Drawing.Point(527, 28);
+            this.buttonQuestorSettings.Name = "buttonQuestorSettings";
+            this.buttonQuestorSettings.Size = new System.Drawing.Size(156, 23);
+            this.buttonQuestorSettings.TabIndex = 110;
+            this.buttonQuestorSettings.Text = "QuestorSettings";
+            this.buttonQuestorSettings.UseVisualStyleBackColor = true;
+            this.buttonQuestorSettings.Click += new System.EventHandler(this.ButtonQuestorSettingsXMLClick);
             // 
             // buttonOpenMissionXML
             // 
@@ -304,6 +323,7 @@
             this.Tabs.Controls.Add(this.States);
             this.Tabs.Controls.Add(this.Schedule);
             this.Tabs.Controls.Add(this.Targets);
+            this.Tabs.Controls.Add(this.EWar);
             this.Tabs.Location = new System.Drawing.Point(4, 101);
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
@@ -666,6 +686,60 @@
             this.Targets.Text = "Targets";
             this.Targets.UseVisualStyleBackColor = true;
             // 
+            // lblDistance3
+            // 
+            this.lblDistance3.AutoSize = true;
+            this.lblDistance3.Location = new System.Drawing.Point(422, 100);
+            this.lblDistance3.Name = "lblDistance3";
+            this.lblDistance3.Size = new System.Drawing.Size(52, 13);
+            this.lblDistance3.TabIndex = 17;
+            this.lblDistance3.Text = "Distance:";
+            // 
+            // lblDistanceDroneTarget
+            // 
+            this.lblDistanceDroneTarget.AutoSize = true;
+            this.lblDistanceDroneTarget.Location = new System.Drawing.Point(222, 100);
+            this.lblDistanceDroneTarget.Name = "lblDistanceDroneTarget";
+            this.lblDistanceDroneTarget.Size = new System.Drawing.Size(52, 13);
+            this.lblDistanceDroneTarget.TabIndex = 16;
+            this.lblDistanceDroneTarget.Text = "Distance:";
+            // 
+            // lblDistanceWeaponsTarget
+            // 
+            this.lblDistanceWeaponsTarget.AutoSize = true;
+            this.lblDistanceWeaponsTarget.Location = new System.Drawing.Point(6, 100);
+            this.lblDistanceWeaponsTarget.Name = "lblDistanceWeaponsTarget";
+            this.lblDistanceWeaponsTarget.Size = new System.Drawing.Size(52, 13);
+            this.lblDistanceWeaponsTarget.TabIndex = 15;
+            this.lblDistanceWeaponsTarget.Text = "Distance:";
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(436, 77);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(38, 13);
+            this.label23.TabIndex = 14;
+            this.label23.Text = "Name:";
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(236, 77);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(38, 13);
+            this.label22.TabIndex = 13;
+            this.label22.Text = "Name:";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(19, 77);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(38, 13);
+            this.label21.TabIndex = 12;
+            this.label21.Text = "Name:";
+            // 
             // CurrentPriorityTargetsData
             // 
             this.CurrentPriorityTargetsData.AutoSize = true;
@@ -761,6 +835,175 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Current Mission Action:";
             // 
+            // EWar
+            // 
+            this.EWar.Controls.Add(this.dataEntitiesTargetPaintingMe);
+            this.EWar.Controls.Add(this.lblTargetPaintingMe);
+            this.EWar.Controls.Add(this.label24);
+            this.EWar.Controls.Add(this.lblTitleEWar);
+            this.EWar.Controls.Add(this.dataEntitiesDampening);
+            this.EWar.Controls.Add(this.lblDampeningMe);
+            this.EWar.Controls.Add(this.dataEntitiesTrackingDisruptingMe);
+            this.EWar.Controls.Add(this.lblTrackingDisruptingMe);
+            this.EWar.Controls.Add(this.dataEntitiesNeutralizingMe);
+            this.EWar.Controls.Add(this.lblWebbingMe);
+            this.EWar.Controls.Add(this.dataEntitiesWebbingMe);
+            this.EWar.Controls.Add(this.lblNeutralizingMe);
+            this.EWar.Controls.Add(this.dataEntitiesJammingMe);
+            this.EWar.Controls.Add(this.lblJammingMe);
+            this.EWar.Controls.Add(this.dataEntitiesWarpDisruptingMe);
+            this.EWar.Controls.Add(this.lblWarpDisrupingMe);
+            this.EWar.Location = new System.Drawing.Point(4, 22);
+            this.EWar.Name = "EWar";
+            this.EWar.Size = new System.Drawing.Size(687, 276);
+            this.EWar.TabIndex = 4;
+            this.EWar.Text = "E-War";
+            this.EWar.UseVisualStyleBackColor = true;
+            // 
+            // dataEntitiesTargetPaintingMe
+            // 
+            this.dataEntitiesTargetPaintingMe.AutoSize = true;
+            this.dataEntitiesTargetPaintingMe.Location = new System.Drawing.Point(189, 182);
+            this.dataEntitiesTargetPaintingMe.Name = "dataEntitiesTargetPaintingMe";
+            this.dataEntitiesTargetPaintingMe.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesTargetPaintingMe.TabIndex = 15;
+            this.dataEntitiesTargetPaintingMe.Text = "n/a";
+            // 
+            // lblTargetPaintingMe
+            // 
+            this.lblTargetPaintingMe.AutoSize = true;
+            this.lblTargetPaintingMe.Location = new System.Drawing.Point(27, 182);
+            this.lblTargetPaintingMe.Name = "lblTargetPaintingMe";
+            this.lblTargetPaintingMe.Size = new System.Drawing.Size(94, 13);
+            this.lblTargetPaintingMe.TabIndex = 14;
+            this.lblTargetPaintingMe.Text = "TargetPaintingMe:";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(35, 254);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(220, 13);
+            this.label24.TabIndex = 13;
+            this.label24.Text = "Entities that have active EWar Effects on Me";
+            // 
+            // lblTitleEWar
+            // 
+            this.lblTitleEWar.AutoSize = true;
+            this.lblTitleEWar.Location = new System.Drawing.Point(35, 10);
+            this.lblTitleEWar.Name = "lblTitleEWar";
+            this.lblTitleEWar.Size = new System.Drawing.Size(220, 13);
+            this.lblTitleEWar.TabIndex = 12;
+            this.lblTitleEWar.Text = "Entities that have active EWar Effects on Me";
+            // 
+            // dataEntitiesDampening
+            // 
+            this.dataEntitiesDampening.AutoSize = true;
+            this.dataEntitiesDampening.Location = new System.Drawing.Point(189, 159);
+            this.dataEntitiesDampening.Name = "dataEntitiesDampening";
+            this.dataEntitiesDampening.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesDampening.TabIndex = 11;
+            this.dataEntitiesDampening.Text = "n/a";
+            // 
+            // lblDampeningMe
+            // 
+            this.lblDampeningMe.AutoSize = true;
+            this.lblDampeningMe.Location = new System.Drawing.Point(42, 159);
+            this.lblDampeningMe.Name = "lblDampeningMe";
+            this.lblDampeningMe.Size = new System.Drawing.Size(79, 13);
+            this.lblDampeningMe.TabIndex = 10;
+            this.lblDampeningMe.Text = "DampeningMe:";
+            // 
+            // dataEntitiesTrackingDisruptingMe
+            // 
+            this.dataEntitiesTrackingDisruptingMe.AutoSize = true;
+            this.dataEntitiesTrackingDisruptingMe.Location = new System.Drawing.Point(189, 130);
+            this.dataEntitiesTrackingDisruptingMe.Name = "dataEntitiesTrackingDisruptingMe";
+            this.dataEntitiesTrackingDisruptingMe.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesTrackingDisruptingMe.TabIndex = 9;
+            this.dataEntitiesTrackingDisruptingMe.Text = "n/a";
+            // 
+            // lblTrackingDisruptingMe
+            // 
+            this.lblTrackingDisruptingMe.AutoSize = true;
+            this.lblTrackingDisruptingMe.Location = new System.Drawing.Point(8, 130);
+            this.lblTrackingDisruptingMe.Name = "lblTrackingDisruptingMe";
+            this.lblTrackingDisruptingMe.Size = new System.Drawing.Size(114, 13);
+            this.lblTrackingDisruptingMe.TabIndex = 8;
+            this.lblTrackingDisruptingMe.Text = "TrackingDisruptingMe:";
+            // 
+            // dataEntitiesNeutralizingMe
+            // 
+            this.dataEntitiesNeutralizingMe.AutoSize = true;
+            this.dataEntitiesNeutralizingMe.Location = new System.Drawing.Point(189, 107);
+            this.dataEntitiesNeutralizingMe.Name = "dataEntitiesNeutralizingMe";
+            this.dataEntitiesNeutralizingMe.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesNeutralizingMe.TabIndex = 7;
+            this.dataEntitiesNeutralizingMe.Text = "n/a";
+            // 
+            // lblWebbingMe
+            // 
+            this.lblWebbingMe.AutoSize = true;
+            this.lblWebbingMe.Location = new System.Drawing.Point(54, 89);
+            this.lblWebbingMe.Name = "lblWebbingMe";
+            this.lblWebbingMe.Size = new System.Drawing.Size(68, 13);
+            this.lblWebbingMe.TabIndex = 6;
+            this.lblWebbingMe.Text = "WebbingMe:";
+            // 
+            // dataEntitiesWebbingMe
+            // 
+            this.dataEntitiesWebbingMe.AutoSize = true;
+            this.dataEntitiesWebbingMe.Location = new System.Drawing.Point(189, 89);
+            this.dataEntitiesWebbingMe.Name = "dataEntitiesWebbingMe";
+            this.dataEntitiesWebbingMe.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesWebbingMe.TabIndex = 5;
+            this.dataEntitiesWebbingMe.Text = "n/a";
+            // 
+            // lblNeutralizingMe
+            // 
+            this.lblNeutralizingMe.AutoSize = true;
+            this.lblNeutralizingMe.Location = new System.Drawing.Point(42, 107);
+            this.lblNeutralizingMe.Name = "lblNeutralizingMe";
+            this.lblNeutralizingMe.Size = new System.Drawing.Size(80, 13);
+            this.lblNeutralizingMe.TabIndex = 4;
+            this.lblNeutralizingMe.Text = "NeutralizingMe:";
+            // 
+            // dataEntitiesJammingMe
+            // 
+            this.dataEntitiesJammingMe.AutoSize = true;
+            this.dataEntitiesJammingMe.Location = new System.Drawing.Point(189, 66);
+            this.dataEntitiesJammingMe.Name = "dataEntitiesJammingMe";
+            this.dataEntitiesJammingMe.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesJammingMe.TabIndex = 3;
+            this.dataEntitiesJammingMe.Text = "n/a";
+            // 
+            // lblJammingMe
+            // 
+            this.lblJammingMe.AutoSize = true;
+            this.lblJammingMe.Location = new System.Drawing.Point(56, 66);
+            this.lblJammingMe.Name = "lblJammingMe";
+            this.lblJammingMe.Size = new System.Drawing.Size(66, 13);
+            this.lblJammingMe.TabIndex = 2;
+            this.lblJammingMe.Text = "JammingMe:";
+            // 
+            // dataEntitiesWarpDisruptingMe
+            // 
+            this.dataEntitiesWarpDisruptingMe.AutoSize = true;
+            this.dataEntitiesWarpDisruptingMe.Location = new System.Drawing.Point(189, 44);
+            this.dataEntitiesWarpDisruptingMe.Name = "dataEntitiesWarpDisruptingMe";
+            this.dataEntitiesWarpDisruptingMe.Size = new System.Drawing.Size(24, 13);
+            this.dataEntitiesWarpDisruptingMe.TabIndex = 1;
+            this.dataEntitiesWarpDisruptingMe.Text = "n/a";
+            // 
+            // lblWarpDisrupingMe
+            // 
+            this.lblWarpDisrupingMe.AutoSize = true;
+            this.lblWarpDisrupingMe.Location = new System.Drawing.Point(23, 44);
+            this.lblWarpDisrupingMe.Name = "lblWarpDisrupingMe";
+            this.lblWarpDisrupingMe.Size = new System.Drawing.Size(98, 13);
+            this.lblWarpDisrupingMe.TabIndex = 0;
+            this.lblWarpDisrupingMe.Text = "WarpDisruptingMe:";
+            // 
             // CombatMissionsBehaviorComboBox
             // 
             this.CombatMissionsBehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -831,60 +1074,6 @@
             this.buttonQuestormanager.UseVisualStyleBackColor = true;
             this.buttonQuestormanager.Click += new System.EventHandler(this.ButtonQuestormanagerClick);
             // 
-            // label21
-            // 
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(19, 77);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(38, 13);
-            this.label21.TabIndex = 12;
-            this.label21.Text = "Name:";
-            // 
-            // label22
-            // 
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(236, 77);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(38, 13);
-            this.label22.TabIndex = 13;
-            this.label22.Text = "Name:";
-            // 
-            // label23
-            // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(436, 77);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(38, 13);
-            this.label23.TabIndex = 14;
-            this.label23.Text = "Name:";
-            // 
-            // lblDistanceWeaponsTarget
-            // 
-            this.lblDistanceWeaponsTarget.AutoSize = true;
-            this.lblDistanceWeaponsTarget.Location = new System.Drawing.Point(6, 100);
-            this.lblDistanceWeaponsTarget.Name = "lblDistanceWeaponsTarget";
-            this.lblDistanceWeaponsTarget.Size = new System.Drawing.Size(52, 13);
-            this.lblDistanceWeaponsTarget.TabIndex = 15;
-            this.lblDistanceWeaponsTarget.Text = "Distance:";
-            // 
-            // lblDistanceDroneTarget
-            // 
-            this.lblDistanceDroneTarget.AutoSize = true;
-            this.lblDistanceDroneTarget.Location = new System.Drawing.Point(222, 100);
-            this.lblDistanceDroneTarget.Name = "lblDistanceDroneTarget";
-            this.lblDistanceDroneTarget.Size = new System.Drawing.Size(52, 13);
-            this.lblDistanceDroneTarget.TabIndex = 16;
-            this.lblDistanceDroneTarget.Text = "Distance:";
-            // 
-            // lblDistance3
-            // 
-            this.lblDistance3.AutoSize = true;
-            this.lblDistance3.Location = new System.Drawing.Point(422, 100);
-            this.lblDistance3.Name = "lblDistance3";
-            this.lblDistance3.Size = new System.Drawing.Size(52, 13);
-            this.lblDistance3.TabIndex = 17;
-            this.lblDistance3.Text = "Distance:";
-            // 
             // QuestorfrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -896,7 +1085,7 @@
             this.Controls.Add(this.buttonOpenCharacterXML);
             this.Controls.Add(this.buttonOpenMissionXML);
             this.Controls.Add(this.Tabs);
-            this.Controls.Add(this.buttonSettingsXML);
+            this.Controls.Add(this.buttonQuestorSettings);
             this.Controls.Add(this.buttonOpenLogDirectory);
             this.Controls.Add(this.buttonQuestorStatistics);
             this.Controls.Add(this.CombatMissionsBehaviorComboBox);
@@ -929,6 +1118,8 @@
             this.panel1.PerformLayout();
             this.Targets.ResumeLayout(false);
             this.Targets.PerformLayout();
+            this.EWar.ResumeLayout(false);
+            this.EWar.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -950,10 +1141,9 @@
         private System.Windows.Forms.Label lblPocketAction;
         private System.Windows.Forms.Label lblCurrentPocketAction;
         private System.Windows.Forms.Button buttonQuestorStatistics;
-        private System.Windows.Forms.Button buttonSettingsXML;
+        private System.Windows.Forms.Button buttonQuestorSettings;
         private System.Windows.Forms.Button buttonOpenMissionXML;
         private System.Windows.Forms.Button buttonOpenLogDirectory;
-        //private System.Windows.Forms.TabPage LiveScheduling;
         //private System.Windows.Forms.DateTimePicker dateTimePickerStopTime;
         //private System.Windows.Forms.Label lblStopTime;
         //private System.Windows.Forms.Label lblMaxRuntime2;
@@ -1020,6 +1210,23 @@
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.TabPage EWar;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label lblTitleEWar;
+        private System.Windows.Forms.Label dataEntitiesDampening;
+        private System.Windows.Forms.Label lblDampeningMe;
+        private System.Windows.Forms.Label dataEntitiesTrackingDisruptingMe;
+        private System.Windows.Forms.Label lblTrackingDisruptingMe;
+        private System.Windows.Forms.Label dataEntitiesNeutralizingMe;
+        private System.Windows.Forms.Label lblWebbingMe;
+        private System.Windows.Forms.Label dataEntitiesWebbingMe;
+        private System.Windows.Forms.Label lblNeutralizingMe;
+        private System.Windows.Forms.Label dataEntitiesJammingMe;
+        private System.Windows.Forms.Label lblJammingMe;
+        private System.Windows.Forms.Label dataEntitiesWarpDisruptingMe;
+        private System.Windows.Forms.Label lblWarpDisrupingMe;
+        private System.Windows.Forms.Label lblTargetPaintingMe;
+        private System.Windows.Forms.Label dataEntitiesTargetPaintingMe;
     }
 }
 

@@ -23,82 +23,97 @@ namespace Questor.Modules.Lookup
 
     public class CombatMissionSettings
     {
-      private void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
-      {
-         //AmmoToLoad.Clear();
-         //AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
-      }
+        private void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
+        {
+            //AmmoToLoad.Clear();
+            //AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+        }
 
-      private void LoadCombatMissionXML(string html)
-      {
-          bool loadedAmmo = false;
+        private void LoadCombatMissionXML(string html)
+        {
+            bool loadedAmmo = false;
 
-          string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
-          string missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+            string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
+            Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
 
-          Cache.Instance.MissionAmmo = new List<Ammo>();
-          if (File.Exists(missionXmlPath))
-          {
-              Logging.Log("AgentInteraction: Loading mission xml [" + missionName + "]");
-              //
-              // this loads the settings global to the mission, NOT individual pockets
-              //
-              try
-              {
-                  XDocument missionXml = XDocument.Load(missionXmlPath);
-                  //load mission specific ammo and weapongroupid if specified in the mission xml
-                  if (missionXml.Root != null)
-                  {
-                      XElement ammoTypes = missionXml.Root.Element("missionammo");
-                      if (ammoTypes != null)
-                          foreach (XElement ammo in ammoTypes.Elements("ammo"))
-                              Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
+            Cache.Instance.MissionAmmo = new List<Ammo>();
+            if (File.Exists(Cache.Instance.missionXmlPath))
+            {
+                Logging.Log("AgentInteraction", "Loading mission xml [" + missionName + "]", Logging.white);
+                //
+                // this loads the settings global to the mission, NOT individual pockets
+                //
+                try
+                {
+                    XDocument missionXml = XDocument.Load(Cache.Instance.missionXmlPath);
+                    //load mission specific ammo and weapongroupid if specified in the mission xml
+                    if (missionXml.Root != null)
+                    {
+                        XElement ammoTypes = missionXml.Root.Element("missionammo");
+                        if (ammoTypes != null)
+                            foreach (XElement ammo in ammoTypes.Elements("ammo"))
+                                Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
 
-                      Cache.Instance.MissionWeaponGroupId = (int?) missionXml.Root.Element("weaponGroupId") ?? 0;
-                      Cache.Instance.MissionUseDrones = (bool?) missionXml.Root.Element("useDrones");
-                  }
-                  //should this default to true?
-                  //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
-                  IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(
-                          e => (DamageType) Enum.Parse(typeof (DamageType), (string) e, true)).ToList();
-                  if (damageTypes.Any())
-                  {
-                      LoadSpecificAmmo(damageTypes.Distinct());
-                      loadedAmmo = true;
-                  }
-              }
-              catch (Exception ex)
-              {
-                  Logging.Log("AgentInteraction: Error parsing damage types for mission [" + Cache.Instance.Mission.Name + "], " + ex.Message);
-              }
-          }
+                        Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
+                        Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones");
+                    }
+                    //should this default to true?
+                    //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
+                    IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(
+                            e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
+                    if (damageTypes.Any())
+                    {
+                        LoadSpecificAmmo(damageTypes.Distinct());
+                        loadedAmmo = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("AgentInteraction", "Error parsing damage types for mission [" + Cache.Instance.Mission.Name + "], " + ex.Message, Logging.white);
+                }
+            }
 
-          if (!loadedAmmo)
-          {
-              Logging.Log("AgentInteraction: Detecting damage type for [" + missionName + "]");
-              Cache.Instance.DamageType = GetMissionDamageType(html);
-              LoadSpecificAmmo(new[] {Cache.Instance.DamageType});
-          }
-      }
+            if (!loadedAmmo)
+            {
+                Logging.Log("AgentInteraction", "Detecting damage type for [" + missionName + "]", Logging.white);
+                Cache.Instance.DamageType = GetMissionDamageType(html);
+                LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
+            }
+        }
 
-      private DamageType GetMissionDamageType(string html)
-      {
-          // We are going to check damage types
-          var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+        private DamageType GetMissionDamageType(string html)
+        {
+            // We are going to check damage types
+            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
-          Match logoMatch = logoRegex.Match(html);
-          if (logoMatch.Success)
-          {
-              var logo = logoMatch.Groups["factionlogo"].Value;
+            Match logoMatch = logoRegex.Match(html);
+            if (logoMatch.Success)
+            {
+                var logo = logoMatch.Groups["factionlogo"].Value;
 
-              // Load faction xml
-              XDocument xml = XDocument.Load(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Factions.xml"));
-              XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
-              if (faction != null)
-                  return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
-          }
+                // Load faction xml
+                string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");
+                try
+                {
+                    XDocument xml = XDocument.Load(factionsXML);
+                    if (xml.Root != null)
+                    {
+                        XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
+                        if (faction != null)
+                            return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
+                    }
+                    else
+                    {
+                        Logging.Log("CombatMissionSettings", "ERROR! unable to read [" + factionsXML + "]  no root element named <faction> ERROR!", Logging.red);
+                    }
+                }
+                catch
+                {
+                    Logging.Log("CombatMissionSettings", "ERROR! unable to find [" + factionsXML + "] ERROR!", Logging.red);
+                }
+            }
 
-          return DamageType.EM;
-      }
+            return DamageType.EM;
+        }
     }
 }

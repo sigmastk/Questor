@@ -1,5 +1,4 @@
-﻿
-using Microsoft.VisualBasic;
+﻿using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,16 +11,15 @@ using System.IO;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
-   
+
 namespace QuestorStatistics
 {
-
     public partial class QuestorStatisticsUI : Form
     {
-        
+        string Localpath = Application.StartupPath + "//log//";
 
-        string Localpath = Application.StartupPath+"//log//";
-        string LogToView { get; set; }
+        private string LogToView { get; set; }
+
         private System.Windows.Forms.OpenFileDialog ofd;
 
         //-------------------------------------------------------------------------
@@ -77,7 +75,6 @@ namespace QuestorStatistics
             _with1.Columns.Add("Lowest Cap", 80, HorizontalAlignment.Right);
             _with1.Columns.Add("Repair Cycles", 80, HorizontalAlignment.Right);
 
-
             ListView _with2 = LstMision;
             _with2.View = View.Details;
             _with2.FullRowSelect = true;
@@ -111,8 +108,7 @@ namespace QuestorStatistics
             Lst1.LabelEdit = false;
             Lst1.Items.Clear();
             string[] files = Directory.GetFiles(Localpath, cmb1.SelectedItem.ToString(), SearchOption.AllDirectories);
-            LogToView = files[0]; //if we find more than one log with the same name, use the 1st one. In practice this should not happen. 
-            
+            LogToView = files[0]; //if we find more than one log with the same name, use the 1st one. In practice this should not happen.
 
             dynamic Data = null;
             bool Heading = false;
@@ -121,7 +117,6 @@ namespace QuestorStatistics
             Heading = true;
             Cleardata();
 
-
             while (!(sr.Peek() == -1))
             {
                 Data = Strings.Split(sr.ReadLine(), ";");
@@ -129,7 +124,6 @@ namespace QuestorStatistics
                 if (Heading)
                 {
                     Heading = false;
-
                 }
                 else
                 {
@@ -138,7 +132,7 @@ namespace QuestorStatistics
                     {
                         AmmoStat = false;
                     }
-      
+
                     ListViewItem _with3 = item;
                     _with3.SubItems.Add(Data[0]);
                     _with3.SubItems.Add(Data[1]);
@@ -172,7 +166,6 @@ namespace QuestorStatistics
                     _with3.SubItems.Add(Data[14]);
 
                     Lst1.Items.Add(item);
-  
                 }
             }
             sr.Close();
@@ -185,10 +178,9 @@ namespace QuestorStatistics
         //----------------------------
         private void CmbDay_SelectedIndexChanged_1(object sender, System.EventArgs e)
         {
-         
-         SortListUP();
-         DayDataCalculated(CmbDia.SelectedItem.ToString());
-         ChartoftheDay(CmbDia.SelectedItem.ToString());
+            SortListUP();
+            DayDataCalculated(CmbDia.SelectedItem.ToString());
+            ChartoftheDay(CmbDia.SelectedItem.ToString());
         }
 
         //----------------------------
@@ -196,18 +188,16 @@ namespace QuestorStatistics
         //----------------------------
         private void cmbMes_SelectedIndexChanged_1(object sender, System.EventArgs e)
         {
-           SortListUP();
-           Mes(cmbMes.SelectedItem.ToString());
-           ChartOfMonth(cmbMes.SelectedItem.ToString());
+            SortListUP();
+            Mes(cmbMes.SelectedItem.ToString());
+            ChartOfMonth(cmbMes.SelectedItem.ToString());
         }
-
 
         //---------------------------
         // Create the Chart of the Month
         //---------------------------
         public object ChartOfMonth(string Seleccion)
         {
-     
             double ProfitTotal = 0;
             string SelectedDay = null;
             string AntDia = "";
@@ -222,7 +212,6 @@ namespace QuestorStatistics
 
                     for (int e = 0; e <= Lst1.Items.Count - 1; e++)
                     {
-                       
                         if (SelectedDay == Strings.Left(Lst1.Items[e].SubItems[1].Text, 10))
                         {
                             ProfitTotal = ProfitTotal + Convert.ToDouble(Lst1.Items[e].SubItems[4].Text) + Convert.ToDouble(Lst1.Items[e].SubItems[6].Text);
@@ -241,13 +230,11 @@ namespace QuestorStatistics
             return true;
         }
 
-
         //-------------------------------
         // We calculate the data of the Month
         //-------------------------------
         public object Mes(string Seleccion)
         {
-
             double TotalBounty = 0;
             double TotalLoot = 0;
             double Nmission = 0;
@@ -281,7 +268,7 @@ namespace QuestorStatistics
                     }
                 }
             }
-            
+
             lbttMbounty.Text = Strings.Format(TotalBounty, "###,###,###");
             LbttMloot.Text = Strings.Format(TotalLoot, "###,###,###");
             LbttMlp.Text = Strings.Format(TotalLP, "###,###,###");
@@ -294,7 +281,6 @@ namespace QuestorStatistics
 
             return true;
         }
-
 
         //---------------------------
         // Create the Chart of the Day
@@ -322,13 +308,11 @@ namespace QuestorStatistics
             return true;
         }
 
-
         //-------------------------------
         // Day data calculated
         //-------------------------------
         public object DayDataCalculated(string Seleccion)
         {
-
             double TotalBounty = 0;
             double TotalLoot = 0;
             double LostDrones = 0;
@@ -352,7 +336,7 @@ namespace QuestorStatistics
                     cont1 = cont1 + 1;
                 }
             }
-            
+
             lbTotalbounty.Text = Strings.Format(TotalBounty, "###,###,###");
             LBtotalloot.Text = Strings.Format(TotalLoot, "###,###,###");
             LBtotallp.Text = Strings.Format(TotalLP, "###,###,###");
@@ -364,7 +348,6 @@ namespace QuestorStatistics
             lblDayAmmoValue.Text = Strings.Format(AmmoValue, "###,###,###");
             return true;
         }
-
 
         //-------------------------------
         // Mission statistics
@@ -389,14 +372,14 @@ namespace QuestorStatistics
             {
                 Mision = Lst1.Items[i].SubItems[2].Text;
                 Nmision = 0;
-                 Time = 0;
-                 Bounty = 0;
-                 Loot = 0;
-                 Lp = 0;
-                 Iskmedia = 0;
-                 LostDrones = 0;
-                 AmmoConsumption = 0;
-                 AmmoValue = 0;
+                Time = 0;
+                Bounty = 0;
+                Loot = 0;
+                Lp = 0;
+                Iskmedia = 0;
+                LostDrones = 0;
+                AmmoConsumption = 0;
+                AmmoValue = 0;
                 for (int e = 0; e <= Lst1.Items.Count - 1; e++)
                 {
                     if (Mision == Lst1.Items[e].SubItems[2].Text)
@@ -445,9 +428,7 @@ namespace QuestorStatistics
             }
             PutMissions();
             return true;
-
         }
-
 
         //--------------------------------
         // Load data in the combox
@@ -466,7 +447,6 @@ namespace QuestorStatistics
 
                 SelectDia = Strings.Left(SelectDia, 10);
 
-
                 if (var1 != SelectDia)
                 {
                     CmbDia.Items.Add(SelectDia);
@@ -480,7 +460,6 @@ namespace QuestorStatistics
                 SelectMes = Lst1.Items[i].SubItems[1].Text;
 
                 SelectMes = Strings.Mid(SelectMes, 4, 7);
-
 
                 if (var1 != SelectMes)
                 {
@@ -498,7 +477,6 @@ namespace QuestorStatistics
 
         public object SortListUP()
         {
-
             ListViewColumnSort oCompare = new ListViewColumnSort();
             oCompare.Sorting = SortOrder.Descending;
             Lst1.Sorting = oCompare.Sorting;
@@ -511,9 +489,8 @@ namespace QuestorStatistics
         //----------------------------------------
         // We organize the listview in ascending
         //----------------------------------------
-        public  object SortListDown()
+        public object SortListDown()
         {
-
             ListViewColumnSort oCompare = new ListViewColumnSort();
             oCompare.Sorting = SortOrder.Ascending;
             Lst1.Sorting = oCompare.Sorting;
@@ -572,13 +549,11 @@ namespace QuestorStatistics
             return true;
         }
 
-
         //----------------------------------
         // Organized by column list
         //----------------------------------
         private void Lst1_ColumnClick(object o, ColumnClickEventArgs e)
         {
-
             ListViewColumnSort oCompare = new ListViewColumnSort(e.Column);
 
             if (Lst1.Sorting == SortOrder.Ascending)
@@ -632,7 +607,6 @@ namespace QuestorStatistics
             }
 
             Lst1.ListViewItemSorter = oCompare;
-
         }
 
         //----------------------------------
@@ -681,25 +655,20 @@ namespace QuestorStatistics
                 case 10:
                     oCompare.CompararPor = ListViewColumnSort.TipoCompare.Numero;
                     break;
-
             }
             LstMision.ListViewItemSorter = oCompare;
-
         }
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-
         }
 
         private void OFD_FileOk(object sender, CancelEventArgs e)
         {
-
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-
         }
 
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
@@ -712,14 +681,13 @@ namespace QuestorStatistics
                 Lst1.GridLines = true;
                 Lst1.LabelEdit = false;
                 Lst1.Items.Clear();
-                
+
                 dynamic Data = null;
                 bool Heading = false;
                 bool AmmoStat = true;
                 System.IO.StreamReader sr = new System.IO.StreamReader(LogToView);
                 Heading = true;
                 Cleardata();
-
 
                 while (!(sr.Peek() == -1))
                 {
@@ -728,7 +696,6 @@ namespace QuestorStatistics
                     if (Heading)
                     {
                         Heading = false;
-
                     }
                     else
                     {
@@ -771,7 +738,6 @@ namespace QuestorStatistics
                         _with3.SubItems.Add(Data[14]);
 
                         Lst1.Items.Add(item);
-
                     }
                 }
                 sr.Close();

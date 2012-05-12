@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-
-
 namespace Questor.Modules.Caching
 {
     using System;
@@ -64,7 +62,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if(_directEntity != null)
+                if (_directEntity != null)
                     return _directEntity.TypeId;
 
                 return 0;
@@ -476,6 +474,7 @@ namespace Questor.Modules.Caching
                 return result;
             }
         }
+
         /// <summary>
         /// Frigate includes all elite-variants
         /// </summary>
@@ -530,7 +529,7 @@ namespace Questor.Modules.Caching
             // If the bad idea is attacking, attack back
             if (IsBadIdea && !IsAttacking)
             {
-                Logging.Log("EntityCache: Attempting to target a player or concord entity! [" + Name + "]");
+                Logging.Log("EntityCache", "Attempting to target a player or concord entity! [" + Name + "]", Logging.white);
                 return;
             }
 
@@ -542,7 +541,7 @@ namespace Questor.Modules.Caching
                 double seconds = DateTime.Now.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 20)
                 {
-                    Logging.Log("EntityCache: LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds,0) + "]");
+                    Logging.Log("EntityCache", "LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.white);
                     return;
                 }
             }

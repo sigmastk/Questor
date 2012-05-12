@@ -1,5 +1,4 @@
-﻿
-namespace Questor.Modules.Actions
+﻿namespace Questor.Modules.Actions
 {
     using System;
     using System.Collections.Generic;
@@ -12,6 +11,7 @@ namespace Questor.Modules.Actions
     public class Buy
     {
         public int Item { get; set; }
+
         public int Unit { get; set; }
 
         private DateTime _lastAction;
@@ -21,7 +21,7 @@ namespace Questor.Modules.Actions
         public void ProcessState()
         {
             DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
-            
+
             switch (_States.CurrentBuyState)
             {
                 case BuyState.Idle:
@@ -41,18 +41,16 @@ namespace Questor.Modules.Actions
                     //if (marketWindow != null)
                     //    marketWindow.Close();
 
-                     if (marketWindow == null)
-                     {
-                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
-                         break;
-                     }
+                    if (marketWindow == null)
+                    {
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                        break;
+                    }
 
+                    if (!marketWindow.IsReady)
+                        break;
 
-                     if (!marketWindow.IsReady)
-                         break;
-
-
-                    Logging.Log("Buy: Opening Market");
+                    Logging.Log("Buy", "Opening Market", Logging.white);
                     _States.CurrentBuyState = BuyState.LoadItem;
 
                     break;
@@ -61,14 +59,13 @@ namespace Questor.Modules.Actions
 
                     _lastAction = DateTime.Now;
 
-                    if (marketWindow.DetailTypeId != Item)
+                    if (marketWindow != null && marketWindow.DetailTypeId != Item)
                     {
                         marketWindow.LoadTypeId(Item);
                         _States.CurrentBuyState = BuyState.BuyItem;
 
                         break;
                     }
-                    
 
                     break;
 
@@ -77,7 +74,8 @@ namespace Questor.Modules.Actions
                     if (DateTime.Now.Subtract(_lastAction).TotalSeconds < 5)
                         break;
 
-                        
+                    if (marketWindow != null)
+                    {
                         IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId);
 
                         DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();
@@ -92,13 +90,13 @@ namespace Questor.Modules.Actions
                             else
                             {
                                 order.Buy(Unit, DirectOrderRange.Station);
-                                 Unit = Unit - order.VolumeEntered;
-                                 Logging.Log("Missing " + Convert.ToString(Unit) + " units");
+                                Unit = Unit - order.VolumeEntered;
+                                Logging.Log("Buy", "Missing " + Convert.ToString(Unit) + " units", Logging.white);
                                 ReturnBuy = true;
                                 _States.CurrentBuyState = BuyState.WaitForItems;
                             }
-
                         }
+                    }
 
                     break;
 
@@ -113,25 +111,17 @@ namespace Questor.Modules.Actions
 
                     if (ReturnBuy == true)
                     {
-                        Logging.Log("Buy: Return Buy");
+                        Logging.Log("Buy", "Return Buy", Logging.white);
                         ReturnBuy = false;
                         _States.CurrentBuyState = BuyState.OpenMarket;
                         break;
                     }
 
-                        Logging.Log("Buy: Done");
-                        _States.CurrentBuyState = BuyState.Done;
-
-
+                    Logging.Log("Buy", "Done", Logging.white);
+                    _States.CurrentBuyState = BuyState.Done;
 
                     break;
-
             }
-
-
         }
-
-
-
     }
 }

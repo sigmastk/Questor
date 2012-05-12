@@ -28,9 +28,13 @@ namespace Questor.Modules.Lookup
         }
 
         public int TypeId { get; private set; }
+
         public DamageType DamageType { get; private set; }
+
         public int Range { get; private set; }
+
         public int Quantity { get; set; }
+
         public string Description { get; set; }
 
         public Ammo Clone()

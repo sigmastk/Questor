@@ -1,5 +1,4 @@
-﻿
-namespace Questor.Storylines
+﻿namespace Questor.Storylines
 {
     using System;
     using System.Collections.Generic;
@@ -12,7 +11,7 @@ namespace Questor.Storylines
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
-    
+
     public class Storyline
     {
         public long CurrentStorylineAgentId { get; private set; }
@@ -30,13 +29,13 @@ namespace Questor.Storylines
 
         public Storyline()
         {
-           _combat = new Combat();
-           _traveler = new Traveler();
-           _agentInteraction = new AgentInteraction();
+            _combat = new Combat();
+            _traveler = new Traveler();
+            _agentInteraction = new AgentInteraction();
 
-           _agentBlacklist = new List<long>();
+            _agentBlacklist = new List<long>();
 
-           _storylines = new Dictionary<string, IStoryline>
+            _storylines = new Dictionary<string, IStoryline>
                             {
                                //{"__", new GenericCombatStoryline()}, //example
                                {"Materials For War Preparation", new MaterialsForWarPreparation()},
@@ -65,7 +64,7 @@ namespace Questor.Storylines
                                {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
                                {"Blood Farm", new GenericCombatStoryline()},
                                {"Jealous Rivals", new GenericCombatStoryline()},
-                               {"Quota Season", new GenericCombatStoryline()}, 
+                               {"Quota Season", new GenericCombatStoryline()},
                                //{"Matriarch", new GenericCombatStoryline()},
                                //{"Diplomatic Incident", new GenericCombatStoryline()},
                                //these work but are against other factions that I generally like to avoid
@@ -74,7 +73,7 @@ namespace Questor.Storylines
                             };
         }
 
-       public void Reset()
+        public void Reset()
         {
             _States.CurrentStorylineState = StorylineState.Idle;
             CurrentStorylineAgentId = 0;
@@ -116,13 +115,13 @@ namespace Questor.Storylines
             DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(CurrentStorylineAgentId);
             if (storylineagent == null)
             {
-                Logging.Log("Storyline: Unknown agent [" + CurrentStorylineAgentId + "]");
+                Logging.Log("Storyline", "Unknown agent [" + CurrentStorylineAgentId + "]", Logging.yellow);
 
                 _States.CurrentStorylineState = StorylineState.Done;
                 return;
             }
 
-            Logging.Log("Storyline: Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + CurrentStorylineAgentId + "]");
+            Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + CurrentStorylineAgentId + "]", Logging.yellow);
             Cache.Instance.MissionName = currentStorylineMission.Name;
 
             _States.CurrentStorylineState = StorylineState.Arm;
@@ -144,7 +143,7 @@ namespace Questor.Storylines
 
             if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
-                Logging.Log("Storyline: GotoAgent: Priority targets found, engaging!");
+                Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.yellow);
                 _combat.ProcessState();
             }
 
@@ -156,7 +155,7 @@ namespace Questor.Storylines
             }
 
             if (Settings.Instance.DebugStates)
-                Logging.Log("Traveler.State = " + _States.CurrentTravelerState);
+                Logging.Log("Traveler.State is", _States.CurrentTravelerState.ToString(), Logging.white);
         }
 
         private void BringSpoilsOfWar()
@@ -185,12 +184,12 @@ namespace Questor.Storylines
                 {
                     if (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
-                        Logging.Log("Storyline: We are full, not moving anything else");
+                        Logging.Log("Storyline", "We are full, not moving anything else", Logging.yellow);
                         _States.CurrentStorylineState = StorylineState.Done;
                         return;
                     }
 
-                    Logging.Log("Storyline: Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo");
+                    Logging.Log("Storyline", "Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo", Logging.yellow);
                     Cache.Instance.CargoHold.Add(item, item.Quantity);
                 }
                 _nextAction = DateTime.Now.AddSeconds(10);
@@ -226,7 +225,7 @@ namespace Questor.Storylines
                     //Logging.Log("Storyline: AcceptMission!!-");
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
-                        Logging.Log("AgentInteraction: Start conversation [Start Mission]");
+                        Logging.Log("Storyline.AgentInteraction", "Start conversation [Start Mission]", Logging.yellow);
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
@@ -237,7 +236,7 @@ namespace Questor.Storylines
                     _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + _States.CurrentAgentInteractionState);
+                        Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.white);
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
@@ -258,7 +257,7 @@ namespace Questor.Storylines
                 case StorylineState.CompleteMission:
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
-                        Logging.Log("AgentInteraction: Start Conversation [Complete Mission]");
+                        Logging.Log("AgentInteraction", "Start Conversation [Complete Mission]", Logging.yellow);
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         _agentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
@@ -267,7 +266,7 @@ namespace Questor.Storylines
                     _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State = " + _States.CurrentAgentInteractionState);
+                        Logging.Log("AgentInteraction.State is", _States.CurrentAgentInteractionState.ToString(), Logging.white);
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {

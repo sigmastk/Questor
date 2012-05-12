@@ -5,18 +5,18 @@ using System.Text;
 
 namespace Questor.Modules.States
 {
-        public enum BuyLPIState
-        {
-            Idle,
-            Begin,
-            OpenItemHangar,
-            OpenLpStore,
-            FindOffer,
-            CheckPetition,
-            OpenMarket,
-            BuyItems,
-            AcceptOffer,
-            Quatity,
-            Done,
-        }
+    public enum BuyLPIState
+    {
+        Idle,
+        Begin,
+        OpenItemHangar,
+        OpenLpStore,
+        FindOffer,
+        CheckPetition,
+        OpenMarket,
+        BuyItems,
+        AcceptOffer,
+        Quatity,
+        Done,
+    }
 }

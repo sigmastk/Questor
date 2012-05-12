@@ -27,6 +27,7 @@ namespace Questor.Modules.Actions
         }
 
         public string Faction { get; private set; }
+
         public string Fitting { get; private set; }
     }
 
@@ -45,8 +46,11 @@ namespace Questor.Modules.Actions
         }
 
         public string Mission { get; private set; }
+
         public string Faction { get; private set; }
+
         public string Fitting { get; private set; }
+
         public string Ship { get; private set; }
     }
 }

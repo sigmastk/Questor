@@ -21,9 +21,10 @@ namespace Questor.Modules.Actions
         public static HashSet<int> Salvagers = new HashSet<int> { 25861, 26983, 30836 };
         public static HashSet<int> TractorBeams = new HashSet<int> { 24348, 24620, 24622, 24644 };
 
-
         public int MaximumWreckTargets { get; set; }
+
         public int ReserveCargoCapacity { get; set; }
+
         public List<Ammo> Ammo { get; set; }
 
         private void Debug_Windows()
@@ -36,7 +37,7 @@ namespace Questor.Modules.Actions
 
             foreach (DirectWindow window in windows)
             {
-                Logging.Log("DebugModule: Debug_Windows: [" + window.Name + "]");
+                Logging.Log("DebugModule", "Debug_Windows: [" + window.Name + "]", Logging.white);
 
                 //if (window.Name.Contains(wreck.Name))
                 //{
@@ -88,5 +89,4 @@ namespace Questor.Modules.Actions
             }
         }
     }
-
 }

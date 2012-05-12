@@ -17,7 +17,17 @@ namespace Questor.Modules.Lookup
 {
     public class InvType
     {
-        public static List<string> Minerals = new List<string>() { "Morphite", "Megacyte", "Zydrine", "Nocxium", "Isogen", "Mexallon", "Pyerite", "Tritanium" };
+        public static List<string> Minerals = new List<string>()
+                                               {
+                                                  "Morphite",
+                                                  "Megacyte",
+                                                  "Zydrine",
+                                                  "Nocxium",
+                                                  "Isogen",
+                                                  "Mexallon",
+                                                  "Pyerite",
+                                                  "Tritanium"
+                                               };
 
         public InvType(XElement element)
         {
@@ -40,11 +50,11 @@ namespace Questor.Modules.Lookup
                 Reprocess.Add(m, (double?)element.Attribute(m));
         }
 
-        public InvType(ItemCache2 item)
+        public InvType(ItemCache item)
         {
             Id = item.TypeId;
             Name = item.Name;
-            GroupId = item.GroupId;
+            GroupId = item.GroupID;
             Volume = item.Volume;
             BasePrice = item.BasePrice;
             Capacity = item.Capacity;
@@ -56,20 +66,35 @@ namespace Questor.Modules.Lookup
         }
 
         public int Id { get; set; }
+
         public string Name { get; set; }
+
         public int GroupId { get; set; }
+
         public double BasePrice { get; set; }
+
         public double Volume { get; set; }
+
         public double Capacity { get; set; }
+
         public double PortionSize { get; set; }
+
         public double? MedianSell { get; set; }
+
         public double? MedianBuy { get; set; }
+
         public double? MedianAll { get; set; }
+
         public double? MinSell { get; set; }
+
         public double? MaxBuy { get; set; }
+
         public double? ReprocessValue { get; set; }
+
         public DateTime? LastUpdate { get; set; }
+
         public Dictionary<string, double?> Reprocess { get; set; }
+
         public XElement Save()
         {
             XElement element = new XElement("invtype");
@@ -90,9 +115,11 @@ namespace Questor.Modules.Lookup
                 element.SetAttributeValue("reprocess", ReprocessValue.Value.ToString("0.00", CultureInfo.InvariantCulture));
             foreach (string m in Minerals)
                 if (Reprocess[m].HasValue && Reprocess[m] > 0)
-                    element.SetAttributeValue(m, Reprocess[m].Value);
+                {
+                    var d = Reprocess[m];
+                    if (d != null) element.SetAttributeValue(m, d.Value);
+                }
 
- 
             if (MinSell.HasValue && MinSell.Value > 0)
                 element.SetAttributeValue("minsell", MinSell.Value.ToString("0.00", CultureInfo.InvariantCulture));
             if (MaxBuy.HasValue && MaxBuy.Value > 0)
