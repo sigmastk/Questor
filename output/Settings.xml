@@ -10,6 +10,14 @@
   <debugPerformance>false</debugPerformance>  <!-- default is false -->
   <!-- debugCurrentTarget: Shows detailed Shields and Armor levels for the currenttarget as things get killed (or not) -->  
   <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
+  <debugLootWrecks>false</debugLootWrecks>
+  <debugActivateWeapons>false</debugActivateWeapons>
+  <debugStatistics>false</debugStatistics>
+  <debugGotobase>false</debugGotobase>
+  <debugIdle>false</debugIdle>
+  <debugAutoStart>false</debugAutoStart>
+  <useInnerspace>true</useInnerspace>
+  
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->
