@@ -186,15 +186,16 @@ namespace Questor.Behaviors
         {
             var baseDestination = _traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
-                _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.AgentStationID);
-
-            _combat.ProcessState();
-            _drones.ProcessState(); //do we really want to use drones here?
+                _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
+           
+                _combat.ProcessState();
+                _drones.ProcessState(); //do we really want to use drones here?
             if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
-            {
-                Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
-                _traveler.ProcessState();
+                {
+                    Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
+              //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.white);
             }
+           _traveler.ProcessState();
             if (Settings.Instance.DebugStates)
             {
                 Logging.Log("Traveler.State", "is " + _States.CurrentTravelerState, Logging.white);
