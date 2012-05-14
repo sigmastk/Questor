@@ -145,9 +145,6 @@ namespace Questor
             {
                 Cache.Instance.CloseQuestorCMDExitGame = true;
             }
-            
-            // Write to Session log
-            if (!Statistics.WriteSessionLogClosing()) break;
 
             if (Settings.Instance.AutoStart)
                 //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
@@ -166,7 +163,7 @@ namespace Questor
                     
                     Logging.Log("Questor", "Exiting eve now.", Logging.white);
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdLogOff);
-                    break;
+                    return;
                 }
                 if (Cache.Instance.CloseQuestorCMDExitGame)
                 {
