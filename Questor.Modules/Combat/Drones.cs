@@ -54,7 +54,7 @@ namespace Questor.Modules.Combat
             if (!Cache.Instance.ActiveDrones.Any())
                 return 0;
 
-            return Math.Round(Cache.Instance.ActiveDrones.Sum(d => d.ShieldPct),0);
+            return Cache.Instance.ActiveDrones.Sum(d => d.ShieldPct);
         }
 
         private double GetArmorPctTotal()
@@ -62,7 +62,7 @@ namespace Questor.Modules.Combat
             if (!Cache.Instance.ActiveDrones.Any())
                 return 0;
 
-            return Math.Round(Cache.Instance.ActiveDrones.Sum(d => d.ArmorPct),0);
+            return Cache.Instance.ActiveDrones.Sum(d => d.ArmorPct);
         }
 
         private double GetStructurePctTotal()
@@ -70,7 +70,7 @@ namespace Questor.Modules.Combat
             if (!Cache.Instance.ActiveDrones.Any())
                 return 0;
 
-            return Math.Round(Cache.Instance.ActiveDrones.Sum(d => d.StructurePct),0);
+            return Cache.Instance.ActiveDrones.Sum(d => d.StructurePct);
         }
 
         /// <summary>
