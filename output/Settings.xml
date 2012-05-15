@@ -251,7 +251,7 @@
   <!-- If the weapon has less then minimumAmmoCharges, the weapon is forced to reload 
        before attacking a new target -->
   <minimumAmmoCharges>6</minimumAmmoCharges>
-  <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc) -->
+  <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasors, NOT the Ammo, *the weapon*) -->
   <weaponGroupId>508</weaponGroupId>
   <!-- Use ONLY drones and NOT torps or autocannons on frigates -->
   <DontShootFrigatesWithSiegeorAutoCannons>false</DontShootFrigatesWithSiegeorAutoCannons>
