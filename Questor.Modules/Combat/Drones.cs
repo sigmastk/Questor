@@ -349,21 +349,21 @@ namespace Questor.Modules.Combat
                             if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to shield [" +
-                                            Cache.Instance.DirectEve.ActiveShip.ShieldPercentage + "%] below [" +
+                                            Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage,0) + "%] below [" +
                                             lowShieldWarning + "%] minimum", Logging.orange);
                                 Recall = true;
                             }
                             else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to armor [" +
-                                            Cache.Instance.DirectEve.ActiveShip.ArmorPercentage + "%] below [" +
+                                            Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage,0) + "%] below [" +
                                             lowArmorWarning + "%] minimum", Logging.orange);
                                 Recall = true;
                             }
                             else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to capacitor [" +
-                                            Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "%] below [" +
+                                            Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage,0) + "%] below [" +
                                             lowCapWarning + "%] minimum", Logging.orange);
                                 Recall = true;
                             }
