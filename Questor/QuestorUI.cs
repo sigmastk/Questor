@@ -701,7 +701,6 @@ namespace Questor
                     //
                     // closing eve would be a very good idea here
                     //
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                     CloseQuestor();
                     //Application.Exit();
                 }
