@@ -50,8 +50,8 @@ call dequote.cmd InnerSpacePath
 popd
 
 :setinnerspacedotnetdirectory
-if exist "%InnerSpacePath%" if "%debug%"=="true" Echo (set innerspacedotnetdirectory="%InnerSpacePath%.Net Programs\")
-if exist "%InnerSpacePath%" set innerspacedotnetdirectory=%InnerSpacePath%.Net Programs\
+if exist "%InnerSpacePath%" if "%debug%"=="true" Echo (set innerspacedotnetdirectory="%InnerSpacePath%\.Net Programs\")
+if exist "%InnerSpacePath%" set innerspacedotnetdirectory=%InnerSpacePath%\.Net Programs\
 @echo [finished] Innerspace Path is: [%InnerSpacePath%]
 @echo [finished] innerspacedotnetdirectory Path is: [%innerspacedotnetdirectory%]
 if "%debug%"=="true" pause && echo ------------------------------------------ && echo ------------------------------------------
