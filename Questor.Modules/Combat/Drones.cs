@@ -346,21 +346,21 @@ namespace Questor.Modules.Combat
                                 lowCapWarning = Settings.Instance.DroneRecallCapacitorPct;
                             }
 
-                            if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning)
+                            if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to shield [" +
                                             Cache.Instance.DirectEve.ActiveShip.ShieldPercentage + "%] below [" +
                                             lowShieldWarning + "%] minimum", Logging.orange);
                                 Recall = true;
                             }
-                            else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning)
+                            else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to armor [" +
                                             Cache.Instance.DirectEve.ActiveShip.ArmorPercentage + "%] below [" +
                                             lowArmorWarning + "%] minimum", Logging.orange);
                                 Recall = true;
                             }
-                            else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning)
+                            else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to capacitor [" +
                                             Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "%] below [" +
