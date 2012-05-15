@@ -88,7 +88,6 @@ namespace Questor.Behaviors
             //
             Settings.Instance.SettingsLoaded += SettingsLoaded;
 
-            // States.CurrentDedicatedBookmarkSalvagerBehaviorState fixed on ExecuteMission
             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
             //_States.CurrentDroneState = DroneState.Idle;
@@ -508,6 +507,7 @@ namespace Questor.Behaviors
                                 Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: Character mode is BookmarkSalvager and no bookmarks salvage.", Logging.white);
                                 //We just need a NextSalvagerSession timestamp to key off of here to add the delay
                                 _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                                _States.CurrentQuestorState = QuestorState.Idle;
 
                                 Statistics.Instance.FinishedSalvaging = DateTime.Now;
                                 return;
@@ -865,7 +865,11 @@ namespace Questor.Behaviors
                             else
                             {
                                 Logging.Log("DedicatedBookmarkSalvagerBehavior.Traveler", "Arrived at destination", Logging.white);
-                                if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Traveler) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                                if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Traveler)
+                                {
+                                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                                    _States.CurrentQuestorState = QuestorState.Idle;
+                                }
                                 return;
                             }
                         }

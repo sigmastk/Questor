@@ -826,7 +826,11 @@ namespace Questor.Behaviors
                         if (Cache.Instance.CourierMission)
                         {
                             Cache.Instance.CourierMission = false;
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.CompleteMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.CompleteMission)
+                            {
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                                _States.CurrentQuestorState = QuestorState.Idle;
+                            }
                         }
                         else
                         {
