@@ -693,7 +693,7 @@ namespace Questor
                 txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                 Cache.Instance.ExtConsole = null;
             }
-            if (DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds > 30 && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
+            if (DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds > 60 && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
                 {
