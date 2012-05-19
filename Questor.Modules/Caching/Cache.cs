@@ -1174,7 +1174,7 @@ namespace Questor.Modules.Caching
         public int MissionWeaponGroupId { get; set; }
 
         public bool? MissionUseDrones { get; set; }
-
+        public bool? MissionKillSentries { get; set; }
         public bool StopTimeSpecified { get; set; }
 
         public DateTime StopTime { get; set; }
@@ -2613,7 +2613,7 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.Now < Cache.Instance.NextDroneBayAction)
             {
-                //Logging.Log(module + ": Closing Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]");
+                //Logging.Log(module + ": Closing Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]",Logging.white);
                 return false;
             }
             if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))

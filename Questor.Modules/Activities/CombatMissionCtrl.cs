@@ -69,7 +69,7 @@ namespace Questor.Modules.Activities
                 {
                     if (target.Distance + (int)Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
-                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] + ": StartOrbiting: Target in range");
+                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
                             Logging.Log("CombatMissionCtrl.NavigateIntoRange", "We are not approaching nor orbiting", Logging.teal);
@@ -303,7 +303,7 @@ namespace Questor.Modules.Activities
                     }
                     return;
                 }
-                //Logging.Log("CombatMissionCtrl: distance " + closest.Distance);
+                //Logging.Log("CombatMissionCtrl","distance " + closest.Distance);
                 //if ((closest.Distance <= (int)Distance.TooCloseToStructure) && (DateTime.Now.Subtract(Cache.Instance._lastOrbit).TotalSeconds > 30)) //-10100 meters (inside docking ring) - so close that we may get tangled in the structure on activation - move away
                 //{
                 //    Logging.Log("CombatMissionCtrl.Activate: Too close to Structure to activate: orbiting");
@@ -653,7 +653,7 @@ namespace Questor.Modules.Activities
                 //{
                 //    //this should at least keep speed tanked ships from going poof if a mission XML uses moveto
                 //    closest.Orbit(Cache.Instance.OrbitDistance);
-                //    Logging.Log("CombatMissionCtrl: MoveTo: Initiating orbit after reaching target")
+                //    Logging.Log("CombatMissionCtrl","MoveTo: Initiating orbit after reaching target")
                 //}
                 return;
             }
