@@ -891,6 +891,7 @@ namespace Questor.Behaviors
                                 {
                                     //Logging.Log("CombatMissionsBehavior: Character mode is not salvage going to next mission.");
                                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle; //add pause here
+                                    _States.CurrentQuestorState = QuestorState.Idle;
                                 }
                                 Statistics.Instance.FinishedSalvaging = DateTime.Now;
                                 return;
@@ -943,6 +944,7 @@ namespace Questor.Behaviors
                             if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower() || Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
                             {
                                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                                _States.CurrentQuestorState = QuestorState.Idle;
                                 Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.white);
                                 Statistics.Instance.FinishedMission = DateTime.Now;
                                 return;
