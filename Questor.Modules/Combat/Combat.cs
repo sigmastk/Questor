@@ -174,7 +174,7 @@ namespace Questor.Modules.Combat
             }
             else
             {
-                Logging.Log("Combat", "Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "]", Logging.teal);
+                Logging.Log("Combat", "Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.teal);
                 weapon.ChangeAmmo(charge);
                 weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + 1;
             }
