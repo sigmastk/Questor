@@ -1116,35 +1116,68 @@ namespace Questor
 
         private void ButtonOpenCharacterXMLClick(object sender, EventArgs e)
         {
-            Logging.Log("QuestorUI", "Launching [" + Settings.Instance.SettingsPath + "]", Logging.white);
-            System.Diagnostics.Process.Start(Settings.Instance.SettingsPath);
+            if (File.Exists(Settings.Instance.SettingsPath))
+            {
+                Logging.Log("QuestorUI", "Launching [" + Settings.Instance.SettingsPath + "]", Logging.white);
+                System.Diagnostics.Process.Start(Settings.Instance.SettingsPath);
+            }
+            else
+            {
+                Logging.Log("QuestorUI", "Unable to open [" + Settings.Instance.SettingsPath + "] file not found", Logging.orange);
+            }
         }
 
         private void ButtonOpenSchedulesXMLClick(object sender, EventArgs e)
         {
             string schedulesXmlPath = Path.Combine(Settings.Instance.Path, "Schedules.xml");
-            Logging.Log("QuestorUI", "Launching [" + schedulesXmlPath + "]", Logging.white);
-            System.Diagnostics.Process.Start(schedulesXmlPath);
+            if (File.Exists(schedulesXmlPath))
+            {
+                Logging.Log("QuestorUI", "Launching [" + schedulesXmlPath + "]", Logging.white);
+                System.Diagnostics.Process.Start(schedulesXmlPath);
+            }
+            else
+            {
+                Logging.Log("QuestorUI", "Unable to open [" + schedulesXmlPath + "] file not found", Logging.orange);
+            }
         }
 
         private void ButtonQuestormanagerClick(object sender, EventArgs e)
         {
-            if (Settings.Instance.UseInnerspace)
+            string questorManagerPath = Path.Combine(Settings.Instance.Path, "QuestorManager.exe");
+            if (File.Exists(questorManagerPath))
             {
-                Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.white);
-                LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
+                if (Settings.Instance.UseInnerspace)
+                {
+                    Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.white);
+                    LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
+                }
+                else
+                {
+                    Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ] - fix me",
+                                Logging.white);
+                }
             }
             else
             {
-                Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ] - fix me", Logging.white);
+                Logging.Log("QuestorUI", "Unable to launch QuestorManager from [" + questorManagerPath + "] file not found", Logging.orange);
             }
         }
 
         private void ButtonQuestorSettingsXMLClick(object sender, EventArgs e)
         {
-            Logging.Log("QuestorUI", "Launching [" + Settings.Instance.Path + "\\QuestorSettings.exe" + "]", Logging.white);
-            System.Diagnostics.Process.Start(Settings.Instance.Path + "\\QuestorSettings.exe");
+            string questorSettingsPath = Path.Combine(Settings.Instance.Path, "QuestorSettings.exe");
+            if (File.Exists(questorSettingsPath))
+            {
+                Logging.Log("QuestorUI", "Launching [" + Settings.Instance.Path + "\\QuestorSettings.exe" + "]",
+                            Logging.white);
+                System.Diagnostics.Process.Start(Settings.Instance.Path + "\\QuestorSettings.exe");
+            }
+            else
+            {
+                Logging.Log("QuestorUI", "Unable to launch QuestorSettings from [" + questorSettingsPath + "] file not found", Logging.orange);
+            }
         }
+
 
         //private void comboBoxQuestorMode_SelectedIndexChanged(object sender, EventArgs e)
         //{
@@ -1154,7 +1187,7 @@ namespace Questor
         //}
 
         //
-        // all the GUI stoptime stuff needs new plumbing as a different deature... and the stoptime stuff likely needs
+        // all the GUI stoptime stuff needs new plumbing as a different feature... and the stoptime stuff likely needs
         // to be combined with the 'pause' and 'wait' stuff planned in station and in combat...
         //
         //
