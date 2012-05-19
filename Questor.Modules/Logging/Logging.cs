@@ -34,18 +34,24 @@ namespace Questor.Modules.Logging
         //public static void Log(string module, string line, string color = Logging.white)
         public static void Log(string module, string line, string color)
         {
-            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, Logging.orange + "[" + Logging.yellow + module + Logging.orange + "] " + color + line));                            //Innerspace Console Log
-            Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + line + "\r\n");               //Questor GUI Console Log
-            Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + line + "\r\n");               //In memory Console Log
+            string colorLogLine = line;
+            //colorLogLine contains color and is for the InnerSpace console
+            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, Logging.orange + "[" + Logging.yellow + module + Logging.orange +  "] " + color + colorLogLine));                            //Innerspace Console Log
+            
+            string plainLogLine = FilterColorsFromLogs(line);
+            //plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
+            Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + plainLogLine + "\r\n");               //Questor GUI Console Log
+            Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + plainLogLine + "\r\n");               //In memory Console Log
             if (Settings.Instance.SaveConsoleLog)
             {
                 if (!Cache.Instance.ConsoleLogOpened)
                 {
                     if (Settings.Instance.ConsoleLogPath != null && Settings.Instance.ConsoleLogFile != null)
                     {
-                        line = "Logging: Writing to Daily Console Log ";
-                        InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
-                        Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line + "\r\n");
+                        module = "Logging";
+                        line = "Writing to Daily Console Log ";
+                        InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, Logging.orange + "[" + Logging.yellow + module + Logging.orange + "] " + color + colorLogLine));                            //Innerspace Console Log
+                        Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, plainLogLine + "\r\n");
 
                         if (!string.IsNullOrEmpty(Settings.Instance.ConsoleLogFile))
                         {
@@ -53,7 +59,7 @@ namespace Questor.Modules.Logging
                             if (Directory.Exists(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile)))
                             {
                                 Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTime.Now,
-                                                                           "[" + module + "]" + line + "\r\n");
+                                                                           "[" + module + "]" + plainLogLine + "\r\n");
                                 Cache.Instance.ConsoleLogOpened = true;
                             }
                             else
@@ -67,8 +73,8 @@ namespace Questor.Modules.Logging
                         else
                         {
                             line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
-                            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
-                            Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + line + "\r\n");
+                            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, colorLogLine));
+                            Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + plainLogLine + "\r\n");
                         }
                     }
                 }
@@ -79,6 +85,25 @@ namespace Questor.Modules.Logging
                     Cache.Instance.ConsoleLog = null;
                 }
             }
+        }
+
+        public static string FilterColorsFromLogs(string line)
+        {
+            if (line == null)
+                return string.Empty;
+
+            line = line.Replace("\ag", "");
+            line = line.Replace("\ay", "");
+            line = line.Replace("\ab", "");
+            line = line.Replace("\ar", "");
+            line = line.Replace("\ao", "");
+            line = line.Replace("\ap", "");
+            line = line.Replace("\am", "");
+            line = line.Replace("\at", "");
+            line = line.Replace("\aw", "");
+            while (line.IndexOf("  ", System.StringComparison.Ordinal) >= 0)
+                line = line.Replace("  ", " ");
+            return line.Trim();
         }
     }
 }
