@@ -72,7 +72,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLootWrecks { get; set; }
 
         public bool DebugActivateWeapons { get; set; }
-
+        public bool DebugReloadorChangeAmmo { get; set; }
         public bool DebugStatistics { get; set; }
 
         public bool DebugGotobase { get; set; }
@@ -476,6 +476,7 @@ namespace Questor.Modules.Lookup
                 DetailedCurrentTargetHealthLogging = false;
                 DebugLootWrecks = false;
                 DebugActivateWeapons = false;
+                DebugReloadorChangeAmmo = false;
                 DebugStatistics = false;
                 DebugGotobase = false;
                 DebugIdle = false;
@@ -743,6 +744,7 @@ namespace Questor.Modules.Lookup
                     DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
+                    DebugReloadorChangeAmmo = (bool?)xml.Element("debugreloadorChangeAmmo") ?? false;
                     DebugStatistics = (bool?)xml.Element("debugStatistics") ?? false;
                     DebugGotobase = (bool?)xml.Element("debugGotobase") ?? false;
                     DebugIdle = (bool?)xml.Element("debugIdle") ?? false;
