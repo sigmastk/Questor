@@ -71,6 +71,8 @@
   <missionsPath>Caldari Missions</missionsPath><!-- needs to be customized -->
   <!-- Run missions that take us into low security space? - READ: DANGEROUS!!! -->
   <LowSecMissionsInShuttles>false</LowSecMissionsInShuttles><!-- default is: false -->
+  <!-- By Default ClearPocket ignores sentries. If you would like them cleared as part of clearpocket you need this set to true --> 
+  <killSentries>false</killSentries>
   <!-- agentsList is used when WaitDecine is true and your standings have gone below MinStandings, it will switch to a lower priority agent, need to be filled out for at least one agent -->
   <agentsList>
     <agentList name="" priority="0" /><!-- needs to be customized -->

@@ -128,6 +128,23 @@ namespace Questor.Modules.Lookup
         public bool WaitDecline { get; set; }
 
         public bool MultiAgentSupport { get; private set; }
+        //
+        // KillSentries Setting
+        //
+        private bool _killSentries;
+        public bool KillSentries
+        {
+            get
+            {
+                if (Cache.Instance.MissionKillSentries != null)
+                    return (bool)Cache.Instance.MissionKillSentries;
+                return _killSentries;
+            }
+            set
+            {
+                _killSentries = value;
+            }
+        }
 
         //
         // Local Watch settings - if enabled
@@ -517,6 +534,7 @@ namespace Questor.Modules.Lookup
                 LowSecMissionsInShuttles = false;
                 MaterialsForWarOreID = 20;
                 MaterialsForWarOreQty = 8000;
+                KillSentries = false;
                 //
                 // Local Watch Settings - if enabled
                 //
@@ -787,6 +805,7 @@ namespace Questor.Modules.Lookup
                     LowSecMissionsInShuttles = (bool?)xml.Element("LowSecMissions") ?? false;
                     MaterialsForWarOreID = (int?)xml.Element("MaterialsForWarOreID") ?? 20;
                     MaterialsForWarOreQty = (int?)xml.Element("MaterialsForWarOreQty") ?? 8000;
+                    KillSentries = (bool?)xml.Element("killSentries") ?? false;
 
                     //
                     // Local Watch Settings - if enabled
