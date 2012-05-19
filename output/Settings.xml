@@ -12,6 +12,7 @@
   <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
   <debugLootWrecks>false</debugLootWrecks>
   <debugActivateWeapons>false</debugActivateWeapons>
+  <debugreloadorChangeAmmo>false</debugreloadorChangeAmmo>
   <debugStatistics>false</debugStatistics>
   <debugGotobase>false</debugGotobase>
   <debugIdle>false</debugIdle>

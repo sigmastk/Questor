@@ -149,20 +149,44 @@ namespace Questor.Modules.Combat
 
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)
+            {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [ ammo == null]", Logging.white);
                 return false;
+            }
+            else
+            {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [" + ammo.TypeId + "][" + ammo.DamageType + "]", Logging.white);
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "]", Logging.white);
+            }
 
             DirectItem charge = cargo.Items.OrderBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == ammo.TypeId);
             // We do not have any ammo left that can hit targets at that range!
             if (charge == null)
+            {
+                if (Settings.Instance.DebugReloadorChangeAmmo)
+                    Logging.Log("Combat",
+                                "ReloadEnergyWeaponAmmo: We do not have any ammo left that can hit targets at that range!",
+                                Logging.orange); 
                 return false;
+            }
+            else
+            {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: charge: [" + charge.TypeName + "][" + charge.TypeId + "]", Logging.white);
+            }
 
             // We have enough ammo loaded
             if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId)
+            {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: We have Enough Ammo of that type Loaded Already", Logging.white);
                 return true;
+            }
 
             // We are reloading, wait at least 5 seconds
             if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds(5))
+            {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: We are currently reloading: waiting", Logging.white);
                 return false;
+            }
             _lastWeaponReload[weapon.ItemId] = DateTime.Now;
 
             // Reload or change ammo
