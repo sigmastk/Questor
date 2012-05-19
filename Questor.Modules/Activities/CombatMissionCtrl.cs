@@ -321,7 +321,7 @@ namespace Questor.Modules.Activities
                     // Reload weapons and activate gate to move to the next pocket
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
-                        Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.teal);
+                        //Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.teal);
                         Combat.ReloadAll();
                         Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                     }
@@ -448,7 +448,7 @@ namespace Questor.Modules.Activities
                 {
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
-                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "ReloadAll: Reload weapons", Logging.teal);
+                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
                         Combat.ReloadAll();
                         Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
@@ -879,7 +879,7 @@ namespace Questor.Modules.Activities
                     }
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
-                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]", Logging.teal);
+                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]", Logging.teal);
                         Combat.ReloadAll();
                         Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
@@ -899,7 +899,7 @@ namespace Questor.Modules.Activities
                 {
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
-                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "ReloadAll: Reload weapons", Logging.teal);
+                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons", Logging.teal);
                         Combat.ReloadAll();
                         Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
@@ -1424,7 +1424,7 @@ namespace Questor.Modules.Activities
                     // Reload weapons
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
-                        //Logging.Log("CombatMissionCtrl: ReloadAll: Reload because ActionState is Done - Reloading Weapons.");
+                        //Logging.Log("CombatMissionCtrl","ReloadAll: Reload because ActionState is Done - Reloading Weapons.");
                         //Combat.ReloadAll();
                         //Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                     }
