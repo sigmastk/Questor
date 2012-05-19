@@ -72,6 +72,15 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
+            if (weapon.Charge.TypeId != 0)
+            {
+                IEnumerable<Ammo> areWeMissingAmmo = correctAmmo.Where(a => a.TypeId == weapon.Charge.TypeId);
+                if (!areWeMissingAmmo.Any())
+                {
+                    Logging.Log("Combat", "ReloadNormalAmmo: We have ammo loaded at does not have a reload available in the cargo. This WILL cause reloading issues! Fix your characters settings XML to have more ammo available.", Logging.orange);
+                }
+            }
+
             // Get the best possible ammo
             Ammo ammo = correctAmmo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
 
@@ -136,6 +145,19 @@ namespace Questor.Modules.Combat
             // Check if we still have that ammo in our cargo
             correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
 
+            //check if mission specific ammo is defined
+            if (Cache.Instance.MissionAmmo.Count() != 0)
+            {
+                correctAmmo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
+            }
+
+            // Check if we still have that ammo in our cargo
+            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            if (Cache.Instance.MissionAmmo.Count() != 0)
+            {
+                correctAmmo = Cache.Instance.MissionAmmo;
+            }
+
             // We are out of ammo! :(
             if (!correctAmmo.Any())
             {
@@ -144,6 +166,15 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
+            if (weapon.Charge.TypeId != 0)
+            {
+                IEnumerable<Ammo> areWeMissingAmmo = correctAmmo.Where(a => a.TypeId == weapon.Charge.TypeId);
+                if (!areWeMissingAmmo.Any())
+                {
+                    Logging.Log("Combat","ReloadEnergyWeaponAmmo: We have ammo loaded at does not have a reload available in the cargo. This WILL cause reloading issues! Fix your characters settings XML to have more ammo available.",Logging.orange);
+                }
+            }
+            
             // Get the best possible ammo - energy weapons change ammo near instantly
             Ammo ammo = correctAmmo.Where(a => a.Range > (entity.Distance)).OrderBy(a => a.Range).FirstOrDefault(); //default
 
