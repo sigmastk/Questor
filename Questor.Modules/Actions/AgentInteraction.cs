@@ -117,7 +117,7 @@ namespace Questor.Modules.Actions
                     {
                         Cache.Instance.CloseQuestorCMDLogoff = false;
                         Cache.Instance.CloseQuestorCMDExitGame = true;
-                        Cache.Instance.ReasonToStopQuestor = "AgentInteraction: ReplyToAgent: Journal would not open/refresh- journalwindows was null: restarting EVE Session";
+                        Cache.Instance.ReasonToStopQuestor = "AgentInteraction: ReplyToAgent: Agent Window would not open/refresh- agentwindow was null: restarting EVE Session";
                         Logging.Log("ReasonToStopQuestor", Cache.Instance.ReasonToStopQuestor, Logging.yellow);
                         Cache.Instance.SessionState = "Quitting";
                     }
@@ -624,7 +624,7 @@ namespace Questor.Modules.Actions
                     Cache.Instance.factionName = "Default";
                     var FactionFitting = Settings.Instance.FactionFitting.FirstOrDefault(m => m.Faction.ToLower() == "default");
                     Cache.Instance.factionFit = (string)FactionFitting.Fitting;
-                    Logging.Log("AgentInteraction: Faction fitting " + FactionFitting.Faction);
+                    Logging.Log("AgentInteraction","Faction fitting " + FactionFitting.Faction);
                     //Cache.Instance.Fitting = Cache.Instance.factionFit;
                     return false;
                 }
