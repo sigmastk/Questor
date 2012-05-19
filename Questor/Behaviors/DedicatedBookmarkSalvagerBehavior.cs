@@ -308,28 +308,7 @@ namespace Questor.Behaviors
             switch (_States.CurrentDedicatedBookmarkSalvagerBehaviorState)
             {
                 case DedicatedBookmarkSalvagerBehaviorState.Idle:
-                    // Every 5 min of idle check and make sure we aren't supposed to stop...
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
-                    {
-                        Cache.Instance.LastTimeCheckAction = DateTime.Now;
 
-                        /*
-                        if (Cache.Instance.ExitWhenIdle && !Settings.Instance.AutoStart)
-                        {
-                            Cache.Instance.ReasonToStopQuestor = "Settings: ExitWhenIdle is true, and we are idle... exiting";
-                            Logging.Log("ReasonToStopQuestor" + Cache.Instance.ReasonToStopQuestor);
-                            Settings.Instance.AutoStart = false;
-                            Cache.Instance.CloseQuestorCMDLogoff = false;
-                            Cache.Instance.CloseQuestorCMDExitGame = true;
-                            Cache.Instance.SessionState = "Exiting";
-                            if (States.CurrentDedicatedBookmarkSalvagerBehaviorState == CombatMissionsModeState.Idle)
-                            {
-                                BeginClosingQuestor();
-                            }
-                            return;
-                        }
-                        */
-                    }
                     if (Cache.Instance.StopBot)
                         return;
 
@@ -494,9 +473,6 @@ namespace Questor.Behaviors
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
 
-                        //This salvaging decision tree does not belong here and should be separated out into a different state
-                        if (Settings.Instance.AfterMissionSalvaging)
-                        {
                             AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                             if (AfterMissionSalvageBookmarks.Count == 0)
                             {
@@ -520,7 +496,6 @@ namespace Questor.Behaviors
                                 Statistics.Instance.StartedSalvaging = DateTime.Now;
                             }
                         }
-                    }
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging:

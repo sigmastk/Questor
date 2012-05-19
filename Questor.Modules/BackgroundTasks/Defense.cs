@@ -190,9 +190,6 @@ namespace Questor.Modules.BackgroundTasks
                 bool deactivate = !Cache.Instance.IsApproaching;
                 deactivate &= module.IsActive;
                 deactivate &= (!Cache.Instance.Entities.Any(e => e.IsAttacking) || !Settings.Instance.SpeedTank);
-                // !!!!!!!!!!!!!!!!!!!
-                // eventually it would be nice to have a setting to allow the ab/mwb when approaching gates (maybe only if all NPCs are dead?!?)
-                // !!!!!!!!!!!!!!!!!!!
 
                 // This only applies when not speed tanking
                 if (!Settings.Instance.SpeedTank && Cache.Instance.IsApproachingOrOrbiting)

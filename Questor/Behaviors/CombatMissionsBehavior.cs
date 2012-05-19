@@ -345,28 +345,7 @@ namespace Questor.Behaviors
             switch (_States.CurrentCombatMissionBehaviorState)
             {
                 case CombatMissionsBehaviorState.Idle:
-                    // Every 5 min of idle check and make sure we aren't supposed to stop...
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
-                    {
-                        Cache.Instance.LastTimeCheckAction = DateTime.Now;
 
-                        /*
-                        if (Cache.Instance.ExitWhenIdle && !Settings.Instance.AutoStart)
-                        {
-                            Cache.Instance.ReasonToStopQuestor = "Settings: ExitWhenIdle is true, and we are idle... exiting";
-                            Logging.Log("ReasonToStopQuestor" + Cache.Instance.ReasonToStopQuestor);
-                            Settings.Instance.AutoStart = false;
-                            Cache.Instance.CloseQuestorCMDLogoff = false;
-                            Cache.Instance.CloseQuestorCMDExitGame = true;
-                            Cache.Instance.SessionState = "Exiting";
-                            if (States.CurrentCombatMissionBehaviorState == CombatMissionsModeState.Idle)
-                            {
-                                BeginClosingQuestor();
-                            }
-                            return;
-                        }
-                        */
-                    }
                     if (Cache.Instance.StopBot)
                     {
                         if (Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "if (Cache.Instance.StopBot)", Logging.white);

@@ -137,98 +137,6 @@ namespace Questor
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
 
-        /*
-        public void RecallDrones()
-        {
-            if (Cache.Instance.InSpace && Cache.Instance.ActiveDrones.Any() &&
-                DateTime.Now > Cache.Instance.NextDroneRecall)
-            {
-                Logging.Log("QuestorState." + State + ": We are not scrambled and will be warping soon: pulling drones");
-                // Tell the drones module to retract drones
-                Cache.Instance.IsMissionPocketDone = true;
-                Cache.Instance.NextDroneRecall = DateTime.Now.AddSeconds(10);
-                _drones.ProcessState();
-            }
-        }
-
-        private void TravelToAgentsStation()
-        {
-            var baseDestination = Traveler.Destination as StationDestination;
-            if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
-              _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
-                                                               Cache.Instance.Agent.StationId,
-                                                               Cache.Instance.DirectEve.GetLocationName(
-                                                                   Cache.Instance.Agent.StationId));
-            //
-            // is there a reason we do not just let combat.cs pick targets?
-            // I am not seeing why we are limiting ourselves to priority targets
-            //
-            if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
-            {
-                Logging.Log("QuestorState." + State + ": TravelToAgentsStation: Priority targets found, engaging!");
-                _combat.ProcessState();
-                _drones.ProcessState(); //do we really want to use drones here?
-            }
-            else
-            {
-                if (Cache.Instance.InSpace && Cache.Instance.ActiveDrones.Any() &&
-                    DateTime.Now > Cache.Instance.NextDroneRecall)
-                {
-                    Logging.Log("QuestorState." + State +
-                                ": We are not scrambled and will be warping soon: pulling drones");
-                    // Tell the drones module to retract drones
-                    Cache.Instance.IsMissionPocketDone = true;
-                    Cache.Instance.NextDroneRecall = DateTime.Now.AddSeconds(10);
-                }
-            }
-            _traveler.ProcessState();
-            if (Settings.Instance.DebugStates)
-            {
-                Logging.Log("Traveler.State = " + _traveler.State);
-            }
-        }
-
-        private void AvoidBumpingThings()
-        {
-            // anti bump
-            EntityCache bigObjects =
-                Cache.Instance.Entities.Where(
-                    i => i.GroupId == (int) Group.LargeCollidableStructure || i.GroupId == (int) Group.SpawnContainer).
-                    OrderBy(t => t.Distance).FirstOrDefault();
-            //
-            // always shoot at NPCs while getting un-hung
-            //
-            _combat.ProcessState();
-
-            //
-            // only use drones if warp scrambled as we do not want to leave them behind accidentally
-            //
-            if (Cache.Instance.InSpace && Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
-            {
-                _drones.ProcessState();
-            }
-            //
-            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
-            //
-            if (Cache.Instance.InSpace && bigObjects != null && bigObjects.Distance < (int) Distance.TooCloseToStructure)
-            {
-                if (DateTime.Now > Cache.Instance.NextOrbit)
-                {
-                    bigObjects.Orbit((int) Distance.SafeDistancefromStructure);
-                    Logging.Log("QuestorState: " + State + ": initiating Orbit of [" + bigObjects.Name +
-                                "] orbiting at [" + Cache.Instance.OrbitDistance + "]");
-                    Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
-                }
-                return; //we are still too close, do not continue through the rest until we are not "too close" anymore
-            }
-            else
-            {
-                //we are no longer "too close" and can proceed.
-            }
-        }
-
-        */
-
         public static void CheckEVEStatus()
         {
             // get the current process
@@ -249,7 +157,7 @@ namespace Questor
                 //m_Parent.Visible = true; //this does not work for some reason - innerspace issue?
                 Cache.Instance.ReasonToStopQuestor =
                     "The Questor GUI is not visible: did EVE get restarted due to a crash or lag?";
-                Logging.Log(Cache.Instance.ReasonToStopQuestor);
+                Logging.Log("ReasonToStopQuestor" + Cache.Instance.ReasonToStopQuestor);
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
@@ -364,21 +272,13 @@ namespace Questor
                     if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) <
                         Settings.Instance.Walletbalancechangelogoffdelay)
                     {
-                        //if (State == QuestorState.Salvage)
-                        //{
-                        //    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
-                        //    Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                        //}
-                        //else
-                        //{
                         if (Cache.Instance.MyWalletBalance != Cache.Instance.DirectEve.Me.Wealth)
                         {
                             Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         }
-                        //}
                     }
-                    else if (Settings.Instance.Walletbalancechangelogoffdelay != 0)
+                    else if (Settings.Instance.Walletbalancechangelogoffdelay != 0 && (_States.CurrentQuestorState == QuestorState.Idle))
                     {
                         Logging.Log(
                             "Questor", String.Format(
@@ -580,7 +480,7 @@ namespace Questor
                         {
                             if (CloseQuestorflag)
                             {
-                                Logging.Log("Questor", "We are in station: Logging off EVE: In theory eve and questor will restart on their own when the client comes back up", Logging.white);
+                                    Logging.Log("Questor","Logging off EVE: In theory eve and questor will restart on their own when the client comes back up",Logging.white);
                                 if (Settings.Instance.UseInnerspace)
                                     LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");
                                 Logging.Log("Questor", "you can change this option by setting the wallet and eveprocessmemoryceiling options to use exit instead of logoff: see the settings.xml file", Logging.white);
@@ -612,7 +512,7 @@ namespace Questor
                                     (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
                                 {
                                     Logging.Log(
-                                        "Questor", "We are in station: You can't combine CloseQuestorArbitraryOSCmd with either of the other two options, fix your settings", Logging.white);
+                                            "Questor","You can't combine CloseQuestorArbitraryOSCmd with either of the other two options, fix your settings",Logging.white);
                                 }
                                 else
                                 {
@@ -620,7 +520,7 @@ namespace Questor
                                         (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
                                     {
                                         Logging.Log(
-                                            "Questor", "We are in station: You cant use both the CloseQuestorCMDUplinkIsboxerProfile and the CloseQuestorCMDUplinkIsboxerProfile setting, choose one", Logging.white);
+                                                "Questor","You cant use both the CloseQuestorCMDUplinkIsboxerProfile and the CloseQuestorCMDUplinkIsboxerProfile setting, choose one",Logging.white);
                                     }
                                     else
                                     {
@@ -631,7 +531,7 @@ namespace Questor
                                             if (_closeQuestorCMDUplink)
                                             {
                                                 Logging.Log(
-                                                    "Questor", "We are in station: Starting a timer in the innerspace uplink to restart this innerspace profile session", Logging.white);
+                                                        "Questor","Starting a timer in the innerspace uplink to restart this innerspace profile session",Logging.white);
                                                 LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " +
                                                                             Settings.Instance.CharacterName +
                                                                             "'s Questor is starting a timedcommand to restart itself in a moment");
@@ -668,7 +568,7 @@ namespace Questor
                                             if (_closeQuestorCMDUplink)
                                             {
                                                 Logging.Log(
-                                                    "Questor", "We are in station: Starting a timer in the innerspace uplink to restart this isboxer character set", Logging.white);
+                                                        "Questor", "Starting a timer in the innerspace uplink to restart this isboxer character set", Logging.white);
                                                 LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " +
                                                                             Settings.Instance.CharacterName +
                                                                             "'s Questor is starting a timedcommand to restart itself in a moment");
