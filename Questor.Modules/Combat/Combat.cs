@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -49,40 +49,40 @@ namespace Questor.Modules.Combat
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            IEnumerable<Ammo> correctAmmoIncargo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
 
             //check if mission specific ammo is defined
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
-                correctAmmo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
+                correctAmmoIncargo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            correctAmmoIncargo = correctAmmoIncargo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
-                correctAmmo = Cache.Instance.MissionAmmo;
+                correctAmmoIncargo = Cache.Instance.MissionAmmo;
             }
 
             // We are out of ammo! :(
-            if (!correctAmmo.Any())
+            if (!correctAmmoIncargo.Any())
             {
                 Logging.Log("Combat", "ReloadNormalAmmo: not enough [" + Cache.Instance.DamageType + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]", Logging.orange);
                 _States.CurrentCombatState = CombatState.OutOfAmmo;
                 return false;
             }
 
-            if (weapon.Charge.TypeId != 0)
+            if (weapon.Charge != null)
             {
                 IEnumerable<Ammo> areWeMissingAmmo = correctAmmo.Where(a => a.TypeId == weapon.Charge.TypeId);
                 if (!areWeMissingAmmo.Any())
                 {
-                    Logging.Log("Combat", "ReloadNormalAmmo: We have ammo loaded at does not have a reload available in the cargo. This WILL cause reloading issues! Fix your characters settings XML to have more ammo available.", Logging.orange);
+                    Logging.Log("Combat", "ReloadNormalAmmo: We have ammo loaded that does not have a full reload available in the cargo.", Logging.orange);
                 }
             }
 
             // Get the best possible ammo
-            Ammo ammo = correctAmmo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
+            Ammo ammo = correctAmmoIncargo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
 
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)
@@ -143,40 +143,40 @@ namespace Questor.Modules.Combat
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
+            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
 
             //check if mission specific ammo is defined
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
-                correctAmmo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
+                correctAmmoInCargo = Cache.Instance.MissionAmmo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            correctAmmoInCargo = correctAmmoInCargo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
-                correctAmmo = Cache.Instance.MissionAmmo;
+                correctAmmoInCargo = Cache.Instance.MissionAmmo;
             }
 
             // We are out of ammo! :(
-            if (!correctAmmo.Any())
+            if (!correctAmmoInCargo.Any())
             {
                 Logging.Log("Combat", "ReloadEnergyWeapon: not enough [" + Cache.Instance.DamageType + "] ammo in cargohold: MinimumCharges: [" + Settings.Instance.MinimumAmmoCharges + "]", Logging.orange);
                 _States.CurrentCombatState = CombatState.OutOfAmmo;
                 return false;
             }
 
-            if (weapon.Charge.TypeId != 0)
+            if (weapon.Charge != null)
             {
-                IEnumerable<Ammo> areWeMissingAmmo = correctAmmo.Where(a => a.TypeId == weapon.Charge.TypeId);
+                IEnumerable<Ammo> areWeMissingAmmo = correctAmmoInCargo.Where(a => a.TypeId == weapon.Charge.TypeId);
                 if (!areWeMissingAmmo.Any())
                 {
-                    Logging.Log("Combat","ReloadEnergyWeaponAmmo: We have ammo loaded at does not have a reload available in the cargo. This WILL cause reloading issues! Fix your characters settings XML to have more ammo available.",Logging.orange);
+                    Logging.Log("Combat","ReloadEnergyWeaponAmmo: We have ammo loaded that does not have a full reload available in the cargo.",Logging.orange);
                 }
             }
             
             // Get the best possible ammo - energy weapons change ammo near instantly
-            Ammo ammo = correctAmmo.Where(a => a.Range > (entity.Distance)).OrderBy(a => a.Range).FirstOrDefault(); //default
+            Ammo ammo = correctAmmoInCargo.Where(a => a.Range > (entity.Distance)).OrderBy(a => a.Range).FirstOrDefault(); //default
 
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)
