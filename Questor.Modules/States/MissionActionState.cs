@@ -30,6 +30,7 @@ namespace Questor.Modules.States
         Analyze,
         PutItem,
         Done,
-        SalvageBookmark
+        SalvageBookmark,
+        DebuggingWait,
     }
 }

@@ -743,6 +743,33 @@ namespace Questor.Modules.Activities
             _waitingSince = DateTime.Now;
         }
 
+        private void DebuggingWait(Actions.Action action)
+        {
+            IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
+
+            // Default timeout is 1200 seconds
+            int timeout;
+            if (!int.TryParse(action.GetParameterValue("timeout"), out timeout))
+                timeout = 1200;
+
+            if (_waiting)
+            {
+                if (DateTime.Now.Subtract(_waitingSince).TotalSeconds < timeout)
+                    return;
+
+                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Nothing targeted us within [ " + timeout + "sec]!", Logging.teal);
+
+                // Nothing has targeted us in the specified timeout
+                _waiting = false;
+                Nextaction();
+                return;
+            }
+
+            // Start waiting
+            _waiting = true;
+            _waitingSince = DateTime.Now;
+        }
+
         private void AggroOnlyAction(Actions.Action action)
         {
             if (Cache.Instance.NormalApproch)
@@ -1505,6 +1532,10 @@ namespace Questor.Modules.Activities
 
                 case ActionState.WaitUntilTargeted:
                     WaitUntilTargeted(action);
+                    break;
+
+                case ActionState.DebuggingWait:
+                    DebuggingWait(action);
                     break;
             }
         }
