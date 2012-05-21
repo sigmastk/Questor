@@ -390,6 +390,10 @@ namespace Questor.Behaviors
                             return;
                         }
                     }
+                    else
+                    {
+                        _States.CurrentQuestorState = QuestorState.Idle;
+                    }
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.DelayedGotoBase:

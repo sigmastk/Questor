@@ -414,6 +414,10 @@ namespace Questor.Behaviors
                             return;
                         }
                     }
+                    else
+                    {
+                        _States.CurrentQuestorState = QuestorState.Idle;
+                    }
                     break;
 
                 case CombatMissionsBehaviorState.DelayedStart:
