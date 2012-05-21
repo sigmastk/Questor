@@ -249,8 +249,29 @@ namespace Questor.Modules.Activities
             }
         }
 
+        private void DoneAction()
+        {
+            // Tell the drones module to retract drones
+            Cache.Instance.IsMissionPocketDone = true;
+            Cache.Instance.UseDrones = true;
+
+            // We do not switch to "done" status if we still have drones out
+            if (Cache.Instance.ActiveDrones.Any())
+                return;
+
+            // Add bookmark (before we're done)
+            if (Settings.Instance.CreateSalvageBookmarks)
+                BookmarkPocketForSalvaging();
+
+            _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
+        }
+
         private void ActivateAction(Actions.Action action)
         {
+            bool optional;
+            if (!bool.TryParse(action.GetParameterValue("optional"), out optional))
+                optional = false;
+
             string target = action.GetParameterValue("target");
 
             // No parameter? Although we shouldn't really allow it, assume its the acceleration gate :)
@@ -270,8 +291,13 @@ namespace Questor.Modules.Activities
                 {
                     if (DateTime.Now.Subtract(_waitingSince).TotalSeconds > (int)Time.NoGateFoundRetryDelay_seconds)
                     {
-                        Logging.Log("CombatMissionCtrl", "Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error", Logging.teal);
-                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Error;
+                        Logging.Log("CombatMissionCtrl",
+                                    "Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error",
+                                    Logging.teal);
+                        if (optional) //if this action has the optional paramater defined as true then we are done if we cant find the gate
+                            DoneAction();
+                        else
+                            _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Error;
                     }
                 }
                 return;
@@ -1414,27 +1440,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case ActionState.Done:
-                    // Tell the drones module to retract drones
-                    Cache.Instance.IsMissionPocketDone = true;
-                    Cache.Instance.UseDrones = true;
-
-                    // We do not switch to "done" status if we still have drones out
-                    if (Cache.Instance.ActiveDrones.Any())
-                        return;
-
-                    // Add bookmark (before we're done)
-                    if (Settings.Instance.CreateSalvageBookmarks)
-                        BookmarkPocketForSalvaging();
-
-                    // Reload weapons
-                    if (DateTime.Now > Cache.Instance.NextReload)
-                    {
-                        //Logging.Log("CombatMissionCtrl","ReloadAll: Reload because ActionState is Done - Reloading Weapons.");
-                        //Combat.ReloadAll();
-                        //Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
-                    }
-
-                    _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
+                    DoneAction();
                     break;
 
                 case ActionState.Kill:
