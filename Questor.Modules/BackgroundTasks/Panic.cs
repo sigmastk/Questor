@@ -26,6 +26,7 @@ namespace Questor.Modules.BackgroundTasks
         private double _lastNormalZ;
 
         private DateTime _resumeTime;
+        private DateTime _nextWrapScrambledWarning = DateTime.MinValue;
 
         //private DateTime _lastDockedorJumping;
         private DateTime _lastWarpScrambled = DateTime.MinValue;
@@ -206,10 +207,16 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
-                            if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                            if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                             {
-                                Logging.Log("Panic", "We are still warp scrambled!", Logging.red); //This runs every 'tick' so we should see it every 1.5 seconds or so
-                                _lastWarpScrambled = DateTime.Now;
+                                EntityCache warpscrambledby = Cache.Instance.PriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
+                                if (warpscrambledby != null && _nextWrapScrambledWarning > DateTime.Now)
+                                {
+                                    _nextWrapScrambledWarning = DateTime.Now.AddSeconds(20);
+                                    Logging.Log("Panic", "We are scrambled by: [" + Logging.white + warpscrambledby.Name + Logging.orange + "][" + Logging.white + Math.Round(warpscrambledby.Distance, 0) + Logging.orange + "][" + Logging.white + warpscrambledby.Id + Logging.orange + "]",
+                                                Logging.orange);
+                                    _lastWarpScrambled = DateTime.Now;
+                                }
                             }
                             else
                             {

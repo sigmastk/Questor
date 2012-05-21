@@ -281,7 +281,7 @@ namespace Questor.Modules.Combat
                             if (warpscrambledby != null && _nextWrapScrambledWarning > DateTime.Now)
                             {
                                 _nextWrapScrambledWarning = DateTime.Now.AddSeconds(20);
-                                Logging.Log("Drones", "We are scrambled by: ["  + Logging.white + warpscrambledby.Name + Logging.orange +  "][" + Logging.white + Math.Round(warpscrambledby.Distance,0) + Logging.orange + "]",
+                                Logging.Log("Drones", "We are scrambled by: [" + Logging.white + warpscrambledby.Name + Logging.orange + "][" + Logging.white + Math.Round(warpscrambledby.Distance, 0) + Logging.orange + "][" + Logging.white + warpscrambledby.Id + Logging.orange + "]",
                                             Logging.orange);
                                 Recall = false;
                                 WarpScrambled = true;
