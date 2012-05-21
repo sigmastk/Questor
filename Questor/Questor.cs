@@ -477,6 +477,7 @@ namespace Questor
                     break;
 
                 case QuestorState.CloseQuestor:
+                    int secRestart = Cache.Instance.RandomNumber(3, 18) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
                     Cache.Instance.SessionState = "Quitting!!"; //so that IF we changed the state we would not be caught in a loop of re-entering closequestor
                     if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
                     {
@@ -561,9 +562,9 @@ namespace Questor
                                                                             Settings.Instance.CharacterName +
                                                                             "'s Questor is starting a timedcommand to restart itself in a moment");
                                                 LavishScript.ExecuteCommand(
-                                                    "uplink exec Echo [${Time}] timedcommand 350 open \\\"${Game}\\\" \\\"${Profile}\\\"");
+                                                    "uplink exec Echo [${Time}] timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
                                                 LavishScript.ExecuteCommand(
-                                                    "uplink exec timedcommand 350 open \\\"${Game}\\\" \\\"${Profile}\\\"");
+                                                    "uplink exec timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
                                                 Logging.Log(
                                                     "Questor", "Done: quitting this session so the new innerspace session can take over", Logging.white);
                                                 Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.white);
@@ -598,9 +599,9 @@ namespace Questor
                                                                             Settings.Instance.CharacterName +
                                                                             "'s Questor is starting a timedcommand to restart itself in a moment");
                                                 LavishScript.ExecuteCommand(
-                                                    "uplink exec Echo [${Time}] timedcommand 350 runscript isboxer -launch \\\"${ISBoxerCharacterSet}\\\"");
+                                                    "uplink exec Echo [${Time}] timedcommand " + secRestart + " runscript isboxer -launch \\\"${ISBoxerCharacterSet}\\\"");
                                                 LavishScript.ExecuteCommand(
-                                                    "uplink timedcommand 350 runscript isboxer -launch \\\"${ISBoxerCharacterSet}\\\"");
+                                                    "uplink timedcommand " + secRestart + " runscript isboxer -launch \\\"${ISBoxerCharacterSet}\\\"");
                                                 Logging.Log(
                                                     "Questor", "Done: quitting this session so the new isboxer session can take over", Logging.white);
                                                 Logging.Log("Questor", "We are in station: Exiting eve.", Logging.white);
@@ -634,10 +635,10 @@ namespace Questor
                                                                             Settings.Instance.CharacterName +
                                                                             "'s Questor is starting a timedcommand to restart itself in a moment");
                                                 LavishScript.ExecuteCommand(
-                                                    "uplink exec Echo [${Time}] timedcommand 350 OSExecute " +
+                                                    "uplink exec Echo [${Time}] timedcommand " + secRestart + " OSExecute " +
                                                     Settings.Instance.CloseQuestorOSCmdContents.ToString());
                                                 LavishScript.ExecuteCommand(
-                                                    "uplink exec timedcommand 350 OSExecute " +
+                                                    "uplink exec timedcommand " + secRestart + " OSExecute " +
                                                     Settings.Instance.CloseQuestorOSCmdContents.ToString());
                                                 Logging.Log("Questor", "Done: quitting this session", Logging.white);
                                                 Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.white);
