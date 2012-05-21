@@ -43,6 +43,7 @@ namespace Questor.Modules.Combat
         public bool Recall; //false
         public bool WarpScrambled; //false
         private DateTime _lastDronesProcessState;
+        private DateTime _nextWrapScrambledWarning = DateTime.MinValue;
 
         private void GetDamagedDrones()
         {
@@ -276,9 +277,15 @@ namespace Questor.Modules.Combat
                     {
                         if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
-                            Logging.Log("Drones", "Overriding drone recall, we are scrambled!", Logging.orange); //this is really spammy and need to only log every 20-30sec
-                            Recall = false;
-                            WarpScrambled = true;
+                            EntityCache warpscrambledby = Cache.Instance.PriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
+                            if (warpscrambledby != null && _nextWrapScrambledWarning > DateTime.Now)
+                            {
+                                _nextWrapScrambledWarning = DateTime.Now.AddSeconds(20);
+                                Logging.Log("Drones", "We are scrambled by: ["  + Logging.white + warpscrambledby.Name + Logging.orange +  "][" + Logging.white + Math.Round(warpscrambledby.Distance,0) + Logging.orange + "]",
+                                            Logging.orange);
+                                Recall = false;
+                                WarpScrambled = true;
+                            }
                         }
                         else
                         {
