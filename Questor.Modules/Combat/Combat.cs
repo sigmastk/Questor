@@ -803,6 +803,11 @@ namespace Questor.Modules.Combat
                 return;
             }
 
+            if (Cache.Instance.InStation)
+            {
+                _States.CurrentCombatState = CombatState.Idle;
+                return;
+            }
             //
             // only the ship defined in CombatShipName will do combat: we assume all other ships are non-combat ships!!!!
             //
