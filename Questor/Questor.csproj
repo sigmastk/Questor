@@ -100,6 +100,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviors\CombatHelperBehavior.cs" />
     <Compile Include="Behaviors\CombatMissionsBehavior.cs" />
     <Compile Include="Behaviors\DedicatedBookmarkSalvagerBehavior.cs" />
     <Compile Include="Options.cs" />

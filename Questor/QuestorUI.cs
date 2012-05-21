@@ -65,6 +65,13 @@ namespace Questor
                     foreach (string text in Enum.GetNames(typeof(DedicatedBookmarkSalvagerBehaviorState)))
                         CombatMissionsBehaviorComboBox.Items.Add(text);
                 }
+                if (Settings.Instance.CharacterMode.ToLower() == "Combat Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "Combat_Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "CombatHelper".ToLower())
+                {
+                    foreach (string text in Enum.GetNames(typeof(CombatHelperBehaviorState)))
+                        CombatMissionsBehaviorComboBox.Items.Add(text);
+                }
             }
 
             //
@@ -406,7 +413,16 @@ namespace Questor
                     foreach (string text2 in Enum.GetNames(typeof(DedicatedBookmarkSalvagerBehaviorState)))
                         CombatMissionsBehaviorComboBox.Items.Add(text2);
                 }
+                if (Settings.Instance.CharacterMode.ToLower() == "Combat Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "Combat_Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "CombatHelper".ToLower())
+                {
+                    _questorBehaviorStatesComboboxFinished = true;
+                    foreach (string text2 in Enum.GetNames(typeof(CombatHelperBehaviorState)))
+                        CombatMissionsBehaviorComboBox.Items.Add(text2);
+                }
             }
+
 
             //
             // Left Group
@@ -431,6 +447,17 @@ namespace Questor
                 if (Settings.Instance.CharacterMode.ToLower() == "salvage".ToLower())
                 {
                     text = _States.CurrentCombatMissionBehaviorState.ToString();
+                    if ((string)CombatMissionsBehaviorComboBox.SelectedItem != text &&
+                        !CombatMissionsBehaviorComboBox.DroppedDown)
+                        CombatMissionsBehaviorComboBox.SelectedItem = text;
+                    text = string.Empty;
+                }
+
+                if (Settings.Instance.CharacterMode.ToLower() == "Combat Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "Combat_Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "CombatHelper".ToLower())
+                {
+                    text = _States.CurrentCombatHelperBehaviorState.ToString();
                     if ((string)CombatMissionsBehaviorComboBox.SelectedItem != text &&
                         !CombatMissionsBehaviorComboBox.DroppedDown)
                         CombatMissionsBehaviorComboBox.SelectedItem = text;
@@ -1044,6 +1071,14 @@ namespace Questor
                     _States.CurrentDedicatedBookmarkSalvagerBehaviorState =
                         (DedicatedBookmarkSalvagerBehaviorState)
                         Enum.Parse(typeof(DedicatedBookmarkSalvagerBehaviorState), CombatMissionsBehaviorComboBox.Text);
+                }
+                if (Settings.Instance.CharacterMode.ToLower() == "Combat Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "Combat_Helper".ToLower() ||
+                    Settings.Instance.CharacterMode.ToLower() == "CombatHelper".ToLower())
+                {
+                    _States.CurrentCombatHelperBehaviorState =
+                      (CombatHelperBehaviorState)
+                      Enum.Parse(typeof(CombatHelperBehaviorState), CombatMissionsBehaviorComboBox.Text);  
                 }
             }
         }

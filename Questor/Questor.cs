@@ -33,6 +33,7 @@ namespace Questor
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
+        private readonly CombatHelperBehavior _combatHelperBehavior;
         private readonly DedicatedBookmarkSalvagerBehavior _dedicatedBookmarkSalvagerBehavior;
         private readonly Cleanup _cleanup;
 
@@ -59,6 +60,7 @@ namespace Questor
             _defense = new Defense();
             _localwatch = new LocalWatch();
             _combatMissionsBehavior = new CombatMissionsBehavior();
+            _combatHelperBehavior = new CombatHelperBehavior();
             _dedicatedBookmarkSalvagerBehavior = new DedicatedBookmarkSalvagerBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
@@ -419,6 +421,17 @@ namespace Questor
                     _combatMissionsBehavior.ProcessState();
                     break;
 
+                case QuestorState.CombatHelperBehavior:
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Idle)
+                    {
+                        _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
+                    }
+                    _combatHelperBehavior.ProcessState();
+                    break;
+
                 case QuestorState.DedicatedBookmarkSalvagerBehavior:
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
@@ -431,23 +444,35 @@ namespace Questor
                     break;
 
                 case QuestorState.Start:
-                    if (Settings.Instance.CharacterMode.ToLower() == "combat missions" || Settings.Instance.CharacterMode.ToLower() == "dps")
+                    switch (Settings.Instance.CharacterMode.ToLower())
                     {
-                        if (_States.CurrentQuestorState == QuestorState.Start)
-                        {
-                            Logging.Log("Questor", "Start Mission Behavior", Logging.white);
-                            _States.CurrentQuestorState = QuestorState.CombatMissionsBehavior;
-                        }
-                        break;
-                    }
-                    if (Settings.Instance.CharacterMode.ToLower() == "salvage")
-                    {
-                        if (_States.CurrentQuestorState == QuestorState.Start)
-                        {
-                            Logging.Log("Questor", "Start Salvaging Behavior", Logging.white);
-                            _States.CurrentQuestorState = QuestorState.DedicatedBookmarkSalvagerBehavior;
-                        }
-                        break;
+                        case "combat missions":
+                        case "combat_missions":
+                        case "dps":
+                            if (_States.CurrentQuestorState == QuestorState.Start)
+                            {
+                                Logging.Log("Questor", "Start Mission Behavior", Logging.white);
+                                _States.CurrentQuestorState = QuestorState.CombatMissionsBehavior;
+                            }
+                            break;
+
+                        case "salvage":
+                            if (_States.CurrentQuestorState == QuestorState.Start)
+                            {
+                                Logging.Log("Questor", "Start Salvaging Behavior", Logging.white);
+                                _States.CurrentQuestorState = QuestorState.DedicatedBookmarkSalvagerBehavior;
+                            }
+                            break;
+
+                        case "combat helper":
+                        case "combat_helper":
+                        case "combathelper":
+                            if (_States.CurrentQuestorState == QuestorState.Start)
+                            {
+                                Logging.Log("Questor", "Start CombatHelper Behavior", Logging.white);
+                                _States.CurrentQuestorState = QuestorState.CombatHelperBehavior;
+                            }
+                            break;
                     }
                     break;
 

@@ -39,7 +39,7 @@ namespace Questor.Behaviors
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         private readonly Random _random;
-        private int _randomDelay;
+        //private int _randomDelay;
         public static long AgentID;
         private readonly Stopwatch _watch;
 
@@ -313,31 +313,17 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    if (Cache.Instance.InSpace)
-                    {
-                        if (Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "if (Cache.Instance.InSpace)", Logging.white);    
-                        // Questor does not handle in space starts very well, head back to base to try again
-                        Logging.Log("CombatHelperBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.white);
-                        LastAction = DateTime.Now;
-                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Idle) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.DelayedGotoBase;
-                        break;
-                    }
-                    else
-                    {
-                        if (Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "if (Cache.Instance.InSpace) else", Logging.white);    
-                        _States.CurrentArmState = ArmState.Idle;
-                        _States.CurrentDroneState = DroneState.Idle;
-                        _States.CurrentSalvageState = SalvageState.Idle;
-                        _States.CurrentTravelerState = TravelerState.Idle; 
-                        _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                        _States.CurrentTravelerState = TravelerState.Idle;
-                    }
-                    //
-                    // do nothing until the user at the kb chooses to do something... 
-                    // AND kick questorstate back into idle while the behavior is in idle 
-                    // so that we checkto see if we should closequestor for any reason
-                    //
-                    _States.CurrentQuestorState = QuestorState.Idle;
+                    if (Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "if (Cache.Instance.InSpace) else", Logging.white);    
+                    _States.CurrentArmState = ArmState.Idle;
+                    _States.CurrentDroneState = DroneState.Idle;
+                    _States.CurrentSalvageState = SalvageState.Idle;
+                    _States.CurrentTravelerState = TravelerState.Idle; 
+                    _States.CurrentUnloadLootState = UnloadLootState.Idle;
+                    _States.CurrentTravelerState = TravelerState.Idle;
+                    
+                    Logging.Log("CombatHelperBehavior", "Started questor in Combat Helper mode", Logging.white);
+                    LastAction = DateTime.Now;
+                    if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Idle) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.CombatHelper;
                     break;
 
                 case CombatHelperBehaviorState.DelayedGotoBase:
@@ -401,54 +387,38 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatHelperBehaviorState.CombatHelper:
-                    DebugPerformanceClearandStartTimer();
-                    _combat.ProcessState();
-                    DebugPerformanceStopandDisplayTimer("Combat.ProcessState");
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("Combat.State is", _States.CurrentCombatState.ToString(), Logging.white);
-
-                    DebugPerformanceClearandStartTimer();
-                    _drones.ProcessState();
-                    DebugPerformanceStopandDisplayTimer("Drones.ProcessState");
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.white);
-
-                    DebugPerformanceClearandStartTimer();
-                    _salvage.ProcessState();
-                    DebugPerformanceStopandDisplayTimer("Salvage.ProcessState");
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("Salvage.State is", _States.CurrentSalvageState.ToString(), Logging.white);
-
-                   
-                    // If we are out of ammo, return to base (do we want to do this with combat helper?!)
-                    if (_States.CurrentCombatState == CombatState.OutOfAmmo)
+                    if (Cache.Instance.InSpace)
                     {
-                        Logging.Log("Combat","Out of Ammo!",Logging.orange);
-                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.CombatHelper) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
-                        // Clear looted containers
-                        Cache.Instance.LootedContainers.Clear();
-                    }
+                        DebugPerformanceClearandStartTimer();
+                        _combat.ProcessState();
+                        DebugPerformanceStopandDisplayTimer("Combat.ProcessState");
 
-                    if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Done)
-                    {
-                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.CombatHelper) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
+                        if (Settings.Instance.DebugStates)
+                            Logging.Log("Combat.State is", _States.CurrentCombatState.ToString(), Logging.white);
 
-                        // Clear looted containers
-                        Cache.Instance.LootedContainers.Clear();
-                    }
+                        DebugPerformanceClearandStartTimer();
+                        _drones.ProcessState();
+                        DebugPerformanceStopandDisplayTimer("Drones.ProcessState");
 
-                    // If in error state, just go home and stop the bot
-                    if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
-                    {
-                        Logging.Log("MissionController", "Error",Logging.red);
-                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.CombatHelper) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
+                       if (Settings.Instance.DebugStates)
+                            Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.white);
 
-                        // Clear looted containers
-                        Cache.Instance.LootedContainers.Clear();
-                        //Cache.Instance.InvalidateBetweenMissionsCache();
+                        DebugPerformanceClearandStartTimer();
+                        _salvage.ProcessState();
+                        DebugPerformanceStopandDisplayTimer("Salvage.ProcessState");
+
+                        if (Settings.Instance.DebugStates)
+                            Logging.Log("Salvage.State is", _States.CurrentSalvageState.ToString(), Logging.white);
+
+                        // If we are out of ammo, return to base (do we want to do this with combat helper?!)
+                        if (_States.CurrentCombatState == CombatState.OutOfAmmo)
+                        {
+                            Logging.Log("Combat","Out of Ammo!",Logging.orange);
+                                if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.CombatHelper)
+                                    _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
+                            // Clear looted containers
+                            Cache.Instance.LootedContainers.Clear();
+                        }
                     }
                     break;
 
