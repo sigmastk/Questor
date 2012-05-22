@@ -149,7 +149,7 @@ namespace Questor.Modules.Actions
 
                     if (Cache.Instance.CargoHold.Items.Count != 0)
                     {
-                        //Logging.Log("Unloadloot: WaitForMove: 1");
+                        //Logging.Log("UnloadLoot","WaitForMove: 1");
                         _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                         _lastUnloadAction = DateTime.Now;
                         break;

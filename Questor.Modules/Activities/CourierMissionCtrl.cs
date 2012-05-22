@@ -1,4 +1,5 @@
-﻿namespace Questor.Modules.Activities
+﻿
+namespace Questor.Modules.Activities
 {
     using System;
     using System.Linq;

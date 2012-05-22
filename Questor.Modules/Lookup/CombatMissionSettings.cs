@@ -107,9 +107,9 @@ namespace Questor.Modules.Lookup
                         Logging.Log("CombatMissionSettings", "ERROR! unable to read [" + factionsXML + "]  no root element named <faction> ERROR!", Logging.red);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Logging.Log("CombatMissionSettings", "ERROR! unable to find [" + factionsXML + "] ERROR!", Logging.red);
+                  Logging.Log("CombatMissionSettings","ERROR! unable to find [" + factionsXML + "] ERROR! [" + ex.Message + "]",Logging.red);
                 }
             }
 

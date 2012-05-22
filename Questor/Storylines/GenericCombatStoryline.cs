@@ -1,4 +1,6 @@
-﻿namespace Questor.Storylines
+﻿
+
+namespace Questor.Storylines
 {
     using System;
     using System.Collections.Generic;
@@ -16,6 +18,7 @@
 
     public class GenericCombatStoryline : IStoryline
     {
+
         private long _agentId;
         private readonly List<Ammo> _neededAmmo;
 
