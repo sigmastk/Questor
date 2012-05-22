@@ -63,6 +63,9 @@ namespace Questor.Modules.Activities
 
         public static void NavigateIntoRange(EntityCache target)
         {
+            if (Cache.Instance.InWarp || Cache.Instance.InStation)
+                return;
+
             if (Settings.Instance.SpeedTank)
             {   //this should be only executed when no specific actions
                 if (DateTime.Now > Cache.Instance.NextOrbit)
@@ -1245,6 +1248,92 @@ namespace Questor.Modules.Activities
                 }
             }
         }
+
+
+        private void DropItem(Actions.Action action)
+        {
+            Cache.Instance.DropMode = true;
+            var items = action.GetParameterValues("item");
+            var target = action.GetParameterValue("target");
+
+            int quantity;
+            if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
+                quantity = 1;
+
+            var done = items.Count == 0;
+
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
+            if (targets == null || targets.Count() == 0)
+            {
+                Logging.Log("MissionController.DropItem","No target name: " + targets, Logging.orange);
+                // now that we've completed this action revert OpenWrecks to false
+                Cache.Instance.DropMode = false;
+                Nextaction();
+                return;
+            }
+
+            var closest = targets.OrderBy(t => t.Distance).First();
+            if (closest.Distance > (int)Distance.SafeScoopRange)
+            {
+                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                {
+                    if (DateTime.Now > Cache.Instance.NextApproachAction)
+                    {
+                        Logging.Log("MissionController.DropItem","Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]",Logging.white);
+                        closest.Approach(1000);
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    }
+                }
+            }
+            else
+            {
+                if (!done)
+                {
+                    if (DateTime.Now > Cache.Instance.NextOpenContainerInSpaceAction)
+                    {
+                        var cargo = Cache.Instance.DirectEve.GetShipsCargo();
+
+                        if (closest.CargoWindow == null)
+                        {
+                            Logging.Log("MissionController.DropItem","Open Cargo",Logging.white);
+                            closest.OpenCargo();
+                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(4,6));
+                            return;
+                        }
+
+                        // Get the container that is associated with the cargo container
+                        var container = Cache.Instance.DirectEve.GetContainer(closest.Id);
+
+                        var ItemsToMove = cargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
+                        if (ItemsToMove != null)
+                        {
+                            Logging.Log("MissionController.DropItem","Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName,Logging.white);
+                            container.Add(ItemsToMove, quantity);
+
+                            done = container.Items.Any(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower() && (i.Quantity >= quantity));
+                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(4, 6));
+                        }
+                        else
+                        {
+                            Logging.Log("MissionController.DropItem","Error not found Items",Logging.white);
+                            Cache.Instance.DropMode = false;
+                            Nextaction();
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    Logging.Log("MissionController.DropItem","We are done",Logging.white);
+                    // now that we've completed this action revert OpenWrecks to false
+                    Cache.Instance.DropMode = false;
+                    Nextaction();
+                    return;
+                }
+            }
+        }
+
+
 
         private void LootItemAction(Actions.Action action)
         {
