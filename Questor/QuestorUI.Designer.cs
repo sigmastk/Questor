@@ -51,7 +51,7 @@
             this.buttonOpenLogDirectory = new System.Windows.Forms.Button();
             this.Console = new System.Windows.Forms.TabPage();
             this.txtComand = new System.Windows.Forms.TextBox();
-            this.txtExtConsole = new System.Windows.Forms.TextBox();
+            this.txtExtConsole = new System.Windows.Forms.RichTextBox();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.States = new System.Windows.Forms.TabPage();
             this.label19 = new System.Windows.Forms.Label();
@@ -118,13 +118,15 @@
             this.lblJammingMe = new System.Windows.Forms.Label();
             this.dataEntitiesWarpDisruptingMe = new System.Windows.Forms.Label();
             this.lblWarpDisrupingMe = new System.Windows.Forms.Label();
-            this.CombatMissionsBehaviorComboBox = new System.Windows.Forms.ComboBox();
+            this.BehaviorComboBox = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.QuestorStateComboBox = new System.Windows.Forms.ComboBox();
             this.QuestorStatelbl = new System.Windows.Forms.Label();
             this.buttonOpenSchedulesXML = new System.Windows.Forms.Button();
             this.buttonOpenCharacterXML = new System.Windows.Forms.Button();
             this.buttonQuestormanager = new System.Windows.Forms.Button();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
             this.Console.SuspendLayout();
             this.Tabs.SuspendLayout();
             this.States.SuspendLayout();
@@ -307,12 +309,14 @@
             // 
             // txtExtConsole
             // 
+            this.txtExtConsole.BackColor = System.Drawing.SystemColors.Control;
+            this.txtExtConsole.Dock = System.Windows.Forms.DockStyle.Top;
             this.txtExtConsole.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtExtConsole.Location = new System.Drawing.Point(0, 3);
             this.txtExtConsole.Multiline = true;
             this.txtExtConsole.Name = "txtExtConsole";
             this.txtExtConsole.ReadOnly = true;
-            this.txtExtConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtExtConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.txtExtConsole.Size = new System.Drawing.Size(688, 234);
             this.txtExtConsole.TabIndex = 25;
             this.txtExtConsole.TextChanged += new System.EventHandler(this.TxtExtConsoleTextChanged);
@@ -1004,45 +1008,45 @@
             this.lblWarpDisrupingMe.TabIndex = 0;
             this.lblWarpDisrupingMe.Text = "WarpDisruptingMe:";
             // 
-            // CombatMissionsBehaviorComboBox
+            // BehaviorComboBox
             // 
-            this.CombatMissionsBehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.CombatMissionsBehaviorComboBox.FormattingEnabled = true;
-            this.CombatMissionsBehaviorComboBox.Location = new System.Drawing.Point(46, 30);
-            this.CombatMissionsBehaviorComboBox.Name = "CombatMissionsBehaviorComboBox";
-            this.CombatMissionsBehaviorComboBox.Size = new System.Drawing.Size(170, 21);
-            this.CombatMissionsBehaviorComboBox.TabIndex = 121;
-            this.CombatMissionsBehaviorComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatMissionsBehaviorComboBoxSelectedIndexChanged);
-            this.CombatMissionsBehaviorComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
+            this.BehaviorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.BehaviorComboBox.FormattingEnabled = true;
+            this.BehaviorComboBox.Location = new System.Drawing.Point(54, 28);
+            this.BehaviorComboBox.Name = "BehaviorComboBox";
+            this.BehaviorComboBox.Size = new System.Drawing.Size(162, 21);
+            this.BehaviorComboBox.TabIndex = 121;
+            this.BehaviorComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatMissionsBehaviorComboBoxSelectedIndexChanged);
+            this.BehaviorComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(2, 33);
+            this.label2.Location = new System.Drawing.Point(-3, 28);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(45, 13);
+            this.label2.Size = new System.Drawing.Size(53, 13);
             this.label2.TabIndex = 120;
-            this.label2.Text = "Mission:";
+            this.label2.Text = "Behavior";
             // 
             // QuestorStateComboBox
             // 
             this.QuestorStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.QuestorStateComboBox.FormattingEnabled = true;
-            this.QuestorStateComboBox.Location = new System.Drawing.Point(46, 3);
+            this.QuestorStateComboBox.Location = new System.Drawing.Point(54, 1);
             this.QuestorStateComboBox.Name = "QuestorStateComboBox";
-            this.QuestorStateComboBox.Size = new System.Drawing.Size(170, 21);
+            this.QuestorStateComboBox.Size = new System.Drawing.Size(162, 21);
             this.QuestorStateComboBox.TabIndex = 119;
             this.QuestorStateComboBox.SelectedIndexChanged += new System.EventHandler(this.QuestorStateComboBoxSelectedIndexChanged);
             this.QuestorStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // QuestorStatelbl
             // 
-            this.QuestorStatelbl.AutoSize = true;
-            this.QuestorStatelbl.Location = new System.Drawing.Point(2, 6);
+            this.QuestorStatelbl.Location = new System.Drawing.Point(-5, 1);
             this.QuestorStatelbl.Name = "QuestorStatelbl";
-            this.QuestorStatelbl.Size = new System.Drawing.Size(47, 13);
+            this.QuestorStatelbl.Size = new System.Drawing.Size(50, 18);
             this.QuestorStatelbl.TabIndex = 119;
-            this.QuestorStatelbl.Text = "Questor:";
+            this.QuestorStatelbl.Text = "Questor";
+            this.QuestorStatelbl.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.QuestorStatelbl.Click += new System.EventHandler(this.QuestorStatelbl_Click);
             // 
             // buttonOpenSchedulesXML
             // 
@@ -1074,12 +1078,32 @@
             this.buttonQuestormanager.UseVisualStyleBackColor = true;
             this.buttonQuestormanager.Click += new System.EventHandler(this.ButtonQuestormanagerClick);
             // 
+            // label25
+            // 
+            this.label25.Location = new System.Drawing.Point(8, 12);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(42, 16);
+            this.label25.TabIndex = 125;
+            this.label25.Text = "State:";
+            this.label25.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // label26
+            // 
+            this.label26.Location = new System.Drawing.Point(-3, 41);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(53, 14);
+            this.label26.TabIndex = 126;
+            this.label26.Text = "State:";
+            this.label26.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
             // QuestorfrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.ClientSize = new System.Drawing.Size(356, 96);
+            this.Controls.Add(this.label26);
+            this.Controls.Add(this.label25);
             this.Controls.Add(this.buttonQuestormanager);
             this.Controls.Add(this.buttonOpenSchedulesXML);
             this.Controls.Add(this.buttonOpenCharacterXML);
@@ -1088,7 +1112,7 @@
             this.Controls.Add(this.buttonQuestorSettings);
             this.Controls.Add(this.buttonOpenLogDirectory);
             this.Controls.Add(this.buttonQuestorStatistics);
-            this.Controls.Add(this.CombatMissionsBehaviorComboBox);
+            this.Controls.Add(this.BehaviorComboBox);
             this.Controls.Add(this.lblCurrentPocketAction);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.QuestorStateComboBox);
@@ -1153,7 +1177,7 @@
         //private System.Windows.Forms.Label lblStartTime1;
         private System.Windows.Forms.TabPage Console;
         private System.Windows.Forms.TextBox txtComand;
-        private System.Windows.Forms.TextBox txtExtConsole;
+        private System.Windows.Forms.RichTextBox txtExtConsole;
         private System.Windows.Forms.TabControl Tabs;
         private System.Windows.Forms.TabPage States;
         private System.Windows.Forms.Panel panel2;
@@ -1182,7 +1206,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox CombatMissionsBehaviorComboBox;
+        private System.Windows.Forms.ComboBox BehaviorComboBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox QuestorStateComboBox;
         private System.Windows.Forms.Label QuestorStatelbl;
@@ -1227,6 +1251,8 @@
         private System.Windows.Forms.Label lblWarpDisrupingMe;
         private System.Windows.Forms.Label lblTargetPaintingMe;
         private System.Windows.Forms.Label dataEntitiesTargetPaintingMe;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label26;
     }
 }
 

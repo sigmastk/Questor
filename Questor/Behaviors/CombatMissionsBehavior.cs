@@ -187,15 +187,21 @@ namespace Questor.Behaviors
             var baseDestination = _traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
                 _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
-           
+
+            if (Cache.Instance.InSpace) 
+            {
+               if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.Now))
+               {
                 _combat.ProcessState();
                 _drones.ProcessState(); //do we really want to use drones here?
+               }
+            }
             if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                 {
                     Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
               //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.white);
             }
-           _traveler.ProcessState();
+            _traveler.ProcessState();
             if (Settings.Instance.DebugStates)
             {
                 Logging.Log("Traveler.State", "is " + _States.CurrentTravelerState, Logging.white);
@@ -249,6 +255,9 @@ namespace Questor.Behaviors
                 return;
             }
 
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //this local is safe check is useless as their is no localwatch processstate running every tick... 
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //If local unsafe go to base and do not start mission again
             if (Settings.Instance.FinishWhenNotSafe && (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
             {
@@ -924,14 +933,11 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower() || Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
-                            {
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                                _States.CurrentQuestorState = QuestorState.Idle;
-                                Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.white);
-                                Statistics.Instance.FinishedMission = DateTime.Now;
-                                return;
-                            }
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                            _States.CurrentQuestorState = QuestorState.Idle;
+                            Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.white);
+                            Statistics.Instance.FinishedMission = DateTime.Now;
+                            return;
                         }
                     }
                     break;
