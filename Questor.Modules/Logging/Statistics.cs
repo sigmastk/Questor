@@ -1,3 +1,4 @@
+
 namespace Questor.Modules.Logging
 {
     using System;
@@ -83,6 +84,84 @@ namespace Questor.Modules.Logging
                     File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "=\n");
                 }
                 File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, ";" + "\n");
+            }
+            return true;
+        }
+
+        public static bool PocketObjectStatistics(List<EntityCache> things)
+        {
+            Logging.Log("Statistics.ObjectStatistics", "Logging info on the [" + things.Count + "] objects in this pocket.", Logging.white);
+            string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name ?? "randomgrid");
+            Settings.Instance.PocketObjectStatisticsFile = Path.Combine(Settings.Instance.PocketStatisticsPath, Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + Cache.Instance.PocketNumber + " - ObjectStatistics.csv");
+
+            if (File.Exists(Settings.Instance.PocketObjectStatisticsFile))
+            {
+                File.Delete(Settings.Instance.PocketObjectStatisticsFile);
+            }
+            //
+            // build header
+            //
+            string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;ID;\r\n";
+            Logging.Log("Statistics",";PocketObjectStatistics;" + objectline,Logging.white);
+            File.AppendAllText(Settings.Instance.PocketObjectStatisticsFile, objectline);
+
+            //
+            // iterate through entities
+            //
+            foreach (EntityCache thing in things.OrderBy(i => i.Distance))
+            {
+                
+                objectline = thing.Name + ";";
+                objectline += Math.Round(thing.Distance/1000,0) + ";";
+                objectline += thing.TypeId + ";";
+                objectline += thing.GroupId + ";";
+                objectline += thing.CategoryId + ";";
+                objectline += thing.IsNpc + ";";
+                objectline += thing.IsPlayer + ";";
+                objectline += thing.TargetValue + ";";
+                objectline += Math.Round(thing.Velocity,0) + ";";
+                objectline += thing.Id + ";\r\n";
+                //
+                // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kind of grid layout... 
+                // or at least know the distances between all the NPCs... thus be able to infer which NPCs were in which 'groups'
+                // 
+
+                Logging.Log("Statistics", ";PocketObjectStatistics;" + objectline, Logging.white);
+                File.AppendAllText(Settings.Instance.PocketObjectStatisticsFile, objectline);
+            }
+            return true; 
+        }
+
+        public static bool EntityStatistics(List<EntityCache> things)
+        {
+            string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;ID;\r\n";
+            Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.white);
+
+            if (!things.Any()) //if their are no entries, return
+            {
+                Logging.Log("Statistics","EntityStatistics: No entries to log",Logging.white);
+                return true;
+            }
+
+            foreach (EntityCache thing in things.OrderBy(i => i.Distance))
+            {
+
+                objectline = thing.Name + ";";
+                objectline += Math.Round(thing.Distance / 1000, 0) + ";";
+                objectline += thing.TypeId + ";";
+                objectline += thing.GroupId + ";";
+                objectline += thing.CategoryId + ";";
+                objectline += thing.IsNpc + ";";
+                objectline += thing.IsPlayer + ";";
+                objectline += thing.TargetValue + ";";
+                objectline += Math.Round(thing.Velocity,0) + ";";
+                objectline += thing.Id + ";\r\n";
+                //
+                // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kinda mission simulator... 
+                // or at least know the distances between all the NPCs... thus be able to infer which NPCs were in which 'groups'
+                // 
+
+                Logging.Log("Statistics",";EntityStatistics;" + objectline,Logging.white);
             }
             return true;
         }
