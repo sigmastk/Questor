@@ -194,6 +194,10 @@ namespace Questor.Modules.Combat
                         // yes if there are targets to kill
                         launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
 
+                        if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
+                        {
+                            launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
+                        }
                         // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
                         if (_lastLaunch < _lastRecall && _lastRecall.Subtract(_lastLaunch).TotalSeconds < 30)
                         {

@@ -17,5 +17,10 @@ namespace Questor.Modules.States
         Paused,
         Panic,
         Traveler,
+        LogCombatTargets, 
+        LogDroneTargets,
+        LogStationEntities,
+        LogStargateEntities,
+        LogAsteroidBelts,
     }
 }

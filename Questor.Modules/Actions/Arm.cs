@@ -42,6 +42,12 @@ namespace Questor.Modules.Actions
         public bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
         public bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
 
+        public void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
+        {
+            AmmoToLoad.Clear();
+            AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+        }
+
         public void ProcessState()
         {
             // Select the correct ammo hangar
@@ -274,7 +280,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("Arm", "Moving Drones", Logging.white);
                         _States.CurrentArmState = ArmState.MoveDrones;
                     }
-                    else if ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings)))
+                    else if ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings)) && _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                     {
                         _States.CurrentArmState = ArmState.OpenFittingWindow;
                     }
@@ -463,7 +469,7 @@ namespace Questor.Modules.Actions
 
                     double neededDrones = Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                     Logging.Log("Arm", "neededDrones: " + neededDrones, Logging.white);
-                    if ((int)neededDrones == 0 && ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings))))
+                    if ((int)neededDrones == 0 && ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings)) && _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior))
                     {
                         Logging.Log("Arm", "Fitting", Logging.white);
                         _States.CurrentArmState = ArmState.OpenFittingWindow;
@@ -599,29 +605,36 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Arm", "Done", Logging.white);
 
-                        //reload the ammo setting for combat
-                        try
+                        if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                         {
-                            DirectAgentMission mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
-                            if (mission == null)
-                                return;
-
-                            string missionName = Cache.Instance.FilterPath(mission.Name);
-                            Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
-                            XDocument missionXml = XDocument.Load(Cache.Instance.missionXmlPath);
-                            Cache.Instance.MissionAmmo = new List<Ammo>();
-                            if (missionXml.Root != null)
+                            //reload the ammo setting for combat
+                            try
                             {
-                                XElement ammoTypes = missionXml.Root.Element("missionammo");
-                                if (ammoTypes != null)
-                                    foreach (XElement ammo in ammoTypes.Elements("ammo"))
-                                        Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
+                                DirectAgentMission mission =
+                                    Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
+                                if (mission == null)
+                                    return;
+
+                                string missionName = Cache.Instance.FilterPath(mission.Name);
+                                Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath,
+                                                                             missionName + ".xml");
+                                XDocument missionXml = XDocument.Load(Cache.Instance.missionXmlPath);
+                                Cache.Instance.MissionAmmo = new List<Ammo>();
+                                if (missionXml.Root != null)
+                                {
+                                    XElement ammoTypes = missionXml.Root.Element("missionammo");
+                                    if (ammoTypes != null)
+                                        foreach (XElement ammo in ammoTypes.Elements("ammo"))
+                                            Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
+                                }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Logging.Log("Arms.WaitForItems", "Unable to load missionammo from mission XML for: [" + Cache.Instance.MissionName + "], " + e.Message, Logging.orange);
-                            Cache.Instance.MissionAmmo = new List<Ammo>();
+                            catch (Exception e)
+                            {
+                                Logging.Log("Arms.WaitForItems",
+                                            "Unable to load missionammo from mission XML for: [" +
+                                            Cache.Instance.MissionName + "], " + e.Message, Logging.orange);
+                                Cache.Instance.MissionAmmo = new List<Ammo>();
+                            }
                         }
 
                         _States.CurrentArmState = ArmState.Done;

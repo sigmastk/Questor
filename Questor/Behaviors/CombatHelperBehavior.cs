@@ -10,6 +10,7 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -67,6 +68,7 @@ namespace Questor.Behaviors
             // this is combat mission specific and needs to be generalized
             //
             Settings.Instance.SettingsLoaded += SettingsLoaded;
+            //Settings.Instance.UseFittingManager = false;
 
             // States.CurrentCombatHelperBehaviorState fixed on ExecuteMission
             _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
@@ -156,21 +158,38 @@ namespace Questor.Behaviors
 
         private void TravelToAgentsStation()
         {
+            try
+            {
            var baseDestination = _traveler.Destination as StationDestination;
            if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
-                _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
-           
-           _combat.ProcessState();
-           _drones.ProcessState(); //do we really want to use drones here? 
-           if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
-           {
-              Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
-              _traveler.ProcessState();
-           }
-           if (Settings.Instance.DebugStates)
-           {
+                    _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId,
+                                                                   Cache.Instance.Agent.StationId,
+                                                                   Cache.Instance.DirectEve.GetLocationName(
+                                                                       Cache.Instance.Agent.StationId));
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("CombatHelper","TravelToAgentsStation: Exception caught: [" + ex.Message + "]",Logging.red);
+                return;
+            }
+            if (Cache.Instance.InSpace)
+            {
+                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.Now))
+                {
+                   _combat.ProcessState();
+                   _drones.ProcessState(); //do we really want to use drones here? 
+                }
+            }
+            if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+            {
+                Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
+                //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.white);
+            }
+            _traveler.ProcessState();
+            if (Settings.Instance.DebugStates)
+            {
                Logging.Log("Traveler.State", "is " + _States.CurrentTravelerState,Logging.white);
-           }
+            }
         }
 
         private void AvoidBumpingThings()
@@ -344,8 +363,8 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load right ammo based on mission
-                        //_arm.AmmoToLoad.Clear();
-                        //_arm.AmmoToLoad.AddRange(_agentInteraction.AmmoToLoad);
+                            _arm.AmmoToLoad.Clear();
+                            _arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
                     }
 
                     _arm.ProcessState();
@@ -423,6 +442,9 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatHelperBehaviorState.Salvage:
+                    if (!Cache.Instance.InSpace)
+                        return;
+                    
                     DirectContainer salvageCargo = Cache.Instance.DirectEve.GetShipsCargo();
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
@@ -612,6 +634,41 @@ namespace Questor.Behaviors
                     {
                         if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.GotoNearestStation) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Error; //should we goto idle here?
                     }
+                    break;
+                case CombatHelperBehaviorState.LogCombatTargets:
+                    //combat targets
+                    //List<EntityCache> combatentitiesInList =  Cache.Instance.Entities.Where(t => t.IsNpc && !t.IsBadIdea && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < Cache.Instance.MaxRange && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
+                    List<EntityCache> combatentitiesInList =  Cache.Instance.Entities.Where(t => t.IsNpc && !t.IsBadIdea && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer).ToList();
+                    Statistics.EntityStatistics(combatentitiesInList);
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case CombatHelperBehaviorState.LogDroneTargets:
+                    //drone targets
+                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
+                    Statistics.EntityStatistics(droneentitiesInList);
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case CombatHelperBehaviorState.LogStationEntities:
+                    //stations
+                    List<EntityCache> stationsInList = Cache.Instance.Entities.Where(e => !e.IsSentry && e.GroupId == (int)Group.Station).ToList();
+                    Statistics.EntityStatistics(stationsInList);
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case CombatHelperBehaviorState.LogStargateEntities:
+                    //stargates
+                    List<EntityCache> stargatesInList = Cache.Instance.Entities.Where(e => !e.IsSentry && e.GroupId == (int)Group.Stargate).ToList();
+                    Statistics.EntityStatistics(stargatesInList);
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case CombatHelperBehaviorState.LogAsteroidBelts:
+                    //Asteroid Belts
+                    List<EntityCache> asteroidbeltsInList = Cache.Instance.Entities.Where(e => !e.IsSentry && e.GroupId == (int)Group.AsteroidBelt).ToList();
+                    Statistics.EntityStatistics(asteroidbeltsInList);
+                    Cache.Instance.Paused = true;
                     break;
 
                 case CombatHelperBehaviorState.Default:
