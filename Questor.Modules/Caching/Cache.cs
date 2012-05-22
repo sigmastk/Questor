@@ -160,16 +160,16 @@ namespace Questor.Modules.Caching
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
             line = string.Empty;
 
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             ShipTargetValues = new List<ShipTargetValue>();
-            XDocument values = XDocument.Load(Path.Combine(path, "ShipTargetValues.xml"));
+            XDocument values = XDocument.Load(System.IO.Path.Combine(path, "ShipTargetValues.xml"));
             if (values.Root != null)
                 foreach (XElement value in values.Root.Elements("ship"))
                     ShipTargetValues.Add(new ShipTargetValue(value));
 
             InvTypesById = new Dictionary<int, InvType>();
-            XDocument invTypes = XDocument.Load(Path.Combine(path, "InvTypes.xml"));
+            XDocument invTypes = XDocument.Load(System.IO.Path.Combine(path, "InvTypes.xml"));
             if (invTypes.Root != null)
                 foreach (XElement element in invTypes.Root.Elements("invtype"))
                     InvTypesById.Add((int)element.Attribute("id"), new InvType(element));
@@ -248,6 +248,8 @@ namespace Questor.Modules.Caching
         public bool MissionXMLIsAvailable { get; set; }
 
         public string missionXmlPath { get; set; }
+        public XDocument InvTypes;
+        public string Path;
 
         public bool LocalSafe(int maxBad, double stand)
         {
@@ -308,7 +310,7 @@ namespace Questor.Modules.Caching
                 IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType).ToList();
 
                 // Is our ship's cargo available?
-                if (Cache.Instance.CargoHold.IsReady)
+                if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.IsReady))
                     ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
 
                 // Return ship range if there's no ammo left
@@ -1229,6 +1231,7 @@ namespace Questor.Modules.Caching
 
         public bool QuestorJustStarted = true;
         public DateTime EnteredCloseQuestor_DateTime;
+        public bool DropMode { get; set; }
 
         public DirectWindow GetWindowByCaption(string caption)
         {
@@ -1410,7 +1413,7 @@ namespace Questor.Modules.Caching
             if (missiondetails != null)
             {
                 string missionName = FilterPath(missiondetails.Name);
-                Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+                Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
                 if (!File.Exists(Cache.Instance.missionXmlPath))
                 {
                     //No mission file but we need to set some cache settings
@@ -1568,7 +1571,7 @@ namespace Questor.Modules.Caching
             }
 
             string missionName = FilterPath(missiondetailsformittionitems.Name);
-            Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
+            Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
             if (!File.Exists(Cache.Instance.missionXmlPath))
                 return;
 
