@@ -51,7 +51,8 @@ namespace Questor.Modules.Lookup
         HeavyMissilelaunchers = 510,
         AssaultMissilelaunchers = 511,
         DefenderMissilelaunchers = 512,
-        SentryGun = 99,
+        SentryGun = 99,                       //Protecting the weak and upholding the law
+
         ProtectiveSentryGun = 180,
         MobileSentryGun = 336,
         DestructibleSentryGun = 383,
@@ -75,6 +76,7 @@ namespace Questor.Modules.Lookup
         Wreck = 186,
 
         ConcordDrone = 301,
+        PoliceDrone = 182,
         CustomsOfficial = 446,
         Billboard = 323,
         Merchant = 297,

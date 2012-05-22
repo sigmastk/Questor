@@ -500,16 +500,19 @@ namespace Questor.Modules.Caching
             {
                 bool result = false;
                 result |= GroupId == (int)Group.ConcordDrone;
+                result |= GroupId == (int)Group.PoliceDrone;
                 result |= GroupId == (int)Group.CustomsOfficial;
                 result |= GroupId == (int)Group.Billboard;
                 result |= GroupId == (int)Group.Stargate;
                 result |= GroupId == (int)Group.Station;
+                result |= GroupId == (int)Group.SentryGun;
                 result |= GroupId == (int)Group.Capsule;
+                result |= GroupId == (int)Group.MissionContainer;
                 result |= IsFrigate;
                 result |= IsCruiser;
                 result |= IsBattlecruiser;
                 result |= IsBattleship;
-                result |= _directEntity.IsPc;
+                result |= IsPlayer;
                 return result;
             }
         }
