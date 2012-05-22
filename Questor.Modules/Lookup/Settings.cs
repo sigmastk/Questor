@@ -224,6 +224,7 @@ namespace Questor.Modules.Lookup
         public int ReserveCargoCapacity { get; set; }
 
         public int MaximumWreckTargets { get; set; }
+        public int AgeofBookmarksForSalvageBehavior { get; set; } //in minutes
 
         //
         // undocking settings
@@ -644,6 +645,7 @@ namespace Questor.Modules.Lookup
                 MaximumWreckTargets = 0;
                 WreckBlackListSmallWrecks = false;
                 WreckBlackListMediumWrecks = false;
+                AgeofBookmarksForSalvageBehavior = 45;
 
                 //
                 // Enable / Disable the different types of logging that are available
@@ -892,6 +894,7 @@ namespace Questor.Modules.Lookup
                     MaximumWreckTargets = (int?)xml.Element("maximumWreckTargets") ?? 0;
                     WreckBlackListSmallWrecks = (bool?)xml.Element("WreckBlackListSmallWrecks") ?? false;
                     WreckBlackListMediumWrecks = (bool?)xml.Element("WreckBlackListMediumWrecks") ?? false;
+                    AgeofBookmarksForSalvageBehavior = (int?) xml.Element("ageofBookmarksForSalvageBehavior") ?? 45;
 
                     //
                     // at what memory usage do we need to restart this session?

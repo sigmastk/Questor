@@ -64,6 +64,8 @@ namespace Questor.Behaviors
         public string CharacterName { get; set; }
 
         public List<DirectBookmark> AfterMissionSalvageBookmarks;
+        public List<DirectBookmark> BookmarksThatAreNotReadyYet;
+
 
         //DateTime _nextAction = DateTime.Now;
 
@@ -477,34 +479,36 @@ namespace Questor.Behaviors
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
 
-                            AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                            if (AfterMissionSalvageBookmarks.Count == 0)
+                        AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(45)).ToList();
+                        if (AfterMissionSalvageBookmarks.Count == 0)
+                        {
+                            BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                            if (BookmarksThatAreNotReadyYet.Any())
                             {
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: No more salvaging bookmarks. Setting FinishedSalvaging Update.", Logging.white);
-                                //Logging.Log("Salvager mode set and no bookmarks making delay");
-                                //States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorStateState.Error; //or salvageonly. need to check difference
-
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: Character mode is BookmarkSalvager and no bookmarks salvage.", Logging.white);
-                                //We just need a NextSalvagerSession timestamp to key off of here to add the delay
-                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
-                                _States.CurrentQuestorState = QuestorState.Idle;
-
-                                Statistics.Instance.FinishedSalvaging = DateTime.Now;
-                                return;
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: There are [" + BookmarksThatAreNotReadyYet.Count() + "] Salvage Bookmarks that have not yet aged [" + Settings.Instance.AgeofBookmarksForSalvageBehavior + "] min.", Logging.white);
                             }
-                            else //There is at least 1 salvage bookmark
-                            {
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: There are [ " + AfterMissionSalvageBookmarks.Count + " ] more salvage bookmarks left to process", Logging.white);
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], DedicatedBookmarkSalvagerBehaviorState: [" + _States.CurrentDedicatedBookmarkSalvagerBehaviorState + "]", Logging.white);
-                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
-                                Statistics.Instance.StartedSalvaging = DateTime.Now;
-                            }
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: Character mode is BookmarkSalvager and no bookmarks are ready to salvage.", Logging.white);
+                            //We just need a NextSalvagerSession timestamp to key off of here to add the delay
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                            _States.CurrentQuestorState = QuestorState.Idle;
+
+                            Statistics.Instance.FinishedSalvaging = DateTime.Now;
+                            return;
                         }
+                        else //There is at least 1 salvage bookmark
+                        {
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: There are [ " + AfterMissionSalvageBookmarks.Count + " ] more salvage bookmarks left to process", Logging.white);
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], DedicatedBookmarkSalvagerBehaviorState: [" + _States.CurrentDedicatedBookmarkSalvagerBehaviorState + "]", Logging.white);
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
+                            Statistics.Instance.StartedSalvaging = DateTime.Now;
+                        }
+                    }
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging:
-                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                    Logging.Log("DedicatedBookmarkSalvagebehavior", "Found [" + AfterMissionSalvageBookmarks.Count + "] salvage bookmarks to process.", Logging.white);
+                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(45)).ToList();
+                    //AgedAfterMissionSalvageBookmarks = AfterMissionSalvageBookmarks.Where(e => e.CreatedOn > DateTime.Now.AddMinutes(45)).ToList();
+                    Logging.Log("DedicatedBookmarkSalvagebehavior","Found [" + AfterMissionSalvageBookmarks.Count + "] salvage bookmarks ready to process.", Logging.white);
                     Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation>
                     _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
                     //we know we are connected here
