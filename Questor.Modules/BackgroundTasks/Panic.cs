@@ -30,7 +30,6 @@ namespace Questor.Modules.BackgroundTasks
 
         //private DateTime _lastDockedorJumping;
         private DateTime _lastWarpScrambled = DateTime.MinValue;
-
         private bool _delayedResume;
         private int _randomDelay;
 
@@ -66,6 +65,9 @@ namespace Questor.Modules.BackgroundTasks
                     }
                     if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
                         return;
+
+                        if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait. 
+                            return;
 
                     if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
                     {
@@ -200,7 +202,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     // We leave the panicking state once we actually start warping off
                     EntityCache station = Cache.Instance.Stations.FirstOrDefault();
-                    if (station != null)
+                    if (station != null && Cache.Instance.InSpace)
                     {
                         if (Cache.Instance.InWarp)
                             break;
@@ -230,7 +232,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 else
                                 {
-                                    Logging.Log("Panic", "Warping has been delayed until [" + Cache.Instance.NextWarpTo.ToString("HH:mm:ss") + "]", Logging.red);
+                                    Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds,0) + "sec]", Logging.red);
                                 }
                             }
                         }
@@ -272,7 +274,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
                         break;
                     }
-                    else
+                    else if (Cache.Instance.InSpace)
                     {
                         if (DateTime.Now.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 15)
                         {
