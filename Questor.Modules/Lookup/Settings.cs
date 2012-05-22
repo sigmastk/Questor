@@ -317,6 +317,12 @@ namespace Questor.Modules.Lookup
 
         public string PocketStatisticsFile { get; set; }
 
+        public bool PocketObjectStatistics { get; set; }
+
+        public string PocketObjectStatisticsPath { get; set; }
+
+        public string PocketObjectStatisticsFile { get; set; }
+
         public bool PocketStatsUseIndividualFilesPerPocket = true;
 
         //
@@ -1178,6 +1184,8 @@ namespace Questor.Modules.Lookup
             MissionStats3LogFile = System.IO.Path.Combine(MissionStats3LogPath, Cache.Instance.DirectEve.Me.Name + ".CustomDatedStatistics.csv");
             PocketStatisticsPath = System.IO.Path.Combine(Logpath, "pocketstats\\");
             PocketStatisticsFile = System.IO.Path.Combine(PocketStatisticsPath, Cache.Instance.DirectEve.Me.Name + "pocketstats-combined.csv");
+            PocketObjectStatisticsPath = System.IO.Path.Combine(Logpath, "pocketobjectstats\\");
+            PocketObjectStatisticsFile = System.IO.Path.Combine(PocketObjectStatisticsPath, Cache.Instance.DirectEve.Me.Name + "pocketobjectstats-combined.csv");
             //create all the logging directories even if they aren't configured to be used - we can adjust this later if it really bugs people to have some potentially empty directories.
             Directory.CreateDirectory(Logpath);
 
@@ -1189,6 +1197,7 @@ namespace Questor.Modules.Lookup
             Directory.CreateDirectory(MissionStats2LogPath);
             Directory.CreateDirectory(MissionStats3LogPath);
             Directory.CreateDirectory(PocketStatisticsPath);
+            Directory.CreateDirectory(PocketObjectStatisticsPath);
             if (!Defaultsettingsloaded)
             {
                 if (SettingsLoaded != null)

@@ -59,6 +59,11 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _bigobjects;
 
         /// <summary>
+        ///   objects we are likely to bump into (Anything that isnt an NPC a wreck or a can)
+        /// </summary>
+        private List<EntityCache> _objects;
+
+        /// <summary>
         ///   Returns all non-empty wrecks and all containers
         /// </summary>
         private List<EntityCache> _containers;
@@ -1086,6 +1091,21 @@ namespace Questor.Modules.Caching
                        e.TypeId == 21609 || //Dysfunctional Solar Harvester in Gone Berserk (not an LCO)
                        e.GroupId == (int)Group.SpawnContainer &&
                        e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+            }
+        }
+
+        public IEnumerable<EntityCache> Objects
+        {
+            get
+            {
+                return _objects ?? (_objects = Entities.Where(e =>
+                       e.CategoryId != (int)CategoryID.Entity && 
+                       !e.IsPlayer &&
+                       e.GroupId != (int)Group.SpawnContainer &&
+                       e.GroupId != (int)Group.Wreck &&
+                       e.GroupId != (int)Group.Stargate &&
+                       e.GroupId != (int)Group.Station &&
+                       e.Distance < 200000).OrderBy(t => t.Distance).ToList());
             }
         }
 
