@@ -1658,7 +1658,7 @@ namespace Questor.Modules.Activities
                     _currentAction = 0;
                     Cache.Instance.IsMissionPocketDone = false;
                     Cache.Instance.IgnoreTargets.Clear();
-
+                    Statistics.PocketObjectStatistics(Cache.Instance.Objects.ToList());
                     _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.ExecutePocketActions;
                     break;
 
