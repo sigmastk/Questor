@@ -234,10 +234,13 @@ namespace Questor.Modules.Actions
                 var logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
-                XDocument xml = XDocument.Load(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Factions.xml"));
-                XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
-                if (faction != null)
-                    return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
+                XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
+                if (xml.Root != null)
+                {
+                    XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
+                    if (faction != null)
+                        return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
+                }
             }
 
             return DamageType.EM;
