@@ -31,7 +31,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
-        public Dictionary<long, DateTime> OpenedContainers;
+        public static Dictionary<long, DateTime> OpenedContainers;
 
         public Salvage()
         {
@@ -326,8 +326,8 @@ namespace Questor.Modules.BackgroundTasks
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
-            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => w.Type == "form.LootCargoView").ToList();
-            foreach (DirectContainerWindow window in lootWindows)
+            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => w.Type == "form.Inventory" && (w.Name.Contains("ItemWreck") || w.Name.Contains("FloatingCargo"))).ToList();
+            foreach (DirectContainerWindow window in lootWindows) //ItemWreck and ItemFloatingCargo
             {
                 // The window is not ready, then continue
                 if (!window.IsReady)
@@ -554,8 +554,21 @@ namespace Questor.Modules.BackgroundTasks
                 // Open the container
                 Logging.Log("Salvage", "Opening container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "]", Logging.white);
                 containerEntity.OpenCargo();
-                OpenedContainers[containerEntity.Id] = DateTime.Now;
-                Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                Cache.Instance.ContainerInSpace = Cache.Instance.DirectEve.GetContainer(containerEntity.Id);
+
+                if (!Cache.Instance.ContainerInSpace.Window.IsReady)
+                    break;
+                if (Cache.Instance.ContainerInSpace.Window.IsReady)
+                {
+                    if (!Cache.Instance.ContainerInSpace.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    {
+                        Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
+                        break;
+                    }
+                    OpenedContainers[containerEntity.Id] = DateTime.Now;
+                    Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                    continue;
+                }
                 return;
             }
         }

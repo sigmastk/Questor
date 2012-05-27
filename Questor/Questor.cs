@@ -743,20 +743,26 @@ namespace Questor
 
                     foreach (DirectWindow window in windows)
                     {
-                        Logging.Log("Questor", "Debug_Questor_WindowNames: [" + window.Name + "]", Logging.white);
+                        Logging.Log("Questor","--------------------------------------------------",Logging.orange);
+                        Logging.Log("Questor", "Debug_Window.Name: [" + window.Name + "]",Logging.white);
+                        Logging.Log("Questor", "Debug_Window.Caption: [" + window.Caption + "]", Logging.white);
+                        Logging.Log("Questor", "Debug_Window.Type: [" + window.Type + "]", Logging.white);
+                        Logging.Log("Questor", "Debug_Window.IsModal: [" + window.IsModal + "]", Logging.white);
+                        Logging.Log("Questor", "Debug_Window.IsDialog: [" + window.IsDialog + "]", Logging.white); 
+                        Logging.Log("Questor", "Debug_Window.Id: [" + window.Id + "]", Logging.white);
+                        Logging.Log("Questor", "Debug_Window.IsKillable: [" + window.IsKillable + "]", Logging.white);
+                        //Logging.Log("Questor", "Debug_Window.Html: [" + window.Html + "]", Logging.white);
                     }
+                    Logging.Log("Questor","Debug_InventoryWindows",Logging.white);
                     foreach (DirectWindow window in windows)
                     {
-                        Logging.Log("Questor", "Debug_Windowcaptions: [" + window.Name + window.Caption + "]", Logging.white);
-                    }
-                    foreach (DirectWindow window in windows)
+                        if (window.Type.Contains("inventory"))
                     {
-                        Logging.Log("Questor", "Debug_WindowTypes: [" + window.Name + window.Type + "]", Logging.white);
+                            Logging.Log("Questor", "Debug_Window.Name: [" + window.Name + "]", Logging.white);
+                            Logging.Log("Questor", "Debug_Window.Type: [" + window.Type + "]", Logging.white);
+                            //Logging.Log("Questor", "Debug_Window.Type: [" + window. + "]", Logging.white);
                     }
-                    foreach (DirectWindow window in windows)
-                    {
-                        Logging.Log("Questor", "Debug_Questor_WindowNames: [" + window.Name + "]", Logging.white);
-                        Logging.Log("Questor", "Debug_WindowTypes: [" + window.Html + "]", Logging.white);
+                        
                     }
                     if (_States.CurrentQuestorState == QuestorState.DebugWindows)
                     {
