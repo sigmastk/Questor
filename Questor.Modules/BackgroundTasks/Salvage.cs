@@ -553,8 +553,12 @@ namespace Questor.Modules.BackgroundTasks
 
                 // Open the container
                 Logging.Log("Salvage", "Opening container [" + containerEntity.Name + "][ID: " + containerEntity.Id + "]", Logging.white);
-                containerEntity.OpenCargo();
                 Cache.Instance.ContainerInSpace = Cache.Instance.DirectEve.GetContainer(containerEntity.Id);
+                if (Cache.Instance.ContainerInSpace.Window == null)
+                {
+                    containerEntity.OpenCargo();    
+                    break;
+                }
 
                 if (!Cache.Instance.ContainerInSpace.Window.IsReady)
                     break;
