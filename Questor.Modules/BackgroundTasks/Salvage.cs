@@ -334,10 +334,10 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 // Get the container
-                EntityCache containerEntity = Cache.Instance.EntityById(window.ItemId);
+                    EntityCache containerEntity = Cache.Instance.EntityById(window.currInvIdItem);
 
                 // Get the container that is associated with the cargo container
-                DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.ItemId);
+                    DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.currInvIdItem);
 
                 // List its items
                 IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i)).ToList();
@@ -561,11 +561,17 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 if (!Cache.Instance.ContainerInSpace.Window.IsReady)
+                {
+                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.white);
                     break;
+                }
+
                 if (Cache.Instance.ContainerInSpace.Window.IsReady)
                 {
+                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is ready", Logging.white);
                     if (!Cache.Instance.ContainerInSpace.Window.Name.ToLower().Contains("secondary".ToLower()))
                     {
+                        if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not yet a secondarywindow", Logging.white);
                         Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
                         break;
                     }
