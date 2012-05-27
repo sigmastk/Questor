@@ -151,7 +151,7 @@ namespace ValueDump
                             amount += orders[i].VolumeRemaining;
                             value += orders[i].VolumeRemaining * orders[i].Price;
                             count++;
-                            //Log(_currentMineral.Name + " " + count + ": " + orders[i].VolumeRemaining.ToString("#,##0") + " items @ " + orders[i].Price);
+                            //Logging.Log(_currentMineral.Name + " " + count + ": " + orders[i].VolumeRemaining.ToString("#,##0") + " items @ " + orders[i].Price);
                             if (amount / totalAmount > 0.01)
                                 break;
                         }
@@ -175,7 +175,7 @@ namespace ValueDump
                             amount += orders[i].VolumeRemaining;
                             value += orders[i].VolumeRemaining * orders[i].Price;
                             count++;
-                            //Log(_currentMineral.Name + " " + count + ": " + orders[i].VolumeRemaining.ToString("#,##0") + " items @ " + orders[i].Price);
+                            //Logging.Log(_currentMineral.Name + " " + count + ": " + orders[i].VolumeRemaining.ToString("#,##0") + " items @ " + orders[i].Price);
                             if (amount / totalAmount > 0.01)
                                 break;
                         }
@@ -266,9 +266,27 @@ namespace ValueDump
 
                     foreach (ItemCache item in Items)
                     {
+                        InvType invType;
+                        if (!InvTypesById.TryGetValue(item.TypeId, out invType))
+                        {
+                            Logging.Log("Valuedump","Unknown TypeId " + item.TypeId + " for " + item.Name + ", adding to the list",Logging.orange);
+                            invType = new InvType(item);
+                            InvTypesById.Add(item.TypeId, invType);
+                            updated = true;
+                            continue;
+                        }
+                        item.InvType = invType;
+
                         bool updItem = false;
                         foreach (ItemCache material in item.RefineOutput)
                         {
+                            if (!InvTypesById.TryGetValue(material.TypeId, out invType))
+                            {
+                                Logging.Log("Valuedump","Unknown TypeId " + material.TypeId + " for " + material.Name,Logging.white);
+                                continue;
+                            }
+                            material.InvType = invType;
+
                             double matsPerItem = (double)material.Quantity / item.PortionSize;
                             bool exists = InvTypesById[(int)item.TypeId].Reprocess[material.Name].HasValue;
                             if ((!exists && matsPerItem > 0) || (exists && InvTypesById[(int)item.TypeId].Reprocess[material.Name] != matsPerItem))
