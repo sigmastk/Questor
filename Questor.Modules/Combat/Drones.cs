@@ -408,8 +408,8 @@ namespace Questor.Modules.Combat
                         break;
                     }
 
-                    // Give recall command every 5 seconds
-                    if (DateTime.Now.Subtract(_lastRecallCommand).TotalSeconds > 5)
+                    // Give recall command every 15 seconds
+                    if (DateTime.Now.Subtract(_lastRecallCommand).TotalSeconds > 15)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesReturnToBay);
                         _lastRecallCommand = DateTime.Now;
