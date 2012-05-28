@@ -567,10 +567,19 @@ namespace Questor.Modules.Actions
                         _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
                         return;
                     }
-
                     Logging.Log("AgentInteraction", "Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above or configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.MissionName + "]", Logging.yellow);
                 }
             }
+         if (_States.CurrentStorylineState == StorylineState.AcceptMission)
+         {
+             Logging.Log("AgentInteraction", "Storyline: Storylines cannot be declined, thus we will add this agent to the blacklist for this session.", Logging.yellow);
+             _States.CurrentStorylineState = StorylineState.Idle;
+             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+             _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+             Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
+             return;
+         }
+
 
             // Decline and request a new mission
             Logging.Log("AgentInteraction", "Saying [Decline]", Logging.yellow);

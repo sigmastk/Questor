@@ -74,10 +74,10 @@ namespace Questor.Storylines
         /// <returns></returns>
         public StorylineState Arm(Storyline storyline)
         {
-            if (_agentId != storyline.CurrentStorylineAgentId)
+            if (_agentId != Cache.Instance.CurrentStorylineAgentId)
             {
                 _neededAmmo.Clear();
-                _agentId = storyline.CurrentStorylineAgentId;
+                _agentId = Cache.Instance.CurrentStorylineAgentId;
 
                 _agentInteraction.AgentId = _agentId;
                 _agentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
@@ -251,11 +251,11 @@ namespace Questor.Storylines
                     //
                     //if (missionDestination != null) Logging.Log("GenericCombatStoryline: missionDestination.AgentId [" + missionDestination.AgentId + "] " + "and storyline.CurrentStorylineAgentId [" + storyline.CurrentStorylineAgentId + "]");
                     //if (missionDestination == null) Logging.Log("GenericCombatStoryline: missionDestination.AgentId [ NULL ] " + "and storyline.CurrentStorylineAgentId [" + storyline.CurrentStorylineAgentId + "]");
-                    if (missionDestination == null || missionDestination.AgentId != storyline.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
+                    if (missionDestination == null || missionDestination.AgentId != Cache.Instance.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
                     {
                         const string nameOfBookmark = "Encounter";
-                        Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + storyline.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.white);
-                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(storyline.CurrentStorylineAgentId, nameOfBookmark));
+                        Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + Cache.Instance.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.white);
+                        _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));
                     }
 
                     if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))

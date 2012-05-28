@@ -15,11 +15,9 @@ namespace Questor.Storylines
 
     public class Storyline
     {
-        public long CurrentStorylineAgentId { get; private set; }
-
         private IStoryline _storyline;
         private readonly Dictionary<string, IStoryline> _storylines;
-        private readonly List<long> _agentBlacklist;
+        //public List<long> AgentBlacklist;
 
         private readonly Combat _combat;
         private readonly Traveler _traveler;
@@ -34,7 +32,7 @@ namespace Questor.Storylines
             _traveler = new Traveler();
             _agentInteraction = new AgentInteraction();
 
-            _agentBlacklist = new List<long>();
+           Cache.Instance.AgentBlacklist = new List<long>();
 
             _storylines = new Dictionary<string, IStoryline>
                             {
@@ -77,7 +75,7 @@ namespace Questor.Storylines
         public void Reset()
         {
             _States.CurrentStorylineState = StorylineState.Idle;
-            CurrentStorylineAgentId = 0;
+            Cache.Instance.CurrentStorylineAgentId = 0;
             _storyline = null;
             _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
@@ -89,10 +87,10 @@ namespace Questor.Storylines
             get
             {
                 IEnumerable<DirectAgentMission> missionsinjournal = Cache.Instance.DirectEve.AgentMissions;
-                if (CurrentStorylineAgentId != 0)
-                    return missionsinjournal.FirstOrDefault(m => m.AgentId == CurrentStorylineAgentId);
+                if (Cache.Instance.CurrentStorylineAgentId != 0)
+                    return missionsinjournal.FirstOrDefault(m => m.AgentId == Cache.Instance.CurrentStorylineAgentId);
 
-                missionsinjournal = missionsinjournal.Where(m => !_agentBlacklist.Contains(m.AgentId));
+                missionsinjournal = missionsinjournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId));
                 missionsinjournal = missionsinjournal.Where(m => m.Important);
                 missionsinjournal = missionsinjournal.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name)));
                 missionsinjournal = missionsinjournal.Where(m => !Settings.Instance.MissionBlacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
@@ -112,17 +110,17 @@ namespace Questor.Storylines
                 return;
             }
 
-            CurrentStorylineAgentId = currentStorylineMission.AgentId;
-            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(CurrentStorylineAgentId);
+            Cache.Instance.CurrentStorylineAgentId = currentStorylineMission.AgentId;
+            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(Cache.Instance.CurrentStorylineAgentId);
             if (storylineagent == null)
             {
-                Logging.Log("Storyline", "Unknown agent [" + CurrentStorylineAgentId + "]", Logging.yellow);
+                Logging.Log("Storyline", "Unknown agent [" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.yellow);
 
                 _States.CurrentStorylineState = StorylineState.Done;
                 return;
             }
 
-            Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + CurrentStorylineAgentId + "]", Logging.yellow);
+            Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.yellow);
             Cache.Instance.MissionName = currentStorylineMission.Name;
 
             _States.CurrentStorylineState = StorylineState.Arm;
@@ -131,7 +129,7 @@ namespace Questor.Storylines
 
         private void GotoAgent(StorylineState nextState)
         {
-            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(CurrentStorylineAgentId);
+            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(Cache.Instance.CurrentStorylineAgentId);
             if (storylineagent == null)
             {
                 _States.CurrentStorylineState = StorylineState.Done;
@@ -230,7 +228,7 @@ namespace Questor.Storylines
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-                        _agentInteraction.AgentId = CurrentStorylineAgentId;
+                        _agentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
                         _agentInteraction.ForceAccept = true;
                     }
 
@@ -281,7 +279,7 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.BlacklistAgent:
-                    _agentBlacklist.Add(CurrentStorylineAgentId);
+                    Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
                     _States.CurrentStorylineState = StorylineState.Done;
                     break;
 

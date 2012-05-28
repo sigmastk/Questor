@@ -48,6 +48,17 @@ namespace Questor.Modules.Caching
         private long? _agentId;
 
         /// <summary>
+        ///   Current Storyline Mission Agent
+        /// </summary>
+        public long CurrentStorylineAgentId { get; set; }
+
+        /// <summary>
+        ///   Agent blacklist
+        /// </summary>
+        public List<long> AgentBlacklist;
+
+        
+        /// <summary>
         ///   Approaching cache
         /// </summary>
         //private int? _approachingId;

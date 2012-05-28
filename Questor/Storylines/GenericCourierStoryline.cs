@@ -171,7 +171,7 @@ namespace Questor.Storylines
             switch (_state)
             {
                 case GenericCourierStorylineState.GotoPickupLocation:
-                    if (GotoMissionBookmark(storyline.CurrentStorylineAgentId, "Objective (Pick Up)"))
+                if (GotoMissionBookmark(Cache.Instance.CurrentStorylineAgentId, "Objective (Pick Up)"))
                         _state = GenericCourierStorylineState.PickupItem;
                     break;
 
@@ -181,7 +181,7 @@ namespace Questor.Storylines
                     break;
 
                 case GenericCourierStorylineState.GotoDropOffLocation:
-                    if (GotoMissionBookmark(storyline.CurrentStorylineAgentId, "Objective (Drop Off)"))
+                if (GotoMissionBookmark(Cache.Instance.CurrentStorylineAgentId, "Objective (Drop Off)"))
                         _state = GenericCourierStorylineState.DropOffItem;
                     break;
 
