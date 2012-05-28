@@ -76,7 +76,6 @@ namespace Questor.Modules.BackgroundTasks
                 Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching", Logging.white);
             }
         }
-
         /// <summary>
         ///   Activates tractorbeam on targeted wrecks
         /// </summary>
@@ -333,7 +332,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (!window.IsReady)
                     continue;
 
-                // Get the container
+                // Get the container entity
                     EntityCache containerEntity = Cache.Instance.EntityById(window.currInvIdItem);
 
                 // Get the container that is associated with the cargo container
@@ -345,8 +344,11 @@ namespace Questor.Modules.BackgroundTasks
                 // Build a list of items to loot
                 var lootItems = new List<ItemCache>();
 
-                // log wreck contents to file
-                if (!Statistics.WreckStatistics(items, containerEntity)) break;
+                if (containerEntity != null)
+                {
+                    // log wreck contents to file
+                    if (!Statistics.WreckStatistics(items, containerEntity)) break;
+                }
 
                 // Does it no longer exist or is it out of transfer range or its looted
                 if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
@@ -556,6 +558,7 @@ namespace Questor.Modules.BackgroundTasks
                 Cache.Instance.ContainerInSpace = Cache.Instance.DirectEve.GetContainer(containerEntity.Id);
                 if (Cache.Instance.ContainerInSpace.Window == null)
                 {
+                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is null, so: containerEntity.OpenCargo(); ", Logging.white);
                     containerEntity.OpenCargo();    
                     break;
                 }
@@ -662,7 +665,7 @@ namespace Questor.Modules.BackgroundTasks
                 case SalvageState.StackItems:
                     Logging.Log("Salvage", "Stacking items", Logging.white);
 
-                    if (cargo.IsReady)
+                    if (cargo !=null && (cargo.IsReady))
                         cargo.StackAll();
 
                     Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItemsDelayBeforeResuming_seconds);
