@@ -139,6 +139,98 @@ namespace Questor
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
 
+        public static void TimeCheck()
+        {
+            Cache.Instance.LastTimeCheckAction = DateTime.Now;
+            if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes >
+                Cache.Instance.MaxRuntime)
+            {
+                // quit questor
+                Logging.Log("Questor", "Maximum runtime exceeded.  Quiting...", Logging.white);
+                Cache.Instance.ReasonToStopQuestor = "Maximum runtime specified and reached.";
+                Settings.Instance.AutoStart = false;
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.SessionState = "Exiting";
+                if (_States.CurrentQuestorState == QuestorState.Idle)
+                {
+                    BeginClosingQuestor();
+                }
+                return;
+            }
+            if (Cache.Instance.StopTimeSpecified)
+            {
+                if (DateTime.Now >= Cache.Instance.StopTime)
+                {
+                    Logging.Log("Questor", "Time to stop.  Quitting game.", Logging.white);
+                    Cache.Instance.ReasonToStopQuestor = "StopTimeSpecified and reached.";
+                    Settings.Instance.AutoStart = false;
+                    Cache.Instance.CloseQuestorCMDLogoff = false;
+                    Cache.Instance.CloseQuestorCMDExitGame = true;
+                    Cache.Instance.SessionState = "Exiting";
+                    if (_States.CurrentQuestorState == QuestorState.Idle)
+                    {
+                        BeginClosingQuestor();
+                    }
+                    return;
+                }
+            }
+        }
+
+        public static void WalletCheck()
+        {
+            Cache.Instance.LastWalletCheck = DateTime.Now;
+            //Logging.Log("[Questor] Wallet Balance Debug Info: lastknowngoodconnectedtime = " + Settings.Instance.lastKnownGoodConnectedTime);
+            //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.Now - lastknowngoodconnectedtime = " + DateTime.Now.Subtract(Settings.Instance.lastKnownGoodConnectedTime).TotalSeconds);
+            if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
+            {
+                Logging.Log("Questor", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.",
+                                          Math.Round(
+                                              DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).
+                                                  TotalMinutes, 0)), Logging.white);
+            }
+
+            //Settings.Instance.walletbalancechangelogoffdelay = 2;  //used for debugging purposes
+            //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.lastKnownGoodConnectedTime);
+            if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) <
+                Settings.Instance.Walletbalancechangelogoffdelay)
+            {
+                if (Cache.Instance.MyWalletBalance != Cache.Instance.DirectEve.Me.Wealth)
+                {
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                    Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                }
+            }
+            else if (Settings.Instance.Walletbalancechangelogoffdelay != 0 && (_States.CurrentQuestorState == QuestorState.Idle))
+            {
+                Logging.Log(
+                    "Questor", String.Format(
+                        "Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor",
+                        Math.Round(
+                            DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.white);
+                Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " +
+                                                     Settings.Instance.Walletbalancechangelogoffdelay + "min";
+
+                if (Settings.Instance.WalletbalancechangelogoffdelayLogofforExit == "logoff")
+                {
+                    Logging.Log("Questor", "walletbalancechangelogoffdelayLogofforExit is set to: " +
+                                Settings.Instance.WalletbalancechangelogoffdelayLogofforExit, Logging.white);
+                    Cache.Instance.CloseQuestorCMDLogoff = true;
+                    Cache.Instance.CloseQuestorCMDExitGame = false;
+                    Cache.Instance.SessionState = "LoggingOff";
+                }
+                if (Settings.Instance.WalletbalancechangelogoffdelayLogofforExit == "exit")
+                {
+                    Logging.Log("Questor", "walletbalancechangelogoffdelayLogofforExit is set to: " +
+                                Settings.Instance.WalletbalancechangelogoffdelayLogofforExit, Logging.white);
+                    Cache.Instance.CloseQuestorCMDLogoff = false;
+                    Cache.Instance.CloseQuestorCMDExitGame = true;
+                    Cache.Instance.SessionState = "Exiting";
+                }
+                BeginClosingQuestor();
+                return;
+            }
+        }
         public static void CheckEVEStatus()
         {
             // get the current process
@@ -258,57 +350,7 @@ namespace Questor
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastWalletCheck).TotalMinutes > (int)Time.WalletCheck_minutes && !Settings.Instance.Defaultsettingsloaded)
                 {
-                    Cache.Instance.LastWalletCheck = DateTime.Now;
-                    //Logging.Log("[Questor] Wallet Balance Debug Info: lastknowngoodconnectedtime = " + Settings.Instance.lastKnownGoodConnectedTime);
-                    //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.Now - lastknowngoodconnectedtime = " + DateTime.Now.Subtract(Settings.Instance.lastKnownGoodConnectedTime).TotalSeconds);
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
-                    {
-                        Logging.Log("Questor", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.",
-                                                  Math.Round(
-                                                      DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).
-                                                          TotalMinutes, 0)), Logging.white);
-                    }
-
-                    //Settings.Instance.walletbalancechangelogoffdelay = 2;  //used for debugging purposes
-                    //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.lastKnownGoodConnectedTime);
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) <
-                        Settings.Instance.Walletbalancechangelogoffdelay)
-                    {
-                        if (Cache.Instance.MyWalletBalance != Cache.Instance.DirectEve.Me.Wealth)
-                        {
-                            Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
-                            Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                        }
-                    }
-                    else if (Settings.Instance.Walletbalancechangelogoffdelay != 0 && (_States.CurrentQuestorState == QuestorState.Idle))
-                    {
-                        Logging.Log(
-                            "Questor", String.Format(
-                                "Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor",
-                                Math.Round(
-                                    DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.white);
-                        Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " +
-                                                             Settings.Instance.Walletbalancechangelogoffdelay + "min";
-
-                        if (Settings.Instance.WalletbalancechangelogoffdelayLogofforExit == "logoff")
-                        {
-                            Logging.Log("Questor", "walletbalancechangelogoffdelayLogofforExit is set to: " +
-                                        Settings.Instance.WalletbalancechangelogoffdelayLogofforExit, Logging.white);
-                            Cache.Instance.CloseQuestorCMDLogoff = true;
-                            Cache.Instance.CloseQuestorCMDExitGame = false;
-                            Cache.Instance.SessionState = "LoggingOff";
-                        }
-                        if (Settings.Instance.WalletbalancechangelogoffdelayLogofforExit == "exit")
-                        {
-                            Logging.Log("Questor", "walletbalancechangelogoffdelayLogofforExit is set to: " +
-                                        Settings.Instance.WalletbalancechangelogoffdelayLogofforExit, Logging.white);
-                            Cache.Instance.CloseQuestorCMDLogoff = false;
-                            Cache.Instance.CloseQuestorCMDExitGame = true;
-                            Cache.Instance.SessionState = "Exiting";
-                        }
-                        BeginClosingQuestor();
-                        return;
-                    }
+                    WalletCheck();
                 }
             }
 
@@ -365,40 +407,7 @@ namespace Questor
                     // Every 5 min of idle check and make sure we aren't supposed to stop...
                     if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
                     {
-                        Cache.Instance.LastTimeCheckAction = DateTime.Now;
-                        if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes >
-                            Cache.Instance.MaxRuntime)
-                        {
-                            // quit questor
-                            Logging.Log("Questor", "Maximum runtime exceeded.  Quiting...", Logging.white);
-                            Cache.Instance.ReasonToStopQuestor = "Maximum runtime specified and reached.";
-                            Settings.Instance.AutoStart = false;
-                            Cache.Instance.CloseQuestorCMDLogoff = false;
-                            Cache.Instance.CloseQuestorCMDExitGame = true;
-                            Cache.Instance.SessionState = "Exiting";
-                            if (_States.CurrentQuestorState == QuestorState.Idle)
-                            {
-                                BeginClosingQuestor();
-                            }
-                            return;
-                        }
-                        if (Cache.Instance.StopTimeSpecified)
-                        {
-                            if (DateTime.Now >= Cache.Instance.StopTime)
-                            {
-                                Logging.Log("Questor", "Time to stop.  Quitting game.", Logging.white);
-                                Cache.Instance.ReasonToStopQuestor = "StopTimeSpecified and reached.";
-                                Settings.Instance.AutoStart = false;
-                                Cache.Instance.CloseQuestorCMDLogoff = false;
-                                Cache.Instance.CloseQuestorCMDExitGame = true;
-                                Cache.Instance.SessionState = "Exiting";
-                                if (_States.CurrentQuestorState == QuestorState.Idle)
-                                {
-                                    BeginClosingQuestor();
-                                }
-                                return;
-                            }
-                        }
+                        TimeCheck(); //Should we close questor due to stoptime or runtime?
                     }
                     if (Cache.Instance.StopBot)
                         return;

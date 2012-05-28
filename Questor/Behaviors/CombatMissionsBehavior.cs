@@ -424,7 +424,13 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        _States.CurrentQuestorState = QuestorState.Idle;
+                        Cache.Instance.LastScheduleCheck = DateTime.Now;
+                        // Every 5 min of idle check and make sure we aren't supposed to stop...
+                        if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
+                        {
+                            Questor.TimeCheck();   //Should we close questor due to stoptime or runtime?
+                            //Questor.WalletCheck(); //Should we close questor due to no wallet balance change? (stuck?)
+                        }
                     }
                     break;
 
