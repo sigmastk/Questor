@@ -329,7 +329,7 @@ namespace Questor.Modules.BackgroundTasks
             {
                 // The window is not ready, then continue
                 if (!window.IsReady || window.currInvIdItem == 0)
-                    continue;
+                    return;
 
                 // Get the container entity
                     EntityCache containerEntity = Cache.Instance.EntityById(window.currInvIdItem);
@@ -369,7 +369,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Salvage", "Closing loot window [" + window.ItemId + "]", Logging.white);
                     }
                     window.Close();
-                    continue;
+                    return;
                 }
 
                 //if (freeCargoCapacity < 1000) //this should allow BSs to dump scrapmetal but haulers and noctus' to hold onto it
@@ -531,7 +531,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (window != null)
                 {
                     if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We have already looted [" + containerEntity.Id + "]", Logging.white);
-                    continue;
+                    return;
                 }
 
                 // Ignore open request within 10 seconds
@@ -561,13 +561,13 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     containerEntity.OpenCargo();    
                     Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
-                    continue;
+                    return;
                 }
 
                 if (!Cache.Instance.ContainerInSpace.Window.IsReady)
                 {
                     if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.white);
-                    continue;
+                    return;
                 }
 
                 if (Cache.Instance.ContainerInSpace.Window.IsReady)
@@ -577,11 +577,11 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not yet a secondarywindow", Logging.white);
                         Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
-                        continue;
+                        return;
                     }
                     OpenedContainers[containerEntity.Id] = DateTime.Now;
                     Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
-                    continue;
+                    return;
                 }
                 return;
             }
