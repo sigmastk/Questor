@@ -72,27 +72,33 @@ namespace Questor.Modules.Logging
         {
             if (Settings.Instance.WreckLootStatistics)
             {
-                // Log all items found in the wreck
-                File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "TIME: " + string.Format("{0:dd/MM/yyyy HH:mm:ss}", DateTime.Now) + "\n");
-                File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "NAME: " + containerEntity.Name + "\n");
-                File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "ITEMS:" + "\n");
-                foreach (ItemCache item in items.OrderBy(i => i.TypeId))
+                if (containerEntity != null)
                 {
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "TypeID: " + item.TypeId.ToString(CultureInfo.InvariantCulture) + "\n");
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "Name: " + item.Name + "\n");
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "Quantity: " + item.Quantity.ToString(CultureInfo.InvariantCulture) + "\n");
-                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "=\n");
+                    // Log all items found in the wreck
+                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile,
+                                       "TIME: " + string.Format("{0:dd/MM/yyyy HH:mm:ss}", DateTime.Now) + "\n");
+                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "NAME: " + containerEntity.Name + "\n");
+                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "ITEMS:" + "\n");
+                    foreach (ItemCache item in items.OrderBy(i => i.TypeId))
+                    {
+                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile,
+                                           "TypeID: " + item.TypeId.ToString(CultureInfo.InvariantCulture) + "\n");
+                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "Name: " + item.Name + "\n");
+                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile,
+                                           "Quantity: " + item.Quantity.ToString(CultureInfo.InvariantCulture) + "\n");
+                        File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, "=\n");
+                    }
+                    File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, ";" + "\n");
                 }
-                File.AppendAllText(Settings.Instance.WreckLootStatisticsFile, ";" + "\n");
             }
             return true;
         }
 
         public static bool PocketObjectStatistics(List<EntityCache> things)
         {
-            Logging.Log("Statistics.ObjectStatistics", "Logging info on the [" + things.Count + "] objects in this pocket.", Logging.white);
             string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name ?? "randomgrid");
-            Settings.Instance.PocketObjectStatisticsFile = Path.Combine(Settings.Instance.PocketStatisticsPath, Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + Cache.Instance.PocketNumber + " - ObjectStatistics.csv");
+            Settings.Instance.PocketObjectStatisticsFile = Path.Combine(Settings.Instance.PocketObjectStatisticsPath, Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + Cache.Instance.PocketNumber + " - ObjectStatistics.csv");
+            Logging.Log("Statistics.ObjectStatistics", "Logging info on the [" + things.Count + "] objects in this pocket to [" + Settings.Instance.PocketObjectStatisticsFile + "]", Logging.white);
 
             if (File.Exists(Settings.Instance.PocketObjectStatisticsFile))
             {
@@ -195,6 +201,8 @@ namespace Questor.Modules.Logging
                     if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
                     {
                         if (!Cache.Instance.OpenDroneBay("Statistics.WriteDroneStatsLog")) return false;
+                        if (Cache.Instance.DroneBay.Window == null) return true; //if the drone window does not exist, assume we cant log any drone stats
+                        
                         InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
                         Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                         Logging.Log("Statistics.WriteDroneStatsLog", "Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString(CultureInfo.InvariantCulture), Logging.white);

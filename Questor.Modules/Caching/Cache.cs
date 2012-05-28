@@ -775,8 +775,9 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public DateTime LastLocalWatchAction;
-        public DateTime LastWalletCheck;
+        public DateTime LastLocalWatchAction = DateTime.Now;
+        public DateTime LastWalletCheck = DateTime.Now;
+        public DateTime LastScheduleCheck = DateTime.Now;
 
         public DateTime LastupdateofSessionRunningTime;
         public DateTime NextInSpaceorInStation;
@@ -1101,12 +1102,12 @@ namespace Questor.Modules.Caching
             get
             {
                 return _objects ?? (_objects = Entities.Where(e =>
-                       e.CategoryId != (int)CategoryID.Entity && 
+                       //e.CategoryId != (int)CategoryID.Entity && 
                        !e.IsPlayer &&
                        e.GroupId != (int)Group.SpawnContainer &&
                        e.GroupId != (int)Group.Wreck &&
-                       e.GroupId != (int)Group.Stargate &&
-                       e.GroupId != (int)Group.Station &&
+                       //e.GroupId != (int)Group.Stargate &&
+                       //e.GroupId != (int)Group.Station &&
                        e.Distance < 200000).OrderBy(t => t.Distance).ToList());
             }
         }
@@ -2427,8 +2428,7 @@ namespace Questor.Modules.Caching
                 {
                     LootHangar.StackAll();
                     return true;
-                }
-                
+                }           
             }
             return false;
         }
