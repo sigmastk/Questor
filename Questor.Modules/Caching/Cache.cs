@@ -2107,6 +2107,7 @@ namespace Questor.Modules.Caching
                 Cache.Instance.CargoHold.StackAll();
                 return true;
             }
+            return false;
         }
 
         public DirectContainer ShipHangar { get; set; }
