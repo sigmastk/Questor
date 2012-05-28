@@ -1774,9 +1774,6 @@ namespace Questor.Modules.Caching
             // Get all entity targets
             IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
 
-            /*
-             *
-             *
             //
             //Start of Current EWar Effects On Me (below)
             //
@@ -1860,10 +1857,6 @@ namespace Questor.Modules.Caching
             //
             //End of Current EWar Effects On Me (above)
             //
-
-             *
-             *
-             */
 
             // Get the closest high value target
             EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
