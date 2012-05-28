@@ -1,4 +1,5 @@
-﻿namespace Questor.Modules.Actions
+﻿
+namespace Questor.Modules.Actions
 {
     using System;
     using System.Collections.Generic;
@@ -11,9 +12,7 @@
     public class Drop
     {
         public int Item { get; set; }
-
         public int Unit { get; set; }
-
         public string Hangar { get; set; }
 
         private DateTime _lastAction;

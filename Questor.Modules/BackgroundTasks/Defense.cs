@@ -48,7 +48,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (module.GroupId == (int)Group.CloakingDevice)
                 {
-                    //Logging.Log("This module has a typeID of: " + module.TypeId + " !!");
+                    //Logging.Log("Defense: This module has a typeID of: " + module.TypeId + " !!");
                     if (module.TypeId != 11578)  //11578 Covert Ops Cloaking Device - if you don't have a covert ops cloak try the next module
                     {
                         continue;
@@ -58,7 +58,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if ((int)stuffThatMayDecloakMe.Distance != 0)
                         {
-                            //Logging.Log(StuffThatMayDecloakMe.Name + " is very close at: " + StuffThatMayDecloakMe.Distance + " meters");
+                            //Logging.Log(Defense: StuffThatMayDecloakMe.Name + " is very close at: " + StuffThatMayDecloakMe.Distance + " meters");
                             continue;
                         }
                     }

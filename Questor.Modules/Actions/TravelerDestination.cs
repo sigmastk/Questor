@@ -175,7 +175,7 @@ namespace Questor.Modules.Actions
                     return false;
                 }
             }
-            //else Logging.Log("TravelerDestination.BookmarkDestination: undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
+            //else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
 
             EntityCache entity = Cache.Instance.EntitiesByName(stationName).FirstOrDefault();
             if (entity == null)
@@ -278,14 +278,14 @@ namespace Questor.Modules.Actions
                 //        undockBookmark = bookmarks.FirstOrDefault();
                 //        if (undockBookmark.X == null || undockBookmark.Y == null || undockBookmark.Z == null)
                 //        {
-                //            Logging.Log("TravelerDestination.BookmarkDestination: undock bookmark [" + undockBookmark.Title + "] is unusable: it has no coords");
+                //            Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark [" + undockBookmark.Title + "] is unusable: it has no coords");
                 //            undockBookmark = null;
                 //        }
-                //        else Logging.Log("TravelerDestination.BookmarkDestination: undock bookmark [" + undockBookmark.Title + "] is usable: it has coords");
+                //        else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark [" + undockBookmark.Title + "] is usable: it has coords");
                 //    }
-                //    else Logging.Log("TravelerDestination.BookmarkDestination: you do not have an undock bookmark that contains [" + Settings.Instance.UndockPrefix + "] in local");
+                //    else Logging.Log("TravelerDestination.BookmarkDestination","you do not have an undock bookmark that contains [" + Settings.Instance.UndockPrefix + "] in local");
                 //}
-                //else Logging.Log("TravelerDestination.BookmarkDestination: UndockPrefix is not configured");
+                //else Logging.Log("TravelerDestination.BookmarkDestination","UndockPrefix is not configured");
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
                 nextAction = DateTime.Now.AddSeconds((int)Time.TravelerExitStationAmIInSpaceYet_seconds);
                 return false;

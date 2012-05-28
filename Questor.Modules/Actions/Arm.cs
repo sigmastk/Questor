@@ -62,13 +62,13 @@ namespace Questor.Modules.Actions
 
                 case ArmState.NotEnoughDrones:
                     //This is logged in questor.cs - do not double log
-                    //Logging.Log("Arm: Armstate.NotEnoughDrones");
+                    //Logging.Log("Arm","Armstate.NotEnoughDrones");
                     //State = ArmState.Idle;
                     break;
 
                 case ArmState.NotEnoughAmmo:
                     //This is logged in questor.cs - do not double log
-                    //Logging.Log("Arm: Armstate.NotEnoughAmmo");
+                    //Logging.Log("Arm","Armstate.NotEnoughAmmo");
                     //State = ArmState.Idle;
                     break;
 
@@ -250,7 +250,7 @@ namespace Questor.Modules.Actions
 
                         //if (State == ArmState.ActivateSalvageShip)
                         //{
-                        //    Logging.Log("Arm: Done");
+                        //    Logging.Log("Arm","Done");
                         //    State = ArmState.Done;
                         //    return;
                         //}

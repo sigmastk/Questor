@@ -1,4 +1,5 @@
-﻿namespace Questor.Modules.Actions
+﻿
+namespace Questor.Modules.Actions
 {
     using System;
     using System.Linq;
@@ -10,7 +11,6 @@
     public class Sell
     {
         public int Item { get; set; }
-
         public int Unit { get; set; }
 
         private DateTime _lastAction;

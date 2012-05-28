@@ -350,7 +350,6 @@ namespace Questor.Behaviors
             }
             DebugPanicstates();
 
-            //Logging.Log("test");
             switch (_States.CurrentCombatMissionBehaviorState)
             {
                 case CombatMissionsBehaviorState.Idle:

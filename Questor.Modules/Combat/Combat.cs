@@ -708,7 +708,7 @@ namespace Questor.Modules.Combat
             int maxHighValueTarget = (lowValueTargetingMe.Count + lowValueTargets.Count) == 0 ? Settings.Instance.MaximumLowValueTargets + Settings.Instance.MaximumHighValueTargets : Settings.Instance.MaximumHighValueTargets;
             int maxLowValueTarget = (highValueTargetingMe.Count + highValueTargets.Count) == 0 ? Settings.Instance.MaximumLowValueTargets + Settings.Instance.MaximumHighValueTargets : Settings.Instance.MaximumLowValueTargets;
 
-            // Do we have too many high (none-priority) value targets targeted?
+            // Do we have too many high (non-priority) value targets targeted?
             while (highValueTargets.Count(t => !Cache.Instance.PriorityTargets.Any(pt => pt.Id == t.Id)) > Math.Max(maxHighValueTarget - Cache.Instance.PriorityTargets.Count(), 0))
             {
                 // Unlock any target
