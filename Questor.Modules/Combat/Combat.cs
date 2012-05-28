@@ -362,15 +362,21 @@ namespace Questor.Modules.Combat
         {
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InWarp)
+            {
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are in warp! doing nothing", Logging.teal);
                 return;
-
+            }
             if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
+            {
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: waiting on NextWeaponAction", Logging.teal);
                 return;
+            }
 
             if (Settings.Instance.SpeedTank && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
             {
                 if (DateTime.Now > Cache.Instance.NextOrbit)
                 {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: Currently not approaching or orbiting anything: initiate orbit", Logging.teal);
                     target.Orbit(Cache.Instance.OrbitDistance);
                     Logging.Log("Combat.ActivateWeapons", "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.teal);
                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
@@ -381,9 +387,11 @@ namespace Questor.Modules.Combat
             // If you are not in a mission by all means let combat actions move you around as needed
             if (!Cache.Instance.InMission)
             {
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are NOT in a mission: navigateintorange", Logging.teal);
                 CombatMissionCtrl.NavigateIntoRange(target); //eventually this method should be moved to something like navigate.cs or movement.cs
             }
 
+            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: after navigate into range...", Logging.teal);
             // Get the weapons
             IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons.ToList();
 
@@ -391,6 +399,7 @@ namespace Questor.Modules.Combat
             // Get distance of the target and compare that with the ammo currently loaded
             foreach (ModuleCache weapon in weapons)
             {
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: for each weapon [" + weapon.ItemId + "] in weapons", Logging.teal);
                 // don't waste ammo on small target if you use autocannon or siege i hope you use drone
                 if (Settings.Instance.DontShootFrigatesWithSiegeorAutoCannons) //this defaults to false and needs to be changed in your characters settings xml file if you want to enable this option
                 {
@@ -413,43 +422,62 @@ namespace Questor.Modules.Combat
                     }
                 }
                 if (!weapon.IsActive)
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: weapon [" + weapon.ItemId + "] is not active: no need to do anything", Logging.teal);
                     continue;
-
+                }
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: weapon [" + weapon.ItemId + "] is reloading, deactivating or changing ammo: no need to do anything", Logging.teal);
                     continue;
+                }
 
                 if (DateTime.Now < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: NextReload is still in the future: wait before doing anything with the weapon", Logging.teal);
                     return;
+                }
 
                 // No ammo loaded
                 if (weapon.Charge == null)
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: no ammo loaded? [" + weapon.ItemId + "] reload will happen elsewhere", Logging.teal);
                     continue;
+                }
 
                 Ammo ammo = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
 
                 //use mission specific ammo
                 if (Cache.Instance.MissionAmmo.Count() != 0)
                 {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: MissionAmmocount is not 0", Logging.teal);
                     ammo = Cache.Instance.MissionAmmo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
                 }
 
                 // How can this happen? Someone manually loaded ammo
                 if (ammo == null)
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: ammo == null [" + weapon.ItemId + "] someone manually loaded ammo?", Logging.teal);
                     continue;
+                }
 
                 // If we have already activated warp, deactivate the weapons
                 if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
                 {
                     // Target is in range
                     if (target.Distance <= ammo.Range)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is in range: do nothing, wait until it is dead", Logging.teal);
                         continue;
+                    }
                 }
 
                 // Target is out of range, stop firing
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is out of range, stop firing", Logging.teal);
                 weapon.Click();
             }
 
-            // Hax for max charges returning incorrect value
+                // Hack for max charges returning incorrect value
             if (!weapons.Any(w => w.IsEnergyWeapon))
             {
                 MaxCharges = Math.Max(MaxCharges, weapons.Max(l => l.MaxCharges));
@@ -464,22 +492,31 @@ namespace Questor.Modules.Combat
             {
                 // Are we reloading, deactivating or changing ammo?
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] is reloading, deactivating or changing ammo", Logging.teal);
                     continue;
+                }
+
                 // Are we on the right target?
                 if (weapon.IsActive)
                 {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] is active already", Logging.teal);
                     if (weapon.TargetId != target.Id)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] is shooting at the wrong target: deactivating", Logging.teal);
                         weapon.Click();
-
+                    }
                     continue;
                 }
 
                 // No, check ammo type and if that is correct, activate weapon
                 if (ReloadAmmo(weapon, target) && CanActivate(weapon, target, true))
                 {
-                    if (_WeaponsActivatedThisTick > _WeaponsToActivateThisTick) //if we have already activated x num of weapons return, which will wait until the next ProcessState
+                    if (_WeaponsActivatedThisTick > _WeaponsToActivateThisTick)
+                        //if we have already activated x num of weapons return, which will wait until the next ProcessState
                         return;
 
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + weapon.ItemId + "] has the correct ammo: activate", Logging.teal);
                     _WeaponsActivatedThisTick++; //increment the num of weapons we've activated this ProcessState so that we might optionally activate more than one module per tick
                     Logging.Log("Combat", "Activating weapon  [" + weapon.ItemId + "] on [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                     weapon.Activate(target.Id);
@@ -496,7 +533,7 @@ namespace Questor.Modules.Combat
         /// </summary>
         public void ActivateTargetPainters(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextPainterAction) //if we just did something wait a fraction of a second
                 return;
 
             List<ModuleCache> targetPainters = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TargetPainter).ToList();
@@ -532,7 +569,7 @@ namespace Questor.Modules.Combat
         /// </summary>
         public void ActivateNos(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextNosAction) //if we just did something wait a fraction of a second
                 return;
 
             List<ModuleCache> noses = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.NOS).ToList();
@@ -576,7 +613,7 @@ namespace Questor.Modules.Combat
         /// </summary>
         public void ActivateStasisWeb(EntityCache target)
         {
-            if (DateTime.Now < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
+            if (DateTime.Now < Cache.Instance.NextWebAction) //if we just did something wait a fraction of a second
                 return;
 
             List<ModuleCache> webs = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.StasisWeb).ToList();
