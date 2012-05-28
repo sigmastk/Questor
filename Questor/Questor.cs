@@ -486,7 +486,8 @@ namespace Questor
                     break;
 
                 case QuestorState.CloseQuestor:
-                    int secRestart = Cache.Instance.RandomNumber(3, 18) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
+                    // 3 min + 30 to 180 seconds + 1 to 9 seconds - the 3 minutes is for DE license instances to be freed
+                    int secRestart = (600 * 3) + Cache.Instance.RandomNumber(3, 18) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
                     Cache.Instance.SessionState = "Quitting!!"; //so that IF we changed the state we would not be caught in a loop of re-entering closequestor
                     if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
                     {
