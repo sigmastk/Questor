@@ -184,14 +184,13 @@ namespace Questor.Modules.Actions
                         break;
 
                     // Stack everything
-                    if (_hangar != null)
+                    if (_hangar != null && _hangar.Window.IsReady)
                     {
                         Logging.Log("Drop", "Stacking items", Logging.white);
                         _hangar.StackAll();
                         _lastAction = DateTime.Now;
+                        _States.CurrentDropState = DropState.WaitForStacking;
                     }
-
-                    _States.CurrentDropState = DropState.WaitForStacking;
                     break;
 
                 case DropState.WaitForStacking:

@@ -402,7 +402,7 @@ namespace Questor.Modules.BackgroundTasks
                 case ScoopState.StackItemsWhileAggressed:
                     Logging.Log("Salvage", "Stacking items", Logging.white);
 
-                    if (cargo.IsReady)
+                    if (cargo != null && (cargo.Window.IsReady))
                         cargo.StackAll();
 
                     _nextAction = DateTime.Now.AddSeconds(5);
