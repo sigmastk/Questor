@@ -634,7 +634,12 @@ namespace Questor.Behaviors
 
                         if (!Cache.Instance.UnlootedContainers.Any())
                         {
-                            Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing old salvage bookmarks", Logging.white);
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmarks that we have already processed.", Logging.white);
+                            //
+                            // this removes bookmarks that:
+                            // a) have the configured bookmark prefix
+                            // b) are in local with us
+                            // c) on grid with us (250k iirc, you can see this definition in distances.cs)
 
                             bool gatesInRoom = GateInSalvage();
                             var bookmarksinlocal = new List<DirectBookmark>(Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").
