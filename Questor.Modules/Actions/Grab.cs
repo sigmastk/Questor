@@ -72,7 +72,7 @@ namespace Questor.Modules.Actions
                         if (_hangar.Window == null)
                         {
                             // No, command it to open
-                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            //Cache.Instance.DirectEve.OpenCorporationHangar();
                         }
 
                         if (!_hangar.IsReady)
