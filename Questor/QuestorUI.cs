@@ -137,6 +137,12 @@ namespace Questor
                     foreach (string text in Enum.GetNames(typeof(CombatHelperBehaviorState)))
                         BehaviorComboBox.Items.Add(text);
                 }
+                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
+                {
+                    BehaviorComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(DirectionalScannerBehaviorState)))
+                        BehaviorComboBox.Items.Add(text);
+                }
             }
         }
 
@@ -432,6 +438,12 @@ namespace Questor
                 {
                     if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatHelperBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
                         BehaviorComboBox.SelectedItem = _States.CurrentCombatHelperBehaviorState.ToString();
+                }
+
+                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
+                {
+                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDirectionalScannerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                        BehaviorComboBox.SelectedItem = _States.CurrentDirectionalScannerBehaviorState.ToString();
                 }
             }
 
@@ -1014,6 +1026,12 @@ namespace Questor
                     _States.CurrentCombatHelperBehaviorState =
                       (CombatHelperBehaviorState)
                       Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);  
+                }
+                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
+                {
+                    _States.CurrentDirectionalScannerBehaviorState =
+                      (DirectionalScannerBehaviorState)
+                      Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
                 }
             }
         }

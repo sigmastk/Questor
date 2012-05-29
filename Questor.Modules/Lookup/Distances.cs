@@ -9,7 +9,7 @@
 // -------------------------------------------------------------------------------
 namespace Questor.Modules.Lookup
 {
-    public enum Distance
+    public enum Distance : long
     {
         ScoopRange = 2490,
         SafeScoopRange = ScoopRange - 700,
@@ -31,6 +31,8 @@ namespace Questor.Modules.Lookup
         WeCanWarpToStarFromHere = 500000000,
         OnGridWithMe = 250000, //250k by default - (used by after mission salvaging)
         //AU = 149598000000, // 1 AU - 1 Astronomical Unit = 149 598 000 000 meters
-        DirectionalScannerCloseRange = 2147483647 //maxint //74799000000 // 1/2 of an AU
+        DirectionalScannerCloseRange = 2147483647,
+        HalfAU = 2147483647,
+        OneAU = 149598000000,
     }
 }

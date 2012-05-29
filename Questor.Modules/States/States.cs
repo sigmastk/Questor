@@ -26,6 +26,8 @@
 
         public static CombatHelperBehaviorState CurrentCombatHelperBehaviorState { get; set; }
 
+        public static DirectionalScannerBehaviorState CurrentDirectionalScannerBehaviorState { get; set; }
+
         public static CourierMissionCtrlState CurrentCourierMissionCtrlState { get; set; }
 
         public static CombatMissionCtrlState CurrentCombatMissionCtrlState { get; set; }
