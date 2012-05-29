@@ -1900,6 +1900,38 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ItemHangar { get; set; }
 
+        public bool OpenItemsHangarSingleInstance(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
+                return false;
+            if (Cache.Instance.InStation)
+            {
+                DirectContainerWindow lootHangarWindow =
+                    (DirectContainerWindow)
+                    Cache.Instance.DirectEve.Windows.OfType<DirectWindow>().FirstOrDefault(
+                        w => w.Type == "form.Inventory" && w.Caption.Contains("Item hangar"));
+                // Is the items hangar open?
+                if (lootHangarWindow == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                    Cache.Instance.NextOpenHangarAction =
+                        DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3,5));
+                    Logging.Log(module, "Opening Item Hangar: waiting [" +
+                                        Math.Round(
+                                            Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
+                                        "sec]", Logging.white);
+                    return false;
+                }
+                else
+                {
+                    Cache.Instance.ItemHangar = Cache.Instance.DirectEve.GetContainer(lootHangarWindow.currInvIdItem);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public bool OpenItemsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
@@ -2193,7 +2225,7 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.AmmoHangar.Window == null)
                         {
                             // No, command it to open
-                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            //Cache.Instance.DirectEve.OpenCorporationHangar();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                             Logging.Log(module, "Opening Corporate Ammo Hangar: waiting [" +
@@ -2277,7 +2309,7 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.LootHangar.Window == null)
                         {
                             // No, command it to open
-                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            //Cache.Instance.DirectEve.OpenCorporationHangar();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                             Logging.Log(module,"Opening Corporate Loot Hangar: waiting [" +
@@ -2356,7 +2388,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.CorpBookmarkHangar.Window == null)
                     {
                         // No, command it to open
-                        Cache.Instance.DirectEve.OpenCorporationHangar();
+                        //Cache.Instance.DirectEve.OpenCorporationHangar();
                         Cache.Instance.NextOpenCorpBookmarkHangarAction =
                             DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                         Logging.Log(module,"Opening Corporate Bookmark Hangar: waiting [" +
@@ -2599,7 +2631,7 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.AmmoHangar.Window == null)
                         {
                             // No, command it to open
-                            Cache.Instance.DirectEve.OpenCorporationHangar();
+                            //Cache.Instance.DirectEve.OpenCorporationHangar();
                             Cache.Instance.NextOpenHangarAction =
                                 DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                             Logging.Log(module, "Opening Corporate Ammo Hangar: waiting [" +

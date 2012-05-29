@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -324,18 +324,19 @@ namespace Questor.Modules.BackgroundTasks
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
-            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => w.Type == "form.Inventory" && (w.Name.Contains("ItemWreck") || w.Name.Contains("FloatingCargo"))).ToList();
-            foreach (DirectContainerWindow window in lootWindows) //ItemWreck and ItemFloatingCargo
+            
+            DirectContainerWindow lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.Type == "form.Inventory");
+            List<long> ContainersID = lootWindows.GetIdsFromTree();
+
+            foreach (long ContainerID in ContainersID) //ItemWreck and ItemFloatingCargo
             {
-                // The window is not ready, then continue
-                if (!window.IsReady || window.currInvIdItem == 0)
-                    return;
+                lootWindows.SelectTreeEntryByID(ContainerID);
 
                 // Get the container entity
-                    EntityCache containerEntity = Cache.Instance.EntityById(window.currInvIdItem);
+                    EntityCache containerEntity = Cache.Instance.EntityById(ContainerID);
 
                 // Get the container that is associated with the cargo container
-                    DirectContainer container = Cache.Instance.DirectEve.GetContainer(window.currInvIdItem);
+                    DirectContainer container = Cache.Instance.DirectEve.GetContainer(ContainerID);
 
                 // List its items
                 IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i)).ToList();
@@ -352,23 +353,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Does it no longer exist or is it out of transfer range or its looted
                 if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
                 {
-                    if (Settings.Instance.DebugLootWrecks)
-                    {
-                        if (containerEntity != null && containerEntity.Distance > (int)Distance.SafeScoopRange)
-                            Logging.Log("Salvage", "Closing loot window [" + window.ItemId +
-                                        "] container out of scoop range", Logging.white);
-                        if (containerEntity != null && Cache.Instance.LootedContainers.Contains(containerEntity.Id))
-                            Logging.Log("Salvage", "Closing loot window [" + window.ItemId +
-                                        "] container already is list of LootedContainers", Logging.white);
-                        if (containerEntity == null)
-                            Logging.Log("Salvage", "Closing loot window [" + window.ItemId +
-                                        "] the container no longer exists: containerEntity is null", Logging.white);
-                    }
-                    else if (!Settings.Instance.DebugLootWrecks)
-                    {
-                        Logging.Log("Salvage", "Closing loot window [" + window.ItemId + "]", Logging.white);
-                    }
-                    window.Close();
+                    lootWindows.CloseTreeEntry(ContainerID);
                     return;
                 }
 
@@ -526,14 +511,6 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
                 }
 
-                // We already opened the loot window
-                DirectContainerWindow window = lootWindows.FirstOrDefault(w => w.ItemId == containerEntity.Id);
-                if (window != null)
-                {
-                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We have already looted [" + containerEntity.Id + "]", Logging.white);
-                    return;
-                }
-
                 // Ignore open request within 10 seconds
                 if (OpenedContainers.ContainsKey(containerEntity.Id) && DateTime.Now.Subtract(OpenedContainers[containerEntity.Id]).TotalSeconds < 10)
                     continue;
@@ -573,12 +550,12 @@ namespace Questor.Modules.BackgroundTasks
                 if (Cache.Instance.ContainerInSpace.Window.IsReady)
                 {
                     if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is ready", Logging.white);
-                    if (!Cache.Instance.ContainerInSpace.Window.Name.ToLower().Contains("secondary".ToLower()))
-                    {
-                        if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not yet a secondarywindow", Logging.white);
-                        Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
-                        return;
-                    }
+                    //if (!Cache.Instance.ContainerInSpace.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    //{
+                    //    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not yet a secondarywindow", Logging.white);
+                    //    Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
+                    //    return;
+                    //}
                     OpenedContainers[containerEntity.Id] = DateTime.Now;
                     Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
                     return;
