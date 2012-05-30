@@ -635,7 +635,7 @@ namespace Questor
                                                     "uplink timedcommand " + secRestart + " runscript isboxer -launch \\\"${ISBoxerCharacterSet}\\\"");
                                                 Logging.Log(
                                                     "Questor", "Done: quitting this session so the new isboxer session can take over", Logging.white);
-                                                Logging.Log("Questor", "We are in station: Exiting eve.", Logging.white);
+                                                    Logging.Log("Questor","Exiting eve.", Logging.white);
                                                 _closeQuestorCMDUplink = false;
                                                 CloseQuestorDelay =
                                                 DateTime.Now.AddSeconds(
@@ -661,7 +661,7 @@ namespace Questor
                                             if (_closeQuestorCMDUplink)
                                             {
                                                 Logging.Log(
-                                                    "Questor", "We are in station: Starting a timer in the innerspace uplink to execute an arbitrary OS command", Logging.white);
+                                                        "Questor","Starting a timer in the innerspace uplink to execute an arbitrary OS command",Logging.white);
                                                 LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " +
                                                                             Settings.Instance.CharacterName +
                                                                             "'s Questor is starting a timedcommand to restart itself in a moment");
