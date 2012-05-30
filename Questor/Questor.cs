@@ -35,6 +35,7 @@ namespace Questor
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
         private readonly CombatHelperBehavior _combatHelperBehavior;
         private readonly DedicatedBookmarkSalvagerBehavior _dedicatedBookmarkSalvagerBehavior;
+        private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly Cleanup _cleanup;
 
         public DateTime LastFrame;
@@ -62,6 +63,7 @@ namespace Questor
             _combatMissionsBehavior = new CombatMissionsBehavior();
             _combatHelperBehavior = new CombatHelperBehavior();
             _dedicatedBookmarkSalvagerBehavior = new DedicatedBookmarkSalvagerBehavior();
+            _directionalScannerBehavior = new DirectionalScannerBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
 
@@ -452,6 +454,17 @@ namespace Questor
                     _dedicatedBookmarkSalvagerBehavior.ProcessState();
                     break;
 
+                case QuestorState.DirectionalScannerBehavior:
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Idle)
+                    {
+                        _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
+                    }
+                    _directionalScannerBehavior.ProcessState();
+                    break;
+
                 case QuestorState.Start:
                     switch (Settings.Instance.CharacterMode.ToLower())
                     {
@@ -480,6 +493,14 @@ namespace Questor
                             {
                                 Logging.Log("Questor", "Start CombatHelper Behavior", Logging.white);
                                 _States.CurrentQuestorState = QuestorState.CombatHelperBehavior;
+                            }
+                            break;
+
+                        case "directionalscanner":
+                            if (_States.CurrentQuestorState == QuestorState.Start)
+                            {
+                                Logging.Log("Questor", "Start DirectionalScanner Behavior", Logging.white);
+                                _States.CurrentQuestorState = QuestorState.DirectionalScannerBehavior;
                             }
                             break;
                     }
