@@ -1,4 +1,5 @@
-﻿namespace Questor.Modules.States
+﻿
+namespace Questor.Modules.States
 {
     public enum DedicatedBookmarkSalvagerBehaviorState
     {

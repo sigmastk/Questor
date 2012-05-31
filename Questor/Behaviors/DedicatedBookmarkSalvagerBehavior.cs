@@ -409,7 +409,7 @@ namespace Questor.Behaviors
                 case DedicatedBookmarkSalvagerBehaviorState.Start:
                     Cache.Instance.OpenWrecks = true;
                     ValidateDedicatedSalvageSettings();
-                    if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Start) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.LocalWatch;
+                    if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Start) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.UnloadLoot;
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.LocalWatch:
@@ -479,7 +479,7 @@ namespace Questor.Behaviors
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
 
-                        AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(45)).ToList();
+                        AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
                         if (AfterMissionSalvageBookmarks.Count == 0)
                         {
                             BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
@@ -506,8 +506,8 @@ namespace Questor.Behaviors
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging:
-                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(45)).ToList();
-                    //AgedAfterMissionSalvageBookmarks = AfterMissionSalvageBookmarks.Where(e => e.CreatedOn > DateTime.Now.AddMinutes(45)).ToList();
+                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
+                    //AgedAfterMissionSalvageBookmarks = AfterMissionSalvageBookmarks.Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
                     Logging.Log("DedicatedBookmarkSalvagebehavior","Found [" + AfterMissionSalvageBookmarks.Count + "] salvage bookmarks ready to process.", Logging.white);
                     Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation>
                     _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
