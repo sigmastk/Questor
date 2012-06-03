@@ -394,7 +394,13 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        _States.CurrentQuestorState = QuestorState.Idle;
+                        // Every 5 min of idle check and make sure we aren't supposed to stop...
+                        if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
+                        {
+                            Cache.Instance.LastScheduleCheck = DateTime.Now;
+                            Questor.TimeCheck();   //Should we close questor due to stoptime or runtime?
+                            //Questor.WalletCheck(); //Should we close questor due to no wallet balance change? (stuck?)
+                        }
                     }
                     break;
 
@@ -508,9 +514,12 @@ namespace Questor.Behaviors
                 case DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging:
                     AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
                     //AgedAfterMissionSalvageBookmarks = AfterMissionSalvageBookmarks.Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
-                    Logging.Log("DedicatedBookmarkSalvagebehavior","Found [" + AfterMissionSalvageBookmarks.Count + "] salvage bookmarks ready to process.", Logging.white);
-                    Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation>
-                    _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                    if (DateTime.Now > Statistics.Instance.StartedSalvaging.AddMinutes(2))
+                    {
+                        Logging.Log("DedicatedBookmarkSalvagebehavior","Found [" + AfterMissionSalvageBookmarks.Count + "] salvage bookmarks ready to process.", Logging.white);
+                        Statistics.Instance.StartedSalvaging = DateTime.Now; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation>
+                        _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                    }
                     //we know we are connected here
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
