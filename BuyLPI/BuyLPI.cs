@@ -93,7 +93,7 @@ namespace BuyLPI
             }
 
             DirectContainer hangar = _directEve.GetItemHangar();
-            if (!hangar.IsReady)
+            if (!hangar.Window.IsReady)
             {
                 _nextAction = DateTime.Now.AddMilliseconds(WaitMillis);
                 _directEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
@@ -176,7 +176,7 @@ namespace BuyLPI
             if (_quantity != null)
                 if (_totalquantityoforders != null)
                     Logging.Log("BuyLPI", "Accepting " + offer.TypeName + " [ " + _quantity.Value + " ] of [ " + _totalquantityoforders.Value + " ] orders and will cost another [" + Math.Round(((offer.IskCost * _quantity.Value) / (double)1000000), 2) + "mil isk]", Logging.white);
-            offer.AcceptOffer();
+            offer.AcceptOfferFromWindow();
 
             // Set next action + loyalty point timeout
             _nextAction = DateTime.Now.AddMilliseconds(WaitMillis);
