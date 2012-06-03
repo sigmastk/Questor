@@ -234,7 +234,7 @@ namespace QuestorManager.Actions
                         if (offer2 != null)
                         {
                             Logging.Log("BuyLPI", "Accepting [" + offer2.TypeName + "]", Logging.white);
-                            offer2.AcceptOffer();
+                            offer2.AcceptOfferFromWindow();
                         }
                     }
                     _States.CurrentBuyLPIState = BuyLPIState.Quantity;
