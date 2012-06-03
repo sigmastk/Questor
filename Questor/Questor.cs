@@ -322,6 +322,12 @@ namespace Questor
                 return;
             }
 
+            //there are cleaner ways to fix this, but this is the quick / dirty solution for certain things occasionally not being ready when we first startup
+            if (DateTime.Now < Cache.Instance.StartTime.AddSeconds(30))
+            {
+                return;
+            }
+
             if (DateTime.Now < Cache.Instance.NextInSpaceorInStation)
                 return;
 
