@@ -210,41 +210,38 @@ namespace Questor.Modules.Actions
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
                                 List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
+                                var ship = ships.Where(s => s.GivenName != null && s.GivenName.ToLower() == shipName).FirstOrDefault();
+                                if (ship != null)
                                 {
                                     Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.white);
                                     ship.ActivateShip();
                                     Cache.Instance.NextArmAction = DateTime.Now.AddSeconds((int)Time.SwitchShipsDelay_seconds);
                                     if (TryMissionShip)
                                         UseMissionShip = true;
+
+
+                                    if (TryMissionShip && !UseMissionShip)
+                                    {
+                                        Logging.Log("Arm", "Unable to find the ship specified in the missionfitting.  Using default combat ship and default fitting.", Logging.orange);
+                                        TryMissionShip = false;
+                                        Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
+                                    }
+                                }
+                                else
+                                {
+                                    _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                                    Logging.Log("Arm", "Found the following ships:", Logging.white);
+                                    foreach (DirectItem sh in ships)
+                                    {
+                                        Logging.Log("Arm", "[" + sh.GivenName + "]", Logging.white);
+                                    }
+                                    Logging.Log("Arm", "Could not find [" + shipName + "] ship!", Logging.red);
                                     return;
                                 }
-
-                                if (TryMissionShip && !UseMissionShip)
-                                {
-                                    Logging.Log("Arm", "Unable to find the ship specified in the missionfitting.  Using default combat ship and default fitting.", Logging.orange);
-                                    TryMissionShip = false;
-                                    Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
-                                    return;
-                                }
-
-                                _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                                Logging.Log("Arm", "Found the following ships:", Logging.white);
-                                foreach (DirectItem ship in ships)
-                                {
-                                    Logging.Log("Arm", "[" + ship.GivenName + "]", Logging.white);
-                                }
-                                Logging.Log("Arm", "Could not find [" + shipName + "] ship!", Logging.red);
-                                return;
-                            }
-                            return;
+                            }                            
                         }
 
-                        if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
-                        {
-                            _States.CurrentArmState = ArmState.OpenShipHangar;
-                            break;
-                        }
+                        
                         if (TryMissionShip)
                             UseMissionShip = true;
 
@@ -271,9 +268,17 @@ namespace Questor.Modules.Actions
 
                 case ArmState.OpenCargo:
                     // Is CargoBay  and AmmoHangar open?
-                    if (!Cache.Instance.OpenAmmoHangar("Arm")) break;
+                    if (!Cache.Instance.OpenAmmoHangar("Arm"))
+                    {
+                        Logging.Log("Arm", "Opening ammo hangar", Logging.white);
+                        break;
+                    }
 
-                    if (!Cache.Instance.OpenCargoHold("Arm")) break;
+                    if (!Cache.Instance.OpenCargoHold("Arm"))
+                    {
+                        Logging.Log("Arm", "Opening cargohold", Logging.white);
+                        break;
+                    }
 
                     if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
                     {

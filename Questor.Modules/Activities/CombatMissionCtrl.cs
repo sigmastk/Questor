@@ -1216,7 +1216,7 @@ namespace Questor.Modules.Activities
             {
                 //DirectContainer cargo = Cache.Instance.DirectEve.;
                 // We assume that the ship's cargo will be opened somewhere else
-                //if (cargo.IsReady)
+                //if (cargo.Window.IsReady)
                 //    done |= cargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));
             }
             if (done)
