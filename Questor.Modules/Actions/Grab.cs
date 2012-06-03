@@ -63,8 +63,9 @@ namespace Questor.Modules.Actions
                         {
                             // No, command it to open
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                            break;
                         }
-                        if (!_hangar.Window.IsReady)
+                        if (_hangar.Window == null || !_hangar.Window.IsReady)
                             break;
                     }
                     else if (Hangar != null)
@@ -73,9 +74,10 @@ namespace Questor.Modules.Actions
                         {
                             // No, command it to open
                             //Cache.Instance.DirectEve.OpenCorporationHangar();
+                            break;
                         }
 
-                        if (!_hangar.Window.IsReady)
+                        if (_hangar.Window == null || !_hangar.Window.IsReady)
                             break;
                     }
 

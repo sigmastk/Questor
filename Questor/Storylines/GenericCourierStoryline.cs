@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Questor.Modules.Actions;
 using Questor.Modules.Activities;
 using Questor.Modules.Caching;
@@ -44,7 +44,7 @@ namespace Questor.Storylines
             }
 
             // If the ship hangar is not ready then wait for it
-            if (!ships.IsReady)
+            if (!ships.Window.IsReady)
                 return StorylineState.Arm;
 
             //  Look for an industrial

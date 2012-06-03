@@ -1,4 +1,4 @@
-﻿
+
 using System.Diagnostics;
 
 namespace Questor.Modules.BackgroundTasks
@@ -278,7 +278,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _lastCleanupAction = DateTime.Now;
                             // Close the drone bay, its not required in space.
-                            if (Cache.Instance.DroneBay != null && Cache.Instance.DroneBay.IsReady)
+                            if (Cache.Instance.DroneBay != null && Cache.Instance.DroneBay.Window.IsReady && Cache.Instance.DroneBay.Window.Name.ToLower().Contains("ShipDroneBay".ToLower()))
                             {
                                 Logging.Log("Cleanup", "Closing Drone Bay Window as it is not useful in space.", Logging.white);
                                 Cache.Instance.DroneBay.Window.Close();

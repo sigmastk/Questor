@@ -247,7 +247,7 @@ namespace ValueDump
                         return;
                     }
 
-                    if (!hangar.IsReady)
+                    if (!hangar.Window.IsReady)
                         return;
 
                     Logging.Log("ValueDumpUI", "Loading hangar items", Logging.white);

@@ -61,7 +61,7 @@ namespace QuestorManager.Actions
 
                 case BuyLPIState.OpenItemHangar:
 
-                    if (!hangar.IsReady)
+                    if (!hangar.Window.IsReady)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                         Logging.Log("BuyLPI", "Opening item hangar", Logging.white);
@@ -158,7 +158,7 @@ namespace QuestorManager.Actions
 
                                         //if(!_form.chkBuyItems.Checked)
                                         //{
-                                        //    Logging.Log("BuyLPI: Done, do not buy item");
+                                        //    Logging.Log("BuyLPI","Done, do not buy item");
                                         //    States.CurrentBuyLPIState = BuyLPIState.Done;
                                         //    break;
                                         //}
@@ -237,11 +237,11 @@ namespace QuestorManager.Actions
                             offer2.AcceptOffer();
                         }
                     }
-                    _States.CurrentBuyLPIState = BuyLPIState.Quatity;
+                    _States.CurrentBuyLPIState = BuyLPIState.Quantity;
 
                     break;
 
-                case BuyLPIState.Quatity:
+                case BuyLPIState.Quantity:
 
                     _loyaltyPointTimeout = DateTime.Now.AddSeconds(1);
 

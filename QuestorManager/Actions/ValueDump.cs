@@ -160,7 +160,7 @@ namespace QuestorManager.Actions
                         return;
                     }
 
-                    if (!hangar.IsReady)
+                    if (!hangar.Window.IsReady)
                         return;
 
                     Logging.Log("ValueDump", "Loading hangar items", Logging.white);
