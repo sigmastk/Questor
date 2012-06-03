@@ -278,10 +278,10 @@ namespace Questor
                                                                 "'s Questor is starting a timedcommand to restart itself in a moment");
                                     LavishScript.ExecuteCommand(
                                         "uplink exec Echo [${Time}] timedcommand " + secRestart + " OSExecute " +
-                                        Settings.Instance.CloseQuestorOSCmdContents.ToString());
+                                        Settings.Instance.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
                                     LavishScript.ExecuteCommand(
                                         "uplink exec timedcommand " + secRestart + " OSExecute " +
-                                        Settings.Instance.CloseQuestorOSCmdContents.ToString());
+                                        Settings.Instance.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
                                     Logging.Log("QuestorUI", "Done: quitting this session", Logging.white);
                                        
                                     Process.GetCurrentProcess().Kill();
