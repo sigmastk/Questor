@@ -1976,7 +1976,7 @@ namespace Questor.Modules.Caching
                     return false;
                 if (Cache.Instance.ItemHangar.Window.IsReady)
                 {
-                    if (!Cache.Instance.ItemHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    if (Cache.Instance.ItemHangar.Window.IsPrimary())
                     {
                         Cache.Instance.ItemHangar.Window.OpenAsSecondary();
                     return false;
@@ -2013,7 +2013,7 @@ namespace Questor.Modules.Caching
                     return false;
                 if (Cache.Instance.LootHangar.Window.IsReady)
                 {
-                    if (!Cache.Instance.LootHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    if (Cache.Instance.LootHangar.Window.IsPrimary())
                     {
                         Cache.Instance.LootHangar.Window.OpenAsSecondary();
                         return false;
@@ -2050,7 +2050,7 @@ namespace Questor.Modules.Caching
                     return false;
                 if (Cache.Instance.AmmoHangar.Window.IsReady)
                 {
-                    if (!Cache.Instance.AmmoHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    if (Cache.Instance.AmmoHangar.Window.IsPrimary())
                     {
                         Cache.Instance.AmmoHangar.Window.OpenAsSecondary();
                         return false;
@@ -2140,11 +2140,11 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                if (!Cache.Instance.CargoHold.Window.Name.Contains("Secondary"))
+                if (Cache.Instance.CargoHold.Window.IsPrimary())
                 {
                     Logging.Log(module, "Opening cargo window as secondary", Logging.white);
-                    //Cache.Instance.CargoHold.Window.OpenAsSecondary();
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                    Cache.Instance.CargoHold.Window.OpenAsSecondary();
+                    //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     return false;
                 }
@@ -2198,7 +2198,7 @@ namespace Questor.Modules.Caching
                     return false;
                 if (Cache.Instance.ShipHangar.Window.IsReady)
                 {
-                    if (!Cache.Instance.ShipHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    if (Cache.Instance.ShipHangar.Window.IsPrimary())
                     {
                         Cache.Instance.ShipHangar.Window.OpenAsSecondary();
                         return false;
@@ -2242,6 +2242,23 @@ namespace Questor.Modules.Caching
                 {
                     Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
 
+                    //method 1: look for the primary inventory window, or open it, then expand the tree.
+                    bool found = false;
+                    DirectContainerWindow inventory=null;
+                    foreach (var window in Cache.Instance.Windows.OfType<DirectContainerWindow>())
+                    {
+                        if (window.IsPrimary())
+                        {
+                            found = true;
+                            inventory = window;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        Cache.Instance.DirectEve.OpenInventory();
+                        return false;
+                    }
                     // Is the corp ammo Hangar open?
                     if (Cache.Instance.AmmoHangar != null)
                     {
@@ -2255,19 +2272,19 @@ namespace Questor.Modules.Caching
                                                 Math.Round(
                                                     Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).
                                                         TotalSeconds, 0) + "sec]", Logging.white);
+                            if (!inventory.SelectTreeEntry("StationCorpHangar", Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.AmmoHangar) - 1))
+                            {
+                                if (!inventory.ExpandCorpHangarView())
+                                {
+                                    Logging.Log(module, "Failed to expand corp hangar tree", Logging.red);
+                                    return false;
+                                }
+                            }
                             return false;
                         }
                         if (!Cache.Instance.AmmoHangar.Window.IsReady)
                             return false;
-                        if (Cache.Instance.AmmoHangar.Window.IsReady)
-                        {
-                            if (!Cache.Instance.AmmoHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
-                            {
-                                Cache.Instance.AmmoHangar.Window.OpenAsSecondary();
-                                return false;
-                            }
-                            return true;
-                        }
+                        
                     }
                     if (Cache.Instance.AmmoHangar == null)
                     {
@@ -2350,7 +2367,7 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.LootHangar.Window.IsReady)
                         {
                             Logging.Log(module, "OpenCorpLootHangar: Cache.Instance.LootHangar.Window is ready", Logging.white);
-                            if (!Cache.Instance.LootHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                            if (Cache.Instance.LootHangar.Window.IsPrimary())
                             {
                                 Logging.Log(module, "OpenCorpLootHangar: Cache.Instance.LootHangar.Window.Name is: " + Cache.Instance.LootHangar.Window.Name, Logging.white); 
                                 Cache.Instance.LootHangar.Window.OpenAsSecondary();
@@ -2424,7 +2441,7 @@ namespace Questor.Modules.Caching
                         return false;
                     if (Cache.Instance.CorpBookmarkHangar.Window.IsReady)
                     {
-                        if (!Cache.Instance.CorpBookmarkHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                        if (Cache.Instance.CorpBookmarkHangar.Window.IsPrimary())
                         {
                             Cache.Instance.CorpBookmarkHangar.Window.OpenAsSecondary();
                             return false;
@@ -2668,7 +2685,7 @@ namespace Questor.Modules.Caching
                             return false;
                         if (Cache.Instance.AmmoHangar.Window.IsReady)
                         {
-                            if (!Cache.Instance.AmmoHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                            if (Cache.Instance.AmmoHangar.Window.IsPrimary())
                             {
                                 Cache.Instance.AmmoHangar.Window.OpenAsSecondary();
                                 return false;
@@ -2705,7 +2722,7 @@ namespace Questor.Modules.Caching
                         return false;
                     if (Cache.Instance.AmmoHangar.Window.IsReady)
                     {
-                        if (!Cache.Instance.AmmoHangar.Window.Name.ToLower().Contains("secondary".ToLower()))
+                        if (Cache.Instance.AmmoHangar.Window.IsPrimary())
                         {
                             Cache.Instance.AmmoHangar.Window.OpenAsSecondary();
                             return false;
@@ -2793,7 +2810,7 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.DroneBay.Window.IsReady)
             {
                 Logging.Log("cache", "DroneBay window is ready", Logging.white);
-                //if (!Cache.Instance.DroneBay.Window.Name.ToLower().Contains("secondary".ToLower()))
+                //if (Cache.Instance.DroneBay.Window.IsPrimary())
                 //{
                 //    Logging.Log("cache", "DroneBay window name is [" + Cache.Instance.DroneBay.Window.Name.ToLower() + "]", Logging.white);
                 //    Logging.Log("cache", "DroneBay currInvIdName is [" + Cache.Instance.DroneBay.Window.currInvIdName + "]", Logging.white);
@@ -2897,7 +2914,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.ContainerInSpace.Window.IsReady)
                 {
                     Logging.Log(module, "OpenContainerInSpace: window is ready", Logging.white);
-                    if (!Cache.Instance.ContainerInSpace.Window.Name.ToLower().Contains("secondary".ToLower()))
+                    if (Cache.Instance.ContainerInSpace.Window.IsPrimary())
                     {
                         Logging.Log(module, "OpenContainerInSpace: window.Name does not yet contain secondary", Logging.white);
                         Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
