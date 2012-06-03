@@ -1016,7 +1016,7 @@
             this.BehaviorComboBox.Name = "BehaviorComboBox";
             this.BehaviorComboBox.Size = new System.Drawing.Size(162, 21);
             this.BehaviorComboBox.TabIndex = 121;
-            this.BehaviorComboBox.SelectedIndexChanged += new System.EventHandler(this.CombatMissionsBehaviorComboBoxSelectedIndexChanged);
+            this.BehaviorComboBox.SelectedIndexChanged += new System.EventHandler(this.BehaviorComboBoxSelectedIndexChanged);
             this.BehaviorComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label2

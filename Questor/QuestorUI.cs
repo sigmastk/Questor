@@ -2,6 +2,7 @@
 namespace Questor
 {
     using System;
+    using System.Drawing;
     using System.Diagnostics;
     using System.Globalization;
     using System.Reflection;
@@ -24,6 +25,7 @@ namespace Questor
     {
         private readonly Questor _questor;
         //private DateTime _lastlogmessage;
+        private int _guiVisibleWarningGiven = 0;
 
         public QuestorfrmMain()
         {
@@ -434,31 +436,28 @@ namespace Questor
                 QuestorStateComboBox.SelectedItem = _States.CurrentQuestorState.ToString();
             }
 
-            if (Settings.Instance.CharacterMode != null)
+            if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
             {
-                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-                {
-                    if ((string) BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                        BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();;
-                }
+                if ((string) BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();;
+            }
 
-                if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-                {
-                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                        BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();
-                }
+            if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+            {
+                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    BehaviorComboBox.SelectedItem = _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString();
+            }
 
-                if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
-                {
-                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatHelperBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                        BehaviorComboBox.SelectedItem = _States.CurrentCombatHelperBehaviorState.ToString();
-                }
+            if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
+            {
+                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatHelperBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    BehaviorComboBox.SelectedItem = _States.CurrentCombatHelperBehaviorState.ToString();
+            }
 
-                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
-                {
-                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDirectionalScannerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                        BehaviorComboBox.SelectedItem = _States.CurrentDirectionalScannerBehaviorState.ToString();
-                }
+            if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
+            {
+                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDirectionalScannerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    BehaviorComboBox.SelectedItem = _States.CurrentDirectionalScannerBehaviorState.ToString();
             }
 
             if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.DamageType.ToString() && !DamageTypeComboBox.DroppedDown)
@@ -1018,37 +1017,34 @@ namespace Questor
             //_questor.panicstatereset = true; //this cannot be reset when the index changes, as that happens during natural state changes, this needs to be a mouse event
         }
 
-        private void CombatMissionsBehaviorComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        private void BehaviorComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (Settings.Instance.CharacterMode != null)
+            //Logging.Log("QuestorUI","BehaviorComboBoxChanged: Current QuestorState is: [" + _States.CurrentQuestorState + "]",Logging.white);
+            if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
             {
-                //Logging.Log("QuestorUI","BehaviorComboBoxChanged: Current QuestorState is: [" + _States.CurrentQuestorState + "]",Logging.white);
-                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-                {
-                    _States.CurrentCombatMissionBehaviorState =
-                        (CombatMissionsBehaviorState)
-                        Enum.Parse(typeof (CombatMissionsBehaviorState), BehaviorComboBox.Text);
-                }
-                if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-                {
-                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState =
-                        (DedicatedBookmarkSalvagerBehaviorState)
-                        Enum.Parse(typeof (DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
-                }
-                if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
-                {
-                    _States.CurrentCombatHelperBehaviorState =
-                      (CombatHelperBehaviorState)
-                      Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);  
-                }
-                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
-                {
-                    _States.CurrentDirectionalScannerBehaviorState =
-                      (DirectionalScannerBehaviorState)
-                      Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
-                }
+                _States.CurrentCombatMissionBehaviorState =
+                    (CombatMissionsBehaviorState)
+                    Enum.Parse(typeof (CombatMissionsBehaviorState), BehaviorComboBox.Text);
             }
-        }
+            if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+            {
+                _States.CurrentDedicatedBookmarkSalvagerBehaviorState =
+                    (DedicatedBookmarkSalvagerBehaviorState)
+                    Enum.Parse(typeof (DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
+            }
+            if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
+            {
+                _States.CurrentCombatHelperBehaviorState =
+                  (CombatHelperBehaviorState)
+                  Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);  
+            }
+            if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
+            {
+                _States.CurrentDirectionalScannerBehaviorState =
+                  (DirectionalScannerBehaviorState)
+                  Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
+            }
+        } 
 
         private void PanicStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1109,6 +1105,7 @@ namespace Questor
 
         private void TxtExtConsoleTextChanged(object sender, EventArgs e)
         {
+
         }
 
         private void AutoStartCheckBoxCheckedChanged(object sender, EventArgs e)
