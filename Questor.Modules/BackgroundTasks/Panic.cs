@@ -77,7 +77,8 @@ namespace Questor.Modules.BackgroundTasks
                     else if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
                     {
                         // Only check for cap-panic while in a mission, not while doing anything else
-                        Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]", Logging.red);
+                        Logging.Log("Panic","Start panicking, capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage,0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]",Logging.red);
+
                         //Questor.panic_attempts_this_mission;
                         Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                         Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
@@ -85,14 +86,14 @@ namespace Questor.Modules.BackgroundTasks
                     }
                     else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
                     {
-                        Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%]", Logging.red);
+                        Logging.Log("Panic","Start panicking, shield [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]", Logging.red);
                         Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                         Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                         _States.CurrentPanicState = PanicState.StartPanicking;
                     }
                     else if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
                     {
-                        Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%]", Logging.red);
+                        Logging.Log("Panic","Start panicking, armor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%]", Logging.red);
                         Cache.Instance.PanicAttemptsThisMission = (Cache.Instance.PanicAttemptsThisMission + 1);
                         Cache.Instance.PanicAttemptsThisPocket = (Cache.Instance.PanicAttemptsThisPocket + 1);
                         _States.CurrentPanicState = PanicState.StartPanicking;
@@ -248,7 +249,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 else
                                 {
-                                    Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.red);
+                                    Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Cache.Instance.NextUndockAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.red);
                                 }
                             }
                             else
