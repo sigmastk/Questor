@@ -401,6 +401,14 @@ namespace Questor.Modules.Actions
                 {
                     Logging.Log("AgentInteraction", "Missing mission xml [" + missionName + "] from [" + Cache.Instance.missionXmlPath + "] !!!", Logging.orange);
                     Cache.Instance.MissionXMLIsAvailable = false;
+                    if (Settings.Instance.RequireMissionXML)
+                    {
+                        Logging.Log("AgentInteraction", "Stopping Questor because RequireMissionXML is true in your character XML settings", Logging.orange);
+                        Logging.Log("AgentInteraction", "You will need to create a mission XML for [" + missionName +"]", Logging.orange);
+
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                        return;
+                    }
                 }
 
                 if (!loadedAmmo)
@@ -607,6 +615,7 @@ namespace Questor.Modules.Actions
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
                     //Cache.Instance.factionFit = "Default";
                     //Cache.Instance.Fitting = "Default";
+                    Cache.Instance.FactionName = "Default";
                     if (faction != null)
                     {
                         var factionName = ((string)faction.Attribute("name"));
