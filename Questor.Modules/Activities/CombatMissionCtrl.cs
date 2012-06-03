@@ -352,7 +352,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.teal);
                         Combat.ReloadAll();
-                        Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                     }
                     if (DateTime.Now > Cache.Instance.NextActivateAction)
                     {
@@ -460,7 +459,6 @@ namespace Questor.Modules.Activities
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         Combat.ReloadAll();
-                        Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
                     }
 
@@ -484,7 +482,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
                         Combat.ReloadAll();
-                        Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
                     }
                 }
@@ -942,7 +939,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]", Logging.teal);
                         Combat.ReloadAll();
-                        Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
                     }
 
@@ -962,7 +958,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons", Logging.teal);
                         Combat.ReloadAll();
-                        Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                         return;
                     }
                 }

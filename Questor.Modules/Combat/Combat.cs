@@ -127,6 +127,7 @@ namespace Questor.Modules.Combat
                 }
 
                 Logging.Log("Combat", "Changing [" + weapon.ItemId + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range / 1000, 0) + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.teal);
+                Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                 weapon.ChangeAmmo(charge);
                 weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
             }
@@ -224,7 +225,8 @@ namespace Questor.Modules.Combat
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
                 Logging.Log("Combat", "Reloading [" + weapon.ItemId + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range/1000, 0) + "][TypeID: " + charge.TypeId + "]", Logging.teal);
-                weapon.ReloadAmmo(charge);
+                Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
+                weapon.ReloadAmmo(charge);                    
                 weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + 1;
             }
             else
@@ -295,7 +297,6 @@ namespace Questor.Modules.Combat
                 if (weapon.Charge != null && (charge != null && weapon.Charge.TypeId == charge.TypeId))
                 {
                     Logging.Log("Combat", "ReloadAll [" + weapon.ItemId + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]", Logging.teal);
-
                     weapon.ReloadAmmo(charge);
                 }
             }
