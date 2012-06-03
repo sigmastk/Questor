@@ -459,7 +459,6 @@ namespace Questor.Modules.Activities
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         Combat.ReloadAll();
-                        return;
                     }
 
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
@@ -482,7 +481,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
                         Combat.ReloadAll();
-                        return;
                     }
                 }
                 NavigateIntoRange(target);
@@ -939,7 +937,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]", Logging.teal);
                         Combat.ReloadAll();
-                        return;
                     }
 
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
@@ -958,7 +955,6 @@ namespace Questor.Modules.Activities
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons", Logging.teal);
                         Combat.ReloadAll();
-                        return;
                     }
                 }
                 NavigateIntoRange(target);
