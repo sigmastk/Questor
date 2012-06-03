@@ -11,7 +11,7 @@ namespace Questor.Modules.Lookup
 {
     public enum Time
     {
-        LootingDelay_milliseconds = 13500,                       // Delay between loot attempts
+        LootingDelay_milliseconds = 3500,                        // Delay between loot attempts
         WarpScrambledNoDelay_seconds = 10,                       // Time after you are no longer warp scrambled to consider it IMPORTANT That you warp soon
         RemoveBookmarkDelay_seconds = 2,                         // Delay between each removal of a bookmark
         QuestorPulse_milliseconds = 1000,                        // Used to delay the next pulse, units: milliseconds. Default is 1500
