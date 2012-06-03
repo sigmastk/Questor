@@ -96,7 +96,12 @@ namespace Questor.Modules.Logging
 
         public static bool PocketObjectStatistics(List<EntityCache> things)
         {
-            string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name ?? "randomgrid");
+            string currentPocketName = Cache.Instance.FilterPath("randomgrid");
+            if (!String.IsNullOrEmpty(Cache.Instance.Mission.Name))
+            {
+                currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
+            }
+            
             Settings.Instance.PocketObjectStatisticsFile = Path.Combine(Settings.Instance.PocketObjectStatisticsPath, Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + Cache.Instance.PocketNumber + " - ObjectStatistics.csv");
             Logging.Log("Statistics.ObjectStatistics", "Logging info on the [" + things.Count + "] objects in this pocket to [" + Settings.Instance.PocketObjectStatisticsFile + "]", Logging.white);
 
