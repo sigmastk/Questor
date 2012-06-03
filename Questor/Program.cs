@@ -231,7 +231,15 @@ namespace Questor
                 //
                 // chantling scheduler (above)
                 //
-                _directEve = new DirectEve();
+                try
+                {
+                    _directEve = new DirectEve();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.white);
+                }
+
                 _directEve.OnFrame += OnFrame;
 
                 while (!_done)
@@ -246,7 +254,14 @@ namespace Questor
             {
                 _readyToStart = true;
 
-                _directEve = new DirectEve();
+                try
+                {
+                    _directEve = new DirectEve();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.white);
+                }
                 _directEve.OnFrame += OnFrame;
 
                 // Sleep until we're done

@@ -123,6 +123,8 @@ namespace Questor.Modules.Lookup
 
         public string MissionsPath { get; set; }
 
+        public bool RequireMissionXML { get; set; }
+
         public bool LowSecMissionsInShuttles { get; set; }
 
         public bool WaitDecline { get; set; }
@@ -537,7 +539,7 @@ namespace Questor.Modules.Lookup
                 const string relativeMissionsPath = "Missions";
                 MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
                 Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.white);
-
+                RequireMissionXML = false;
                 LowSecMissionsInShuttles = false;
                 MaterialsForWarOreID = 20;
                 MaterialsForWarOreQty = 8000;
@@ -810,6 +812,7 @@ namespace Questor.Modules.Lookup
                     var relativeMissionsPath = (string)xml.Element("missionsPath");
                     MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
                     Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.white);
+                    RequireMissionXML = (bool?)xml.Element("requireMissionXML") ?? false;
                     LowSecMissionsInShuttles = (bool?)xml.Element("LowSecMissions") ?? false;
                     MaterialsForWarOreID = (int?)xml.Element("MaterialsForWarOreID") ?? 20;
                     MaterialsForWarOreQty = (int?)xml.Element("MaterialsForWarOreQty") ?? 8000;

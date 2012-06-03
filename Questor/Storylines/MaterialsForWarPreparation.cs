@@ -74,6 +74,13 @@ namespace Questor.Storylines
             // Open the item hangar
             if (!Cache.Instance.OpenItemsHangar("MaterialsForWarPreperation")) return StorylineState.PreAcceptMission;
 
+            if (Cache.Instance.ItemHangar.Window == null)
+            {
+                Logging.Log("MaterialsForWar","PreacceptMission: ItemHangar is nul!",Logging.orange);
+                if (!Cache.Instance.OpenItemsHangar("MaterialsForWarPreperation")) return StorylineState.PreAcceptMission;
+                return StorylineState.PreAcceptMission;
+            }
+
             // Is there a market window?
             DirectMarketWindow marketWindow = directEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
 
