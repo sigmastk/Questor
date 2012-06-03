@@ -320,16 +320,30 @@ namespace Questor.Modules.Caching
                 // Get ammo based on current damage type
                 IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType).ToList();
 
+                try
+                {
                 // Is our ship's cargo available?
-                if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.IsReady))
-                    ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+                    if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.Window.IsReady))
+                        ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+                    else
+                        return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
 
                 // Return ship range if there's no ammo left
                 if (!ammo.Any())
                     return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
 
-                // Return max range
                 return ammo.Max(a => a.Range);
+            }
+                catch (Exception)
+                {
+                    // Return max range
+                    if (Cache.Instance.DirectEve.ActiveShip != null)
+                    {
+                        return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+                    }
+                    return 0;
+                }
+                
             }
         }
 
@@ -894,7 +908,10 @@ namespace Questor.Modules.Caching
             get
             {
                 _agent = DirectEve.GetAgentByName(CurrentAgent);
-                _agentId = _agent.AgentId;
+                if (_agent != null)
+                {
+                    _agentId = _agent.AgentId;
+                }
 
                 return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
             }
