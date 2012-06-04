@@ -484,30 +484,35 @@ namespace Questor.Behaviors
                     {
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;                    
+                    }
+                    break;
 
-                        AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
-                        if (AfterMissionSalvageBookmarks.Count == 0)
+
+                case DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge:
+                        
+                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
+                    if (AfterMissionSalvageBookmarks.Count == 0)
+                    {
+                        BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        if (BookmarksThatAreNotReadyYet.Any())
                         {
-                            BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                            if (BookmarksThatAreNotReadyYet.Any())
-                            {
                                 Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: There are [" + BookmarksThatAreNotReadyYet.Count() + "] Salvage Bookmarks that have not yet aged [" + Settings.Instance.AgeofBookmarksForSalvageBehavior + "] min.", Logging.white);
-                            }
-                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: Character mode is BookmarkSalvager and no bookmarks are ready to salvage.", Logging.white);
-                            //We just need a NextSalvagerSession timestamp to key off of here to add the delay
-                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
-                            _States.CurrentQuestorState = QuestorState.Idle;
+                        }
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: Character mode is BookmarkSalvager and no bookmarks are ready to salvage.", Logging.white);
+                        //We just need a NextSalvagerSession timestamp to key off of here to add the delay
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                        _States.CurrentQuestorState = QuestorState.Idle;
 
-                            Statistics.Instance.FinishedSalvaging = DateTime.Now;
-                            return;
-                        }
-                        else //There is at least 1 salvage bookmark
-                        {
-                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: There are [ " + AfterMissionSalvageBookmarks.Count + " ] more salvage bookmarks left to process", Logging.white);
-                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], DedicatedBookmarkSalvagerBehaviorState: [" + _States.CurrentDedicatedBookmarkSalvagerBehaviorState + "]", Logging.white);
-                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
-                            Statistics.Instance.StartedSalvaging = DateTime.Now;
-                        }
+                        Statistics.Instance.FinishedSalvaging = DateTime.Now;
+                        return;
+                    }
+                    else //There is at least 1 salvage bookmark
+                    {
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: There are [ " + AfterMissionSalvageBookmarks.Count + " ] more salvage bookmarks left to process", Logging.white);
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "Unloadloot: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], DedicatedBookmarkSalvagerBehaviorState: [" + _States.CurrentDedicatedBookmarkSalvagerBehaviorState + "]", Logging.white);
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
+                        Statistics.Instance.StartedSalvaging = DateTime.Now;
                     }
                     break;
 
@@ -678,7 +683,7 @@ namespace Questor.Behaviors
                                 if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Salvage)
                                 {
                                     Statistics.Instance.FinishedSalvaging = DateTime.Now;
-                                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
+                                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
                                 }
                                 return;
                             }
