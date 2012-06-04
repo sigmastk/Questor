@@ -194,16 +194,15 @@ namespace Questor
 
             //Settings.Instance.walletbalancechangelogoffdelay = 2;  //used for debugging purposes
             //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.lastKnownGoodConnectedTime);
-            if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) <
-                Settings.Instance.Walletbalancechangelogoffdelay)
+            if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.Walletbalancechangelogoffdelay)
             {
-                if (Cache.Instance.MyWalletBalance != Cache.Instance.DirectEve.Me.Wealth)
+                if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth)
                 {
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 }
             }
-            else if (Settings.Instance.Walletbalancechangelogoffdelay != 0 && (_States.CurrentQuestorState == QuestorState.Idle))
+            else if (Settings.Instance.Walletbalancechangelogoffdelay != 0)
             {
                 Logging.Log(
                     "Questor", String.Format(
