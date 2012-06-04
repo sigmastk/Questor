@@ -2146,10 +2146,10 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.CargoHold.Window.IsPrimary())
                 {
                     Logging.Log(module, "Opening cargo window as secondary", Logging.white);
-                    //Cache.Instance.CargoHold.Window.OpenAsSecondary();
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                    Cache.Instance.CargoHold.Window.OpenAsSecondary();
+                    //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    return false;
+                    return true; // just assume everything went well. the window is already open and is ready anyway
                 }
                 return true;                
             }
@@ -2203,8 +2203,10 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.ShipHangar.Window.IsPrimary())
                     {
-                        //Cache.Instance.ShipHangar.Window.OpenAsSecondary();
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                        Logging.Log(module, "Opening Ship Hangar as secondary", Logging.white);
+                        Cache.Instance.ShipHangar.Window.OpenAsSecondary();
+                        //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                         return false;
                     }
                     return true;
