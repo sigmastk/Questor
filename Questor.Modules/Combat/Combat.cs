@@ -388,6 +388,8 @@ namespace Questor.Modules.Combat
 
             // TODO: Add check to see if there is better ammo to use! :)
             // Get distance of the target and compare that with the ammo currently loaded
+
+            //Deactivate weapns that needs to be deactivated for this list of reasons...
             foreach (ModuleCache weapon in weapons)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: for each weapon [" + weapon.ItemId + "] in weapons", Logging.teal);
