@@ -696,10 +696,18 @@ namespace Questor
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
                 {
+                    if (DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds > 120)
+                    {
+                        Logging.Log("QuestorUI", "The Last Session.IsReady = true was more than 120 seconds ago! This is bad. - Exiting EVE", Logging.red);
+                        CloseQuestor();
+                    }
+                    
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        Logging.Log("QuestorUI","Debugger.IsAttached == true - not exiting",Logging.white);
+                        return;
+                    }
                     Logging.Log("QuestorUI", "The Last Session.IsReady = true was more than 60 seconds ago! This is bad. - Exiting EVE", Logging.red);
-                    //
-                    // closing eve would be a very good idea here
-                    //
                     CloseQuestor();
                     //Application.Exit();
                    
