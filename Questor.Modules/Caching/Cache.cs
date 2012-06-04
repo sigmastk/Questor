@@ -2123,13 +2123,9 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-
-
             Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
             if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
             {
-
-
                 if (Cache.Instance.CargoHold.Window == null)
                 {
                     // No, command it to open
@@ -2150,8 +2146,8 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.CargoHold.Window.IsPrimary())
                 {
                     Logging.Log(module, "Opening cargo window as secondary", Logging.white);
-                    Cache.Instance.CargoHold.Window.OpenAsSecondary();
-                    //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                    //Cache.Instance.CargoHold.Window.OpenAsSecondary();
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     return false;
                 }
@@ -2207,7 +2203,8 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.ShipHangar.Window.IsPrimary())
                     {
-                        Cache.Instance.ShipHangar.Window.OpenAsSecondary();
+                        //Cache.Instance.ShipHangar.Window.OpenAsSecondary();
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
                         return false;
                     }
                     return true;
