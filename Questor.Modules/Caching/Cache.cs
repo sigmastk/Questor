@@ -157,6 +157,10 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _aggressed;
 
         /// <summary>
+
+        ///   DroneBay
+        /// </summary>
+        private DirectContainer _dronebay;
         ///   Returns all unlooted wrecks & containers
         /// </summary>
         private List<EntityCache> _unlootedContainers;
