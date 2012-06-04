@@ -167,23 +167,26 @@ namespace Questor.Modules.Caching
 
         public Cache()
         {
-            string line = "Cache: new cache instance being instantiated";
+            //string line = "Cache: new cache instance being instantiated";
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, line));
-            line = string.Empty;
+            //line = string.Empty;
 
             string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            ShipTargetValues = new List<ShipTargetValue>();
-            XDocument values = XDocument.Load(System.IO.Path.Combine(path, "ShipTargetValues.xml"));
-            if (values.Root != null)
-                foreach (XElement value in values.Root.Elements("ship"))
-                    ShipTargetValues.Add(new ShipTargetValue(value));
+            if (path != null)
+            {
+                ShipTargetValues = new List<ShipTargetValue>();
+                XDocument values = XDocument.Load(System.IO.Path.Combine(path, "ShipTargetValues.xml"));
+                if (values.Root != null)
+                    foreach (XElement value in values.Root.Elements("ship"))
+                        ShipTargetValues.Add(new ShipTargetValue(value));
 
-            InvTypesById = new Dictionary<int, InvType>();
-            XDocument invTypes = XDocument.Load(System.IO.Path.Combine(path, "InvTypes.xml"));
-            if (invTypes.Root != null)
-                foreach (XElement element in invTypes.Root.Elements("invtype"))
-                    InvTypesById.Add((int)element.Attribute("id"), new InvType(element));
+                InvTypesById = new Dictionary<int, InvType>();
+                XDocument invTypes = XDocument.Load(System.IO.Path.Combine(path, "InvTypes.xml"));
+                if (invTypes.Root != null)
+                    foreach (XElement element in invTypes.Root.Elements("invtype"))
+                        InvTypesById.Add((int)element.Attribute("id"), new InvType(element));
+            }
 
             _priorityTargets = new List<PriorityTarget>();
             LastModuleTargetIDs = new Dictionary<long, long>();
@@ -322,18 +325,18 @@ namespace Questor.Modules.Caching
 
                 try
                 {
-                // Is our ship's cargo available?
+                    // Is our ship's cargo available?
                     if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.Window.IsReady))
                         ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
                     else
                         return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
 
-                // Return ship range if there's no ammo left
-                if (!ammo.Any())
-                    return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+                    // Return ship range if there's no ammo left
+                    if (!ammo.Any())
+                        return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
 
-                return ammo.Max(a => a.Range);
-            }
+                    return ammo.Max(a => a.Range);                
+                }
                 catch (Exception)
                 {
                     // Return max range
@@ -2755,7 +2758,10 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public DirectContainer DroneBay { get; set; }
+        public DirectContainer DroneBay
+        {
+            get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
+        }
 
         public bool OpenDroneBay(String module)
         {
@@ -2774,11 +2780,6 @@ namespace Questor.Modules.Caching
             //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
             //    return false;
             //}
-            if (Cache.Instance.InStation || Cache.Instance.InSpace)
-            {
-                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
-            }
-            else return false;
 
             if (Cache.Instance.DroneBay == null)
             {
@@ -2841,11 +2842,6 @@ namespace Questor.Modules.Caching
                 Logging.Log(module, "Closing Drone Bay: We aren't in station or space?!", Logging.orange);
                 return false;
             }
-            if (Cache.Instance.InStation || Cache.Instance.InSpace)
-            {
-                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
-            }
-            else return false;
 
             // Is the drone bay open? if so, close it
             if (Cache.Instance.DroneBay.Window != null)

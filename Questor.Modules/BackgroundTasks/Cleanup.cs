@@ -16,6 +16,7 @@ namespace Questor.Modules.BackgroundTasks
     {
         private DateTime _lastCleanupAction;
         private DateTime _lastCleanupProcessState;
+      private int _dronebayclosingattempts = 0;
         //private DateTime _lastChatWindowAction;
         //private bool _newprivateconvowindowhandled;
 
@@ -274,17 +275,26 @@ namespace Questor.Modules.BackgroundTasks
                 case CleanupState.CheckWindowsThatDontBelongInSpace:
                     if (Cache.Instance.InSpace)
                     {
-                        if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
+                        if (Settings.Instance.UseDrones && 
+                           (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && 
+                            Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && 
+                            Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&  
+                            _dronebayclosingattempts <= 1))
                         {
                             _lastCleanupAction = DateTime.Now;
+                            _dronebayclosingattempts++;
                             // Close the drone bay, its not required in space.
                             if (Cache.Instance.DroneBay.Window != null)
                                 if(Cache.Instance.DroneBay.Window.IsReady)
                                 {
-                                    Logging.Log("Cleanup", "Closing Drone Bay Window as it is not useful in space.", Logging.white);
+                                    Logging.Log("Cleanup", "Closing Drone Bay Window Named [" + Cache.Instance.DroneBay.Window.Name + "] as it is not useful in space. [" + _dronebayclosingattempts  + "] attempts", Logging.white);
                                     Cache.Instance.DroneBay.Window.Close();
                                 }
                         }
+                    }
+                    else
+                    {
+                        _dronebayclosingattempts = 0;
                     }
                     _lastCleanupAction = DateTime.Now;
                     _States.CurrentCleanupState = CleanupState.Idle;
