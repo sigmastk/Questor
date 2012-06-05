@@ -2525,6 +2525,45 @@ namespace Questor.Modules.Caching
             {
                 if (!Cache.Instance.OpenLootContainer("Cache.StackLootContainer")) return false;
                 Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                if (LootHangar.Window == null)
+                {
+                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    if (firstlootcontainer != null)
+                    {
+                        long lootContainerID = firstlootcontainer.ItemId;
+                        //var inventories = Cache.Instance.Windows.OfType<DirectContainerWindow>().Where(w => w.IsPrimary() && w.Name == "('Inventory', None)");
+                        //var inventory = inventories.FirstOrDefault(i => i.GetIdsFromTree(false).Count > 1);
+                        var inventory = Cache.Instance.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.IsPrimary());
+                        //more than 1 primary window ??
+                        if (inventory == null)
+                        {
+                            Cache.Instance.DirectEve.OpenInventory();
+                            Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        }
+                        else
+                        {
+                            if (!inventory.GetIdsFromTree(false).Contains(lootContainerID))
+                            {
+                                Logging.Log(module, "Error: can't find inventory container item in the tree. Found the following ids:", Logging.red);
+                                var idsintree = inventory.GetIdsFromTree(false);                                
+                                foreach (var itemintree in idsintree)
+                                {
+                                    Logging.Log(module, "ID: " + itemintree, Logging.red);
+                                }
+                                Logging.Log(module, "Was looking for: " + lootContainerID, Logging.red);
+                                
+                                return false;
+                            }
+                            else
+                            {
+                                inventory.SelectTreeEntryByID(lootContainerID);
+                                Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                                return false;
+                            }
+                        }
+                    }
+                    else return false;
+                }
                 if (LootHangar.Window == null) return false;
                 if (!LootHangar.Window.IsReady) return false;
                 Logging.Log(module, "Loot Container named: [ " + LootHangar.Window.Name +
@@ -2532,6 +2571,7 @@ namespace Questor.Modules.Caching
                 if (LootHangar != null && LootHangar.Window.IsReady)
                 {
                     LootHangar.StackAll();
+                    Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));            
                     return true;
                 }           
             }
