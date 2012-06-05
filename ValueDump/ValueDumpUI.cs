@@ -19,29 +19,34 @@ namespace ValueDump
     using System.Xml.Linq;
     using System.IO;
     using DirectEve;
+    using Valuedump;
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
     using Questor.Modules.Logging;
 
     public partial class ValueDumpUI : Form
     {
-        private Dictionary<int, InvType> InvTypesById { get; set; }
+        private DateTime _lastPulse;
 
-        private List<ItemCache> Items { get; set; }
+        private Dictionary<int, InvTypeMarket> InvTypesById { get; set; }
 
-        private List<ItemCache> ItemsToSell { get; set; }
+        private List<ItemCacheMarket> Items { get; set; }
 
-        private List<ItemCache> ItemsToRefine { get; set; }
+        private List<ItemCacheMarket> ItemsToSell { get; set; }
+
+        private List<ItemCacheMarket> ItemsToRefine { get; set; }
 
         private ValueDumpState State { get; set; }
 
-        private DirectEve DirectEve { get; set; }
+        private DirectEve _directEve { get; set; }
 
         private static double Marketlookupdelay { get; set; }
 
         private static double Marketsellorderdelay { get; set; }
 
         private static double Marketbuyorderdelay { get; set; }
+
+        public string CharacterName { get; set; }
 
         public string InvTypesPath
         {
@@ -53,38 +58,80 @@ namespace ValueDump
 
         public ValueDumpUI()
         {
+            Logging.Log("ValueDumpUI","Starting ValueDump",Logging.orange);
             InitializeComponent();
 
-            InvTypesById = new Dictionary<int, InvType>();
+            InvTypesById = new Dictionary<int, InvTypeMarket>();
             XDocument invTypes = XDocument.Load(InvTypesPath);
             if (invTypes.Root != null)
                 foreach (XElement element in invTypes.Root.Elements("invtype"))
-                    InvTypesById.Add((int)element.Attribute("id"), new InvType(element));
+                    InvTypesById.Add((int)element.Attribute("id"), new InvTypeMarket(element));
 
-            Items = new List<ItemCache>();
-            ItemsToSell = new List<ItemCache>();
-            ItemsToRefine = new List<ItemCache>();
+            Items = new List<ItemCacheMarket>();
+            ItemsToSell = new List<ItemCacheMarket>();
+            ItemsToRefine = new List<ItemCacheMarket>();
 
-            DirectEve = new DirectEve();
-            DirectEve.OnFrame += OnFrame;
+            _directEve = new DirectEve();
+            Cache.Instance.DirectEve = _directEve;
             Marketlookupdelay = 3;
             Marketsellorderdelay = 5;
             Marketbuyorderdelay = 5;
+            _directEve.OnFrame += OnFrame;
         }
 
-        private InvType _currentMineral;
-        private ItemCache _currentItem;
+        private InvTypeMarket _currentMineral;
+        private ItemCacheMarket _currentItem;
         private DateTime _lastExecute = DateTime.MinValue;
 
         private void OnFrame(object sender, EventArgs e)
         {
+            Cache.Instance.LastFrame = DateTime.Now;
+            // Only pulse state changes every .5s
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.ValueDumpPulse_milliseconds) //default: 500ms
+                return;
+            _lastPulse = DateTime.Now;
+            
+            // Session is not ready yet, do not continue
+            if (!Cache.Instance.DirectEve.Session.IsReady)
+                return;
+
+            if (Cache.Instance.DirectEve.Session.IsReady)
+                Cache.Instance.LastSessionIsReady = DateTime.Now;
+
+            // We are not in space or station, don't do shit yet!
+            if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
+            {
+                Cache.Instance.NextInSpaceorInStation = DateTime.Now.AddSeconds(12);
+                Cache.Instance.LastSessionChange = DateTime.Now;
+                return;
+            }
+
+            if (DateTime.Now < Cache.Instance.NextInSpaceorInStation)
+                return;
+
+            // New frame, invalidate old cache
+            Cache.Instance.InvalidateCache();
+
+            // Update settings (settings only load if character name changed)
+            if (!Settings.Instance.Defaultsettingsloaded)
+            {
+                Settings.Instance.LoadSettings();
+            }
+            
+            if (DateTime.Now.Subtract(Cache.Instance.LastupdateofSessionRunningTime).TotalSeconds <
+                (int)Time.SessionRunningTimeUpdate_seconds)
+            {
+                Cache.Instance.SessionRunningTime =
+                    (int)DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
+                Cache.Instance.LastupdateofSessionRunningTime = DateTime.Now;
+            }
+
             if (State == ValueDumpState.Idle)
                 return;
 
-            DirectMarketWindow marketWindow = DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
-            DirectContainer hangar = DirectEve.GetItemHangar();
-            DirectMarketActionWindow sellWindow = DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
-            DirectReprocessingWindow reprorcessingWindow = DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
+            DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
+            DirectReprocessingWindow reprorcessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
             switch (State)
             {
                 case ValueDumpState.CheckMineralPrices:
@@ -110,7 +157,7 @@ namespace ValueDump
                         {
                             if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Marketlookupdelay)
                             {
-                                DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
                                 _lastExecute = DateTime.Now;
                             }
                             return;
@@ -131,7 +178,7 @@ namespace ValueDump
                             return;
                         }
 
-                        if (!marketWindow.BuyOrders.Any(o => o.StationId == DirectEve.Session.StationId))
+                        if (!marketWindow.BuyOrders.Any(o => o.StationId == Cache.Instance.DirectEve.Session.StationId))
                         {
                             _currentMineral.LastUpdate = DateTime.Now;
 
@@ -143,7 +190,7 @@ namespace ValueDump
                         //_currentMineral.MedianBuy = marketWindow.BuyOrders.Where(o => o.StationId == DirectEve.Session.StationId).OrderByDescending(o => o.Price).Take(5).Average(o => o.Price);
 
                         // Take top 1% orders and count median-buy price (no botter covers more than 1% Jita orders anyway)
-                        List<DirectOrder> orders = marketWindow.BuyOrders.Where(o => o.StationId == DirectEve.Session.StationId && o.MinimumVolume == 1).OrderByDescending(o => o.Price).ToList();
+                        List<DirectOrder> orders = marketWindow.BuyOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.MinimumVolume == 1).OrderByDescending(o => o.Price).ToList();
                         double totalAmount = orders.Sum(o => (double)o.VolumeRemaining);
                         double amount = 0, value = 0, count = 0;
                         for (int i = 0; i < orders.Count(); i++)
@@ -158,7 +205,7 @@ namespace ValueDump
                         _currentMineral.MedianBuy = value / amount;
                         Logging.Log("ValuedumpUI", "Average buy price for " + _currentMineral.Name + " is " + _currentMineral.MedianBuy.Value.ToString("#,##0.00") + " (" + count + " / " + orders.Count() + " orders, " + amount.ToString("#,##0") + " / " + totalAmount.ToString("#,##0") + " items)", Logging.white);
 
-                        if (!marketWindow.SellOrders.Any(o => o.StationId == DirectEve.Session.StationId))
+                        if (!marketWindow.SellOrders.Any(o => o.StationId == Cache.Instance.DirectEve.Session.StationId))
                         {
                             _currentMineral.LastUpdate = DateTime.Now;
 
@@ -167,7 +214,7 @@ namespace ValueDump
                         }
 
                         // Take top 1% orders and count median-sell price
-                        orders = marketWindow.SellOrders.Where(o => o.StationId == DirectEve.Session.StationId).OrderBy(o => o.Price).ToList();
+                        orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId).OrderBy(o => o.Price).ToList();
                         totalAmount = orders.Sum(o => (double)o.VolumeRemaining);
                         amount = 0; value = 0; count = 0;
                         for (int i = 0; i < orders.Count(); i++)
@@ -199,8 +246,8 @@ namespace ValueDump
 
                     // a quick price check table
                     Dictionary<string, double> mineralPrices = new Dictionary<string, double>();
-                    foreach (InvType i in InvTypesById.Values)
-                        if (InvType.Minerals.Contains(i.Name))
+                    foreach (InvTypeMarket i in InvTypesById.Values)
+                        if (InvTypeMarket.Minerals.Contains(i.Name))
 #if manual
                             mineralPrices.Add(i.Name, i.MedianSell ?? 0);
 #else
@@ -208,10 +255,10 @@ namespace ValueDump
 #endif
 
                     double temp;
-                    foreach (InvType i in InvTypesById.Values)
+                    foreach (InvTypeMarket i in InvTypesById.Values)
                     {
                         temp = 0;
-                        foreach (string m in InvType.Minerals)
+                        foreach (string m in InvTypeMarket.Minerals)
                             if (i.Reprocess[m].HasValue && i.Reprocess[m] > 0)
                             {
                                 var d = i.Reprocess[m];
@@ -226,7 +273,7 @@ namespace ValueDump
                     Logging.Log("ValuedumpUI", "Saving InvTypes.xml", Logging.white);
 
                     XDocument xdoc = new XDocument(new XElement("invtypes"));
-                    foreach (InvType type in InvTypesById.Values.OrderBy(i => i.Id))
+                    foreach (InvTypeMarket type in InvTypesById.Values.OrderBy(i => i.Id))
                         xdoc.Root.Add(type.Save());
                     xdoc.Save(InvTypesPath);
 
@@ -234,29 +281,14 @@ namespace ValueDump
                     break;
 
                 case ValueDumpState.GetItems:
-                    if (hangar.Window == null)
-                    {
-                        // No, command it to open
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Marketlookupdelay)
-                        {
-                            Logging.Log("ValueDumpUI", "Opening hangar", Logging.white);
-                            DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                            _lastExecute = DateTime.Now;
-                        }
-
-                        return;
-                    }
-
-                    if (!hangar.Window.IsReady)
-                        return;
-
+                    if (!Cache.Instance.OpenItemsHangar("ValueDump")) break;
                     Logging.Log("ValueDumpUI", "Loading hangar items", Logging.white);
 
                     // Clear out the old
                     Items.Clear();
-                    List<DirectItem> hangarItems = hangar.Items;
+                    List<DirectItem> hangarItems = Cache.Instance.ItemHangar.Items;
                     if (hangarItems != null)
-                        Items.AddRange(hangarItems.Where(i => i.ItemId > 0 && i.Quantity > 0).Select(i => new ItemCache(i, RefineCheckBox.Checked)));
+                        Items.AddRange(hangarItems.Where(i => i.ItemId > 0 && i.Quantity > 0).Select(i => new ItemCacheMarket(i, RefineCheckBox.Checked)));
 
                     State = ValueDumpState.UpdatePrices;
                     break;
@@ -264,13 +296,13 @@ namespace ValueDump
                 case ValueDumpState.UpdatePrices:
                     bool updated = false;
 
-                    foreach (ItemCache item in Items)
+                    foreach (ItemCacheMarket item in Items)
                     {
-                        InvType invType;
+                        InvTypeMarket invType;
                         if (!InvTypesById.TryGetValue(item.TypeId, out invType))
                         {
                             Logging.Log("Valuedump","Unknown TypeId " + item.TypeId + " for " + item.Name + ", adding to the list",Logging.orange);
-                            invType = new InvType(item);
+                            invType = new InvTypeMarket(item);
                             InvTypesById.Add(item.TypeId, invType);
                             updated = true;
                             continue;
@@ -278,7 +310,7 @@ namespace ValueDump
                         item.InvType = invType;
 
                         bool updItem = false;
-                        foreach (ItemCache material in item.RefineOutput)
+                        foreach (ItemCacheMarket material in item.RefineOutput)
                         {
                             if (!InvTypesById.TryGetValue(material.TypeId, out invType))
                             {
@@ -292,7 +324,15 @@ namespace ValueDump
                             if ((!exists && matsPerItem > 0) || (exists && InvTypesById[(int)item.TypeId].Reprocess[material.Name] != matsPerItem))
                             {
                                 if (exists)
-                                    Logging.Log("ValueDumpUI", "[" + item.Name + "][" + material.Name + "] old value: [" + InvTypesById[(int)item.TypeId].Reprocess[material.Name] + ", new value: [" + matsPerItem + "]", Logging.white);
+                                    Logging.Log("ValueDumpUI",
+                                        Logging.orange + " [" + Logging.white + 
+                                        item.Name +
+                                        Logging.orange + "][" + Logging.white + 
+                                        material.Name +
+                                        Logging.orange + "] old value: [" + Logging.white + 
+                                        InvTypesById[(int)item.TypeId].Reprocess[material.Name] + ", new value: " +
+                                        Logging.orange + "[" + Logging.white + matsPerItem +
+                                        Logging.orange + "]", Logging.white);
                                 InvTypesById[(int)item.TypeId].Reprocess[material.Name] = matsPerItem;
                                 updItem = true;
                             }
@@ -345,7 +385,7 @@ namespace ValueDump
                     ItemsToSell.RemoveAt(0);
 
                     // Do not sell containers
-                    if (_currentItem.GroupID == 448)
+                    if (_currentItem.GroupId == 448)
                     {
                         Logging.Log("ValueDumpUI", "Skipping " + _currentItem.Name, Logging.white);
                         break;
@@ -359,7 +399,7 @@ namespace ValueDump
                         break;
                     _lastExecute = DateTime.Now;
 
-                    DirectItem directItem = hangar.Items.FirstOrDefault(i => i.ItemId == _currentItem.Id);
+                    DirectItem directItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.ItemId == _currentItem.Id);
                     if (directItem == null)
                     {
                         Logging.Log("ValueDumpUI", "Item " + _currentItem.Name + " no longer exists in the hanger", Logging.white);
@@ -428,7 +468,12 @@ namespace ValueDump
 
                             if (refinePrice > totalPrice)
                             {
-                                Logging.Log("ValueDumpUI", "Refining gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPrice.ToString("#,##0.00") + "]", Logging.white);
+                                Logging.Log("ValueDumpUI", "Refining gives a better price for item " + _currentItem.Name + 
+                                    Logging.orange + " [" + Logging.white + 
+                                    "Refine price: " + refinePrice.ToString("#,##0.00") + 
+                                    Logging.orange + "][" + Logging.white + 
+                                    "Sell price: " + totalPrice.ToString("#,##0.00") +
+                                    Logging.orange + "]", Logging.white);
 
                                 // Add it to the refine list
                                 ItemsToRefine.Add(_currentItem);
@@ -455,7 +500,14 @@ namespace ValueDump
                             // If percentage < 85% and total price > 1m isk then skip this item (we don't undersell)
                             if (perc < 0.85 && total > 1000000)
                             {
-                                Logging.Log("ValueDumpUI", "Not underselling item " + _currentItem.Name + " [Median buy price: " + _currentItem.InvType.MedianBuy.Value.ToString("#,##0.00") + "][Sell price: " + price.ToString("#,##0.00") + "][" + perc.ToString("0%") + "]", Logging.white);
+                                Logging.Log("ValueDumpUI", "Not underselling item " + _currentItem.Name +
+                                    Logging.orange + " [" + Logging.white +  
+                                    "Median buy price: " + _currentItem.InvType.MedianBuy.Value.ToString("#,##0.00") + 
+                                    Logging.orange  + "][" + Logging.white + 
+                                    "Sell price: " + price.ToString("#,##0.00") +
+                                    Logging.orange + "][" + Logging.white +
+                                    perc.ToString("0%") + 
+                                    Logging.orange + "]", Logging.white);
 
                                 sellWindow.Cancel();
                                 State = ValueDumpState.WaitingToFinishQuickSell;
@@ -471,7 +523,11 @@ namespace ValueDump
                             _currentItem.StationBuy = price;
                         _currentItem.StationBuy = (_currentItem.StationBuy + price) / 2;
 
-                        Logging.Log("ValueDumpUI", "Selling " + quantity + " of " + _currentItem.Name + " [Sell price: " + (price * quantity).ToString("#,##0.00") + "]" + otherPrices, Logging.white);
+                        Logging.Log("ValueDumpUI", "Selling " + quantity + " of " + _currentItem.Name +
+                            Logging.orange + " [" + Logging.white +
+                            "Sell price: " + (price * quantity).ToString("#,##0.00") + 
+                            Logging.orange + "]" + Logging.white + 
+                            otherPrices, Logging.white);
                     }
                     sellWindow.Accept();
 
@@ -486,7 +542,7 @@ namespace ValueDump
                 case ValueDumpState.WaitingToFinishQuickSell:
                     if (sellWindow == null || !sellWindow.IsReady || sellWindow.Item.ItemId != _currentItem.Id)
                     {
-                        DirectWindow modal = DirectEve.Windows.FirstOrDefault(w => w.IsModal);
+                        DirectWindow modal = Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.IsModal);
                         if (modal != null)
                             modal.Close();
 
@@ -500,8 +556,8 @@ namespace ValueDump
                     {
                         if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Marketlookupdelay)
                         {
-                            IEnumerable<DirectItem> refineItems = hangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
-                            DirectEve.ReprocessStationItems(refineItems);
+                            IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
+                            Cache.Instance.DirectEve.ReprocessStationItems(refineItems);
 
                             _lastExecute = DateTime.Now;
                         }
@@ -554,7 +610,7 @@ namespace ValueDump
             }
 
             lvItems.Items.Clear();
-            foreach (ItemCache item in Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
+            foreach (ItemCacheMarket item in Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
             {
                 ListViewItem listItem = new ListViewItem(item.Name);
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.Quantity));
@@ -582,10 +638,10 @@ namespace ValueDump
             }
         }
 
-        private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
+        private void ValueDumpUIFormClosed(object sender, FormClosedEventArgs e)
         {
-            DirectEve.Dispose();
-            DirectEve = null;
+            Cache.Instance.DirectEve.Dispose();
+            Cache.Instance.DirectEve = null;
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -634,7 +690,7 @@ namespace ValueDump
             lvItems.ListViewItemSorter = oCompare;
         }
 
-        private void frmMain_Load(object sender, EventArgs e)
+        private void ValueDumpUI_Load(object sender, EventArgs e)
         {
         }
 

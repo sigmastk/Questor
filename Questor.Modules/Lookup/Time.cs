@@ -58,5 +58,6 @@ namespace Questor.Modules.Lookup
         AverageTimetoSalvageMultipleMissions_minutes = 40,       // average time it will take to salvage the multiple mission chain we plan on salvaging all in one go.
         CheckForWindows_seconds = 15,                            // Check for and deal with modal windows every x seconds, units: seconds. Default is 15
         ScheduleCheck_seconds = 120,                                   // How often when in IDLE, we should check to see if we need to logoff / restart, this can be set to a low number, default is 120 seconds (2 minutes)
+        ValueDumpPulse_milliseconds = 500,                       // Used to delay the next valuedump pulse, units: milliseconds. Default is 500
     }
 }
