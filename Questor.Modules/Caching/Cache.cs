@@ -1899,6 +1899,17 @@ namespace Questor.Modules.Caching
             // Get the closest low value target
             EntityCache lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 
+            //if (Settings.Instance.DontShootFrigatesWithSiegeorAutoCannons && (lowValueTarget != null)) //this defaults to false and needs to be changed in your characters settings xml file if you want to enable this option
+            //{
+            //    if (Settings.Instance.WeaponGroupId == 55 || Settings.Instance.WeaponGroupId == 508 || Settings.Instance.WeaponGroupId == 506)
+            //    {
+            //        if (lowValueTarget.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !lowValueTarget.TargetValue.HasValue && lowValueTarget.GroupId != (int)Group.LargeCollidableStructure)
+            //        {
+            //           //we really need a reliable way to determine if a particular NPC is a particular size ship, database of typeIDs or grouIDs maybe?            
+            //        }
+            //    }
+            //}
+
             if (lowValueFirst && lowValueTarget != null)
                 return lowValueTarget;
             if (!lowValueFirst && highValueTarget != null)
