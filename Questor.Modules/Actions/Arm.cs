@@ -21,11 +21,13 @@ namespace Questor.Modules.Actions
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
     using global::Questor.Modules.Logging;
+    using Questor.Modules.BackgroundTasks;
 
     public class Arm
     {
         private bool _missionItemMoved;
         private bool _optionalMissionItemMoved;
+        private bool _inventoryWindowsCleanedUp = false;
 
         public Arm()
         {
@@ -55,9 +57,19 @@ namespace Questor.Modules.Actions
             switch (_States.CurrentArmState)
             {
                 case ArmState.Idle:
+                    _inventoryWindowsCleanedUp = false;
                     break;
 
                 case ArmState.Done:
+                    if(!_inventoryWindowsCleanedUp)
+                    {
+                        if (!Cleanup.CloseInventoryWindows())
+                        {
+                            _inventoryWindowsCleanedUp = false;
+                            break;
+                        }
+                    }
+                    _inventoryWindowsCleanedUp = true;
                     break;
 
                 case ArmState.NotEnoughDrones:

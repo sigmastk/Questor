@@ -14,7 +14,7 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Cleanup
     {
-        private DateTime _lastCleanupAction;
+        private static DateTime _lastCleanupAction;
         private DateTime _lastCleanupProcessState;
       private int _dronebayclosingattempts = 0;
         //private DateTime _lastChatWindowAction;
@@ -24,6 +24,50 @@ namespace Questor.Modules.BackgroundTasks
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
             Cache.Instance.SessionState = "Quitting";
+        }
+
+        public static bool CloseInventoryWindows()
+        {
+            if (DateTime.Now < _lastCleanupAction.AddMilliseconds(500))
+                return false;
+            //
+            // go through *every* window
+            //
+            foreach (DirectWindow window in Cache.Instance.Windows)
+            {
+                if (window.Name.Contains("_ShipDroneBay_") && window.Caption.Contains("Drone Bay") && window.Type.Contains("Inventory"))
+                {
+                    Logging.Log("Cleanup","CloseInventoryWindows: Closing Drone Bay Window",Logging.white);
+                    window.Close();
+                    _lastCleanupAction = DateTime.Now;
+                    return false;
+                }
+                if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))                 
+                {
+                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Cargo Bay Window", Logging.white);
+                    window.Close();
+                    _lastCleanupAction = DateTime.Now;
+                    return false;
+                }
+                if (window.Name.Contains("_StationItems_") && window.Caption.Contains("Item hangar") && window.Type.Contains("Inventory"))
+                {
+                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Item Hangar Window", Logging.white);
+                    window.Close();
+                    _lastCleanupAction = DateTime.Now;
+                    return false;
+                }
+                if (window.Name.Contains("_StationShips_") && window.Caption.Contains("Ship hangar") && window.Type.Contains("Inventory"))
+                {
+                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Ship Hangar Window", Logging.white);
+                    window.Close();
+                    _lastCleanupAction = DateTime.Now;
+                    return false;
+                }
+                // 
+                // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp. 
+                //
+            }
+            return true;
         }
 
         public void CheckEVEStatus()
@@ -268,13 +312,10 @@ namespace Questor.Modules.BackgroundTasks
                                 break;
                             }
                         }
-                    }
-                    _States.CurrentCleanupState = CleanupState.CheckWindowsThatDontBelongInSpace;
-                    break;
-
-                case CleanupState.CheckWindowsThatDontBelongInSpace:
                     if (Cache.Instance.InSpace)
                     {
+                            if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
+                            {
                         if (Settings.Instance.UseDrones && 
                            (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && 
                             Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && 
@@ -284,18 +325,20 @@ namespace Questor.Modules.BackgroundTasks
                             _lastCleanupAction = DateTime.Now;
                             _dronebayclosingattempts++;
                             // Close the drone bay, its not required in space.
-                            if (Cache.Instance.DroneBay.Window != null)
-                                if(Cache.Instance.DroneBay.Window.IsReady)
-                                {
-                                    Logging.Log("Cleanup", "Closing Drone Bay Window Named [" + Cache.Instance.DroneBay.Window.Name + "] as it is not useful in space. [" + _dronebayclosingattempts  + "] attempts", Logging.white);
-                                    Cache.Instance.DroneBay.Window.Close();
-                                }
+                                    window.Close();
                         }
                     }
                     else
                     {
                         _dronebayclosingattempts = 0;
                     }
+                        }
+                    }
+                    _States.CurrentCleanupState = CleanupState.CheckWindowsThatDontBelongInSpace;
+                    break;
+
+                case CleanupState.CheckWindowsThatDontBelongInSpace:
+
                     _lastCleanupAction = DateTime.Now;
                     _States.CurrentCleanupState = CleanupState.Idle;
                     break;

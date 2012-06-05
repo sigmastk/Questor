@@ -2511,6 +2511,8 @@ namespace Questor.Modules.Caching
             {
                 if (!Cache.Instance.OpenLootContainer("Cache.StackLootContainer")) return false;
                 Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                if (LootHangar.Window == null) return false;
+                if (!LootHangar.Window.IsReady) return false;
                 Logging.Log(module, "Loot Container named: [ " + LootHangar.Window.Name +
                             " ] was found and its contents are being stacked", Logging.white);
                 if (LootHangar != null && LootHangar.Window.IsReady)
@@ -2761,10 +2763,10 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public DirectContainer DroneBay
-        {
-            get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
-        }
+        public DirectContainer DroneBay { get; set; }
+        //{
+        //    get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
+        //}
 
         public bool OpenDroneBay(String module)
         {
@@ -2783,6 +2785,11 @@ namespace Questor.Modules.Caching
             //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
             //    return false;
             //}
+            if (Cache.Instance.InStation || Cache.Instance.InSpace)
+            {
+                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+            }
+            else return false;
 
             if (Cache.Instance.DroneBay == null)
             {
@@ -2845,6 +2852,11 @@ namespace Questor.Modules.Caching
                 Logging.Log(module, "Closing Drone Bay: We aren't in station or space?!", Logging.orange);
                 return false;
             }
+            if (Cache.Instance.InStation || Cache.Instance.InSpace)
+            {
+                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+            }
+            else return false;
 
             // Is the drone bay open? if so, close it
             if (Cache.Instance.DroneBay.Window != null)
