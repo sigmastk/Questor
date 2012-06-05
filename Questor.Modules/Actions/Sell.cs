@@ -18,7 +18,6 @@ namespace Questor.Modules.Actions
         public void ProcessState()
         {
             DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
-            DirectContainer hangar = Cache.Instance.DirectEve.GetItemHangar();
             DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
 
             switch (_States.CurrentSellState)
@@ -37,17 +36,9 @@ namespace Questor.Modules.Actions
                         break;
                     _lastAction = DateTime.Now;
 
-                    if (hangar.Window == null)
-                    {
-                        // No, command it to open
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                        break;
-                    }
+                    if (!Cache.Instance.OpenItemsHangar("Sell")) break;
 
-                    if (!hangar.Window.IsReady)
-                        break;
-
-                    DirectItem directItem = hangar.Items.FirstOrDefault(i => (i.TypeId == Item));
+                    DirectItem directItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeId == Item));
                     if (directItem == null)
                     {
                         Logging.Log("Sell", "Item " + Item + " no longer exists in the hanger", Logging.white);

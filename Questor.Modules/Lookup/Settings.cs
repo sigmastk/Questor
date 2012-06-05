@@ -360,6 +360,8 @@ namespace Questor.Modules.Lookup
         public bool SpeedTank { get; set; }
 
         public int OrbitDistance { get; set; }
+        
+        public bool OrbitStructure { get; set; }
 
         public int OptimalRange { get; set; }
 
@@ -461,8 +463,6 @@ namespace Questor.Modules.Lookup
         //
         public string Path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public string CharacterNameXML { get; private set; }
-
         public string SettingsPath { get; private set; }
 
         public event EventHandler<EventArgs> SettingsLoaded;
@@ -471,8 +471,15 @@ namespace Questor.Modules.Lookup
 
         public void LoadSettings()
         {
-            Settings.Instance.CharacterNameXML = Cache.Instance.DirectEve.Me.Name;
-            Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterNameXML) + ".xml");
+            try
+            {
+                Settings.Instance.CharacterName = Cache.Instance.DirectEve.Me.Name;    
+            }
+            catch(Exception)
+            {
+                Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
+            }
+            Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
             bool reloadSettings = true;
             if (File.Exists(Settings.Instance.SettingsPath))
                 reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.SettingsPath);
@@ -512,9 +519,7 @@ namespace Questor.Modules.Lookup
                 // Misc Settings
                 //
                 CharacterMode = "none";
-                AutoStart = false; // auto Start enabled or disabled by default?
-                SaveConsoleLog = true; // save the console log to file
-                MaxLineConsole = 1000;
+                AutoStart = false; // auto Start enabled or disabled by default
                 // maximum console log lines to show in the GUI
                 Disable3D = false; // Disable3d graphics while in space
                 RandomDelay = 15;
@@ -528,7 +533,7 @@ namespace Questor.Modules.Lookup
 
                 // Console Log Settings
                 //
-                SaveConsoleLog = false;
+                SaveConsoleLog = true; // save the console log to file
                 MaxLineConsole = 1000;
                 //
                 // Agent Standings and Mission Settings
@@ -538,7 +543,7 @@ namespace Questor.Modules.Lookup
                 WaitDecline = false;
                 const string relativeMissionsPath = "Missions";
                 MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
-                Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.white);
+                //Logging.Log("Settings","Default MissionXMLPath is: [" + MissionsPath + "]",Logging.white);
                 RequireMissionXML = false;
                 LowSecMissionsInShuttles = false;
                 MaterialsForWarOreID = 20;
@@ -674,6 +679,7 @@ namespace Questor.Modules.Lookup
                 //
                 SpeedTank = false;
                 OrbitDistance = 0;
+                OrbitStructure = false;
                 OptimalRange = 0;
                 NosDistance = 38000;
                 MinimumPropulsionModuleDistance = 5000;
@@ -968,6 +974,7 @@ namespace Questor.Modules.Lookup
                     //
                     SpeedTank = (bool?)xml.Element("speedTank") ?? false;
                     OrbitDistance = (int?)xml.Element("orbitDistance") ?? 0;
+                    OrbitStructure = (bool?) xml.Element("orbitStructure") ?? false;
                     OptimalRange = (int?)xml.Element("optimalRange") ?? 0;
                     NosDistance = (int?)xml.Element("NosDistance") ?? 38000;
                     MinimumPropulsionModuleDistance = (int?)xml.Element("minimumPropulsionModuleDistance") ?? 5000;
@@ -1169,29 +1176,38 @@ namespace Questor.Modules.Lookup
                 WreckBlackList.Add(26934);
             }
 
+
+            //"-RandomName-" + Cache.Instance.RandomNumber(1,500) + "-of-500"
+            string characterNameForLogs = Cache.Instance.FilterPath(Settings.Instance.CharacterName);
+            if (characterNameForLogs == "AtLoginScreenNoCharactersLoggedInYet")
+            {
+                characterNameForLogs = characterNameForLogs + "-randomName-" + Cache.Instance.RandomNumber(1, 500) + "-of-500";
+            }
+
             //
             // Log location and log names defined here
             //
-            Logpath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + Cache.Instance.DirectEve.Me.Name + "\\");
+            Logpath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + characterNameForLogs + "\\");
+            
             //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
             ConsoleLogPath = System.IO.Path.Combine(Logpath, "Console\\");
-            ConsoleLogFile = System.IO.Path.Combine(ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + Cache.Instance.DirectEve.Me.Name + "-" + "console" + ".log");
+            ConsoleLogFile = System.IO.Path.Combine(ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + characterNameForLogs + "-" + "console" + ".log");
             SessionsLogPath = Logpath;
-            SessionsLogFile = System.IO.Path.Combine(SessionsLogPath, Cache.Instance.DirectEve.Me.Name + ".Sessions.log");
+            SessionsLogFile = System.IO.Path.Combine(SessionsLogPath, characterNameForLogs + ".Sessions.log");
             DroneStatsLogPath = Logpath;
-            DroneStatslogFile = System.IO.Path.Combine(DroneStatsLogPath, Cache.Instance.DirectEve.Me.Name + ".DroneStats.log");
+            DroneStatslogFile = System.IO.Path.Combine(DroneStatsLogPath, characterNameForLogs + ".DroneStats.log");
             WreckLootStatisticsPath = Logpath;
-            WreckLootStatisticsFile = System.IO.Path.Combine(WreckLootStatisticsPath, Cache.Instance.DirectEve.Me.Name + ".WreckLootStatisticsDump.log");
+            WreckLootStatisticsFile = System.IO.Path.Combine(WreckLootStatisticsPath, characterNameForLogs + ".WreckLootStatisticsDump.log");
             MissionStats1LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
-            MissionStats1LogFile = System.IO.Path.Combine(MissionStats1LogPath, Cache.Instance.DirectEve.Me.Name + ".Statistics.log");
+            MissionStats1LogFile = System.IO.Path.Combine(MissionStats1LogPath, characterNameForLogs + ".Statistics.log");
             MissionStats2LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
-            MissionStats2LogFile = System.IO.Path.Combine(MissionStats2LogPath, Cache.Instance.DirectEve.Me.Name + ".DatedStatistics.log");
+            MissionStats2LogFile = System.IO.Path.Combine(MissionStats2LogPath, characterNameForLogs + ".DatedStatistics.log");
             MissionStats3LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
-            MissionStats3LogFile = System.IO.Path.Combine(MissionStats3LogPath, Cache.Instance.DirectEve.Me.Name + ".CustomDatedStatistics.csv");
+            MissionStats3LogFile = System.IO.Path.Combine(MissionStats3LogPath, characterNameForLogs + ".CustomDatedStatistics.csv");
             PocketStatisticsPath = System.IO.Path.Combine(Logpath, "pocketstats\\");
-            PocketStatisticsFile = System.IO.Path.Combine(PocketStatisticsPath, Cache.Instance.DirectEve.Me.Name + "pocketstats-combined.csv");
+            PocketStatisticsFile = System.IO.Path.Combine(PocketStatisticsPath, characterNameForLogs + "pocketstats-combined.csv");
             PocketObjectStatisticsPath = System.IO.Path.Combine(Logpath, "pocketobjectstats\\");
-            PocketObjectStatisticsFile = System.IO.Path.Combine(PocketObjectStatisticsPath, Cache.Instance.DirectEve.Me.Name + "pocketobjectstats-combined.csv");
+            PocketObjectStatisticsFile = System.IO.Path.Combine(PocketObjectStatisticsPath, characterNameForLogs + "pocketobjectstats-combined.csv");
             //create all the logging directories even if they aren't configured to be used - we can adjust this later if it really bugs people to have some potentially empty directories.
             Directory.CreateDirectory(Logpath);
 

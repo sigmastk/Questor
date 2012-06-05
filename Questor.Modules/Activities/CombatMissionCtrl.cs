@@ -76,10 +76,10 @@ namespace Questor.Modules.Activities
                         if (!Cache.Instance.IsApproachingOrOrbiting)
                         {
                             Logging.Log("CombatMissionCtrl.NavigateIntoRange", "We are not approaching nor orbiting", Logging.teal);
-                            const bool orbitStructure = true;
-                            var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeCollidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
-
-                            if (orbitStructure && structure != null)
+                            
+                            EntityCache structure = Cache.Instance.Entities.Where(i => i.Name.Contains("Gate")).OrderBy(t => t.Distance).OrderBy(t => t.Distance).FirstOrDefault();
+                            
+                            if (Settings.Instance.OrbitStructure && structure != null)
                             {
                                 structure.Orbit((int)Cache.Instance.OrbitDistance);
                                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Initiating Orbit [" + structure.Name + "][ID: " + structure.Id + "]", Logging.teal);
@@ -473,7 +473,6 @@ namespace Questor.Modules.Activities
                             target.LockTarget();
                         }
                     }
-                    return;
                 }
                 else //target is not in range...
                 {
@@ -945,7 +944,6 @@ namespace Questor.Modules.Activities
                         {
                             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                             target.LockTarget();
-                            return;
                         }
                     }
                 }

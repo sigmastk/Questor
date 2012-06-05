@@ -16,7 +16,6 @@ namespace Questor.Modules.Actions
 
         public void ProcessState()
         {
-            DirectContainer shipHangar = Cache.Instance.DirectEve.GetShipHangar();
             var defaultFitting = Settings.Instance.DefaultFitting.Fitting;
 
             switch (_States.CurrentSwitchShipState)
@@ -48,7 +47,7 @@ namespace Questor.Modules.Actions
                     {
                         if (DateTime.Now.Subtract(_lastSwitchShipAction).TotalSeconds > (int)Time.SwitchShipsDelay_seconds)
                         {
-                            List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
+                            List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                             foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
                             {
                                 Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.white);

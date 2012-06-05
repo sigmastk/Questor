@@ -157,10 +157,6 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _aggressed;
 
         /// <summary>
-
-        ///   DroneBay
-        /// </summary>
-        private DirectContainer _dronebay;
         ///   Returns all unlooted wrecks & containers
         /// </summary>
         private List<EntityCache> _unlootedContainers;
@@ -168,6 +164,13 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _unlootedWrecksAndSecureCans;
 
         private List<DirectWindow> _windows;
+
+        public void DirecteveDispose()
+        {
+            Logging.Log("QuestorUI", "started calling DirectEve.Dispose()", Logging.white);
+            Cache.Instance.DirectEve.Dispose(); //could this hang?
+            Logging.Log("QuestorUI", "finished calling DirectEve.Dispose()", Logging.white); 
+        }
 
         public Cache()
         {
@@ -1899,6 +1902,17 @@ namespace Questor.Modules.Caching
             // Get the closest low value target
             EntityCache lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 
+            //if (Settings.Instance.DontShootFrigatesWithSiegeorAutoCannons && (lowValueTarget != null)) //this defaults to false and needs to be changed in your characters settings xml file if you want to enable this option
+            //{
+            //    if (Settings.Instance.WeaponGroupId == 55 || Settings.Instance.WeaponGroupId == 508 || Settings.Instance.WeaponGroupId == 506)
+            //    {
+            //        if (lowValueTarget.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !lowValueTarget.TargetValue.HasValue && lowValueTarget.GroupId != (int)Group.LargeCollidableStructure)
+            //        {
+            //           //we really need a reliable way to determine if a particular NPC is a particular size ship, database of typeIDs or grouIDs maybe?            
+            //        }
+            //    }
+            //}
+
             if (lowValueFirst && lowValueTarget != null)
                 return lowValueTarget;
             if (!lowValueFirst && highValueTarget != null)
@@ -2511,6 +2525,8 @@ namespace Questor.Modules.Caching
             {
                 if (!Cache.Instance.OpenLootContainer("Cache.StackLootContainer")) return false;
                 Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                if (LootHangar.Window == null) return false;
+                if (!LootHangar.Window.IsReady) return false;
                 Logging.Log(module, "Loot Container named: [ " + LootHangar.Window.Name +
                             " ] was found and its contents are being stacked", Logging.white);
                 if (LootHangar != null && LootHangar.Window.IsReady)
@@ -2761,10 +2777,10 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public DirectContainer DroneBay
-        {
-            get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
-        }
+        public DirectContainer DroneBay { get; set; }
+        //{
+        //    get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
+        //}
 
         public bool OpenDroneBay(String module)
         {
@@ -2783,6 +2799,11 @@ namespace Questor.Modules.Caching
             //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
             //    return false;
             //}
+            if (Cache.Instance.InStation || Cache.Instance.InSpace)
+            {
+                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+            }
+            else return false;
 
             if (Cache.Instance.DroneBay == null)
             {
@@ -2845,6 +2866,11 @@ namespace Questor.Modules.Caching
                 Logging.Log(module, "Closing Drone Bay: We aren't in station or space?!", Logging.orange);
                 return false;
             }
+            if (Cache.Instance.InStation || Cache.Instance.InSpace)
+            {
+                Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+            }
+            else return false;
 
             // Is the drone bay open? if so, close it
             if (Cache.Instance.DroneBay.Window != null)

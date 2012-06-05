@@ -21,11 +21,13 @@ namespace Questor.Modules.Actions
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
     using global::Questor.Modules.Logging;
+    using Questor.Modules.BackgroundTasks;
 
     public class Arm
     {
         private bool _missionItemMoved;
         private bool _optionalMissionItemMoved;
+        private bool _inventoryWindowsCleanedUp = false;
 
         public Arm()
         {
@@ -55,9 +57,19 @@ namespace Questor.Modules.Actions
             switch (_States.CurrentArmState)
             {
                 case ArmState.Idle:
+                    _inventoryWindowsCleanedUp = false;
                     break;
 
                 case ArmState.Done:
+                    if(!_inventoryWindowsCleanedUp)
+                    {
+                        if (!Cleanup.CloseInventoryWindows())
+                        {
+                            _inventoryWindowsCleanedUp = false;
+                            break;
+                        }
+                    }
+                    _inventoryWindowsCleanedUp = true;
                     break;
 
                 case ArmState.NotEnoughDrones:
@@ -120,7 +132,7 @@ namespace Questor.Modules.Actions
                     }
                     if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
                     {
-                        List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
+                        List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
                         {
                             Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.white);
@@ -156,7 +168,7 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
-                                List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
+                                List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
                                 {
                                     Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.white);
@@ -209,8 +221,8 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
-                                List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
-                                var ship = ships.Where(s => s.GivenName != null && s.GivenName.ToLower() == shipName).FirstOrDefault();
+                                List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
+                                var ship = ships.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == shipName);
                                 if (ship != null)
                                 {
                                     Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.white);

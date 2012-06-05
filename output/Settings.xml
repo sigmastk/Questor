@@ -275,6 +275,8 @@
   <speedTank>false</speedTank>
   <!-- The range used by SpeedTank -->
   <orbitDistance>5000</orbitDistance>
+  <!--  When SpeedTank is true this optional setting allows you to orbit the gate rather than the target -->
+  <orbitStructure>false</orbitStructure>
   <!-- Propulsion mod settings, do not activate AB/MWD unless these settings are matched -->
   <minimumPropulsionModuleDistance>5000</minimumPropulsionModuleDistance>
   <minimumPropulsionModuleCapacitor>55</minimumPropulsionModuleCapacitor>
