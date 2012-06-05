@@ -157,10 +157,6 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _aggressed;
 
         /// <summary>
-
-        ///   DroneBay
-        /// </summary>
-        private DirectContainer _dronebay;
         ///   Returns all unlooted wrecks & containers
         /// </summary>
         private List<EntityCache> _unlootedContainers;
@@ -168,6 +164,13 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _unlootedWrecksAndSecureCans;
 
         private List<DirectWindow> _windows;
+
+        public void DirecteveDispose()
+        {
+            Logging.Log("QuestorUI", "started calling DirectEve.Dispose()", Logging.white);
+            Cache.Instance.DirectEve.Dispose(); //could this hang?
+            Logging.Log("QuestorUI", "finished calling DirectEve.Dispose()", Logging.white); 
+        }
 
         public Cache()
         {

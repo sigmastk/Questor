@@ -185,6 +185,8 @@ namespace Questor
                                 Logging.white);
                     
                     Logging.Log("QuestorUI", "Exiting eve now.", Logging.white);
+
+                    Cache.Instance.DirecteveDispose();
                     Process.GetCurrentProcess().Kill();
                     Environment.Exit(0);
                     //Application.Exit();
@@ -238,6 +240,7 @@ namespace Questor
                                         "Done: quitting this session so the new innerspace session can take over",
                                         Logging.white);
                                     
+                                    Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
                                     //Application.Exit();
@@ -263,6 +266,8 @@ namespace Questor
                                         "QuestorUI",
                                         "Done: quitting this session so the new isboxer session can take over",
                                         Logging.white);
+
+                                    Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
                                     //Application.Exit();
@@ -286,6 +291,7 @@ namespace Questor
                                         Settings.Instance.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
                                     Logging.Log("QuestorUI", "Done: quitting this session", Logging.white);
                                        
+                                    Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
                                     //Application.Exit();
@@ -300,6 +306,7 @@ namespace Questor
                                         "CloseQuestorArbitraryOSCmd, CloseQuestorCMDUplinkInnerspaceProfile and CloseQuestorCMDUplinkIsboxerProfile all false",
                                         Logging.white);
                                     
+                                    Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
                                     //Application.Exit();
@@ -684,7 +691,7 @@ namespace Questor
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
                 {
-                    Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was more than 30 seconds ago! This is bad. - Exiting EVE", Logging.red);
+                    Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was more than 45 seconds ago! This is bad. - Exiting EVE", Logging.red);
                     //
                     // closing eve would be a very good idea here
                     //
