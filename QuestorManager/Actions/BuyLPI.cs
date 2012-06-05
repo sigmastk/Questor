@@ -29,8 +29,6 @@ namespace QuestorManager.Actions
 
         public void ProcessState()
         {
-            DirectContainer hangar = Cache.Instance.DirectEve.GetItemHangar();
-            DirectContainer shiphangar = Cache.Instance.DirectEve.GetShipHangar();
             DirectLoyaltyPointStoreWindow lpstore =
                 Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
             DirectMarketWindow marketWindow =
@@ -56,18 +54,14 @@ namespace QuestorManager.Actions
                         lpstore.Close();*/
 
                     _States.CurrentBuyLPIState = BuyLPIState.OpenItemHangar;
-
                     break;
 
                 case BuyLPIState.OpenItemHangar:
 
-                    if (!hangar.Window.IsReady)
-                    {
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                        Logging.Log("BuyLPI", "Opening item hangar", Logging.white);
-                    }
-                    _States.CurrentBuyLPIState = BuyLPIState.OpenLpStore;
+                    if (!Cache.Instance.OpenItemsHangar("BuyLPI")) return;
+                    if (!Cache.Instance.OpenShipsHangar("BuyLPI")) return;
 
+                    _States.CurrentBuyLPIState = BuyLPIState.OpenLpStore;
                     break;
 
                 case BuyLPIState.OpenLpStore:
@@ -78,7 +72,6 @@ namespace QuestorManager.Actions
                         Logging.Log("BuyLPI", "Opening loyalty point store", Logging.white);
                     }
                     _States.CurrentBuyLPIState = BuyLPIState.FindOffer;
-
                     break;
 
                 case BuyLPIState.FindOffer:
@@ -147,8 +140,8 @@ namespace QuestorManager.Actions
                         if (offer1 != null)
                             foreach (DirectLoyaltyPointOfferRequiredItem requiredItem in offer1.RequiredItems)
                             {
-                                DirectItem ship = shiphangar.Items.FirstOrDefault(i => i.TypeId == requiredItem.TypeId);
-                                DirectItem item = hangar.Items.FirstOrDefault(i => i.TypeId == requiredItem.TypeId);
+                                DirectItem ship = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.TypeId == requiredItem.TypeId);
+                                DirectItem item = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.TypeId == requiredItem.TypeId);
                                 if (item == null || item.Quantity < requiredItem.Quantity)
                                 {
                                     if (ship == null || ship.Quantity < requiredItem.Quantity)

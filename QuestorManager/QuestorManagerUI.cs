@@ -373,7 +373,7 @@ namespace QuestorManager
 
                     if (DateTime.Now > _lastAction)
                     {
-                        List<DirectItem> ships = Cache.Instance.DirectEve.GetShipHangar().Items;
+                        List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName == txtNameShip.Text))
                         {
                             Logging.Log("QuestorManager", "MakeShip: Making [" + ship.GivenName + "] active", Logging.white);

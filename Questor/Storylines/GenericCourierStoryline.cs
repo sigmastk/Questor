@@ -31,24 +31,10 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            var ships = directEve.GetShipHangar();
-            if (ships.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
-
-                Logging.Log("GenericCourier", "Opening ship hangar", Logging.white);
-
-                // No, command it to open
-                directEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                return StorylineState.Arm;
-            }
-
-            // If the ship hangar is not ready then wait for it
-            if (!ships.Window.IsReady)
-                return StorylineState.Arm;
-
+            if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: Arm")) return StorylineState.Arm;
+            
             //  Look for an industrial
-            var item = ships.Items.FirstOrDefault(i => i.Quantity == -1 && (i.TypeId == 648 || i.TypeId == 649 || i.TypeId == 650 || i.TypeId == 651 || i.TypeId == 652 || i.TypeId == 653 || i.TypeId == 654 || i.TypeId == 655 || i.TypeId == 656 || i.TypeId == 657 || i.TypeId == 1944 || i.TypeId == 19744));
+            var item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && (i.TypeId == 648 || i.TypeId == 649 || i.TypeId == 650 || i.TypeId == 651 || i.TypeId == 652 || i.TypeId == 653 || i.TypeId == 654 || i.TypeId == 655 || i.TypeId == 656 || i.TypeId == 657 || i.TypeId == 1944 || i.TypeId == 19744));
             if (item != null)
             {
                 Logging.Log("GenericCourier", "Switching to an industrial", Logging.white);
@@ -102,39 +88,14 @@ namespace Questor.Storylines
             var directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            var hangar = directEve.GetItemHangar();
-            if (hangar.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
+            if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: MoveItem")) return false;
 
-                Logging.Log("GenericCourier", "Opening hangar floor", Logging.white);
-
-                directEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                return false;
-            }
-
-            // Wait for it to become ready
-            if (!hangar.Window.IsReady)
-                return false;
-
-            var cargo = directEve.GetShipsCargo();
-            if (cargo.Window == null)
-            {
-                _nextAction = DateTime.Now.AddSeconds(10);
-
-                Logging.Log("GenericCourier", "Opening cargo", Logging.white);
-
-                directEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                return false;
-            }
-
-            if (!cargo.Window.IsReady)
-                return false;
+            if (!Cache.Instance.OpenCargoHold("GenericCourierStoryline: MoveItem")) return false;
 
             // 314 == Giant Sealed Cargo Containers
             const int groupId = 314;
-            DirectContainer from = pickup ? hangar : cargo;
-            DirectContainer to = pickup ? cargo : hangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
+            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
 
             // We moved the item
             if (to.Items.Any(i => i.GroupId == groupId))
