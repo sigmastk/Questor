@@ -92,17 +92,6 @@ namespace BuyLPI
                 return;
             }
 
-            foreach (var window in _directEve.Windows)
-            {
-                if (window.Name == "modal")
-                {
-                    _nextAction = DateTime.Now.AddMilliseconds(WaitMillis);
-                    window.AnswerModal("Ok");
-                    Logging.Log("BuyLPI", "BuyLPI: Saying OK to modal window for lpstore offer.", Logging.white);                    
-                    return;
-                }
-            }
-
             DirectContainer hangar = _directEve.GetItemHangar();
             if (!hangar.Window.IsReady)
             {
@@ -122,6 +111,17 @@ namespace BuyLPI
                 Logging.Log("BuyLPI", "Opening loyalty point store", Logging.white);
                 return;
             }
+            foreach (var window in _directEve.Windows)
+            {
+                if (window.Name == "modal")
+                {
+                    _nextAction = DateTime.Now.AddMilliseconds(WaitMillis);
+                    window.AnswerModal("Ok");
+                    Logging.Log("BuyLPI", "BuyLPI: Saying OK to modal window for lpstore offer.", Logging.white);                    
+                    return;
+                }
+            }
+
 
             // Wait for the amount of LP to change
             if (_lastLoyaltyPoints == lpstore.LoyaltyPoints)
