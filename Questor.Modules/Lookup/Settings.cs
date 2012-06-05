@@ -360,6 +360,8 @@ namespace Questor.Modules.Lookup
         public bool SpeedTank { get; set; }
 
         public int OrbitDistance { get; set; }
+        
+        public bool OrbitStructure { get; set; }
 
         public int OptimalRange { get; set; }
 
@@ -674,6 +676,7 @@ namespace Questor.Modules.Lookup
                 //
                 SpeedTank = false;
                 OrbitDistance = 0;
+                OrbitStructure = false;
                 OptimalRange = 0;
                 NosDistance = 38000;
                 MinimumPropulsionModuleDistance = 5000;
@@ -968,6 +971,7 @@ namespace Questor.Modules.Lookup
                     //
                     SpeedTank = (bool?)xml.Element("speedTank") ?? false;
                     OrbitDistance = (int?)xml.Element("orbitDistance") ?? 0;
+                    OrbitStructure = (bool?) xml.Element("orbitStructure") ?? false;
                     OptimalRange = (int?)xml.Element("optimalRange") ?? 0;
                     NosDistance = (int?)xml.Element("NosDistance") ?? 38000;
                     MinimumPropulsionModuleDistance = (int?)xml.Element("minimumPropulsionModuleDistance") ?? 5000;
