@@ -473,7 +473,6 @@ namespace Questor.Modules.Activities
                             target.LockTarget();
                         }
                     }
-                    return;
                 }
                 else //target is not in range...
                 {
@@ -945,7 +944,6 @@ namespace Questor.Modules.Activities
                         {
                             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                             target.LockTarget();
-                            return;
                         }
                     }
                 }
