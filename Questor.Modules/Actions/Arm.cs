@@ -132,6 +132,8 @@ namespace Questor.Modules.Actions
                     }
                     if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
                     {
+                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+
                         List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
                         {
@@ -168,6 +170,8 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
+                                if (!Cache.Instance.OpenShipsHangar("Arm")) break; 
+                                
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
                                 {
@@ -221,6 +225,8 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
+                                if (!Cache.Instance.OpenShipsHangar("Arm")) break; 
+                                
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 var ship = ships.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == shipName);
                                 if (ship != null)

@@ -306,6 +306,11 @@ namespace Questor
                 return;
             _lastPulse = DateTime.Now;
 
+            if (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            {
+                Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+            }
+
             // Session is not ready yet, do not continue
             if (!Cache.Instance.DirectEve.Session.IsReady)
                 return;
@@ -318,12 +323,6 @@ namespace Questor
             {
                 Cache.Instance.NextInSpaceorInStation = DateTime.Now.AddSeconds(12);
                 Cache.Instance.LastSessionChange = DateTime.Now;
-                return;
-            }
-
-            //there are cleaner ways to fix this, but this is the quick / dirty solution for certain things occasionally not being ready when we first startup
-            if (DateTime.Now < Cache.Instance.StartTime.AddSeconds(30))
-            {
                 return;
             }
 
