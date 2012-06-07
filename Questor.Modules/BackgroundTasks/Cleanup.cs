@@ -63,6 +63,13 @@ namespace Questor.Modules.BackgroundTasks
                     _lastCleanupAction = DateTime.Now;
                     return false;
                 }
+                if (window.Type.Contains("Inventory"))
+                {
+                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing other Inventory Window named [ " + window.Name + "]", Logging.white);
+                    window.Close();
+                    _lastCleanupAction = DateTime.Now;
+                    return false;
+                }
                 // 
                 // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp. 
                 //
