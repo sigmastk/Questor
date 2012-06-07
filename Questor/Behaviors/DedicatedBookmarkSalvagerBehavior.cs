@@ -307,6 +307,8 @@ namespace Questor.Behaviors
             }
             DebugPanicstates();
 
+            DateTime AgedDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior);
+
             //Logging.Log("test");
             switch (_States.CurrentDedicatedBookmarkSalvagerBehaviorState)
             {
@@ -315,24 +317,23 @@ namespace Questor.Behaviors
                     if (Cache.Instance.StopBot)
                         return;
 
+                    _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                    _States.CurrentArmState = ArmState.Idle;
+                    _States.CurrentDroneState = DroneState.Idle;
+                    _States.CurrentSalvageState = SalvageState.Idle;
+                    _States.CurrentStorylineState = StorylineState.Idle;
+                    _States.CurrentTravelerState = TravelerState.Idle;
+                    _States.CurrentUnloadLootState = UnloadLootState.Idle;
+                    _States.CurrentTravelerState = TravelerState.Idle;
+
                     if (Cache.Instance.InSpace)
                     {
                         // Questor does not handle in space starts very well, head back to base to try again
                         Logging.Log("DedicatedBookmarkSalvagerBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.white);
                         LastAction = DateTime.Now;
-                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Idle) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.DelayedGotoBase;
+                        _nextSalvageTrip = DateTime.Now;
+                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Idle) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
                         break;
-                    }
-                    else
-                    {
-                        _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-                        _States.CurrentArmState = ArmState.Idle;
-                        _States.CurrentDroneState = DroneState.Idle;
-                        _States.CurrentSalvageState = SalvageState.Idle;
-                        _States.CurrentStorylineState = StorylineState.Idle;
-                        _States.CurrentTravelerState = TravelerState.Idle;
-                        _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                        _States.CurrentTravelerState = TravelerState.Idle;
                     }
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
@@ -493,43 +494,45 @@ namespace Questor.Behaviors
 
                 case DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge:
 
-                    DateTime AgedDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior);
-                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo( AgedDate ) < 0).ToList();
-                    /*
-                                                            AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").ToList();
-                                                            foreach ( DirectBookmark bookmark in AfterMissionSalvageBookmarks )
-                                                            {
-                                                                if( bookmark.CreatedOn.Value.AddMinutes(Settings.Instance.AgeofBookmarksForSalvageBehavior).CompareTo( DateTime.UtcNow ) > 0 )
-                                                            }
-                    */
-
-                    if (AfterMissionSalvageBookmarks.Count == 0)
+                    if (DateTime.Now >= _nextSalvageTrip)
                     {
-                        BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                        if (BookmarksThatAreNotReadyYet.Any())
+                        AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
+
+                        if (AfterMissionSalvageBookmarks.Count == 0)
                         {
-                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: There are [" + BookmarksThatAreNotReadyYet.Count() + "] Salvage Bookmarks that have not yet aged [" + Settings.Instance.AgeofBookmarksForSalvageBehavior + "] min.", Logging.white);
+                            BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                            if (BookmarksThatAreNotReadyYet.Any())
+                            {
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: There are [" + BookmarksThatAreNotReadyYet.Count() + "] Salvage Bookmarks that have not yet aged [" + Settings.Instance.AgeofBookmarksForSalvageBehavior + "] min.", Logging.white);
+                            }
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: Character mode is BookmarkSalvager and no bookmarks are ready to salvage.", Logging.white);
+                            //We just need a NextSalvagerSession timestamp to key off of here to add the delay
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                            _States.CurrentQuestorState = QuestorState.Idle;
+                            _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+
+                            break;
                         }
-                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: Character mode is BookmarkSalvager and no bookmarks are ready to salvage.", Logging.white);
-                        //We just need a NextSalvagerSession timestamp to key off of here to add the delay
+                        else //There is at least 1 salvage bookmark
+                        {
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: There are [ " + AfterMissionSalvageBookmarks.Count + " ] more salvage bookmarks older then:" + AgedDate.ToString() + ", left to process", Logging.white);
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], DedicatedBookmarkSalvagerBehaviorState: [" + _States.CurrentDedicatedBookmarkSalvagerBehaviorState + "]", Logging.white);
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
+                            Statistics.Instance.StartedSalvaging = DateTime.Now;
+                        }
+                    }
+                    else
+                    {
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: next salvage timer not expired. Waiting...", Logging.white);
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
                         _States.CurrentQuestorState = QuestorState.Idle;
-                        _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
-
-                        break;
-                    }
-                    else //There is at least 1 salvage bookmark
-                    {
-                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: There are [ " + AfterMissionSalvageBookmarks.Count + " ] more salvage bookmarks older then:" + AgedDate.ToString() + ", left to process", Logging.white);
-                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], DedicatedBookmarkSalvagerBehaviorState: [" + _States.CurrentDedicatedBookmarkSalvagerBehaviorState + "]", Logging.white);
-                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
-                        Statistics.Instance.StartedSalvaging = DateTime.Now;
+                        return;
                     }
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging:
-                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
-                    //AgedAfterMissionSalvageBookmarks = AfterMissionSalvageBookmarks.Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
+
+                    AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
                     if (DateTime.Now > Statistics.Instance.StartedSalvaging.AddMinutes(2))
                     {
                         Logging.Log("DedicatedBookmarkSalvagebehavior", "Found [" + AfterMissionSalvageBookmarks.Count + "] salvage bookmarks ready to process.", Logging.white);
@@ -560,15 +563,22 @@ namespace Questor.Behaviors
                         }
                         Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvager", "Salvaging at first oldest bookmarks created on: " + bookmark.CreatedOn.ToString(), Logging.white);
 
-                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging)
+                        var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
+                                                                               OrderBy(b => b.CreatedOn));
+                        DirectBookmark localBookmark = bookmarksinlocal.FirstOrDefault();
+                        if (localBookmark != null)
                         {
-                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark;
-                            _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
-                            //we know we are connected here
-                            Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
-                            Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                            _traveler.Destination = new BookmarkDestination(localBookmark);
                         }
-                        _traveler.Destination = new BookmarkDestination(bookmark);
+                        else
+                        {
+                            _traveler.Destination = new BookmarkDestination(bookmark);
+                        }
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark;
+                        _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                        //we know we are connected here
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         return;
                     }
                     break;
@@ -577,6 +587,20 @@ namespace Questor.Behaviors
                     _traveler.ProcessState();
                     string target = "Acceleration Gate";
                     Cache.Instance.EntitiesByName(target);
+
+                    if ( GateInSalvage() )
+                    {
+                        //we know we are connected here
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+
+                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                        _traveler.Destination = null;
+                        _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                        return;
+                    }
+
+
                     if (_States.CurrentTravelerState == TravelerState.AtDestination || GateInSalvage())
                     {
                         //we know we are connected here
@@ -610,6 +634,7 @@ namespace Questor.Behaviors
                         Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "could not be completed because of NPCs left in the mission: deleting salvage bookmarks", Logging.white);
                         Statistics.Instance.FinishedSalvaging = DateTime.Now;
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                        _nextSalvageTrip = DateTime.Now;
                         AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
                         var bookmark = AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
                         if (bookmark != null)
@@ -635,16 +660,31 @@ namespace Questor.Behaviors
 
                         if (!Cache.Instance.UnlootedContainers.Any())
                         {
-                            AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn > DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior)).ToList();
+                            AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
                             var bookmark = AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
-                            if (bookmark != null)
+                            var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
+                                                                                   OrderBy(b => b.CreatedOn));
+                            DirectBookmark localBookmark = bookmarksinlocal.FirstOrDefault();
+                            //Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room, current bookmark:" + _currentBookmark.Title, Logging.white);
+
+                            if (localBookmark != null)
                             {
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmark:" + bookmark.Title, Logging.white);
-                                bookmark.Delete();
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmark:" + localBookmark.Title, Logging.white);
+                                localBookmark.Delete();
                             }
+                            else
+                            {
+                                if (bookmark != null)
+                                {
+                                    Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmark:" + bookmark.Title, Logging.white);
+                                    bookmark.Delete();
+                                }
+                            }
+
                             Cache.Instance.NextRemoveBookmarkAction = DateTime.Now.AddSeconds((int)Time.RemoveBookmarkDelay_seconds);
                             if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Salvage)
                             {
+                                _nextSalvageTrip = DateTime.Now;
                                 Statistics.Instance.FinishedSalvaging = DateTime.Now;
                                 _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
                             }
