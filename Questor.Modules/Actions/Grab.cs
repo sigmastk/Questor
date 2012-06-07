@@ -20,6 +20,15 @@ namespace Questor.Modules.Actions
 
         public void ProcessState()
         {
+            if (!Cache.Instance.InStation)
+                return;
+
+            if (Cache.Instance.InSpace)
+                return;
+
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return;
+
             DirectContainer _hangar = null;
 
             if (!Cache.Instance.OpenItemsHangar("Grab")) return;

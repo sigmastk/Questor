@@ -1041,12 +1041,28 @@ namespace Questor.Modules.Caching
 
         public bool InSpace
         {
-            get { return DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null; }
+            get
+            {
+                if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null)
+                {
+                    Cache.Instance.LastInSpace = DateTime.Now;
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool InStation
         {
-            get { return DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady; }
+            get
+            {
+                if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
+                {
+                    Cache.Instance.LastInStation = DateTime.Now;
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool InWarp
@@ -1235,7 +1251,9 @@ namespace Questor.Modules.Caching
         public int MissionWeaponGroupId { get; set; }
 
         public bool? MissionUseDrones { get; set; }
+        
         public bool? MissionKillSentries { get; set; }
+        
         public bool StopTimeSpecified { get; set; }
 
         public DateTime StopTime { get; set; }
@@ -1244,8 +1262,14 @@ namespace Questor.Modules.Caching
 
         public int MaxRuntime { get; set; }
 
+        public DateTime LastInStation { get; set; }
+
+        public DateTime LastInSpace { get; set; }
+
         public bool CloseQuestorCMDLogoff; //false;
+        
         public bool CloseQuestorCMDExitGame = true;
+        
         public bool GotoBaseNow; //false;
 
         public string ReasonToStopQuestor { get; set; }
@@ -2078,6 +2102,7 @@ namespace Questor.Modules.Caching
                     }
                     return true;
                 }
+                return false;
             }
             return false;
         }
@@ -2098,6 +2123,7 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LootHangar.StackAll();
                     return true;
                 }
+                return false;
             }
             return false;
         }
@@ -2118,6 +2144,7 @@ namespace Questor.Modules.Caching
                     Cache.Instance.AmmoHangar.StackAll();
                     return true;
                 }
+                return false;
             }
             return false;
         }
@@ -2246,6 +2273,7 @@ namespace Questor.Modules.Caching
                     Cache.Instance.ShipHangar.StackAll();
                     return true;
                 }
+                return false;
             }
             return false;
         }
@@ -2340,6 +2368,7 @@ namespace Questor.Modules.Caching
                         Cache.Instance.AmmoHangar.StackAll();
                         return true;
                     }
+                    return false;
                 }
                 else
                 {

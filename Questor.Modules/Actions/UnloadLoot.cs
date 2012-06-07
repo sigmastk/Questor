@@ -38,6 +38,9 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.InSpace)
                 return;
 
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return;
+
             switch (_States.CurrentUnloadLootState)
             {
                 case UnloadLootState.Idle:
