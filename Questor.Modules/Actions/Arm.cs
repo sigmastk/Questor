@@ -67,16 +67,13 @@ namespace Questor.Modules.Actions
                     _inventoryWindowsCleanedUp = false;
                     break;
 
+                case ArmState.Cleanup:
+                    if (!Cleanup.CloseInventoryWindows()) break;
+                    _States.CurrentArmState = ArmState.Done;
+                    break;
+                    
                 case ArmState.Done:
-                    if(!_inventoryWindowsCleanedUp)
-                    {
-                        if (!Cleanup.CloseInventoryWindows())
-                        {
-                            _inventoryWindowsCleanedUp = false;
-                            break;
-                        }
-                    }
-                    _inventoryWindowsCleanedUp = true;
+
                     break;
 
                 case ArmState.NotEnoughDrones:
