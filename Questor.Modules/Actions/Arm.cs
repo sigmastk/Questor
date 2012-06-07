@@ -152,7 +152,7 @@ namespace Questor.Modules.Actions
                         if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == transportshipName)
                         {
                             Logging.Log("Arm.ActivateTransportShip", "Done", Logging.white);
-                            _States.CurrentArmState = ArmState.Done;
+                            _States.CurrentArmState = ArmState.Cleanup;
                             return;
                         }
                     }
@@ -195,7 +195,7 @@ namespace Questor.Modules.Actions
                         if (DateTime.Now > Cache.Instance.NextArmAction)
                         {
                             Logging.Log("Arm", "Done", Logging.white);
-                            _States.CurrentArmState = ArmState.Done;
+                            _States.CurrentArmState = ArmState.Cleanup;
                             return;
                         }
                     }
@@ -279,7 +279,7 @@ namespace Questor.Modules.Actions
                         if (AmmoToLoad.Count == 0 && string.IsNullOrEmpty(Cache.Instance.BringMissionItem))
                         {
                             Logging.Log("Arm", "Done", Logging.white);
-                            _States.CurrentArmState = ArmState.Done;
+                            _States.CurrentArmState = ArmState.Cleanup;
                         }
                         else
                         {
@@ -664,7 +664,7 @@ namespace Questor.Modules.Actions
                             }
                         }
 
-                        _States.CurrentArmState = ArmState.Done;
+                        _States.CurrentArmState = ArmState.Cleanup;
                         break;
                     }
 
