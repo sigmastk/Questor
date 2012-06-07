@@ -59,5 +59,9 @@ namespace Questor.Modules.Lookup
         CheckForWindows_seconds = 15,                            // Check for and deal with modal windows every x seconds, units: seconds. Default is 15
         ScheduleCheck_seconds = 120,                                   // How often when in IDLE, we should check to see if we need to logoff / restart, this can be set to a low number, default is 120 seconds (2 minutes)
         ValueDumpPulse_milliseconds = 500,                       // Used to delay the next valuedump pulse, units: milliseconds. Default is 500
+        NoFramesRestart_seconds = 45,
+        NoFramesReallyRestart_seconds = 90,
+        NoSessionIsReadyRestart_seconds = 60,
+        NoSessionIsReadyReallyRestart_seconds = 120,
     }
 }
