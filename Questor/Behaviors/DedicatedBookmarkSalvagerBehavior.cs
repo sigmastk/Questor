@@ -507,9 +507,20 @@ namespace Questor.Behaviors
                             }
                             Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: Character mode is BookmarkSalvager and no bookmarks are ready to salvage.", Logging.white);
                             //We just need a NextSalvagerSession timestamp to key off of here to add the delay
-                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
-                            _States.CurrentQuestorState = QuestorState.Idle;
-                            _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                            if (Cache.Instance.InSpace)
+                            {
+                                // Questor does not handle in space starts very well, head back to base to try again
+                                LastAction = DateTime.Now;
+                                _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                                break;
+                            }
+                            else
+                            {
+                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                                _States.CurrentQuestorState = QuestorState.Idle;
+                                _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                            }
 
                             break;
                         }
