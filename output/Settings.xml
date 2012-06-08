@@ -74,7 +74,7 @@
   <!-- By Default ClearPocket ignores sentries. If you would like them cleared as part of clearpocket you need this set to true --> 
   <killSentries>false</killSentries>
   <!-- Require a mission XML for Every Mission, default is false: if enabled questor will error while docked if it comes across a mission you do not have an XML for -->
-  <requireMissionXML>false<requireMissionXML>
+  <requireMissionXML>false</requireMissionXML>
   <!-- agentsList is used when WaitDecine is true and your standings have gone below MinStandings, it will switch to a lower priority agent, need to be filled out for at least one agent -->
   <agentsList>
     <agentList name="" priority="0" /><!-- needs to be customized -->
