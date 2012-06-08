@@ -2793,73 +2793,11 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                 {
-                    //Logging.Log(module + ": Corporate Hangar is defined as the Ammo Hangar");
-                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
-
-                    // Is the corp loot Hangar open?
-                    if (Cache.Instance.AmmoHangar != null)
-                    {
-                        if (Cache.Instance.AmmoHangar.Window == null)
-                        {
-                            // No, command it to open
-                            //Cache.Instance.DirectEve.OpenCorporationHangar();
-                            Cache.Instance.NextOpenHangarAction =
-                                DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                            Logging.Log(module, "Opening Corporate Ammo Hangar: waiting [" +
-                                        Math.Round(
-                                            Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).
-                                                TotalSeconds,
-                                            0) + "sec]", Logging.white);
-                            return false;
-                        }
-                        if (!Cache.Instance.AmmoHangar.Window.IsReady)
-                            return false;
-                        if (Cache.Instance.AmmoHangar.Window.IsReady)
-                        {
-                            if (Cache.Instance.AmmoHangar.Window.IsPrimary())
-                            {
-                                Cache.Instance.AmmoHangar.Window.OpenAsSecondary();
-                                return false;
-                            }
-                            return true;
-                        }
-                    }
-                    if (Cache.Instance.AmmoHangar == null)
-                    {
-                        if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                            Logging.Log(module, "Opening Corporate Hangar: failed! No Corporate Hangar in this station! lag?", Logging.orange);
-                        return false;
-                    }
+                    if (!Cache.Instance.OpenCorpAmmoHangar("Cache.OpenAmmoHangar")) return false;
                 }
                 else
                 {
-                    //Logging.Log(module + ": Item Hangar is defined as the Ammo Hangar");
-                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
-                    if (Cache.Instance.AmmoHangar == null)
-                        return false;
-
-                    // Is the items hangar open?
-                    if (Cache.Instance.AmmoHangar.Window == null)
-                    {
-                        // No, command it to open
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module, "Opening Item Hangar: waiting [" +
-                                    Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]", Logging.white);
-                        return false;
-                    }
-                    if (!Cache.Instance.AmmoHangar.Window.IsReady)
-                        return false;
-                    if (Cache.Instance.AmmoHangar.Window.IsReady)
-                    {
-                        if (Cache.Instance.AmmoHangar.Window.IsPrimary())
-                        {
-                            Cache.Instance.AmmoHangar.Window.OpenAsSecondary();
-                            return false;
-                        }
-                        return true;
-                    }
+                    if (!Cache.Instance.OpenItemsHangarAsAmmoHangar("Cache.OpenAmmoHangar")) return false;
                 }
             }
             return false;
