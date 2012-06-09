@@ -9,6 +9,8 @@
 //-------------------------------------------------------------------------------
 
 using System.Globalization;
+using LavishScriptAPI;
+using Questor.Modules.Caching;
 
 namespace Questor
 {
