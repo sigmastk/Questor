@@ -413,9 +413,13 @@ namespace Questor
                         {
                             Logging.Log("Startup", "ERROR! - Human Intervention is required in this case: halting all login attempts - ERROR!", Logging.red);
                             Logging.Log("Startup", "window.Name is: " + window.Name, Logging.red);
-                            Logging.Log("Startup", "window.Caption is: " + window.Caption, Logging.red);
-                            Logging.Log("Startup", "window.ID is: " + window.Id, Logging.red);
                             Logging.Log("Startup", "window.Html is: " + window.Html, Logging.red);
+                            Logging.Log("Startup", "window.Caption is: " + window.Caption, Logging.red);
+                            Logging.Log("Startup", "window.Type is: " + window.Type, Logging.red);
+                            Logging.Log("Startup", "window.ID is: " + window.Id, Logging.red);
+                            Logging.Log("Startup", "window.IsDialog is: " + window.IsDialog, Logging.red);
+                            Logging.Log("Startup", "window.IsKillable is: " + window.IsKillable, Logging.red);
+                            Logging.Log("Startup", "window.Viewmode is: " + window.ViewMode, Logging.red);
                             Logging.Log("Startup", "ERROR! - Human Intervention is required in this case: halting all login attempts - ERROR!", Logging.red);
                             _humaninterventionrequired = true;
                             return;
@@ -428,9 +432,14 @@ namespace Questor
                         continue;
                     Logging.Log("Startup", "We've got an unexpected window, auto login halted.", Logging.red);
                     Logging.Log("Startup", "window.Name is: " + window.Name, Logging.red);
-                    Logging.Log("Startup", "window.Caption is: " + window.Caption, Logging.red);
-                    Logging.Log("Startup", "window.ID is: " + window.Id, Logging.red);
                     Logging.Log("Startup", "window.Html is: " + window.Html, Logging.red);
+                    Logging.Log("Startup", "window.Caption is: " + window.Caption, Logging.red);
+                    Logging.Log("Startup", "window.Type is: " + window.Type, Logging.red);
+                    Logging.Log("Startup", "window.ID is: " + window.Id, Logging.red);
+                    Logging.Log("Startup", "window.IsDialog is: " + window.IsDialog, Logging.red);
+                    Logging.Log("Startup", "window.IsKillable is: " + window.IsKillable, Logging.red);
+                    Logging.Log("Startup", "window.Viewmode is: " + window.ViewMode, Logging.red);
+                    Logging.Log("Startup", "We've got an unexpected window, auto login halted.", Logging.red);
                     _done = true;
                     return;
                 }
