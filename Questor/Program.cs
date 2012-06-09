@@ -340,11 +340,15 @@ namespace Questor
                         bool close = false;
                         bool restart = false;
                         bool needhumanintervention = false;
+                        bool sayyes = false;
+                        bool update = false;
 
                         if (!string.IsNullOrEmpty(window.Html))
                         {
                             //errors that are repeatable and unavoidable even after a restart of eve/questor
                             needhumanintervention = window.Html.Contains("reason: Account subscription expired");
+
+                            //update |= window.Html.Contains("The update has been downloaded");
 
                             // Server going down
                             //Logging.Log("[Startup] (1) close is: " + close);
@@ -386,12 +390,26 @@ namespace Questor
                             restart |= window.Html.Contains("Local session information is corrupt");
                             restart |= window.Html.Contains("The client's local session"); // information is corrupt");
                             restart |= window.Html.Contains("restart the client prior to logging in");
-
+                            //
+                            // Modal Dialogs the need "yes" pressed
+                            //
+                            //sayyes |= window.Html.Contains("There is a new build available");
                             //Logging.Log("[Startup] (2) close is: " + close);
                             //Logging.Log("[Startup] (1) window.Html is: " + window.Html);
                             _pulsedelay = 60;
                         }
-
+                        if (update)
+                        {
+                            int secRestart = (400 * 3) + Cache.Instance.RandomNumber(3, 18) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
+                            LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " OSExecute taskkill /IM launcher.exe");
+                        }
+                        if (sayyes)
+                        {
+                            Logging.Log("Startup", "Found a window that needs 'yes' chosen...", Logging.white);
+                            Logging.Log("Startup", "Content of modal window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.white);
+                            window.AnswerModal("Yes");
+                            continue;
+                        }
                         if (restart)
                         {
                             Logging.Log("Startup", "Restarting eve...", Logging.red);
