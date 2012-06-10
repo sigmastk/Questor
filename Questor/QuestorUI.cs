@@ -29,13 +29,12 @@ namespace Questor
 
         public QuestorfrmMain()
         {
-            this.Show();
             InitializeComponent();
             _questor = new Questor(this);
-
             PopulateStateComboBoxes();
             PopulateBehaviorStateComboBox();
             CreateLavishCommands();
+            this.Show();
         }
 
         private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
