@@ -614,7 +614,8 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
+            if (!Cache.Instance.OpenCargoHold("Salvge")) return;
+
             switch (_States.CurrentSalvageState)
             {
                 case SalvageState.TargetWrecks:
@@ -636,10 +637,10 @@ namespace Questor.Modules.BackgroundTasks
 
                     // Default action
                     _States.CurrentSalvageState = SalvageState.TargetWrecks;
-                    if (cargo.Window.IsReady && cargo.Items.Any() && Cache.Instance.NextSalvageAction < DateTime.Now)
+                    if (Cache.Instance.CargoHold.Window.IsReady && Cache.Instance.CargoHold.Items.Any() && Cache.Instance.NextSalvageAction < DateTime.Now)
                     {
                         // Check if there are actually duplicates
-                        bool duplicates = cargo.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
+                        bool duplicates = Cache.Instance.CargoHold.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
                         if (duplicates)
                         {
                             _States.CurrentSalvageState = SalvageState.StackItems;
@@ -651,8 +652,8 @@ namespace Questor.Modules.BackgroundTasks
                 case SalvageState.StackItems:
                     Logging.Log("Salvage", "Stacking items", Logging.white);
 
-                    if (cargo.Window.IsReady)
-                        cargo.StackAll();
+                    if (Cache.Instance.CargoHold.Window.IsReady)
+                        Cache.Instance.CargoHold.StackAll();
 
                     Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItemsDelayBeforeResuming_seconds);
                     _States.CurrentSalvageState = SalvageState.WaitForStacking;
