@@ -39,8 +39,11 @@
   <!--   CONSOLE LOG SETTINGS   -->
   <!--                                                -->
   
-  <!-- Enable or Disable the SessionsLog that tracks Logins / Logoffs and overall session stats for questor -->
+  <!-- Save Console Log: the logs will save to: ./.Net Programs/Logs/<CharacterName>/consolelogs/<DailyLog> -->
   <saveLog>true</saveLog><!-- default is true -->
+  <!-- Save Console Log Redacted of at least some of the sensitive info: the logs will save to: ./.Net Programs/Logs/<CharacterName>/consolelogs/<DailyLog-redacted> -->
+  <saveLogRedacted>true</saveLogRedacted><!-- default is true -->
+  
   <!-- Maximum number of lines in the external console -->
   <maxLineConsole>1000</maxLineConsole><!-- default is 1000 -->
   
@@ -211,7 +214,7 @@
   <!--                                                                                                                                                   -->
   <!--      Logging Options: All logs are in ./.Net Programs/Logs/<CharacterName>/<optionalsubdirectory> -->
   <!--                                                                                                                                                   -->
-  <!-- Save Log Console: the logs will save to: ./.Net Programs/Logs/<CharacterName>/consolelogs/<DailyLog> -->
+  <!-- Enable or Disable the SessionsLog that tracks Logins / Logoffs and overall session stats for questor -->
   <SessionsLog>true</SessionsLog><!-- default is: true -->
   <!-- Enable or Disable the DroneStatsLog that tracks drone losses -->
   <DroneStatsLog>true</DroneStatsLog><!-- default is: true -->

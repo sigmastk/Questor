@@ -375,7 +375,7 @@ namespace Questor.Modules.Caching
         public string ExtConsole { get; set; }
 
         public string ConsoleLog { get; set; }
-
+        public string ConsoleLogRedacted { get; set; }
         public bool IsAgentLoop { get; set; }
 
         private string _agentName = "";
@@ -870,13 +870,18 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_agentName == "")
+                if (Settings.Instance.CharacterXMLExists)
                 {
-                    _agentName = SwitchAgent;
-                    Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]", Logging.white);
-                }
+                    if (_agentName == "")
+                    {
+                        _agentName = SwitchAgent;
+                        Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]",
+                                    Logging.white);
+                    }
 
-                return _agentName;
+                    return _agentName;
+                }
+                return "";
             }
             set
             {
@@ -906,10 +911,14 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                _agent = DirectEve.GetAgentByName(CurrentAgent);
-                _agentId = _agent.AgentId;
+                if (Settings.Instance.CharacterXMLExists)
+                {
+                    _agent = DirectEve.GetAgentByName(CurrentAgent);
+                    _agentId = _agent.AgentId;
 
-                return _agentId ?? -1;
+                    return _agentId ?? -1;
+                }
+                return -1;
             }
         }
 
@@ -917,13 +926,17 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                _agent = DirectEve.GetAgentByName(CurrentAgent);
-                if (_agent != null)
+                if (Settings.Instance.CharacterXMLExists)
                 {
-                    _agentId = _agent.AgentId;
-                }
+                    _agent = DirectEve.GetAgentByName(CurrentAgent);
+                    if (_agent != null)
+                    {
+                        _agentId = _agent.AgentId;
+                    }
 
-                return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
+                    return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
+                }
+                return null;
             }
         }
 

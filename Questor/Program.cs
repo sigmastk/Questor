@@ -10,7 +10,6 @@
 
 using System.Globalization;
 using LavishScriptAPI;
-using Questor.Modules.Caching;
 
 namespace Questor
 {
@@ -280,7 +279,8 @@ namespace Questor
             }
 
             _startTime = DateTime.Now;
-
+            Settings.Instance.LoginUsername = _username;
+            Settings.Instance.LoginCharacter = _character;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new QuestorfrmMain());
@@ -402,7 +402,7 @@ namespace Questor
                         }
                         if (update)
                         {
-                            int secRestart = (400 * 3) + Cache.Instance.RandomNumber(3, 18) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
+                            int secRestart = (400 * 3) + Settings.Instance.RandomNumber(3, 18) * 100 + Settings.Instance.RandomNumber(1, 9) * 10;
                             LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " OSExecute taskkill /IM launcher.exe");
                         }
                         if (sayyes)
