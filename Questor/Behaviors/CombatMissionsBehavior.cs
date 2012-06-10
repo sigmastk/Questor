@@ -424,14 +424,10 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        // Every 5 min of idle check and make sure we aren't supposed to stop...
-                        if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
-                        {
                             Cache.Instance.LastScheduleCheck = DateTime.Now;
                             Questor.TimeCheck();   //Should we close questor due to stoptime or runtime?
                             //Questor.WalletCheck(); //Should we close questor due to no wallet balance change? (stuck?)
                         }
-                    }
                     break;
 
                 case CombatMissionsBehaviorState.DelayedStart:
