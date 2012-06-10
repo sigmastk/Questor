@@ -1978,6 +1978,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenItemsHangarSingleInstance(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2010,6 +2013,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenItemsHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2048,6 +2054,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenItemsHangarAsLootHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2095,6 +2104,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenItemsHangarAsAmmoHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -2144,6 +2156,9 @@ namespace Questor.Modules.Caching
 
         public bool StackItemsHangarAsLootHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2165,6 +2180,9 @@ namespace Questor.Modules.Caching
 
         public bool StackItemsHangarAsAmmoHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2188,6 +2206,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenCargoHold(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) || Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
             {
                 if (DateTime.Now.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
@@ -2234,6 +2255,9 @@ namespace Questor.Modules.Caching
 
         public bool StackCargoHold(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) || Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenCargoAction)
                 return false;
 
@@ -2253,6 +2277,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenShipsHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -2293,6 +2320,9 @@ namespace Questor.Modules.Caching
 
         public bool StackShipsHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -2319,6 +2349,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenCorpAmmoHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2390,6 +2423,9 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpAmmoHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2422,6 +2458,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenInventoryWindow(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             Cache.Instance.InventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.OfType<DirectWindow>().FirstOrDefault(
                             w => w.Type == "form.Inventory" &&
                                  w.Name.Contains("Inventory") &&
@@ -2455,6 +2494,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenCorpLootHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2526,6 +2568,9 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2547,6 +2592,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenCorpBookmarkHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenCorpBookmarkHangarAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2595,6 +2643,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenLootContainer(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
                 return false;
             if (Cache.Instance.InStation)
@@ -2630,6 +2681,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenAndSelectInvItem(string module, long ID)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             var inventory = Cache.Instance.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.IsPrimary());
             if(ID < 0) return false;
             
@@ -2667,6 +2721,9 @@ namespace Questor.Modules.Caching
 
         public bool StackLootContainer(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenLootContainerAction)
                 return false;
 
@@ -2783,6 +2840,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenLootHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -2810,6 +2870,9 @@ namespace Questor.Modules.Caching
 
         public bool StackLootHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -2838,6 +2901,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenAmmoHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -2860,6 +2926,9 @@ namespace Questor.Modules.Caching
 
         public bool StackAmmoHangar(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
@@ -3044,6 +3113,9 @@ namespace Questor.Modules.Caching
 
         public bool OpenJournalWindow(String module)
         {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
             if (DateTime.Now < Cache.Instance.NextOpenJournalWindowAction)
                 return false;
 
