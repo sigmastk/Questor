@@ -2973,6 +2973,59 @@ namespace Questor.Modules.Caching
             return true;
         }
 
+        public DirectLoyaltyPointStoreWindow LPStore { get; set; }
+
+        public bool OpenLPStore(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
+            {
+                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]",Logging.white);
+                return false;
+            }
+            if (!Cache.Instance.InStation)
+            {
+                Logging.Log(module, "Opening LP Store: We aren't in station?! There is no LP Store in space, waiting...", Logging.orange);
+                return false;
+            }
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.LPStore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+                if (Cache.Instance.LPStore == null)
+                {
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
+                    Logging.Log(module, "Opening loyalty point store", Logging.white);
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public bool CloseLPStore(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
+            {
+                return false;
+            }
+            if (!Cache.Instance.InStation)
+            {
+                Logging.Log(module, "Closing LP Store: We aren't in station?!", Logging.orange);
+                return false;
+            }
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.LPStore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+                if (Cache.Instance.LPStore != null)
+                {
+                    Logging.Log(module, "Closing loyalty point store", Logging.white);
+                    Cache.Instance.LPStore.Close();
+                    return false;
+                }
+                return true;
+            }
+            return true; //if we aren't in station then the LP Store should have auto closed already. 
+        }
+
         public DirectWindow JournalWindow { get; set; }
 
         public bool OpenJournalWindow(String module)
