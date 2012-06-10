@@ -601,6 +601,11 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.LocalWatch:
+                    if (DateTime.Now < Cache.Instance.NextArmAction)
+                    {
+                        Logging.Log("Cleanup", "Closing Inventory Windows: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "]sec", Logging.white);
+                        break;
+                    }
                     if (Settings.Instance.UseLocalWatch)
                     {
                         Cache.Instance.LastLocalWatchAction = DateTime.Now;

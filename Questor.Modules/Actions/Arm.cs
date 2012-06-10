@@ -67,10 +67,6 @@ namespace Questor.Modules.Actions
 
                 case ArmState.Cleanup:
                     if (!Cleanup.CloseInventoryWindows()) break;
-                    if (DateTime.Now < Cache.Instance.NextArmAction)
-                    {
-                        Logging.Log("Arm", "Cleanup: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds,2) + "]sec",Logging.white);
-                    }
                     _States.CurrentArmState = ArmState.Done;
                     break;
                     
