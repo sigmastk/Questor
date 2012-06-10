@@ -38,6 +38,12 @@ namespace Questor
             CreateLavishCommands();
         }
 
+        private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
+        {
+            Cache.Instance.DirectEve.Dispose();
+            Cache.Instance.DirectEve = null;
+        }
+
         private void PopulateStateComboBoxes()
         {
             QuestorStateComboBox.Items.Clear();
