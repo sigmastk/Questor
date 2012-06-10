@@ -235,6 +235,7 @@ namespace Questor.Modules.Caching
             get { return _instance; }
         }
 
+        public bool ExitWhenIdle = false;
         public bool StopBot = false;
         public bool DoNotBreakInvul = false;
         public bool UseDrones = true;

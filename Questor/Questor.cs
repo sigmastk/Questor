@@ -16,6 +16,7 @@ namespace Questor
     using System.Collections.Generic;
     using System.Diagnostics;
     using DirectEve;
+    using System.Linq;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
@@ -138,7 +139,9 @@ namespace Questor
         public static void BeginClosingQuestor()
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
+            Cache.Instance.SessionState = "Quitting";
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
+            return;
         }
 
         public static void TimeCheck()
@@ -154,10 +157,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
-                if (_States.CurrentQuestorState == QuestorState.Idle)
-                {
                     BeginClosingQuestor();
-                }
                 return;
             }
             if (Cache.Instance.StopTimeSpecified)
@@ -170,12 +170,20 @@ namespace Questor
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.SessionState = "Exiting";
-                    if (_States.CurrentQuestorState == QuestorState.Idle)
-                    {
                         BeginClosingQuestor();
-                    }
                     return;
                 }
+            }
+            if (Cache.Instance.ExitWhenIdle)
+            {
+                Logging.Log("Questor", "ExitWhenIdle set to true.  Quitting game.", Logging.white);
+                Cache.Instance.ReasonToStopQuestor = "ExitWhenIdle se to true";
+                Settings.Instance.AutoStart = false;
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.SessionState = "Exiting";
+                BeginClosingQuestor();
+                return;
             }
         }
 
