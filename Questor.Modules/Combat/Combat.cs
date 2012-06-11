@@ -887,15 +887,11 @@ namespace Questor.Modules.Combat
             switch (_States.CurrentCombatState)
             {
                 case CombatState.CheckTargets:
-                    // Next state
-                    _States.CurrentCombatState = CombatState.KillTargets;
                     TargetCombatants();
+                    _States.CurrentCombatState = CombatState.KillTargets;
                     break;
 
                 case CombatState.KillTargets:
-                    // Next state
-                    _States.CurrentCombatState = CombatState.CheckTargets;
-
                     //
                     // iterate through priority targets here !!!!!!!!
                     //
@@ -914,6 +910,7 @@ namespace Questor.Modules.Combat
                         ActivateNos(TargetingCache.CurrentWeaponsTarget);
                         ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
                     }
+                    _States.CurrentCombatState = CombatState.CheckTargets;
                     break;
 
                 case CombatState.OutOfAmmo:
