@@ -623,7 +623,9 @@ namespace Questor.Behaviors
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.Salvage:
-                    DirectContainer salvageCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: attempting to open cargo hold", Logging.white);
+                    if (!Cache.Instance.OpenCargoHold("DedicatedSalvageBehavior: Salvage")) break;
+                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: done opening cargo hold", Logging.white);
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
@@ -652,9 +654,8 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (!Cache.Instance.OpenCargoHold("DedicatedSalvageBehavior: Salvage")) break;
 
-                        if (Settings.Instance.UnloadLootAtStation && salvageCargo.Window.IsReady && (salvageCargo.Capacity - salvageCargo.UsedCapacity) < 100)
+                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < 100)
                         {
                             Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "We are full, go to base to unload", Logging.white);
                             if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Salvage)
@@ -666,37 +667,28 @@ namespace Questor.Behaviors
 
                         if (!Cache.Instance.UnlootedContainers.Any())
                         {
+                            Logging.Log("DedicatedBookmarkSalvageBehavior","salvage: no unlooted containers left on grid",Logging.white);
                             AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
                             var bookmark = AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
                             var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                                    OrderBy(b => b.CreatedOn));
-                            DirectBookmark localBookmark = bookmarksinlocal.FirstOrDefault();
+                            DirectBookmark onGridBookmark = bookmarksinlocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
                             //Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room, current bookmark:" + _currentBookmark.Title, Logging.white);
 
-                            if (localBookmark != null)
+                            if (onGridBookmark != null)
                             {
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmark:" + localBookmark.Title, Logging.white);
-                                localBookmark.Delete();
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmark:" + onGridBookmark.Title, Logging.white);
+                                onGridBookmark.Delete();
                             }
-                            else
-                            {
-                                if (bookmark != null)
-                                {
-                                    Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvage", "Finished salvaging the room: removing salvage bookmark:" + bookmark.Title, Logging.white);
-                                    bookmark.Delete();
-                                }
-                            }
+
 
                             Cache.Instance.NextRemoveBookmarkAction = DateTime.Now.AddSeconds((int)Time.RemoveBookmarkDelay_seconds);
-                            if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Salvage)
-                            {
-                                _nextSalvageTrip = DateTime.Now;
-                                Statistics.Instance.FinishedSalvaging = DateTime.Now;
-                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
-                            }
+                            _nextSalvageTrip = DateTime.Now;
+                            Statistics.Instance.FinishedSalvaging = DateTime.Now;
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
                             return;
-
                         }
+                        if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior","salvage: we have more wrecks to salvage",Logging.white);
                         //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
                         Salvage.MoveIntoRangeOfWrecks();
                         try
