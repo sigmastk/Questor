@@ -179,40 +179,6 @@ namespace Questor.Behaviors
             }
         }
 
-        private void AvoidBumpingThings(EntityCache thisBigObject)
-        {
-            //if It hasn't been at least 60 seconds since we last session changed do not do anything
-            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
-                return;
-            //
-            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
-            //
-            if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
-            {
-                //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-                if (thisBigObject != null)
-                {
-                    if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
-                    {
-                        //we are no longer "too close" and can proceed.
-                    }
-                    else
-                    {
-                        if (DateTime.Now > Cache.Instance.NextOrbit)
-                        {
-                            thisBigObject.Orbit((int)Distance.SafeDistancefromStructure);
-                            Logging.Log("CombatMissionsBehavior", _States.CurrentCombatMissionBehaviorState +
-                                       ": initiating Orbit of [" + thisBigObject.Name +
-                                          "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.white);
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                        }
-                        return;
-                        //we are still too close, do not continue through the rest until we are not "too close" anymore
-                    }
-                }
-            }
-        }
-
         public void ProcessState()
         {
             // Invalid settings, quit while we're ahead
@@ -444,7 +410,7 @@ namespace Questor.Behaviors
                 case DedicatedBookmarkSalvagerBehaviorState.GotoBase:
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: AvoidBumpingThings()", Logging.white);
-                    AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault());
+                    NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "DedicatedBookmarkSalvagerBehaviorState.GotoBase");
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: TravelToAgentsStation()", Logging.white);
                     TravelToAgentsStation();
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)

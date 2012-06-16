@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Caching;
 using Questor.Modules.Activities;
 
@@ -383,7 +384,7 @@ namespace Questor.Modules.Combat
             if (!Cache.Instance.InMission)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are NOT in a mission: navigateintorange", Logging.teal);
-                CombatMissionCtrl.NavigateIntoRange(target); //eventually this method should be moved to something like navigate.cs or movement.cs
+                NavigateOnGrid.NavigateIntoRange(target,"Combat");
             }
 
             if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: after navigate into range...", Logging.teal);
