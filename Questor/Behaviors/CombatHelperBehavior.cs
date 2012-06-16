@@ -192,39 +192,39 @@ namespace Questor.Behaviors
             }
         }
 
-        private void AvoidBumpingThings()
+        private void AvoidBumpingThings(EntityCache thisBigObject)
         {
             //if It hasn't been at least 60 seconds since we last session changed do not do anything
-         if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
+            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
                 return;
             //
             // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
             //
-         if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
-         {
-            EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-            if (thisBigObject != null)
+            if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
             {
-                if (thisBigObject.Distance >= (int) Distance.TooCloseToStructure)
+                //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
+                if (thisBigObject != null)
                 {
-                    //we are no longer "too close" and can proceed. 
-                }
-                else
-                {
-                    if (DateTime.Now > Cache.Instance.NextOrbit)
+                    if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
                     {
-                        thisBigObject.Orbit((int) Distance.SafeDistancefromStructure);
-                        Logging.Log("CombatHelperBehavior", _States.CurrentCombatHelperBehaviorState +
-                                    ": initiating Orbit of [" + thisBigObject.Name +
-                                    "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.white);
-                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
+                        //we are no longer "too close" and can proceed.
                     }
-                    return;
-                    //we are still too close, do not continue through the rest until we are not "too close" anymore
+                    else
+                    {
+                        if (DateTime.Now > Cache.Instance.NextOrbit)
+                        {
+                            thisBigObject.Orbit((int)Distance.SafeDistancefromStructure);
+                            Logging.Log("CombatMissionsBehavior", _States.CurrentCombatMissionBehaviorState +
+                                       ": initiating Orbit of [" + thisBigObject.Name +
+                                          "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.white);
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                        }
+                        return;
+                        //we are still too close, do not continue through the rest until we are not "too close" anymore
+                    }
                 }
             }
         }
-      }
 
         public void ProcessState()
         {
@@ -486,7 +486,7 @@ namespace Questor.Behaviors
                 case CombatHelperBehaviorState.GotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatHelperBehavior", "GotoBase: AvoidBumpingThings()",Logging.white);
 
-                    AvoidBumpingThings();
+                    AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault());
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatHelperBehavior", "GotoBase: TravelToAgentsStation()", Logging.white);
                     

@@ -1165,6 +1165,19 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public IEnumerable<EntityCache> BigObjectsandGates
+        {
+            get
+            {
+                return _bigobjects ?? (_bigobjects = Entities.Where(e =>
+                       e.GroupId == (int)Group.LargeCollidableStructure ||
+                       e.GroupId == (int)Group.AccellerationGate ||
+                       e.TypeId == 21609 || //Dysfunctional Solar Harvester in Gone Berserk (not an LCO)
+                       e.GroupId == (int)Group.SpawnContainer &&
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+            }
+        }
+
         public IEnumerable<EntityCache> Objects
         {
             get

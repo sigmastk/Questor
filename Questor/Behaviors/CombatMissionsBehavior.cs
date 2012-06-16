@@ -208,7 +208,7 @@ namespace Questor.Behaviors
             }
         }
 
-        private void AvoidBumpingThings()
+        private void AvoidBumpingThings(EntityCache thisBigObject)
         {
             //if It hasn't been at least 60 seconds since we last session changed do not do anything
             if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
@@ -218,7 +218,7 @@ namespace Questor.Behaviors
             //
             if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
             {
-                EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
+                //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
                 if (thisBigObject != null)
                 {
                     if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
@@ -770,7 +770,7 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.GotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: AvoidBumpingThings()", Logging.white);
 
-                    AvoidBumpingThings();
+                    AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault());
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: TravelToAgentsStation()", Logging.white);
 
