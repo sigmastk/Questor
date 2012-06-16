@@ -1,11 +1,8 @@
 ﻿/* Written by Noob536 */
 
-
-
 namespace GoToBM
 {
     using DirectEve;
-    using global::Questor.Modules;
     using System;
     using Questor.Modules.Activities;
     using Questor.Modules.Caching;
