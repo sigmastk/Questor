@@ -73,8 +73,8 @@ namespace Questor.Behaviors
             // States.CurrentDirectionalScannerBehaviorState fixed on ExecuteMission
             _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
-            _States.CurrentCombatState = CombatState.Idle;
-            _States.CurrentDroneState = DroneState.Idle;
+            //_States.CurrentCombatState = CombatState.Idle;
+            //_States.CurrentDroneState = DroneState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
         }
@@ -191,40 +191,6 @@ namespace Questor.Behaviors
                Logging.Log("Traveler.State", "is " + _States.CurrentTravelerState,Logging.white);
             }
         }
-
-        private void AvoidBumpingThings()
-        {
-            //if It hasn't been at least 60 seconds since we last session changed do not do anything
-         if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
-                return;
-            //
-            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
-            //
-         if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
-         {
-            EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-            if (thisBigObject != null)
-            {
-                if (thisBigObject.Distance >= (int) Distance.TooCloseToStructure)
-                {
-                    //we are no longer "too close" and can proceed. 
-                }
-                else
-                {
-                    if (DateTime.Now > Cache.Instance.NextOrbit)
-                    {
-                        thisBigObject.Orbit((int) Distance.SafeDistancefromStructure);
-                        Logging.Log("DirectionalScannerBehavior", _States.CurrentDirectionalScannerBehaviorState +
-                                    ": initiating Orbit of [" + thisBigObject.Name +
-                                    "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.white);
-                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int) Time.OrbitDelay_seconds);
-                    }
-                    return;
-                    //we are still too close, do not continue through the rest until we are not "too close" anymore
-                }
-            }
-        }
-      }
 
         public void ProcessState()
         {
@@ -356,7 +322,7 @@ namespace Questor.Behaviors
                 case DirectionalScannerBehaviorState.GotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: AvoidBumpingThings()",Logging.white);
 
-                    AvoidBumpingThings();
+                    NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "DirectionalScannerBehaviorState.GotoBase");
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: TravelToAgentsStation()", Logging.white);
                     

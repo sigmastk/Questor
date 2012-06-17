@@ -63,5 +63,8 @@ namespace Questor.Modules.Lookup
         NoFramesReallyRestart_seconds = 90,
         NoSessionIsReadyRestart_seconds = 60,
         NoSessionIsReadyReallyRestart_seconds = 120,
+        Marketlookupdelay_seconds = 3,
+        Marketsellorderdelay_seconds = 5,
+        Marketbuyorderdelay_seconds = 5,
     }
 }

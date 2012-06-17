@@ -96,8 +96,8 @@ namespace Questor.Behaviors
             // States.CurrentCombatMissionBehaviorState fixed on ExecuteMission
             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
-            _States.CurrentCombatState = CombatState.Idle;
-            _States.CurrentDroneState = DroneState.Idle;
+            //_States.CurrentCombatState = CombatState.Idle;
+            //_States.CurrentDroneState = DroneState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
         }
@@ -205,40 +205,6 @@ namespace Questor.Behaviors
             if (Settings.Instance.DebugStates)
             {
                 Logging.Log("Traveler.State", "is " + _States.CurrentTravelerState, Logging.white);
-            }
-        }
-
-        private void AvoidBumpingThings()
-        {
-            //if It hasn't been at least 60 seconds since we last session changed do not do anything
-            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
-                return;
-            //
-            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
-            //
-            if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
-            {
-                EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-                if (thisBigObject != null)
-                {
-                    if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
-                    {
-                        //we are no longer "too close" and can proceed.
-                    }
-                    else
-                    {
-                        if (DateTime.Now > Cache.Instance.NextOrbit)
-                        {
-                            thisBigObject.Orbit((int)Distance.SafeDistancefromStructure);
-                            Logging.Log("CombatMissionsBehavior", _States.CurrentCombatMissionBehaviorState +
-                                       ": initiating Orbit of [" + thisBigObject.Name +
-                                          "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.white);
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
-                        }
-                        return;
-                        //we are still too close, do not continue through the rest until we are not "too close" anymore
-                    }
-                }
             }
         }
 
@@ -424,14 +390,10 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        // Every 5 min of idle check and make sure we aren't supposed to stop...
-                        if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
-                        {
                             Cache.Instance.LastScheduleCheck = DateTime.Now;
                             Questor.TimeCheck();   //Should we close questor due to stoptime or runtime?
                             //Questor.WalletCheck(); //Should we close questor due to no wallet balance change? (stuck?)
                         }
-                    }
                     break;
 
                 case CombatMissionsBehaviorState.DelayedStart:
@@ -605,6 +567,11 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.LocalWatch:
+                    if (DateTime.Now < Cache.Instance.NextArmAction)
+                    {
+                        Logging.Log("Cleanup", "Closing Inventory Windows: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "]sec", Logging.white);
+                        break;
+                    }
                     if (Settings.Instance.UseLocalWatch)
                     {
                         Cache.Instance.LastLocalWatchAction = DateTime.Now;
@@ -700,7 +667,7 @@ namespace Questor.Behaviors
 
                         // Seeing as we just warped to the mission, start the mission controller
                         _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
-                        _States.CurrentCombatState = CombatState.CheckTargets;
+                        //_States.CurrentCombatState = CombatState.CheckTargets;
                         _traveler.Destination = null;
                     }
                     break;
@@ -739,7 +706,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                     {
                         Logging.Log("Combat", "Out of Ammo!", Logging.orange);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
                         //Cache.Instance.InvalidateBetweenMissionsCache();
@@ -747,7 +714,7 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Done)
                     {
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
 
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
@@ -758,7 +725,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                     {
                         Logging.Log("MissionController", "Error", Logging.red);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
 
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
@@ -769,7 +736,7 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.GotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: AvoidBumpingThings()", Logging.white);
 
-                    AvoidBumpingThings();
+                    NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "CombatMissionsBehaviorState.GotoBase");
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: TravelToAgentsStation()", Logging.white);
 
@@ -1009,7 +976,9 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.Salvage:
-                    DirectContainer salvageCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: attempting to open cargo hold", Logging.white);
+                    if (!Cache.Instance.OpenCargoHold("DedicatedSalvageBehavior: Salvage")) break;
+                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: done opening cargo hold", Logging.white);
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
@@ -1055,7 +1024,7 @@ namespace Questor.Behaviors
                     {
                         if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
 
-                        if (Settings.Instance.UnloadLootAtStation && salvageCargo.Window.IsReady && (salvageCargo.Capacity - salvageCargo.UsedCapacity) < 100)
+                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < 100)
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.white);
                             if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Salvage)
@@ -1074,7 +1043,7 @@ namespace Questor.Behaviors
 
                             while (true)
                             {
-                                // Remove all bookmarks from address book
+                                // Remove on grid bookmark from address book
                                 var bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
                                 if (!gatesInRoom && _gatesPresent) // if there were gates, but we've gone through them all, delete all bookmarks
                                     bookmark = bookmarks.FirstOrDefault();
