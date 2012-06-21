@@ -1,8 +1,4 @@
 
-using System.Globalization;
-using System.Linq;
-using DirectEve;
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -11,6 +7,9 @@ namespace Questor.Modules.BackgroundTasks
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
+    using System.Globalization;
+    using System.Linq;
+    using DirectEve;
 
     public class NavigateOnGrid
     {
