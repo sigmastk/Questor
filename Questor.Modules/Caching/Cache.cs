@@ -816,6 +816,18 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextStartupAction;
+
+        public DateTime NextStartupAction
+        {
+            get { return _nextStartupAction; }
+            set
+            {
+                _nextStartupAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         public DateTime LastLocalWatchAction = DateTime.Now;
         public DateTime LastWalletCheck = DateTime.Now;
         public DateTime LastScheduleCheck = DateTime.Now;

@@ -50,6 +50,7 @@ namespace Questor
         //private double _lastZ;
         //private bool _firstStart = true;
         public bool Panicstatereset = false;
+        private bool _runOnce30SecAfterStartupalreadyProcessed = false;
 
         //DateTime _nextAction = DateTime.Now;
         private readonly Stopwatch _watch;
@@ -90,13 +91,6 @@ namespace Questor
             Cache.Instance.SessionLootGenerated = 0;
             Cache.Instance.SessionLPGenerated = 0;
             Settings.Instance.CharacterMode = "none";
-
-            if (Settings.Instance.UseInnerspace)
-            {
-                //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
-                Logging.Log("Questor", "Running Innerspace command: windowtaskbar on", Logging.white);
-                LavishScript.ExecuteCommand("windowtaskbar on");
-            }
             _directEve.OnFrame += OnFrame;
         }
 
@@ -122,6 +116,28 @@ namespace Questor
         //    if (Settings.Instance.DebugStates)
         //        Logging.Log("Panic.State = " + _panic.State);
         //    }
+
+        public void RunOnce30SecAfterStartup()
+        {
+            if (!_runOnce30SecAfterStartupalreadyProcessed && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            {
+                if (Settings.Instance.CharacterName != null && DateTime.Now > Cache.Instance.NextStartupAction)
+                {
+                    _runOnce30SecAfterStartupalreadyProcessed = true;
+                    if (Settings.Instance.UseInnerspace)
+                    {
+                        //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
+                        Logging.Log("Questor", "Running Innerspace command: windowtaskbar on" + Settings.Instance.CharacterName, Logging.white);
+                        LavishScript.ExecuteCommand("windowtaskbar on" + Settings.Instance.CharacterName);
+                    }
+                }
+                else
+                {
+                    Logging.Log("Questor", "RunOnce30SecAfterStartup: Settings.Instance.CharacterName is still null", Logging.orange);
+                    Cache.Instance.NextStartupAction = DateTime.Now.AddSeconds(30);
+                }
+            }
+        }
 
         public void DebugPerformanceClearandStartTimer()
         {
