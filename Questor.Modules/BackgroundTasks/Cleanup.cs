@@ -221,6 +221,9 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("The Zbikoki's Hacker Card");
                                 close |= window.Html.Contains(" units free.");
                                 close |= window.Html.Contains("already full");
+                                //windows that can be disabled, but may not yet be disabled 
+                                close |= window.Html.Contains("Are you sure you would like to decline this mission");
+
                                 //
                                 // restart the client if these are encountered
                                 //
