@@ -1317,6 +1317,8 @@ namespace Questor.Modules.Caching
 
         public bool CloseQuestorCMDExitGame = true;
 
+        public bool CloseQuestorEndProcess = false;
+
         public bool GotoBaseNow; //false;
 
         public string ReasonToStopQuestor { get; set; }
