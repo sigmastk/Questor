@@ -1248,7 +1248,7 @@
             // MinAgentGreyListStandingsData
             // 
             this.MinAgentGreyListStandingsData.AutoSize = true;
-            this.MinAgentGreyListStandingsData.Location = new System.Drawing.Point(582, 205);
+            this.MinAgentGreyListStandingsData.Location = new System.Drawing.Point(582, 99);
             this.MinAgentGreyListStandingsData.Name = "MinAgentGreyListStandingsData";
             this.MinAgentGreyListStandingsData.Size = new System.Drawing.Size(24, 13);
             this.MinAgentGreyListStandingsData.TabIndex = 8;
@@ -1257,7 +1257,7 @@
             // MinAgentBlackListStandingsData
             // 
             this.MinAgentBlackListStandingsData.AutoSize = true;
-            this.MinAgentBlackListStandingsData.Location = new System.Drawing.Point(581, 99);
+            this.MinAgentBlackListStandingsData.Location = new System.Drawing.Point(582, 205);
             this.MinAgentBlackListStandingsData.Name = "MinAgentBlackListStandingsData";
             this.MinAgentBlackListStandingsData.Size = new System.Drawing.Size(24, 13);
             this.MinAgentBlackListStandingsData.TabIndex = 7;
