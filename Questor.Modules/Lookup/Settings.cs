@@ -251,6 +251,8 @@ namespace Questor.Modules.Lookup
 
         public bool CloseQuestorCMDUplinkIsboxerCharacterSet { get; set; }
 
+        public bool CloseQuestorAllowRestart { get; set; }
+
         public bool CloseQuestorArbitraryOSCmd { get; set; }
 
         public string CloseQuestorOSCmdContents { get; set; }
@@ -333,6 +335,7 @@ namespace Questor.Modules.Lookup
 
         public bool PocketStatsUseIndividualFilesPerPocket = true;
 
+        public bool PocketObjectStatisticsLog { get; set; }
         //
         // Fitting Settings - if enabled
         //
@@ -598,6 +601,7 @@ namespace Questor.Modules.Lookup
 
                 CloseQuestorCMDUplinkInnerspaceProfile = true;
                 CloseQuestorCMDUplinkIsboxerCharacterSet = false;
+                CloseQuestorAllowRestart = true;
 
                 CloseQuestorArbitraryOSCmd = false; //true or false
                 CloseQuestorOSCmdContents = string.Empty;
@@ -676,6 +680,7 @@ namespace Questor.Modules.Lookup
                 MissionStats3Log = false;
                 PocketStatistics = false;
                 PocketStatsUseIndividualFilesPerPocket = false;
+                PocketObjectStatisticsLog = false;
 
                 //
                 // Weapon and targeting Settings
@@ -932,7 +937,7 @@ namespace Questor.Modules.Lookup
                         (bool?)xml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
                     CloseQuestorCMDUplinkIsboxerCharacterSet =
                         (bool?)xml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
-
+                    CloseQuestorAllowRestart = (bool?)xml.Element("CloseQuestorAllowRestart") ?? true;
                     CloseQuestorArbitraryOSCmd = (bool?)xml.Element("CloseQuestorArbitraryOSCmd") ?? false;
                     //true or false
                     CloseQuestorOSCmdContents = (string)xml.Element("CloseQuestorOSCmdContents") ??
@@ -977,6 +982,7 @@ namespace Questor.Modules.Lookup
                     PocketStatsUseIndividualFilesPerPocket =
                         (bool?)xml.Element("PocketStatsUseIndividualFilesPerPocket") ??
                                                         true;
+                    PocketObjectStatisticsLog = (bool?)xml.Element("PocketObjectStatisticsLog") ?? true;
 
                     //
                     // Weapon and targeting Settings

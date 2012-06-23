@@ -21,6 +21,8 @@
   <debugHangars>false</debugHangars>
   <debugLogging>false</debugLogging>
   <debugSalvage>false</debugSalvage>
+  <debugUI>false</debugUI>
+  <debugAttachVSDebugger>false</debugAttachVSDebugger>
   <useInnerspace>true</useInnerspace>
   
   
@@ -198,6 +200,7 @@
   <!-- it needs to know if you want to launch the session using the innerspace profile or the ISBoxer Character Set or just execute an arbitrary OS command-->
   <CloseQuestorCMDUplinkInnerspaceProfile>true</CloseQuestorCMDUplinkInnerspaceProfile>  <!-- default is: true -->
   <CloseQuestorCMDUplinkIsboxerCharacterSet>false</CloseQuestorCMDUplinkIsboxerCharacterSet>  <!-- default is: false -->
+  <CloseQuestorAllowRestart>true</CloseQuestorAllowRestart> <!-- default is: true -->
   <CloseQuestorArbitraryOSCmd>false</CloseQuestorArbitraryOSCmd> <!-- default is: false -->
   <CloseQuestorOSCmdContents></CloseQuestorOSCmdContents> <!-- contains the command to be executed, must be valid in a cmd shell executed in the IS directory -->
 
@@ -232,6 +235,8 @@
   <MissionStats3Log>true</MissionStats3Log><!-- default is: true -->
   <!-- Enable of Disable the PocketStatistics logs: each and every pocket of missions will generate a seperate log with completion times and other statistics for your XML tuning pleasure -->
   <PocketStatistics>true</PocketStatistics><!-- default is: true -->
+  <!-- Enable of Disable the PocketObjectsStatistics logs: each and every pocket of missions will generate a seperate log with the Entity information for the 1st spawn and other static objects on grid for your XML tuning pleasure -->
+  <PocketObjectStatisticsLog>true</PocketObjectStatisticsLog>
 
   <!--                                                -->
   <!--       FITTING SETTINGS        -->

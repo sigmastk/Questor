@@ -55,7 +55,7 @@ namespace Questor.Modules.BackgroundTasks
             // Write to Session log
             if (!Statistics.WriteSessionLogClosing()) return false;
 
-            if (Settings.Instance.AutoStart)
+            if (Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart)
             //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)
@@ -342,11 +342,13 @@ namespace Questor.Modules.BackgroundTasks
             Logging.Log("Questor", "Autostart is false: Stopping EVE with quit command (if EVE is going to restart it will do so externally)", Logging.white);
             if (Cache.Instance.CloseQuestorEndProcess)
             {
+                Logging.Log("Questor", "Closing with: Process.GetCurrentProcess().Kill()", Logging.white);
                 Process.GetCurrentProcess().Kill();
                 return false;
             }
             else
             {
+                Logging.Log("Questor", "Closing with: DirectCmd.CmdQuitGame", Logging.white);
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                 return false;
             }
