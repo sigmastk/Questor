@@ -15,6 +15,8 @@ namespace Questor.Modules.BackgroundTasks
     {
         public static DateTime AvoidBumpingThingsTimeStamp = DateTime.MinValue;
         public static int SafeDistanceFromStructureMultiplier = 1;
+        public static bool AvoidBumpoingThingsWarningSent = false;
+        
 
         public static void AvoidBumpingThings(EntityCache thisBigObject, string module)
         {
@@ -34,6 +36,7 @@ namespace Questor.Modules.BackgroundTasks
                         //we are no longer "too close" and can proceed.
                         AvoidBumpingThingsTimeStamp = DateTime.MinValue;
                         SafeDistanceFromStructureMultiplier = 1;
+                        AvoidBumpoingThingsWarningSent = false;
                     }
                     else
                     {
@@ -43,8 +46,16 @@ namespace Questor.Modules.BackgroundTasks
                             {
                                 if (SafeDistanceFromStructureMultiplier <= 4)
                                 {
+                                    //
+                                    // for simplicitys sake we reset this timestamp every 30 sec until the multiplier hits 5 then it should stay static until we arent "too close" anymore
+                                    //
                                     AvoidBumpingThingsTimeStamp = DateTime.Now;
                                     SafeDistanceFromStructureMultiplier++;
+                                }
+                                if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddMinutes(5) && !AvoidBumpoingThingsWarningSent)
+                                {
+                                    Logging.Log("NavigateOnGrid","We are stuck on a object and have been trying to orbit away from it for over 5 min", Logging.orange);
+                                    AvoidBumpoingThingsWarningSent = true;
                                 }
                                 if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddMinutes(15))
                                 {
