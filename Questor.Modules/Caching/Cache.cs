@@ -259,6 +259,11 @@ namespace Questor.Modules.Caching
         public int TimeSpentInMission_seconds = 0;
         public int TimeSpentInMissionInRange = 0;
         public int TimeSpentInMissionOutOfRange = 0;
+        public int GreyListedMissionsDeclined = 0;
+        public string LastGreylistMissionDeclined = string.Empty;
+        public int BlackListedMissionsDeclined = 0;
+        public string LastBlacklistMissionDeclined = string.Empty;
+        
         public DirectAgentMission Mission;
 
         public bool DronesKillHighValueTargets { get; set; }

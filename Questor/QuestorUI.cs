@@ -116,6 +116,21 @@ namespace Questor
             }
         }
 
+        private void PopulateMissionLists()
+        {
+            BlacklistedMissionstextbox.Text = "";
+            foreach (string blacklistedmission in Settings.Instance.MissionBlacklist)
+            {
+                BlacklistedMissionstextbox.AppendText(blacklistedmission + "\r\n");
+            }
+
+            GreyListedMissionsTextBox.Text = "";
+            foreach (string greylistedmission in Settings.Instance.MissionGreylist)
+            {
+                GreyListedMissionsTextBox.AppendText(greylistedmission + "\r\n");
+            }
+        }
+
         private void PopulateBehaviorStateComboBox()
         {
             if (Settings.Instance.CharacterMode != null)
@@ -581,6 +596,25 @@ namespace Questor
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
             }
+            if (!String.IsNullOrEmpty(Cache.Instance.CurrentAgent))
+            {
+                AgentNameData.Text = Cache.Instance.CurrentAgent;
+                AgentEffectiveStandingsData.Text = Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2).ToString(CultureInfo.InvariantCulture);
+                //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
+                //
+                // greylist info
+                //
+                MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
+                greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                //
+                // blacklist info
+                //
+                MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture); ;
+                LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
+                blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+            }
+
             if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
             {
                 if (!String.IsNullOrEmpty(Settings.Instance.MissionsPath))
@@ -708,6 +742,8 @@ namespace Questor
                 txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                 Cache.Instance.ExtConsole = null;
             }
+
+
 
             int extraWaitSeconds = 0;
             if (!System.Diagnostics.Debugger.IsAttached) //do not restart due to no frames or Session.Isready aging if a debugger is attached until it reaches absurdity...
@@ -1051,6 +1087,7 @@ namespace Questor
             _States.CurrentQuestorState = (QuestorState)Enum.Parse(typeof(QuestorState), QuestorStateComboBox.Text);
             if (Settings.Instance.DebugStates) Logging.Log("QuestorUI", "QuestorState has been changed to [" + QuestorStateComboBox.Text + "]", Logging.white);
             PopulateBehaviorStateComboBox();
+            PopulateMissionLists();
             // If you are at the controls enough to change states... assume that panic needs to do nothing
             //_questor.panicstatereset = true; //this cannot be reset when the index changes, as that happens during natural state changes, this needs to be a mouse event
         }
