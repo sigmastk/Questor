@@ -163,6 +163,7 @@ namespace Questor.Modules.Actions
                     // Complete the mission, close convo
                     Logging.Log("AgentInteraction", "Saying [Complete Mission]", Logging.yellow);
                     complete.Say();
+                    Cache.Instance.FactionName = string.Empty;
 
                     Logging.Log("AgentInteraction", "Closing conversation", Logging.yellow);
 
@@ -223,6 +224,45 @@ namespace Questor.Modules.Actions
             }
         }
 
+        private void GetFactionName(string html)
+        {
+            // We are going to check damage types
+            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+
+            Match logoMatch = logoRegex.Match(html);
+            if (logoMatch.Success)
+            {
+                var logo = logoMatch.Groups["factionlogo"].Value;
+
+                // Load faction xml
+                string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");
+                try
+                {
+                    XDocument xml = XDocument.Load(factionsXML);
+                    if (xml.Root != null)
+                    {
+                        XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
+                        if (faction != null)
+                        {
+                            Cache.Instance.FactionName = (string)faction.Attribute("name");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Logging.Log("CombatMissionSettings", "ERROR! unable to read [" + factionsXML + "]  no root element named <faction> ERROR!", Logging.red);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("CombatMissionSettings", "ERROR! unable to find [" + factionsXML + "] ERROR! [" + ex.Message + "]", Logging.red);
+                }
+            }
+            Logging.Log("AgentInteraction","Unable to find the faction for this mission when searching through the html (listed below)",Logging.orange);
+            Logging.Log("AgentInteraction", html, Logging.white);
+            return;
+        }
+
         private DamageType GetMissionDamageType(string html)
         {
             // We are going to check damage types
@@ -239,10 +279,12 @@ namespace Questor.Modules.Actions
                 {
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
                     if (faction != null)
-                        return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
+                    {
+                        Cache.Instance.FactionName = (string) faction.Attribute("name");
+                        return (DamageType) Enum.Parse(typeof (DamageType), (string) faction.Attribute("damagetype"));
+                    }
                 }
             }
-
             return DamageType.EM;
         }
 
@@ -363,8 +405,26 @@ namespace Questor.Modules.Actions
             if (missionName != "Enemies Abound (2 of 5)")
             {
                 bool loadedAmmo = false;
+                GetFactionName(html);
+                if (!string.IsNullOrEmpty(Cache.Instance.FactionName))
+                {
+                    Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath,
+                                                                 missionName + "-" + Cache.Instance.FactionName + ".xml");
+                    if (!File.Exists(Cache.Instance.missionXmlPath))
+                    {
+                        Logging.Log("AgentInteraction",
+                                    "Unable to find faction specific [" + Cache.Instance.missionXmlPath +
+                                    "] trying generic version", Logging.white);
+                        Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath,
+                                                                     missionName + ".xml");
+                    }
+                }
+                else
+                {
+                    Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath,
+                                                                     missionName + ".xml");
+                }
 
-                Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
                 Cache.Instance.MissionAmmo = new List<Ammo>();
                 if (File.Exists(Cache.Instance.missionXmlPath))
                 {
