@@ -1359,9 +1359,9 @@
             this.panel3.Controls.Add(this.GreyListlbl);
             this.panel3.Controls.Add(this.BlacklistedMissionstextbox);
             this.panel3.Controls.Add(this.GreyListedMissionsTextBox);
-            this.panel3.Location = new System.Drawing.Point(6, 21);
+            this.panel3.Location = new System.Drawing.Point(6, 12);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(449, 237);
+            this.panel3.Size = new System.Drawing.Size(449, 258);
             this.panel3.TabIndex = 0;
             // 
             // BlackListedMissionslbl
@@ -1389,7 +1389,7 @@
             this.BlacklistedMissionstextbox.Name = "BlacklistedMissionstextbox";
             this.BlacklistedMissionstextbox.ReadOnly = true;
             this.BlacklistedMissionstextbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.BlacklistedMissionstextbox.Size = new System.Drawing.Size(206, 202);
+            this.BlacklistedMissionstextbox.Size = new System.Drawing.Size(206, 234);
             this.BlacklistedMissionstextbox.TabIndex = 1;
             // 
             // GreyListedMissionsTextBox
@@ -1399,7 +1399,7 @@
             this.GreyListedMissionsTextBox.Name = "GreyListedMissionsTextBox";
             this.GreyListedMissionsTextBox.ReadOnly = true;
             this.GreyListedMissionsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.GreyListedMissionsTextBox.Size = new System.Drawing.Size(206, 202);
+            this.GreyListedMissionsTextBox.Size = new System.Drawing.Size(206, 234);
             this.GreyListedMissionsTextBox.TabIndex = 0;
             // 
             // BehaviorComboBox
