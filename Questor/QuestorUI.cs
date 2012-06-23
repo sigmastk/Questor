@@ -1,4 +1,4 @@
-﻿
+?
 namespace Questor
 {
     using System;
@@ -29,22 +29,40 @@ namespace Questor
 
         public QuestorfrmMain()
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.white);
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.white);
             InitializeComponent();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.white);
             _questor = new Questor(this);
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.white);
             PopulateStateComboBoxes();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.white);
             PopulateBehaviorStateComboBox();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.white);
             CreateLavishCommands();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.white);
             this.Show();
+            if (Settings.Instance.DebugAttachVSDebugger)
+            {
+                if (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.teal);
+                    System.Diagnostics.Debugger.Launch();
+                }
+            }
         }
 
         private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.white);
+            
             Cache.Instance.DirectEve.Dispose();
             Cache.Instance.DirectEve = null;
         }
 
         private void PopulateStateComboBoxes()
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.white);
             QuestorStateComboBox.Items.Clear();
             foreach (string text in Enum.GetNames(typeof(QuestorState)))
                 QuestorStateComboBox.Items.Add(text);
@@ -135,6 +153,7 @@ namespace Questor
 
         private void PopulateBehaviorStateComboBox()
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.white);
             if (Settings.Instance.CharacterMode != null)
             {
                 //
@@ -445,6 +464,7 @@ namespace Questor
 
         private void UpdateUiTick(object sender, EventArgs e)
         {
+            //if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.white);
             // The if's in here stop the UI from flickering
             string text = "Questor";
             if (_questor.CharacterName != string.Empty)
@@ -599,43 +619,6 @@ namespace Questor
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
             }
             
-            if (!String.IsNullOrEmpty(Cache.Instance.CurrentAgent))
-            {
-                try
-                {
-                    AgentNameData.Text = Cache.Instance.CurrentAgent;
-                    if (Cache.Instance.AgentEffectiveStandingtoMe != null)
-                    {
-                        AgentEffectiveStandingsData.Text = Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2).ToString(CultureInfo.InvariantCulture);
-                    }
-
-                    //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
-                    //
-                    // greylist info
-                    //
-                    if (Settings.Instance.MinAgentGreyListStandings != null)
-                    {
-                        MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
-                    }
-                    LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
-                    greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
-                    //
-                    // blacklist info
-                    //
-                    if (Settings.Instance.MinAgentBlackListStandings != null)
-                    {
-                        MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
-                    }
-                    LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
-                    blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
-                }
-                catch (Exception ex)
-                {
-                    //if we get an exception here ignore it as it shouldnt effect anything, theu GUI is only displaying data collected and processed elsewhere
-                }
-
-
-            } 
 
             if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
             {
@@ -1141,7 +1124,31 @@ namespace Questor
                   (DirectionalScannerBehaviorState)
                   Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
             }
-        } 
+            
+            try
+            { 
+                AgentNameData.Text = Cache.Instance.CurrentAgent_text;
+                AgentEffectiveStandingsData.Text = Cache.Instance.AgentEffectiveStandingtoMe_text;
+                //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
+                //
+                // greylist info
+                //
+                MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
+                greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                //
+                // blacklist info
+                //
+                MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
+                blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                //if we get an exception here ignore it as it shouldnt effect anything, theu GUI is only displaying data collected and processed elsewhere
+            }
+            
+        }
 
         private void PanicStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {

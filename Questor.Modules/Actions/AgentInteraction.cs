@@ -385,9 +385,8 @@ namespace Questor.Modules.Actions
             }
 
             string missionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
-
-            Logging.Log("AgentInteraction", "[" + Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00") + "], minAgentGreyListStandings: [" + Settings.Instance.MinAgentGreyListStandings + "]", Logging.yellow);
-
+            
+            Logging.Log("AgentInteraction", "[" + Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMe_text + "], minAgentGreyListStandings: [" + Settings.Instance.MinAgentGreyListStandings + "]", Logging.yellow);
             string html = agentWindow.Objective;
             if (CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == missionName.ToLower()))
             {
@@ -687,6 +686,7 @@ namespace Questor.Modules.Actions
                         CloseConversation();
 
                         Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent;
+                        Cache.Instance.CurrentAgent_text = Cache.Instance.CurrentAgent.ToString();
                         Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.yellow);
                         _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
                         return;
@@ -836,7 +836,7 @@ namespace Questor.Modules.Actions
 
                 case AgentInteractionState.StartConversation:
                     Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
-
+                    Cache.Instance.AgentEffectiveStandingtoMe_text = Cache.Instance.AgentEffectiveStandingtoMe.ToString("0.00");
                     //
                     // Standings Check: if this is a totally new agent this check will timeout after 20 seconds
                     //

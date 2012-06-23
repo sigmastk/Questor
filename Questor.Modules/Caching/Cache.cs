@@ -867,11 +867,13 @@ namespace Questor.Modules.Caching
         public string CurrentPocketAction { get; set; }
 
         public float AgentEffectiveStandingtoMe;
+        public string AgentEffectiveStandingtoMe_text;
         public bool Missionbookmarktimerset = false;
         public DateTime Missionbookmarktimeout = DateTime.MaxValue;
 
         public string AgentStationID { get; set; }
 
+        public string CurrentAgent_text = string.Empty;
         public string CurrentAgent
         {
             get
@@ -883,6 +885,7 @@ namespace Questor.Modules.Caching
                         _agentName = SwitchAgent;
                         Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]",
                                     Logging.white);
+                        Cache.Instance.CurrentAgent_text = CurrentAgent.ToString();
                     }
 
                     return _agentName;
