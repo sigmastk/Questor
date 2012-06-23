@@ -118,12 +118,14 @@ namespace Questor
 
         private void PopulateMissionLists()
         {
+            //Logging.Log("QuestorUI","populating MissionBlacklisttextbox",Logging.white);
             BlacklistedMissionstextbox.Text = "";
             foreach (string blacklistedmission in Settings.Instance.MissionBlacklist)
             {
                 BlacklistedMissionstextbox.AppendText(blacklistedmission + "\r\n");
             }
 
+            //Logging.Log("QuestorUI", "populating MissionBlacklisttextbox", Logging.white);
             GreyListedMissionsTextBox.Text = "";
             foreach (string greylistedmission in Settings.Instance.MissionGreylist)
             {
@@ -596,24 +598,44 @@ namespace Questor
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
             }
+            
             if (!String.IsNullOrEmpty(Cache.Instance.CurrentAgent))
             {
-                AgentNameData.Text = Cache.Instance.CurrentAgent;
-                AgentEffectiveStandingsData.Text = Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2).ToString(CultureInfo.InvariantCulture);
-                //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
-                //
-                // greylist info
-                //
-                MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
-                LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
-                greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
-                //
-                // blacklist info
-                //
-                MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture); ;
-                LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
-                blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
-            }
+                try
+                {
+                    AgentNameData.Text = Cache.Instance.CurrentAgent;
+                    if (Cache.Instance.AgentEffectiveStandingtoMe != null)
+                    {
+                        AgentEffectiveStandingsData.Text = Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2).ToString(CultureInfo.InvariantCulture);
+                    }
+
+                    //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
+                    //
+                    // greylist info
+                    //
+                    if (Settings.Instance.MinAgentGreyListStandings != null)
+                    {
+                        MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                    }
+                    LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
+                    greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                    //
+                    // blacklist info
+                    //
+                    if (Settings.Instance.MinAgentBlackListStandings != null)
+                    {
+                        MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                    }
+                    LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
+                    blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //if we get an exception here ignore it as it shouldnt effect anything, theu GUI is only displaying data collected and processed elsewhere
+                }
+
+
+            } 
 
             if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
             {

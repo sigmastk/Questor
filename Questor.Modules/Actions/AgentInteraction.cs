@@ -259,6 +259,36 @@ namespace Questor.Modules.Actions
                     Logging.Log("CombatMissionSettings", "ERROR! unable to find [" + factionsXML + "] ERROR! [" + ex.Message + "]", Logging.red);
                 }
             }
+            /*
+            if (html.Contains("Destroy the Rogue Drones" || 
+                              "Rogue Drone Harassment Objectives" ||
+                              "Air Show! Objectives" ||
+                              "Alluring Emanations Objectives" ||
+                              "Anomoly Objectives" ||
+                              "Attack of the Drones Objectives" ||
+                              "Drone Detritus Objectives" ||
+                              "Drone Infestation Objectives" ||
+                              "Evolution Objectives" ||
+                              "Infected Ruins Objectives" ||
+                              "Infiltrated Outposts Objectives" ||
+                              "Mannar Mining Colony" ||
+                              "Missing Convoy Objectives" ||
+                              "Onslaught Objectives" ||
+                              "Patient Zero Objectives" ||
+                              "Persistent Pests Objectives" ||
+                              "Portal to War Objectives" ||
+                              "Rogue Eradication Objectives" ||
+                              "Rogue Hunt Objectives" ||
+                              "Rogue Spy Objectives" ||
+                              "Roving Rogue Drones Objectives" ||
+                              "Soothe The Salvage Beast" ||
+                              "Wildcat Strike Objectives"
+                              ))
+            {
+                Cache.Instance.FactionName = "Rogue Drones";
+                return;
+            }
+            */
             Logging.Log("AgentInteraction","Unable to find the faction for this mission when searching through the html (listed below)",Logging.orange);
             Logging.Log("AgentInteraction", html, Logging.white);
             return;
@@ -375,14 +405,21 @@ namespace Questor.Modules.Actions
                 if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + Cache.Instance.MissionName + "] is not on the blacklist and might be on the greylist we havent checked yet", Logging.white);    
             }
             
-            if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == Cache.Instance.MissionName.ToLower()) && Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings) //-1.7
+            if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == Cache.Instance.MissionName.ToLower())) //-1.7
             {
-                Cache.Instance.LastGreylistMissionDeclined = Cache.Instance.MissionName;
-                Cache.Instance.GreyListedMissionsDeclined++;
-                Logging.Log("AgentInteraction", "Declining greylisted mission [" + Cache.Instance.MissionName + "]", Logging.yellow);
-                _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
-                _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(5, 10));
-                return;
+                if (Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings)
+                {
+                    Cache.Instance.LastGreylistMissionDeclined = Cache.Instance.MissionName;
+                    Cache.Instance.GreyListedMissionsDeclined++;
+                    Logging.Log("AgentInteraction", "Declining greylisted mission [" + Cache.Instance.MissionName + "]", Logging.yellow);
+                    _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
+                    _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(5, 10));
+                    return;    
+                }
+                else
+                {
+                    Logging.Log("AgentInteraction", "Unable to decline greylisted mission: AgentEffectiveStandings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] >  MinGreyListStandings [" + Settings.Instance.MinAgentGreyListStandings + "]" , Logging.orange);
+                }
             }
             else
             {

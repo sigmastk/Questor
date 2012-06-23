@@ -132,6 +132,10 @@
             this.dataEntitiesWarpDisruptingMe = new System.Windows.Forms.Label();
             this.lblWarpDisrupingMe = new System.Windows.Forms.Label();
             this.MissionsTab = new System.Windows.Forms.TabPage();
+            this.blacklistedmissionsdeclineddata = new System.Windows.Forms.Label();
+            this.blacklistedmissionsdeclinedlbl = new System.Windows.Forms.Label();
+            this.greylistedmissionsdeclineddata = new System.Windows.Forms.Label();
+            this.greylistedmissionsdeclinedlbl = new System.Windows.Forms.Label();
             this.LastBlacklistedMissionDeclinedData = new System.Windows.Forms.Label();
             this.LastGreylistedMissionDeclinedData = new System.Windows.Forms.Label();
             this.LastBlacklistedMissionDeclinedlbl = new System.Windows.Forms.Label();
@@ -158,10 +162,6 @@
             this.buttonQuestormanager = new System.Windows.Forms.Button();
             this.label25 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
-            this.greylistedmissionsdeclinedlbl = new System.Windows.Forms.Label();
-            this.greylistedmissionsdeclineddata = new System.Windows.Forms.Label();
-            this.blacklistedmissionsdeclinedlbl = new System.Windows.Forms.Label();
-            this.blacklistedmissionsdeclineddata = new System.Windows.Forms.Label();
             this.Console.SuspendLayout();
             this.Tabs.SuspendLayout();
             this.States.SuspendLayout();
@@ -1209,6 +1209,42 @@
             this.MissionsTab.Text = "Missions";
             this.MissionsTab.UseVisualStyleBackColor = true;
             // 
+            // blacklistedmissionsdeclineddata
+            // 
+            this.blacklistedmissionsdeclineddata.AutoSize = true;
+            this.blacklistedmissionsdeclineddata.Location = new System.Drawing.Point(582, 218);
+            this.blacklistedmissionsdeclineddata.Name = "blacklistedmissionsdeclineddata";
+            this.blacklistedmissionsdeclineddata.Size = new System.Drawing.Size(24, 13);
+            this.blacklistedmissionsdeclineddata.TabIndex = 16;
+            this.blacklistedmissionsdeclineddata.Text = "n/a";
+            // 
+            // blacklistedmissionsdeclinedlbl
+            // 
+            this.blacklistedmissionsdeclinedlbl.AutoSize = true;
+            this.blacklistedmissionsdeclinedlbl.Location = new System.Drawing.Point(463, 218);
+            this.blacklistedmissionsdeclinedlbl.Name = "blacklistedmissionsdeclinedlbl";
+            this.blacklistedmissionsdeclinedlbl.Size = new System.Drawing.Size(113, 13);
+            this.blacklistedmissionsdeclinedlbl.TabIndex = 15;
+            this.blacklistedmissionsdeclinedlbl.Text = "Blacklisted # Declined";
+            // 
+            // greylistedmissionsdeclineddata
+            // 
+            this.greylistedmissionsdeclineddata.AutoSize = true;
+            this.greylistedmissionsdeclineddata.Location = new System.Drawing.Point(581, 112);
+            this.greylistedmissionsdeclineddata.Name = "greylistedmissionsdeclineddata";
+            this.greylistedmissionsdeclineddata.Size = new System.Drawing.Size(24, 13);
+            this.greylistedmissionsdeclineddata.TabIndex = 14;
+            this.greylistedmissionsdeclineddata.Text = "n/a";
+            // 
+            // greylistedmissionsdeclinedlbl
+            // 
+            this.greylistedmissionsdeclinedlbl.AutoSize = true;
+            this.greylistedmissionsdeclinedlbl.Location = new System.Drawing.Point(467, 112);
+            this.greylistedmissionsdeclinedlbl.Name = "greylistedmissionsdeclinedlbl";
+            this.greylistedmissionsdeclinedlbl.Size = new System.Drawing.Size(108, 13);
+            this.greylistedmissionsdeclinedlbl.TabIndex = 13;
+            this.greylistedmissionsdeclinedlbl.Text = "Greylisted # Declined";
+            // 
             // LastBlacklistedMissionDeclinedData
             // 
             this.LastBlacklistedMissionDeclinedData.AutoSize = true;
@@ -1351,6 +1387,8 @@
             this.BlacklistedMissionstextbox.Location = new System.Drawing.Point(227, 21);
             this.BlacklistedMissionstextbox.Multiline = true;
             this.BlacklistedMissionstextbox.Name = "BlacklistedMissionstextbox";
+            this.BlacklistedMissionstextbox.ReadOnly = true;
+            this.BlacklistedMissionstextbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.BlacklistedMissionstextbox.Size = new System.Drawing.Size(206, 202);
             this.BlacklistedMissionstextbox.TabIndex = 1;
             // 
@@ -1359,6 +1397,8 @@
             this.GreyListedMissionsTextBox.Location = new System.Drawing.Point(15, 21);
             this.GreyListedMissionsTextBox.Multiline = true;
             this.GreyListedMissionsTextBox.Name = "GreyListedMissionsTextBox";
+            this.GreyListedMissionsTextBox.ReadOnly = true;
+            this.GreyListedMissionsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.GreyListedMissionsTextBox.Size = new System.Drawing.Size(206, 202);
             this.GreyListedMissionsTextBox.TabIndex = 0;
             // 
@@ -1449,42 +1489,6 @@
             this.label26.TabIndex = 126;
             this.label26.Text = "State:";
             this.label26.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // greylistedmissionsdeclinedlbl
-            // 
-            this.greylistedmissionsdeclinedlbl.AutoSize = true;
-            this.greylistedmissionsdeclinedlbl.Location = new System.Drawing.Point(467, 112);
-            this.greylistedmissionsdeclinedlbl.Name = "greylistedmissionsdeclinedlbl";
-            this.greylistedmissionsdeclinedlbl.Size = new System.Drawing.Size(108, 13);
-            this.greylistedmissionsdeclinedlbl.TabIndex = 13;
-            this.greylistedmissionsdeclinedlbl.Text = "Greylisted # Declined";
-            // 
-            // greylistedmissionsdeclineddata
-            // 
-            this.greylistedmissionsdeclineddata.AutoSize = true;
-            this.greylistedmissionsdeclineddata.Location = new System.Drawing.Point(581, 112);
-            this.greylistedmissionsdeclineddata.Name = "greylistedmissionsdeclineddata";
-            this.greylistedmissionsdeclineddata.Size = new System.Drawing.Size(24, 13);
-            this.greylistedmissionsdeclineddata.TabIndex = 14;
-            this.greylistedmissionsdeclineddata.Text = "n/a";
-            // 
-            // blacklistedmissionsdeclinedlbl
-            // 
-            this.blacklistedmissionsdeclinedlbl.AutoSize = true;
-            this.blacklistedmissionsdeclinedlbl.Location = new System.Drawing.Point(463, 218);
-            this.blacklistedmissionsdeclinedlbl.Name = "blacklistedmissionsdeclinedlbl";
-            this.blacklistedmissionsdeclinedlbl.Size = new System.Drawing.Size(113, 13);
-            this.blacklistedmissionsdeclinedlbl.TabIndex = 15;
-            this.blacklistedmissionsdeclinedlbl.Text = "Blacklisted # Declined";
-            // 
-            // blacklistedmissionsdeclineddata
-            // 
-            this.blacklistedmissionsdeclineddata.AutoSize = true;
-            this.blacklistedmissionsdeclineddata.Location = new System.Drawing.Point(582, 218);
-            this.blacklistedmissionsdeclineddata.Name = "blacklistedmissionsdeclineddata";
-            this.blacklistedmissionsdeclineddata.Size = new System.Drawing.Size(24, 13);
-            this.blacklistedmissionsdeclineddata.TabIndex = 16;
-            this.blacklistedmissionsdeclineddata.Text = "n/a";
             // 
             // QuestorfrmMain
             // 
