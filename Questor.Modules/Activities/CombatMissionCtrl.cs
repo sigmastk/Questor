@@ -1095,7 +1095,7 @@ namespace Questor.Modules.Activities
         }
 
 
-        private void DropItem(Actions.Action action)
+        private void DropItemAction(Actions.Action action)
         {
             Cache.Instance.DropMode = true;
             var items = action.GetParameterValues("item");
@@ -1107,8 +1107,8 @@ namespace Questor.Modules.Activities
 
             var done = items.Count == 0;
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || targets.Count() == 0)
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            if (!targets.Any())
             {
                 Logging.Log("MissionController.DropItem","No target name: " + targets, Logging.orange);
                 // now that we've completed this action revert OpenWrecks to false
@@ -1149,11 +1149,11 @@ namespace Questor.Modules.Activities
                         // Get the container that is associated with the cargo container
                         var container = Cache.Instance.DirectEve.GetContainer(closest.Id);
 
-                        var ItemsToMove = cargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
-                        if (ItemsToMove != null)
+                        var itemsToMove = cargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
+                        if (itemsToMove != null)
                         {
                             Logging.Log("MissionController.DropItem","Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName,Logging.white);
-                            container.Add(ItemsToMove, quantity);
+                            container.Add(itemsToMove, quantity);
 
                             done = container.Items.Any(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower() && (i.Quantity >= quantity));
                             Cache.Instance.NextOpenContainerInSpaceAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(4, 6));
@@ -1459,6 +1459,10 @@ namespace Questor.Modules.Activities
                 //case ActionState.PutItem:
                 //    PutItemAction(action);
                 //    break;
+
+                case ActionState.DropItem:
+                    DropItemAction(action);
+                    break;
 
                 case ActionState.Ignore:
                     IgnoreAction(action);
