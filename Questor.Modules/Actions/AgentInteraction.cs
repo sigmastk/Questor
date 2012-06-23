@@ -12,6 +12,7 @@ namespace Questor.Modules.Actions
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -341,7 +342,7 @@ namespace Questor.Modules.Actions
                     {
                         Cache.Instance.CloseQuestorCMDLogoff = false;
                         Cache.Instance.CloseQuestorCMDExitGame = true;
-                        Cache.Instance.ReasonToStopQuestor = "AgentInteraction: WaitforMission: Journal would not open/refresh- journalwindows was null: restarting EVE Session";
+                        Cache.Instance.ReasonToStopQuestor = "AgentInteraction: WaitforMission: AgentWindow would not open/refresh- agentwindow was null: restarting EVE Session";
                         Logging.Log("ReasonToStopQuestor", Cache.Instance.ReasonToStopQuestor, Logging.yellow);
                         Cache.Instance.SessionState = "Quitting";
                     }
@@ -393,7 +394,7 @@ namespace Questor.Modules.Actions
                 if (Purpose != AgentInteractionPurpose.AmmoCheck)
                     Logging.Log("AgentInteraction", "Declining blacklisted faction mission", Logging.yellow);
 
-                Cache.Instance.LastBlacklistMissionDeclined = Cache.Instance.MissionName;
+                Cache.Instance.LastBlacklistMissionDeclined = missionName;
                 Cache.Instance.BlackListedMissionsDeclined++;
                 _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                 _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(5, 10));
@@ -401,16 +402,16 @@ namespace Questor.Modules.Actions
             }
             else
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + Cache.Instance.MissionName + "] is not on the blacklist and might be on the greylist we havent checked yet", Logging.white);    
+                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + missionName + "] is not on the blacklist and might be on the greylist we havent checked yet", Logging.white);    
             }
-            
-            if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == Cache.Instance.MissionName.ToLower())) //-1.7
+
+            if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == missionName.ToLower())) //-1.7
             {
                 if (Cache.Instance.AgentEffectiveStandingtoMe > Settings.Instance.MinAgentGreyListStandings)
                 {
-                    Cache.Instance.LastGreylistMissionDeclined = Cache.Instance.MissionName;
+                    Cache.Instance.LastGreylistMissionDeclined = missionName;
                     Cache.Instance.GreyListedMissionsDeclined++;
-                    Logging.Log("AgentInteraction", "Declining greylisted mission [" + Cache.Instance.MissionName + "]", Logging.yellow);
+                    Logging.Log("AgentInteraction", "Declining greylisted mission [" + missionName + "]", Logging.yellow);
                     _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                     _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(5, 10));
                     return;    
@@ -422,7 +423,7 @@ namespace Questor.Modules.Actions
             }
             else
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + Cache.Instance.MissionName + "] is not on the greylist and will likely be run if it isnt in lowsec, we havent checked for that yet", Logging.white);
+                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + missionName + "] is not on the greylist and will likely be run if it isnt in lowsec, we havent checked for that yet", Logging.white);
             }
             
             //public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
@@ -441,7 +442,7 @@ namespace Questor.Modules.Actions
             }
             else
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + Cache.Instance.MissionName + "] is not in lowsec so we will do the mission", Logging.white);
+                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + missionName + "] is not in lowsec so we will do the mission", Logging.white);
             }
 
             if (!ForceAccept)
@@ -509,7 +510,7 @@ namespace Questor.Modules.Actions
                     }
                     catch (Exception ex)
                     {
-                        Logging.Log("AgentInteraction", "Error parsing damage types for mission [" + Cache.Instance.Mission.Name + "], " + ex.Message, Logging.orange);
+                        Logging.Log("AgentInteraction", "Error parsing damage types for mission [" + missionName + "], " + ex.Message, Logging.orange);
                     }
                 }
                 else
@@ -686,7 +687,7 @@ namespace Questor.Modules.Actions
                         CloseConversation();
 
                         Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent;
-                        Cache.Instance.CurrentAgent_text = Cache.Instance.CurrentAgent.ToString();
+                        Cache.Instance.CurrentAgent_text = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
                         Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.yellow);
                         _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
                         return;
@@ -725,50 +726,48 @@ namespace Questor.Modules.Actions
                 string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
-                XDocument xml = XDocument.Load(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), path2: "Factions.xml"));
+                XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
                 if (xml.Root != null)
                 {
-                    XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
+                    XElement faction =
+                        xml.Root.Elements("faction").FirstOrDefault(f => (string) f.Attribute("logo") == logo);
                     //Cache.Instance.factionFit = "Default";
                     //Cache.Instance.Fitting = "Default";
                     Cache.Instance.FactionName = "Default";
                     if (faction != null)
                     {
-                        var factionName = ((string)faction.Attribute("name"));
+                        var factionName = ((string) faction.Attribute("name"));
                         Cache.Instance.FactionName = factionName;
                         Logging.Log("AgentInteraction", "Mission enemy faction: " + factionName, Logging.yellow);
                         if (Settings.Instance.FactionBlacklist.Any(m => m.ToLower() == factionName.ToLower()))
                             return true;
-                        if (Settings.Instance.UseFittingManager && Settings.Instance.FactionFitting.Any(m => m.Faction.ToLower() == factionName.ToLower()))
+                        if (Settings.Instance.UseFittingManager &&
+                            Settings.Instance.FactionFitting.Any(m => m.Faction.ToLower() == factionName.ToLower()))
                         {
-                            FactionFitting factionFitting = Settings.Instance.FactionFitting.FirstOrDefault(m => m.Faction.ToLower() == factionName.ToLower());
+                            FactionFitting factionFitting =
+                                Settings.Instance.FactionFitting.FirstOrDefault(
+                                    m => m.Faction.ToLower() == factionName.ToLower());
                             if (factionFitting != null)
                             {
                                 Cache.Instance.FactionFit = factionFitting.Fitting;
-                                Logging.Log("AgentInteraction", "Faction fitting: " + factionFitting.Faction, Logging.yellow);
+                                Logging.Log("AgentInteraction", "Faction fitting: " + factionFitting.Faction,
+                                            Logging.yellow);
                             }
                             else
                             {
-                                Logging.Log("AgentInteraction", "Faction fitting: No fittings defined for [ " + factionName + " ]", Logging.yellow);
+                                Logging.Log("AgentInteraction",
+                                            "Faction fitting: No fittings defined for [ " + factionName + " ]",
+                                            Logging.yellow);
                             }
                             //Cache.Instance.Fitting = Cache.Instance.factionFit;
                             return false;
                         }
-                    }/*
-                else if (Settings.Instance.FittingsDefined)
-                {
-                    Cache.Instance.factionName = "Default";
-                    var FactionFitting = Settings.Instance.FactionFitting.FirstOrDefault(m => m.Faction.ToLower() == "default");
-                    Cache.Instance.factionFit = (string)FactionFitting.Fitting;
-                    Logging.Log("AgentInteraction","Faction fitting " + FactionFitting.Faction);
-                    //Cache.Instance.Fitting = Cache.Instance.factionFit;
-                    return false;
-                }
-                return false;  */
-                }
-                else
-                {
-                    Logging.Log("AgentInteraction", "Faction fitting: Missing Factions.xml :aborting faction fittings", Logging.yellow);
+                    }
+                    else
+                    {
+                        Logging.Log("AgentInteraction",
+                                    "Faction fitting: Missing Factions.xml :aborting faction fittings", Logging.yellow);
+                    }
                 }
             }
             if (Settings.Instance.UseFittingManager)
