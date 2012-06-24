@@ -227,7 +227,7 @@ namespace Questor.Behaviors
             }
 
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //this local is safe check is useless as their is no localwatch processstate running every tick... 
+            //this local is safe check is useless as their is no localwatch processstate running every tick...
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //If local unsafe go to base and do not start mission again
             if (Settings.Instance.FinishWhenNotSafe && (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
@@ -395,10 +395,10 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                            Cache.Instance.LastScheduleCheck = DateTime.Now;
-                            Questor.TimeCheck();   //Should we close questor due to stoptime or runtime?
-                            //Questor.WalletCheck(); //Should we close questor due to no wallet balance change? (stuck?)
-                        }
+                        Cache.Instance.LastScheduleCheck = DateTime.Now;
+                        Questor.TimeCheck();   //Should we close questor due to stoptime or runtime?
+                        //Questor.WalletCheck(); //Should we close questor due to no wallet balance change? (stuck?)
+                    }
                     break;
 
                 case CombatMissionsBehaviorState.DelayedStart:
@@ -794,9 +794,9 @@ namespace Questor.Behaviors
                         if (Cache.Instance.CourierMission)
                         {
                             Cache.Instance.CourierMission = false;
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                                _States.CurrentQuestorState = QuestorState.Idle;
-                            }
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                            _States.CurrentQuestorState = QuestorState.Idle;
+                        }
                         else
                         {
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
@@ -872,10 +872,10 @@ namespace Questor.Behaviors
                                     {
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes + "] ago ", Logging.white);
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are after mission salvaging again because it has been at least [" + ((int)Time.WrecksDisappearAfter_minutes - (int)Time.AverageTimeToCompleteAMission_minutes - (int)Time.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.white);
-                                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
-                                            Statistics.Instance.StartedSalvaging = DateTime.Now;
-                                            //FIXME: should we be overwriting this timestamp here? What if this is the 3rd run back and fourth to the station?
-                                        }
+                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
+                                        Statistics.Instance.StartedSalvaging = DateTime.Now;
+                                        //FIXME: should we be overwriting this timestamp here? What if this is the 3rd run back and fourth to the station?
+                                    }
                                     else //we are salvaging mission 'in one pass' and it has not been enough time since our last run... do another mission
                                     {
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes + "] ago ", Logging.white);
@@ -1031,7 +1031,7 @@ namespace Questor.Behaviors
                             bool gatesInRoom = GateInSalvage();
                             List<DirectBookmark> afterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                             DirectBookmark onGridBookmark = afterMissionSalvageBookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
-                            
+
                             if (onGridBookmark != null)
                             {
                                 _bookmarkdeletionattempt++;
@@ -1187,7 +1187,7 @@ namespace Questor.Behaviors
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "We've timed out, retry last action", Logging.white);
                             // We have reached a timeout, revert to ExecutePocketActions (e.g. most likely Activate)
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageNextPocket) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageUseGate;
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageUseGate;
                         }
                     }
                     break;
@@ -1198,7 +1198,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentStorylineState == StorylineState.Done)
                     {
                         Logging.Log("CombatMissionsBehavior.Storyline", "We have completed the storyline, returning to base", Logging.white);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Storyline) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                         break;
                     }
                     break;
@@ -1214,7 +1214,7 @@ namespace Questor.Behaviors
                     {
                         _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.Idle;
                         Cache.Instance.CourierMission = false;
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.CourierMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                     }
                     break;
 
@@ -1226,7 +1226,7 @@ namespace Questor.Behaviors
                         // happens if autopilot isn't set and this questorstate is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("CombatMissionsBehavior.Traveler", "No destination?", Logging.white);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
                         return;
                     }
                     else

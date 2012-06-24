@@ -55,7 +55,7 @@ namespace Questor
         private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.white);
-            
+
             Cache.Instance.DirectEve.Dispose();
             Cache.Instance.DirectEve = null;
         }
@@ -68,7 +68,7 @@ namespace Questor
                 QuestorStateComboBox.Items.Add(text);
 
             if (Settings.Instance.CharacterMode != null)
-            {    
+            {
                 //
                 // populate combo boxes with the various states that are possible
                 //
@@ -203,7 +203,7 @@ namespace Questor
         public void CloseQuestor()
         {
             int secRestart = (600 * 3) + Cache.Instance.RandomNumber(3, 18) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
-                    
+
             Cache.Instance.SessionState = "Quitting!!";
             //so that IF we changed the state we would not be caught in a loop of re-entering closequestor
             if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
@@ -212,7 +212,7 @@ namespace Questor
             }
 
             if (Settings.Instance.AutoStart)
-                //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
+            //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)
                 {
@@ -225,7 +225,7 @@ namespace Questor
                     Logging.Log("QuestorUI",
                                 "you can change this option by setting the wallet and eveprocessmemoryceiling options to use exit instead of logoff: see the settings.xml file",
                                 Logging.white);
-                    
+
                     Logging.Log("QuestorUI", "Exiting eve now.", Logging.white);
 
                     Cache.Instance.DirecteveDispose();
@@ -262,10 +262,10 @@ namespace Questor
                             else
                             {
                                 if (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile)
-                                    //if configured as true we will use the innerspace profile to restart this session
+                                //if configured as true we will use the innerspace profile to restart this session
                                 {
                                     //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkInnerspaceProfile is ["+ CloseQuestorCMDUplinkInnerspaceProfile.tostring() +"]");
-                                    
+
                                     Logging.Log(
                                         "QuestorUI",
                                         "Starting a timer in the innerspace uplink to restart this innerspace profile session",
@@ -281,7 +281,7 @@ namespace Questor
                                         "QuestorUI",
                                         "Done: quitting this session so the new innerspace session can take over",
                                         Logging.white);
-                                    
+
                                     Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
@@ -289,10 +289,10 @@ namespace Questor
                                     return;
                                 }
                                 else if (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet)
-                                    //if configured as true we will use isboxer to restart this session
+                                //if configured as true we will use isboxer to restart this session
                                 {
                                     //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkIsboxerProfile is ["+ CloseQuestorCMDUplinkIsboxerProfile.tostring() +"]");
-                                    
+
                                     Logging.Log(
                                         "QuestorUI",
                                         "Starting a timer in the innerspace uplink to restart this isboxer character set",
@@ -316,7 +316,7 @@ namespace Questor
                                     return;
                                 }
                                 else if (Settings.Instance.CloseQuestorArbitraryOSCmd)
-                                    // will execute an arbitrary OS command through the IS Uplink
+                                // will execute an arbitrary OS command through the IS Uplink
                                 {
                                     Logging.Log(
                                         "QuestorUI",
@@ -332,12 +332,12 @@ namespace Questor
                                         "uplink exec timedcommand " + secRestart + " OSExecute " +
                                         Settings.Instance.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
                                     Logging.Log("QuestorUI", "Done: quitting this session", Logging.white);
-                                       
+
                                     Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
                                     //Application.Exit();
-                                return;
+                                    return;
                                 }
                                 else if (!Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile &&
                                          !Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet &&
@@ -347,7 +347,7 @@ namespace Questor
                                         "QuestorUI",
                                         "CloseQuestorArbitraryOSCmd, CloseQuestorCMDUplinkInnerspaceProfile and CloseQuestorCMDUplinkIsboxerProfile all false",
                                         Logging.white);
-                                    
+
                                     Cache.Instance.DirecteveDispose();
                                     Process.GetCurrentProcess().Kill();
                                     Environment.Exit(0);
@@ -366,9 +366,9 @@ namespace Questor
                         Logging.Log("QuestorUI",
                                     "CloseQuestor: Currently the questor will exit (and not restart itself) in this configuration, this likely needs additional work to make questor reentrant so we can use a scheduled task?!",
                                     Logging.white);
-                       
+
                         Process.GetCurrentProcess().Kill();
-                        Environment.Exit(0);      
+                        Environment.Exit(0);
                         //Application.Exit();
                     }
                 }
@@ -479,12 +479,12 @@ namespace Questor
             if (Text != text)
                 Text = text;
 
-            lastSessionisreadyData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds,0) + "] sec ago";
-            LastFrameData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds,0) + "] sec ago";
-            lastInSpaceData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInSpace).TotalSeconds,0) + "] sec ago";
-            lastInStationData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInStation).TotalSeconds,0) + "] sec ago";
-            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalSeconds,0) + "] min ago";
-            
+            lastSessionisreadyData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] sec ago";
+            LastFrameData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] sec ago";
+            lastInSpaceData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInSpace).TotalSeconds, 0) + "] sec ago";
+            lastInStationData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInStation).TotalSeconds, 0) + "] sec ago";
+            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalSeconds, 0) + "] min ago";
+
             if (Cache.Instance.SessionState == "Quitting")
             {
                 if (Cache.Instance.ReasonToStopQuestor == "A message from ccp indicated we were disconnected")
@@ -503,8 +503,8 @@ namespace Questor
 
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
             {
-                if ((string) BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                    BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();;
+                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString(); ;
             }
 
             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
@@ -743,10 +743,10 @@ namespace Questor
             {
                 if (DateTime.Now > NextConsoleLogRefresh)
                 {
-                if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
-                    txtExtConsole.Text = "";
-                txtExtConsole.AppendText(Cache.Instance.ExtConsole);
-                Cache.Instance.ExtConsole = null;
+                    if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
+                        txtExtConsole.Text = "";
+                    txtExtConsole.AppendText(Cache.Instance.ExtConsole);
+                    Cache.Instance.ExtConsole = null;
                     NextConsoleLogRefresh = DateTime.Now.AddSeconds(1);
                 }
             }
@@ -1041,7 +1041,7 @@ namespace Questor
         //    int number2;
         //    if (int.TryParse(textBoxMaxRunTime.Text, out number2))
         //    {
-        //        Cache.Instance.MaxRuntime = number2;
+        //Cache.Instance.MaxRuntime = number2;
         //    }
         //    else
         //    {
@@ -1106,29 +1106,29 @@ namespace Questor
             {
                 _States.CurrentCombatMissionBehaviorState =
                     (CombatMissionsBehaviorState)
-                    Enum.Parse(typeof (CombatMissionsBehaviorState), BehaviorComboBox.Text);
+                    Enum.Parse(typeof(CombatMissionsBehaviorState), BehaviorComboBox.Text);
             }
             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
             {
                 _States.CurrentDedicatedBookmarkSalvagerBehaviorState =
                     (DedicatedBookmarkSalvagerBehaviorState)
-                    Enum.Parse(typeof (DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
+                    Enum.Parse(typeof(DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
             }
             if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
             {
                 _States.CurrentCombatHelperBehaviorState =
-                  (CombatHelperBehaviorState)
-                  Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);  
+                    (CombatHelperBehaviorState)
+                    Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);
             }
             if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
             {
                 _States.CurrentDirectionalScannerBehaviorState =
-                  (DirectionalScannerBehaviorState)
-                  Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
+                    (DirectionalScannerBehaviorState)
+                    Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
             }
-            
+
             try
-            { 
+            {
                 AgentNameData.Text = Cache.Instance.CurrentAgent_text;
                 AgentEffectiveStandingsData.Text = Cache.Instance.AgentEffectiveStandingtoMe_text;
                 //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
@@ -1210,7 +1210,7 @@ namespace Questor
 
         private void TxtExtConsoleTextChanged(object sender, EventArgs e)
         {
-
+        
         }
 
         private void AutoStartCheckBoxCheckedChanged(object sender, EventArgs e)

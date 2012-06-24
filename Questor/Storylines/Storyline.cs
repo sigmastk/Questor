@@ -32,7 +32,7 @@ namespace Questor.Storylines
             _traveler = new Traveler();
             _agentInteraction = new AgentInteraction();
 
-           Cache.Instance.AgentBlacklist = new List<long>();
+            Cache.Instance.AgentBlacklist = new List<long>();
 
             _storylines = new Dictionary<string, IStoryline>
                             {
@@ -281,7 +281,7 @@ namespace Questor.Storylines
 
                 case StorylineState.BlacklistAgent:
                     Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
-                    Logging.Log("Storyline","BlacklistAgent: The agent that provided us with a storyline mission in lowsec has been added to the session blacklist",Logging.orange);
+                    Logging.Log("Storyline", "BlacklistAgent: The agent that provided us with a storyline mission in lowsec has been added to the session blacklist", Logging.orange);
                     Reset();
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                     break;
