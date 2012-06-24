@@ -350,6 +350,7 @@
             this.txtExtConsole.BackColor = System.Drawing.SystemColors.Control;
             this.txtExtConsole.Dock = System.Windows.Forms.DockStyle.Top;
             this.txtExtConsole.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtExtConsole.HideSelection = false;
             this.txtExtConsole.Location = new System.Drawing.Point(3, 3);
             this.txtExtConsole.Name = "txtExtConsole";
             this.txtExtConsole.ReadOnly = true;

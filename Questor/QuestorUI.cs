@@ -24,7 +24,8 @@ namespace Questor
     public partial class QuestorfrmMain : Form
     {
         private readonly Questor _questor;
-        //private DateTime _lastlogmessage;
+        //private DateTime _lastlogmessage
+        private DateTime NextConsoleLogRefresh = DateTime.MinValue;
 
         public QuestorfrmMain()
         {
@@ -740,10 +741,14 @@ namespace Questor
 
             if (!String.IsNullOrEmpty(Cache.Instance.ExtConsole))
             {
+                if (DateTime.Now > NextConsoleLogRefresh)
+                {
                 if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
                     txtExtConsole.Text = "";
                 txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                 Cache.Instance.ExtConsole = null;
+                    NextConsoleLogRefresh = DateTime.Now.AddSeconds(1);
+                }
             }
 
             int extraWaitSeconds = 0;
