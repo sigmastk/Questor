@@ -207,11 +207,12 @@ namespace Questor.Modules.Activities
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
                         //Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.teal);
-                        Combat.ReloadAll();
+                        if (!Combat.ReloadAll(closest)) return;
                     }
                     if (DateTime.Now > Cache.Instance.NextActivateAction)
                     {
                         Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.green);
+                        if (!Combat.ReloadAll(closest)) return;
                         closest.Activate();
 
                         // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
@@ -314,7 +315,7 @@ namespace Questor.Modules.Activities
                     //panic handles adding any priority targets and combat will prefer to kill any priority targets
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
-                        Combat.ReloadAll();
+                        if (!Combat.ReloadAll(target)) return;
                     }
 
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
@@ -335,7 +336,7 @@ namespace Questor.Modules.Activities
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
-                        Combat.ReloadAll();
+                        if (!Combat.ReloadAll(target)) return;
                     }
                 }
                 NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
@@ -789,7 +790,7 @@ namespace Questor.Modules.Activities
                     if (_targetNull && targetedby == 0 && DateTime.Now > Cache.Instance.NextReload)
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]", Logging.teal);
-                        Combat.ReloadAll();
+                        if (!Combat.ReloadAll(target)) return;
                     }
 
                     if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets > 0)
@@ -806,7 +807,7 @@ namespace Questor.Modules.Activities
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons", Logging.teal);
-                        Combat.ReloadAll();
+                        if (!Combat.ReloadAll(target)) return;
                     }
                 }
                 NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);

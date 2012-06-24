@@ -10,7 +10,6 @@
 
 using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Caching;
-using Questor.Modules.Activities;
 
 namespace Questor.Modules.Combat
 {
@@ -44,7 +43,7 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "weaponNumber"></param>
         /// <returns>True if the (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded</returns>
-        public bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        public static bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
 
@@ -80,7 +79,11 @@ namespace Questor.Modules.Combat
                 IEnumerable<Ammo> areWeMissingAmmo = correctAmmo.Where(a => a.TypeId == weapon.Charge.TypeId);
                 if (!areWeMissingAmmo.Any())
                 {
+                    if (DateTime.Now.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 4)
+                    {
                     Logging.Log("Combat", "ReloadNormalAmmo: We have ammo loaded that does not have a full reload available in the cargo.", Logging.orange);
+                        Cache.Instance.LastLoggingAction = DateTime.Now;
+                    }
                 }
             }
 
@@ -106,7 +109,7 @@ namespace Questor.Modules.Combat
 
             // We are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
-                return false;
+                return true;
             _lastWeaponReload[weapon.ItemId] = DateTime.Now;
 
             // Reload or change ammo
@@ -123,23 +126,17 @@ namespace Questor.Modules.Combat
             }
             else
             {
-                if (DateTime.Now.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
-                {
-                    Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
-                    Cache.Instance.LastLoggingAction = DateTime.Now;
-                }
-
                 Logging.Log("Combat", "Changing [" + weaponNumber + "] with [" + charge.TypeName + "][" + Math.Round((double) ammo.Range/1000, 0) + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance/1000, 0) + "k]", Logging.teal);
                 Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                 weapon.ChangeAmmo(charge);
                 weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
             }
 
-            // Return false as we are reloading ammo
-            return false;
+            // Return true as we are reloading ammo, assume it is the correct ammo...
+            return true;
         }
 
-        public bool ReloadEnergyWeaponAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        public static bool ReloadEnergyWeaponAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
 
@@ -249,7 +246,7 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "weaponNumber"></param>
         /// <returns>True if the (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded</returns>
-        public bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        public static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             // We need the cargo bay open for both reload actions
             if (!Cache.Instance.OpenCargoHold("Questor: ReloadAmmo")) return false;
@@ -257,55 +254,32 @@ namespace Questor.Modules.Combat
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber);
         }
 
-        public static void ReloadAll()
+        public static bool ReloadAll(EntityCache entity)
         {
-            if (DateTime.Now < _lastReloadAll.AddMinutes(1)) //if it has not been 1 min since the last time we ran this ProcessState return. We can't do anything that close together anyway
-                return;
+            //if (DateTime.Now < _lastReloadAll.AddMinutes(1)) //if it has not been 1 min since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            //    return true;
 
-            _lastReloadAll = DateTime.Now;
+            //_lastReloadAll = DateTime.Now;
 
             IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
-
-            correctAmmo1 = correctAmmo1.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
-
-            if (!correctAmmo1.Any())
-                return;
-
-            Ammo ammo = correctAmmo1.Where(a => a.Range > 1).OrderBy(a => a.Range).FirstOrDefault();
-            DirectItem charge = cargo.Items.FirstOrDefault(i => ammo != null && i.TypeId == ammo.TypeId);
-
-            if (ammo == null)
-                return;
-
-            Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
             weaponNumber = 0;
             foreach (ModuleCache weapon in weapons)
             {
                 // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
                 if (weapon.IsEnergyWeapon)
-                    return;
+                    continue;
                 weaponNumber++;
 
-                if (weapon.CurrentCharges >= weapon.MaxCharges)
-                    return;
-
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || weapon.IsActive)
-                    return;
+                    continue;
 
                 if (_lastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.Now < _lastWeaponReload[weapon.ItemId].AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds))
-                    return;
+                    continue;
 
-                _lastWeaponReload[weapon.ItemId] = DateTime.Now;
-
-                if (weapon.Charge != null && (charge != null && weapon.Charge.TypeId == charge.TypeId))
-                {
-                    Logging.Log("Combat", "ReloadAll [" + weaponNumber + "] with [" + charge.TypeName + "][ typeID:" + charge.TypeId + "]", Logging.teal);
-                    weapon.ReloadAmmo(charge);
-                }
-            }
-            return;
+                if(!ReloadAmmo(weapon, entity, weaponNumber)) return false;
+                return false;
+                        }
+            return true;
         }
 
         /// <summary> Returns true if it can activate the weapon on the target
@@ -861,8 +835,7 @@ namespace Questor.Modules.Combat
                 (Cache.Instance.InStation ||// There is really no combat in stations (yet)
                 !Cache.Instance.InSpace || // if we are not in space yet, wait...
                 Cache.Instance.DirectEve.ActiveShip.Entity == null || // What? No ship entity?
-                Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
-                Cache.Instance.InWarp)) //you cant do combat while warping!
+                Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))  // There is no combat when cloaked
             {
                 _States.CurrentCombatState = CombatState.Idle;
                 return;

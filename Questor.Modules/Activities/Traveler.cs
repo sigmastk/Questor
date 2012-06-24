@@ -134,8 +134,8 @@ namespace Questor.Modules.Activities
                             Logging.Log("Traveler",
                                         "Warping to [" + Logging.yellow + locationName + Logging.green + "][" + Logging.yellow + 
                                         Math.Round((stargate.Distance / 1000) / 149598000, 2) + Logging.green + " AU away]", Logging.green);
+                            if (!Combat.ReloadAll(Cache.Instance.Entities.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return;
                             stargate.WarpTo();
-                            Combat.ReloadAll();
                             Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
                         }
                     }
