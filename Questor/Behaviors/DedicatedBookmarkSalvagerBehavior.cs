@@ -546,7 +546,7 @@ namespace Questor.Behaviors
                     string target = "Acceleration Gate";
                     Cache.Instance.EntitiesByName(target);
 
-                    if ( GateInSalvage() )
+                    if (GateInSalvage())
                     {
                         //we know we are connected here
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -557,7 +557,6 @@ namespace Questor.Behaviors
                         _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
                         return;
                     }
-
 
                     if (_States.CurrentTravelerState == TravelerState.AtDestination || GateInSalvage())
                     {
@@ -628,7 +627,7 @@ namespace Questor.Behaviors
 
                         if (!Cache.Instance.UnlootedContainers.Any())
                         {
-                            Logging.Log("DedicatedBookmarkSalvageBehavior","salvage: no unlooted containers left on grid",Logging.white);
+                            Logging.Log("DedicatedBookmarkSalvageBehavior", "salvage: no unlooted containers left on grid", Logging.white);
                             AfterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
                             var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                                    OrderBy(b => b.CreatedOn));
@@ -661,7 +660,7 @@ namespace Questor.Behaviors
                             }
                             return;
                         }
-                        if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior","salvage: we have more wrecks to salvage",Logging.white);
+                        if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: we have more wrecks to salvage", Logging.white);
                         //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
                         Salvage.MoveIntoRangeOfWrecks();
                         try

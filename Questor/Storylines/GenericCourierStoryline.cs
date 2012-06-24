@@ -32,7 +32,7 @@ namespace Questor.Storylines
 
             // Open the ship hangar
             if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: Arm")) return StorylineState.Arm;
-            
+
             //  Look for an industrial
             var item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && (i.TypeId == 648 || i.TypeId == 649 || i.TypeId == 650 || i.TypeId == 651 || i.TypeId == 652 || i.TypeId == 653 || i.TypeId == 654 || i.TypeId == 655 || i.TypeId == 656 || i.TypeId == 657 || i.TypeId == 1944 || i.TypeId == 19744));
             if (item != null)
@@ -132,7 +132,7 @@ namespace Questor.Storylines
             switch (_state)
             {
                 case GenericCourierStorylineState.GotoPickupLocation:
-                if (GotoMissionBookmark(Cache.Instance.CurrentStorylineAgentId, "Objective (Pick Up)"))
+                    if (GotoMissionBookmark(Cache.Instance.CurrentStorylineAgentId, "Objective (Pick Up)"))
                         _state = GenericCourierStorylineState.PickupItem;
                     break;
 
@@ -142,7 +142,7 @@ namespace Questor.Storylines
                     break;
 
                 case GenericCourierStorylineState.GotoDropOffLocation:
-                if (GotoMissionBookmark(Cache.Instance.CurrentStorylineAgentId, "Objective (Drop Off)"))
+                    if (GotoMissionBookmark(Cache.Instance.CurrentStorylineAgentId, "Objective (Drop Off)"))
                         _state = GenericCourierStorylineState.DropOffItem;
                     break;
 
