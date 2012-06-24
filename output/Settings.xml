@@ -22,6 +22,7 @@
   <debugLogging>false</debugLogging>
   <debugSalvage>false</debugSalvage>
   <debugUI>false</debugUI>
+  <debugReloadAll>false</debugReloadAll>
   <debugAttachVSDebugger>false</debugAttachVSDebugger>
   <useInnerspace>true</useInnerspace>
   
@@ -203,7 +204,6 @@
   <CloseQuestorAllowRestart>true</CloseQuestorAllowRestart> <!-- default is: true -->
   <CloseQuestorArbitraryOSCmd>false</CloseQuestorArbitraryOSCmd> <!-- default is: false -->
   <CloseQuestorOSCmdContents></CloseQuestorOSCmdContents> <!-- contains the command to be executed, must be valid in a cmd shell executed in the IS directory -->
-
 
   <!--                                                -->
   <!--        WRECKS SETTINGS        -->

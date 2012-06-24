@@ -1073,6 +1073,17 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public IEnumerable<EntityCache> EntitiesNotSelf
+        {
+            get
+            {
+                if (!InSpace)
+                    return new List<EntityCache>();
+
+                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid && e.Name != Settings.Instance.CharacterName).ToList());
+            }
+        }
+
         public bool InSpace
         {
             get

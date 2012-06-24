@@ -41,7 +41,7 @@ namespace Questor.Modules.Lookup
         FittingWindowLoadFittingDelay_seconds = 7,               // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
         WaitforItemstoMove_seconds = 5,                          // Arm state: wait for items to move, units: seconds. Default is 5
         CheckLocalDelay_seconds = 5,                             // Local Check for bad standings pilots, delay between checks, units: seconds. Default is 5
-        ReloadWeaponDelayBeforeUsable_seconds = 22,              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 22
+        ReloadWeaponDelayBeforeUsable_seconds = 17,              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 22
         BookmarkPocketRetryDelay_seconds = 20,                   // When checking to see if a bookmark needs to be made in a pocket for after mission salvaging this is the delay between retries, units: seconds. Default is 20
         NoGateFoundRetryDelay_seconds = 30,                      // no gate found on grid when executing the activate action, wait this long to see if it appears (lag), units: seconds. Default is 30
         AlignDelay_minutes = 2,                                  // Delay between the last align command and the next, units: minutes. Default is 2

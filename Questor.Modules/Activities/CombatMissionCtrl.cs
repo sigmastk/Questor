@@ -211,8 +211,8 @@ namespace Questor.Modules.Activities
                     }
                     if (DateTime.Now > Cache.Instance.NextActivateAction)
                     {
-                        Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.green);
                         if (!Combat.ReloadAll(closest)) return;
+                        Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.green);
                         closest.Activate();
 
                         // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
