@@ -189,18 +189,20 @@ namespace Questor.Behaviors
             if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
                 _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
 
-            if (Cache.Instance.InSpace) 
+            if (Cache.Instance.InSpace)
             {
-               if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.Now))
-               {
-                _combat.ProcessState();
-                    if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.Now))
                 {
-                    Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
-              //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.white);
-            }
+                    _combat.ProcessState();
+                    if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                    {
+                        if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: we are not scrambled - pulling drones.", Logging.white);
+                        Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
+                        //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.white);
+                    }
                     else if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
+                        Cache.Instance.IsMissionPocketDone = false;
                         _drones.ProcessState();
                         return;
                     }
