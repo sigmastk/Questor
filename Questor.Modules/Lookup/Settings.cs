@@ -83,6 +83,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLogging { get; set; }
         public bool DebugSalvage { get; set; }
         public bool DebugUI { get; set; }
+        public bool DebugReloadAll { get; set; }
         public bool DebugAttachVSDebugger { get; set; }
 
         public bool DebugDroneHealth { get; set; }
@@ -537,6 +538,7 @@ namespace Questor.Modules.Lookup
                 DebugAttachVSDebugger = false;
                 DebugDroneHealth = false;
                 DebugNavigateOnGrid = false;
+                DebugReloadAll = false;
                 UseInnerspace = true;
                 //
                 // Misc Settings
@@ -817,6 +819,7 @@ namespace Questor.Modules.Lookup
                     DebugAttachVSDebugger = (bool?)xml.Element("debugAttachVSDebugger") ?? false;
                     DebugDroneHealth = (bool?)xml.Element("debugDroneHealth") ?? false;
                     DebugNavigateOnGrid = (bool?)xml.Element("debugNavigateOnGrid") ?? false;
+                    DebugReloadAll = (bool?)xml.Element("debugReloadAll") ?? false;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
 
                     //
