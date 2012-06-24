@@ -554,16 +554,18 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("Are you sure you would like to decline this mission");
                                 //why are we reloading an already full weapon?
                                 close |= window.Html.Contains("All the weapons in this group are already full");
+                                //trial account
+                                close |= window.Html.Contains("At any time you can log in to the account management page and change your trial account to a paying account");
 
                                 restartharsh |= window.Html.Contains("The connection to the server was closed");
                                 restartharsh |= window.Html.Contains("The user's connection has been usurped on the proxy");
                                 restartharsh |= window.Html.Contains("The connection to the server was closed"); 										//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("server was closed");  																//CONNECTION LOST
+                                restartharsh |= window.Html.Contains("server was closed");  															//CONNECTION LOST
                                 restartharsh |= window.Html.Contains("The socket was closed"); 															//CONNECTION LOST
                                 restartharsh |= window.Html.Contains("The connection was closed"); 														//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("Connection to server lost"); 														//INFORMATION
+                                restartharsh |= window.Html.Contains("Connection to server lost"); 														//CONNECTION LOST
                                 restartharsh |= window.Html.Contains("The user connection has been usurped on the proxy"); 								//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful"); 	//CONNECTION LOST
+                                restartharsh |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");	//CONNECTION LOST
                                 restartharsh |= window.Html.Contains("Your client has waited"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
                                 restartharsh |= window.Html.Contains("This could mean the server is very loaded"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
                                 
