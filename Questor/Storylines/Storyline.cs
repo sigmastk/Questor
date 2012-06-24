@@ -74,7 +74,7 @@ namespace Questor.Storylines
 
         public void Reset()
         {
-            Logging.Log("Storyline","Reset: Storyline.Reset() has been called - this clears the states involved with storyline missions",Logging.white);
+            //Logging.Log("Storyline", "Storyline.Reset", Logging.white);
             _States.CurrentStorylineState = StorylineState.Idle;
             Cache.Instance.CurrentStorylineAgentId = 0;
             _storyline = null;
