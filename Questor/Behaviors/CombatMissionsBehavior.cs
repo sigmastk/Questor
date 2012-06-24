@@ -194,13 +194,17 @@ namespace Questor.Behaviors
                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.Now))
                {
                 _combat.ProcessState();
-                _drones.ProcessState(); //do we really want to use drones here?
-               }
-            }
-            if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                    if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                 {
                     Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
               //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.white);
+            }
+                    else if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                    {
+                        _drones.ProcessState();
+                        return;
+                    }
+                }
             }
             _traveler.ProcessState();
             if (Settings.Instance.DebugStates)
