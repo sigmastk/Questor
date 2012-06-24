@@ -35,6 +35,9 @@ namespace Questor.Modules.Actions
         public const string Accept = "Accept";
         public const string Decline = "Decline";
         public const string Close = "Close";
+        public const string Delay = "Delay";
+        public const string Quit = "Quit";
+
         private DateTime _nextAgentAction;
         bool _agentStandingsCheckFlag;  //false;
         DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
@@ -49,6 +52,7 @@ namespace Questor.Modules.Actions
 
         private bool _waitingonagentresponse;
         private DateTime _waitingonagentresponsetimer = DateTime.Now;
+        private DateTime AgentWindowTimeStamp = DateTime.MinValue;
 
         public bool WaitDecline { get; set; }
 
@@ -157,6 +161,40 @@ namespace Questor.Modules.Actions
             DirectAgentResponse view = responses.FirstOrDefault(r => r.Text.Contains(ViewMission));
             DirectAgentResponse accept = responses.FirstOrDefault(r => r.Text.Contains(Accept));
             DirectAgentResponse decline = responses.FirstOrDefault(r => r.Text.Contains(Decline));
+            DirectAgentResponse delay = responses.FirstOrDefault(r => r.Text.Contains(Delay));
+            DirectAgentResponse quit = responses.FirstOrDefault(r => r.Text.Contains(Quit));
+            DirectAgentResponse close = responses.FirstOrDefault(r => r.Text.Contains(Close));
+
+            //
+            // Read the possibly responces and make sure we are 'doing the right thing' - set AgentInteractionPurpose to fit the state of the agent window
+            //
+            if (Purpose != AgentInteractionPurpose.AmmoCheck) //dont change the AgentInteractionPurpose if we are checking which ammo type to use.
+            {
+                if (accept != null && decline != null && delay != null)
+                {
+                    AgentWindowTimeStamp = DateTime.Now;
+                    Purpose = AgentInteractionPurpose.StartMission;
+
+                }
+
+                if (complete != null && quit != null && close != null && (Statistics.Instance.MissionCompletionErrors == 0))
+                {
+                    //we have a mission in progress here, attempt to complete it
+                    if (DateTime.Now > AgentWindowTimeStamp.AddSeconds(30))
+                    {
+                        Purpose = AgentInteractionPurpose.CompleteMission;
+                    }
+                }
+
+                if (request != null && close != null)
+                {
+                    //we do not have a mission yet, request one?
+                    if (DateTime.Now > AgentWindowTimeStamp.AddSeconds(30))
+                    {
+                        Purpose = AgentInteractionPurpose.StartMission;
+                    }
+                }
+            }
 
             if (complete != null)
             {
@@ -392,7 +430,7 @@ namespace Questor.Modules.Actions
             if (CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == missionName.ToLower()))
             {
                 if (Purpose != AgentInteractionPurpose.AmmoCheck)
-                    Logging.Log("AgentInteraction", "Declining blacklisted faction mission", Logging.yellow);
+                    Logging.Log("AgentInteraction", "Declining blacklisted mission [" + Cache.Instance.Mission.Name + "]", Logging.yellow);
 
                 Cache.Instance.LastBlacklistMissionDeclined = missionName;
                 Cache.Instance.BlackListedMissionsDeclined++;
@@ -692,7 +730,7 @@ namespace Questor.Modules.Actions
                         _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
                         return;
                     }
-                    Logging.Log("AgentInteraction", "Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above or configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.MissionName + "]", Logging.yellow);
+                    Logging.Log("AgentInteraction", "Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above our configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.Mission.Name + "]", Logging.yellow);
                 }
             }
          if (_States.CurrentStorylineState == StorylineState.AcceptMission)
@@ -704,7 +742,6 @@ namespace Questor.Modules.Actions
              Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
              return;
          }
-
 
             // Decline and request a new mission
             Logging.Log("AgentInteraction", "Saying [Decline]", Logging.yellow);
