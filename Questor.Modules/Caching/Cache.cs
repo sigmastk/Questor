@@ -1803,6 +1803,30 @@ namespace Questor.Modules.Caching
             return t => (int)(t.ShieldPct + t.ArmorPct + t.StructurePct);
         }
 
+        //public List <long> BookMarkToDestination(DirectBookmark bookmark)
+        //{
+            //Directdestination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.AgentId, "Encounter"));
+            //return List<long> destination;
+        //}
+        public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
+        {
+            // Find the first waypoint
+            for (int i = currentDestination.Count - 1; i >= 0; i--)
+            {
+                DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentDestination[i]];
+                if (solarSystemInRoute.Security < 0.5)
+                {
+                    //Bad bad bad
+                    return false;
+                }
+                else
+                {
+                    //Good.
+                }
+            }
+            return true;
+        }
+
         /// <summary>
         ///   Return the best possible target (based on current target, distance and low value first)
         /// </summary>
