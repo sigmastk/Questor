@@ -298,36 +298,62 @@ namespace Questor.Modules.Actions
                     Logging.Log("CombatMissionSettings", "ERROR! unable to find [" + factionsXML + "] ERROR! [" + ex.Message + "]", Logging.red);
                 }
             }
-            /*
-            if (html.Contains("Destroy the Rogue Drones" || 
-                              "Rogue Drone Harassment Objectives" ||
-                              "Air Show! Objectives" ||
-                              "Alluring Emanations Objectives" ||
-                              "Anomoly Objectives" ||
-                              "Attack of the Drones Objectives" ||
-                              "Drone Detritus Objectives" ||
-                              "Drone Infestation Objectives" ||
-                              "Evolution Objectives" ||
-                              "Infected Ruins Objectives" ||
-                              "Infiltrated Outposts Objectives" ||
-                              "Mannar Mining Colony" ||
-                              "Missing Convoy Objectives" ||
-                              "Onslaught Objectives" ||
-                              "Patient Zero Objectives" ||
-                              "Persistent Pests Objectives" ||
-                              "Portal to War Objectives" ||
-                              "Rogue Eradication Objectives" ||
-                              "Rogue Hunt Objectives" ||
-                              "Rogue Spy Objectives" ||
-                              "Roving Rogue Drones Objectives" ||
-                              "Soothe The Salvage Beast" ||
-                              "Wildcat Strike Objectives"
-                              ))
+            
+
+            bool roguedrones = false;
+            bool mercinaries = false;
+            bool eom = false;
+            bool seven = false;
+            if (!string.IsNullOrEmpty(html))
             {
-                Cache.Instance.FactionName = "Rogue Drones";
+                roguedrones |= html.Contains("Destroy the Rogue Drones");
+                roguedrones |= html.Contains("Rogue Drone Harassment Objectives");
+                roguedrones |= html.Contains("Air Show! Objectives");
+                roguedrones |= html.Contains("Alluring Emanations Objectives");
+                roguedrones |= html.Contains("Anomoly Objectives");
+                roguedrones |= html.Contains("Attack of the Drones Objectives");
+                roguedrones |= html.Contains("Drone Detritus Objectives");
+                roguedrones |= html.Contains("Drone Infestation Objectives");
+                roguedrones |= html.Contains("Evolution Objectives");
+                roguedrones |= html.Contains("Infected Ruins Objectives");
+                roguedrones |= html.Contains("Infiltrated Outposts Objectives");
+                roguedrones |= html.Contains("Mannar Mining Colony");
+                roguedrones |= html.Contains("Missing Convoy Objectives");
+                roguedrones |= html.Contains("Onslaught Objectives");
+                roguedrones |= html.Contains("Patient Zero Objectives");
+                roguedrones |= html.Contains("Persistent Pests Objectives");
+                roguedrones |= html.Contains("Portal to War Objectives");
+                roguedrones |= html.Contains("Rogue Eradication Objectives");
+                roguedrones |= html.Contains("Rogue Hunt Objectives");
+                roguedrones |= html.Contains("Rogue Spy Objectives");
+                roguedrones |= html.Contains("Roving Rogue Drones Objectives");
+                roguedrones |= html.Contains("Soothe The Salvage Beast");
+                roguedrones |= html.Contains("Wildcat Strike Objectives");
+                eom |= html.Contains("Gone Berserk Objectives");
+                seven |= html.Contains("The Damsel In Distress Objectives");
+            }
+
+            if (roguedrones)                                 
+            {
+                Cache.Instance.FactionName = "rogue drones";
                 return;
             }
-            */
+            if (eom)
+            {
+                Cache.Instance.FactionName = "eom";
+                return;
+            }
+            if (mercinaries)
+            {
+                Cache.Instance.FactionName = "mercinaries";
+                return;
+            }
+            if (seven)
+            {
+                Cache.Instance.FactionName = "the seven";
+                return;
+            }
+
             Logging.Log("AgentInteraction","Unable to find the faction for this mission when searching through the html (listed below)",Logging.orange);
             Logging.Log("AgentInteraction", html, Logging.white);
             return;
@@ -730,7 +756,7 @@ namespace Questor.Modules.Actions
                         _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
                         return;
                     }
-                    Logging.Log("AgentInteraction", "Current standings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] is above our configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.Mission.Name + "]", Logging.yellow);
+                    Logging.Log("AgentInteraction", "Current standings [" + Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2) + "] is above our configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.Mission.Name + "]", Logging.yellow);
                 }
             }
          if (_States.CurrentStorylineState == StorylineState.AcceptMission)
