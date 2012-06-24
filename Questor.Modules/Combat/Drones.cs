@@ -47,7 +47,11 @@ namespace Questor.Modules.Combat
 
         private void GetDamagedDrones()
         {
-            Cache.Instance.DamagedDrones = Cache.Instance.ActiveDrones.Where(d => d.ArmorPct < .8);
+            foreach (EntityCache Drone in Cache.Instance.ActiveDrones)
+            {
+                if (Settings.Instance.DebugDroneHealth) Logging.Log("Drones: GetDamagedDrones", "Health[" + Drone.Health + "]" + "S[" + Math.Round(Drone.ShieldPct,3) + "]" + "A[" + Math.Round(Drone.ArmorPct,3) + "]" + "H[" + Math.Round(Drone.StructurePct,3) + "][ID" + Drone.Id + "]", Logging.white);
+            }
+            Cache.Instance.DamagedDrones = Cache.Instance.ActiveDrones.Where(d => d.Health < Settings.Instance.BelowThisHealthLevelRemoveFromDroneBay);
         }
 
         private double GetShieldPctTotal()

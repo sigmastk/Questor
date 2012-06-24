@@ -84,6 +84,9 @@ namespace Questor.Modules.Lookup
         public bool DebugSalvage { get; set; }
         public bool DebugUI { get; set; }
         public bool DebugAttachVSDebugger { get; set; }
+
+        public bool DebugDroneHealth { get; set; }
+
         public bool UseInnerspace { get; set; }
 
         //
@@ -438,6 +441,8 @@ namespace Questor.Modules.Lookup
 
         public int DroneRecallCapacitorPct { get; set; }
 
+        public int BelowThisHealthLevelRemoveFromDroneBay { get; set; }
+
         public int LongRangeDroneRecallShieldPct { get; set; }
 
         public int LongRangeDroneRecallArmorPct { get; set; }
@@ -528,6 +533,7 @@ namespace Questor.Modules.Lookup
                 DebugSalvage = false;
                 DebugUI = false;
                 DebugAttachVSDebugger = false;
+                DebugDroneHealth = false;
                 UseInnerspace = true;
                 //
                 // Misc Settings
@@ -733,6 +739,7 @@ namespace Questor.Modules.Lookup
                 LongRangeDroneRecallArmorPct = 0;
                 LongRangeDroneRecallCapacitorPct = 0;
                 DronesKillHighValueTargets = false;
+                BelowThisHealthLevelRemoveFromDroneBay = 150;
 
                 //
                 // Storage Location for Loot, Ammo, Bookmarks, default is local hangar
@@ -805,6 +812,7 @@ namespace Questor.Modules.Lookup
                     DebugSalvage = (bool?) xml.Element("debugSalvage") ?? false;
                     DebugUI = (bool?)xml.Element("debugUI") ?? false;
                     DebugAttachVSDebugger = (bool?)xml.Element("debugAttachVSDebugger") ?? false;
+                    DebugDroneHealth = (bool?)xml.Element("debugDroneHealth") ?? false;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
 
                     //
@@ -1036,6 +1044,7 @@ namespace Questor.Modules.Lookup
                     LongRangeDroneRecallArmorPct = (int?)xml.Element("longRangeDroneRecallArmorPct") ?? 0;
                     LongRangeDroneRecallCapacitorPct = (int?)xml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
                     DronesKillHighValueTargets = (bool?)xml.Element("dronesKillHighValueTargets") ?? false;
+                    BelowThisHealthLevelRemoveFromDroneBay = (int?)xml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? 150;
 
                     //
                     // Ammo settings
