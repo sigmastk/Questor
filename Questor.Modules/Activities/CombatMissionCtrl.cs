@@ -321,7 +321,7 @@ namespace Questor.Modules.Activities
                     {
                         if (target.IsTarget || target.IsTargeting) //This target is already targeted no need to target it again
                         {
-                            return;
+                            //noop
                         }
                         else
                         {
@@ -395,7 +395,7 @@ namespace Questor.Modules.Activities
                     {
                         if (target.IsTarget || target.IsTargeting) //This target is already targeted no need to target it again
                         {
-                            return;
+                            //noop
                         }
                         else
                         {
@@ -752,8 +752,6 @@ namespace Questor.Modules.Activities
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + entity.Name + "][ID: " + entity.Id + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.teal);
                     entity.UnlockTarget();
                 }
-
-                return;
             }
 
             if (!ignoreAttackers || breakOnAttackers)

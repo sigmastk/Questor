@@ -79,31 +79,14 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        public static void NavigateIntoRange(EntityCache target,string module)
-        {
-            if (Cache.Instance.InWarp || Cache.Instance.InStation)
-                return;
-
-            if (Cache.Instance.OrbitDistance != Settings.Instance.OrbitDistance) //this should be done elsewhere
-            {
-                if (Cache.Instance.OrbitDistance == 0)
+        public static void OrbitGateorTarget(EntityCache target, string module)
                 {
-                    Cache.Instance.OrbitDistance = Settings.Instance.OrbitDistance;
-                    Logging.Log("CombatMissionCtrl", "Using default orbit distance: " + Cache.Instance.OrbitDistance + " (as the custom one was 0)", Logging.teal);
-                }
-                //else
-                //    Logging.Log("CombatMissionCtrl", "Using custom orbit distance: " + Cache.Instance.OrbitDistance, Logging.teal);
-            }
-            //if (Cache.Instance.OrbitDistance != 0)
-            //    Logging.Log("CombatMissionCtrl", "Orbit Distance is set to: " + (Cache.Instance.OrbitDistance / 1000).ToString(CultureInfo.InvariantCulture) + "k", Logging.teal);
-                    
-
-            NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjectsandGates.FirstOrDefault(), "NavigateOnGrid: NavigateIntoRange");
-
-            if (Settings.Instance.SpeedTank)
-            {   //this should be only executed when no specific actions
                 if (DateTime.Now > Cache.Instance.NextOrbit)
                 {
+                if (Cache.Instance.OrbitDistance == 0)
+                {
+                    Cache.Instance.OrbitDistance = 2000;
+                }
                     if (target.Distance + (int)Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
@@ -137,6 +120,34 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
             }
+
+        public static void NavigateIntoRange(EntityCache target, string module)
+        {
+            if (Cache.Instance.InWarp || Cache.Instance.InStation)
+                return;
+
+            if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange", Logging.white);
+                
+            if (Cache.Instance.OrbitDistance != Settings.Instance.OrbitDistance)
+            {
+                if (Cache.Instance.OrbitDistance == 0)
+                {
+                    Cache.Instance.OrbitDistance = Settings.Instance.OrbitDistance;
+                    Logging.Log("CombatMissionCtrl", "Using default orbit distance: " + Cache.Instance.OrbitDistance + " (as the custom one was 0)", Logging.teal);
+                }
+                //else
+                //    Logging.Log("CombatMissionCtrl", "Using custom orbit distance: " + Cache.Instance.OrbitDistance, Logging.teal);
+            }
+            //if (Cache.Instance.OrbitDistance != 0)
+            //    Logging.Log("CombatMissionCtrl", "Orbit Distance is set to: " + (Cache.Instance.OrbitDistance / 1000).ToString(CultureInfo.InvariantCulture) + "k", Logging.teal);
+
+            NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjectsandGates.FirstOrDefault(), "NavigateOnGrid: NavigateIntoRange");
+
+            if (Settings.Instance.SpeedTank)
+            {   //this should be only executed when no specific actions
+                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank", Logging.white);
+                OrbitGateorTarget(target, module);
+            }
             else //if we aren't speed tanking then check optimalrange setting, if that isn't set use the less of targeting range and weapons range to dictate engagement range
             {
                 if (DateTime.Now > Cache.Instance.NextApproachAction)
@@ -144,8 +155,16 @@ namespace Questor.Modules.BackgroundTasks
                     //if optimalrange is set - use it to determine engagement range
                     if (Settings.Instance.OptimalRange != 0)
                     {
+                        if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: OptimalRange", Logging.white);
+
                         if (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
+                            if (target.IsNPCFrigate)
+                            {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate", Logging.white);
+                                OrbitGateorTarget(target, module);
+                                return;
+                            }
                             target.Approach(Settings.Instance.OptimalRange);
                             Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                         }
@@ -160,14 +179,28 @@ namespace Questor.Modules.BackgroundTasks
                     //if optimalrange is not set use MaxRange (shorter of weapons range and targeting range)
                     else
                     {
+                        if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: MaxRange", Logging.white);
+
                         if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
+                            if (target.IsNPCFrigate)
+                            {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate", Logging.white);
+                                OrbitGateorTarget(target, module);
+                                return;
+                            }
                             target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
                             Logging.Log(module, "Using Weapons Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                         }
                         //I think when approach distance will be reached ship will be stopped so this is not needed
                         if (target.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching != null)
                         {
+                            if (target.IsNPCFrigate)
+                            {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate", Logging.white);
+                                OrbitGateorTarget(target, module);
+                                return;
+                            }
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                             Cache.Instance.Approaching = null;
                             Logging.Log(module, "Using Weapons Range: Stop ship, target is in orbit range", Logging.teal);
