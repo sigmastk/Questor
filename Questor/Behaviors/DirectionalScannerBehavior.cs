@@ -318,7 +318,6 @@ namespace Questor.Behaviors
                     if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.DelayedGotoBase) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.GotoBase;                    
                     break;
 
-                
                 case DirectionalScannerBehaviorState.GotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: AvoidBumpingThings()",Logging.white);
 

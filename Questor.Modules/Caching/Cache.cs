@@ -57,7 +57,6 @@ namespace Questor.Modules.Caching
         /// </summary>
         public List<long> AgentBlacklist;
 
-        
         /// <summary>
         ///   Approaching cache
         /// </summary>
@@ -259,6 +258,11 @@ namespace Questor.Modules.Caching
         public int TimeSpentInMission_seconds = 0;
         public int TimeSpentInMissionInRange = 0;
         public int TimeSpentInMissionOutOfRange = 0;
+        public int GreyListedMissionsDeclined = 0;
+        public string LastGreylistMissionDeclined = string.Empty;
+        public int BlackListedMissionsDeclined = 0;
+        public string LastBlacklistMissionDeclined = string.Empty;
+        
         public DirectAgentMission Mission;
 
         public bool DronesKillHighValueTargets { get; set; }
@@ -354,7 +358,6 @@ namespace Questor.Modules.Caching
                     }
                     return 0;
                 }
-                
             }
         }
 
@@ -376,7 +379,9 @@ namespace Questor.Modules.Caching
         public string ExtConsole { get; set; }
 
         public string ConsoleLog { get; set; }
+
         public string ConsoleLogRedacted { get; set; }
+
         public bool IsAgentLoop { get; set; }
 
         private string _agentName = "";
@@ -811,6 +816,18 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextStartupAction;
+
+        public DateTime NextStartupAction
+        {
+            get { return _nextStartupAction; }
+            set
+            {
+                _nextStartupAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         public DateTime LastLocalWatchAction = DateTime.Now;
         public DateTime LastWalletCheck = DateTime.Now;
         public DateTime LastScheduleCheck = DateTime.Now;
@@ -862,11 +879,13 @@ namespace Questor.Modules.Caching
         public string CurrentPocketAction { get; set; }
 
         public float AgentEffectiveStandingtoMe;
+        public string AgentEffectiveStandingtoMe_text;
         public bool Missionbookmarktimerset = false;
         public DateTime Missionbookmarktimeout = DateTime.MaxValue;
 
         public string AgentStationID { get; set; }
 
+        public string CurrentAgent_text = string.Empty;
         public string CurrentAgent
         {
             get
@@ -878,6 +897,7 @@ namespace Questor.Modules.Caching
                         _agentName = SwitchAgent;
                         Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]",
                                     Logging.white);
+                        Cache.Instance.CurrentAgent_text = CurrentAgent.ToString();
                     }
 
                     return _agentName;
@@ -1296,6 +1316,8 @@ namespace Questor.Modules.Caching
         public bool CloseQuestorCMDLogoff; //false;
 
         public bool CloseQuestorCMDExitGame = true;
+
+        public bool CloseQuestorEndProcess = false;
 
         public bool GotoBaseNow; //false;
 
@@ -1779,6 +1801,30 @@ namespace Questor.Modules.Caching
         private Func<EntityCache, int> OrderByLowestHealth()
         {
             return t => (int)(t.ShieldPct + t.ArmorPct + t.StructurePct);
+        }
+
+        //public List <long> BookMarkToDestination(DirectBookmark bookmark)
+        //{
+            //Directdestination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.AgentId, "Encounter"));
+            //return List<long> destination;
+        //}
+        public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
+        {
+            // Find the first waypoint
+            for (int i = currentDestination.Count - 1; i >= 0; i--)
+            {
+                DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentDestination[i]];
+                if (solarSystemInRoute.Security < 0.5)
+                {
+                    //Bad bad bad
+                    return false;
+                }
+                else
+                {
+                    //Good.
+                }
+            }
+            return true;
         }
 
         /// <summary>

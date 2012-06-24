@@ -24,27 +24,45 @@ namespace Questor
     public partial class QuestorfrmMain : Form
     {
         private readonly Questor _questor;
-        //private DateTime _lastlogmessage;
-        private int _guiVisibleWarningGiven = 0;
+        //private DateTime _lastlogmessage
+        private DateTime NextConsoleLogRefresh = DateTime.MinValue;
 
         public QuestorfrmMain()
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.white);
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.white);
             InitializeComponent();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.white);
             _questor = new Questor(this);
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.white);
             PopulateStateComboBoxes();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.white);
             PopulateBehaviorStateComboBox();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.white);
             CreateLavishCommands();
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.white);
             this.Show();
+            if (Settings.Instance.DebugAttachVSDebugger)
+            {
+                if (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.teal);
+                    System.Diagnostics.Debugger.Launch();
+                }
+            }
         }
 
         private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.white);
+            
             Cache.Instance.DirectEve.Dispose();
             Cache.Instance.DirectEve = null;
         }
 
         private void PopulateStateComboBoxes()
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.white);
             QuestorStateComboBox.Items.Clear();
             foreach (string text in Enum.GetNames(typeof(QuestorState)))
                 QuestorStateComboBox.Items.Add(text);
@@ -116,8 +134,26 @@ namespace Questor
             }
         }
 
+        private void PopulateMissionLists()
+        {
+            //Logging.Log("QuestorUI","populating MissionBlacklisttextbox",Logging.white);
+            BlacklistedMissionstextbox.Text = "";
+            foreach (string blacklistedmission in Settings.Instance.MissionBlacklist)
+            {
+                BlacklistedMissionstextbox.AppendText(blacklistedmission + "\r\n");
+            }
+
+            //Logging.Log("QuestorUI", "populating MissionBlacklisttextbox", Logging.white);
+            GreyListedMissionsTextBox.Text = "";
+            foreach (string greylistedmission in Settings.Instance.MissionGreylist)
+            {
+                GreyListedMissionsTextBox.AppendText(greylistedmission + "\r\n");
+            }
+        }
+
         private void PopulateBehaviorStateComboBox()
         {
+            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.white);
             if (Settings.Instance.CharacterMode != null)
             {
                 //
@@ -428,6 +464,7 @@ namespace Questor
 
         private void UpdateUiTick(object sender, EventArgs e)
         {
+            //if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.white);
             // The if's in here stop the UI from flickering
             string text = "Questor";
             if (_questor.CharacterName != string.Empty)
@@ -559,6 +596,7 @@ namespace Questor
                 Top = Settings.Instance.WindowYPosition.Value;
                 Settings.Instance.WindowYPosition = null;
             }
+
             if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission && Cache.Instance.CurrentPocketAction != null)
             {
                 string newlblCurrentPocketActiontext = "[ " + Cache.Instance.CurrentPocketAction + " ] Action";
@@ -581,6 +619,7 @@ namespace Questor
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
             }
+
             if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
             {
                 if (!String.IsNullOrEmpty(Settings.Instance.MissionsPath))
@@ -702,11 +741,14 @@ namespace Questor
 
             if (!String.IsNullOrEmpty(Cache.Instance.ExtConsole))
             {
+                if (DateTime.Now > NextConsoleLogRefresh)
+                {
                 if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
                     txtExtConsole.Text = "";
-
                 txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                 Cache.Instance.ExtConsole = null;
+                    NextConsoleLogRefresh = DateTime.Now.AddSeconds(1);
+                }
             }
 
             int extraWaitSeconds = 0;
@@ -714,6 +756,7 @@ namespace Questor
             {
                 extraWaitSeconds = 60;
             }
+
             if (DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds > ((int)Time.NoFramesRestart_seconds + extraWaitSeconds) && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
@@ -1051,6 +1094,7 @@ namespace Questor
             _States.CurrentQuestorState = (QuestorState)Enum.Parse(typeof(QuestorState), QuestorStateComboBox.Text);
             if (Settings.Instance.DebugStates) Logging.Log("QuestorUI", "QuestorState has been changed to [" + QuestorStateComboBox.Text + "]", Logging.white);
             PopulateBehaviorStateComboBox();
+            PopulateMissionLists();
             // If you are at the controls enough to change states... assume that panic needs to do nothing
             //_questor.panicstatereset = true; //this cannot be reset when the index changes, as that happens during natural state changes, this needs to be a mouse event
         }
@@ -1082,7 +1126,30 @@ namespace Questor
                   (DirectionalScannerBehaviorState)
                   Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
             }
-        } 
+            
+            try
+            { 
+                AgentNameData.Text = Cache.Instance.CurrentAgent_text;
+                AgentEffectiveStandingsData.Text = Cache.Instance.AgentEffectiveStandingtoMe_text;
+                //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
+                //
+                // greylist info
+                //
+                MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
+                greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                //
+                // blacklist info
+                //
+                MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
+                blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                //if we get an exception here ignore it as it shouldnt effect anything, theu GUI is only displaying data collected and processed elsewhere
+            }
+        }
 
         private void PanicStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
