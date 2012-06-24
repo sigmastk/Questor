@@ -1,4 +1,4 @@
-
+﻿
 namespace Questor
 {
     using System;
@@ -25,7 +25,6 @@ namespace Questor
     {
         private readonly Questor _questor;
         //private DateTime _lastlogmessage;
-        private int _guiVisibleWarningGiven = 0;
 
         public QuestorfrmMain()
         {
@@ -596,6 +595,7 @@ namespace Questor
                 Top = Settings.Instance.WindowYPosition.Value;
                 Settings.Instance.WindowYPosition = null;
             }
+
             if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission && Cache.Instance.CurrentPocketAction != null)
             {
                 string newlblCurrentPocketActiontext = "[ " + Cache.Instance.CurrentPocketAction + " ] Action";
@@ -618,7 +618,6 @@ namespace Questor
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
             }
-            
 
             if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
             {
@@ -743,18 +742,16 @@ namespace Questor
             {
                 if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
                     txtExtConsole.Text = "";
-
                 txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                 Cache.Instance.ExtConsole = null;
             }
-
-
 
             int extraWaitSeconds = 0;
             if (!System.Diagnostics.Debugger.IsAttached) //do not restart due to no frames or Session.Isready aging if a debugger is attached until it reaches absurdity...
             {
                 extraWaitSeconds = 60;
             }
+
             if (DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds > ((int)Time.NoFramesRestart_seconds + extraWaitSeconds) && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
@@ -1147,7 +1144,6 @@ namespace Questor
             {
                 //if we get an exception here ignore it as it shouldnt effect anything, theu GUI is only displaying data collected and processed elsewhere
             }
-            
         }
 
         private void PanicStateComboBoxSelectedIndexChanged(object sender, EventArgs e)

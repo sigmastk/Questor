@@ -307,7 +307,7 @@ namespace Questor.Modules.BackgroundTasks
                 wreckTargets.Add(wreck);
                 wrecksProcessedThisTick++;
                 if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.teal);
-                        
+
                 //_nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_miliseconds);
                 if (Cache.Instance.MissionLoot)
                 {

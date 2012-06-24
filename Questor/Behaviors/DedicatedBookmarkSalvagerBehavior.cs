@@ -30,10 +30,7 @@ namespace Questor.Behaviors
     public class DedicatedBookmarkSalvagerBehavior
     {
         private readonly Arm _arm;
-        //private readonly Combat _combat;
         private readonly LocalWatch _localWatch;
-        //private readonly Defense _defense;
-        //private readonly Drones _drones;
 
         private DateTime _lastPulse;
         private DateTime _nextSalvageTrip = DateTime.MinValue;
@@ -52,11 +49,6 @@ namespace Questor.Behaviors
 
         private readonly Stopwatch _watch;
         private DateTime _nextBookmarkRefreshCheck = DateTime.MinValue;
-
-        //private double _lastX;
-        //private double _lastY;
-        //private double _lastZ;
-        private bool _gatesPresent;
 
         public bool Panicstatereset = false;
 
@@ -703,7 +695,6 @@ namespace Questor.Behaviors
             var targets = Cache.Instance.EntitiesByName(target);
             if (targets == null || !targets.Any())
                 return false;
-            _gatesPresent = true;
             return true;
         }
     }

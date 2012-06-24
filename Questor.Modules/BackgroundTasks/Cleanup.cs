@@ -1,9 +1,8 @@
 
-using System.Globalization;
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
+    using System.Globalization;
     using DirectEve;
     using System.Diagnostics;
     using LavishScriptAPI;
@@ -145,7 +144,6 @@ namespace Questor.Modules.BackgroundTasks
                                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                             return false;
                                         }
-                                        
                                     }
                                     if (CloseQuestorDelay < DateTime.Now)
                                     {
@@ -352,11 +350,6 @@ namespace Questor.Modules.BackgroundTasks
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                 return false;
             }
-            return false;
-            //}
-            //if (Settings.Instance.DebugStates)
-            //    Logging.Log("Traveler.State = " + _traveler.State);
-            //break;
         }
 
         public static bool CloseInventoryWindows()
@@ -557,6 +550,8 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("already full");
                                 //windows that can be disabled, but may not yet be disabled 
                                 close |= window.Html.Contains("Are you sure you would like to decline this mission");
+                                //why are we reloading an already full weapon?
+                                close |= window.Html.Contains("All the weapons in this group are already full");
 
                                 restartharsh |= window.Html.Contains("The connection to the server was closed");
                                 restartharsh |= window.Html.Contains("The user's connection has been usurped on the proxy");
@@ -640,7 +635,6 @@ namespace Questor.Modules.BackgroundTasks
                                 continue;
                             }
 
-                            
                             if (gotobasenow)
                             {
                                 Logging.Log("Cleanup", "Evidentially the cluster is dieing... and CCP is restarting the server", Logging.white);

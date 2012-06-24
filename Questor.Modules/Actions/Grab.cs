@@ -59,7 +59,6 @@ namespace Questor.Modules.Actions
                     if ("Local Hangar" == Hangar)
                     {
                         if (!Cache.Instance.OpenItemsHangar("Drop")) return;
-                        
                     }
                     else if ("Ship Hangar" == Hangar)
                     {

@@ -41,25 +41,6 @@ namespace Questor.Modules.Activities
             }
         }
 
-        public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
-        {
-            // Find the first waypoint
-            for (int i = currentDestination.Count - 1; i >= 0; i--)
-            {
-                DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentDestination[i]];
-                if (solarSystemInRoute.Security < 0.5)
-                {
-                    //Bad bad bad
-                    return false;
-                }
-                else
-                {
-                    //Good.
-                }
-            }
-            return true;
-        }
-
         /// <summary>
         ///   Navigate to a solar system
         /// </summary>

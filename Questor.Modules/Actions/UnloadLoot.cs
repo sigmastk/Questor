@@ -88,7 +88,6 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.OpenLootHangar("UnloadLoot")) return;
 
                     IEnumerable<DirectItem> lootToMove = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() != Cache.Instance.BringMissionItem && !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)).ToList();
-                    
                     foreach (DirectItem item in lootToMove)
                     {
                         if (!Cache.Instance.InvTypesById.ContainsKey(item.TypeId))
