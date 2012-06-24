@@ -855,14 +855,15 @@ namespace Questor.Modules.Combat
 
             _lastCombatProcessState = DateTime.Now;
 
-            if (_States.CurrentCombatState != CombatState.Idle &&
+            if ((_States.CurrentCombatState != CombatState.Idle ||
+                _States.CurrentCombatState != CombatState.OutOfAmmo) &&
                 (Cache.Instance.InStation ||// There is really no combat in stations (yet)
                 !Cache.Instance.InSpace || // if we are not in space yet, wait...
                 Cache.Instance.DirectEve.ActiveShip.Entity == null || // What? No ship entity?
                 Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
                 Cache.Instance.InWarp)) //you cant do combat while warping!
             {
-                //_States.CurrentCombatState = CombatState.Idle;
+                _States.CurrentCombatState = CombatState.Idle;
                 return;
             }
 
@@ -881,8 +882,8 @@ namespace Questor.Modules.Combat
             switch (_States.CurrentCombatState)
             {
                 case CombatState.CheckTargets:
+                    _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() of the combat state will potentially get reset (important for the outofammo state)
                     TargetCombatants();
-                    _States.CurrentCombatState = CombatState.KillTargets;
                     break;
 
                 case CombatState.KillTargets:
@@ -896,6 +897,7 @@ namespace Questor.Modules.Combat
                     //newlblPriorityTargetstext = newlblPriorityTargetstext + "[ " + i + " ][ "; //+ Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "],";
                     //}
                     if (!Cache.Instance.OpenCargoHold("Combat")) break;
+                    _States.CurrentCombatState = CombatState.CheckTargets;
                     TargetingCache.CurrentWeaponsTarget = GetTarget();
                     if (TargetingCache.CurrentWeaponsTarget != null)
                     {
@@ -904,7 +906,6 @@ namespace Questor.Modules.Combat
                         ActivateNos(TargetingCache.CurrentWeaponsTarget);
                         ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
                     }
-                    _States.CurrentCombatState = CombatState.CheckTargets;
                     break;
 
                 case CombatState.OutOfAmmo:
@@ -930,6 +931,7 @@ namespace Questor.Modules.Combat
                     break;
                 default:
                     // Next state
+                    Logging.Log("Combat","CurrentCombatState was not set thus ended up at default",Logging.orange);
                     _States.CurrentCombatState = CombatState.CheckTargets;
                     break;
             }
