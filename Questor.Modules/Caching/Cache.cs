@@ -57,7 +57,6 @@ namespace Questor.Modules.Caching
         /// </summary>
         public List<long> AgentBlacklist;
 
-        
         /// <summary>
         ///   Approaching cache
         /// </summary>
@@ -359,7 +358,6 @@ namespace Questor.Modules.Caching
                     }
                     return 0;
                 }
-                
             }
         }
 
@@ -381,7 +379,9 @@ namespace Questor.Modules.Caching
         public string ExtConsole { get; set; }
 
         public string ConsoleLog { get; set; }
+
         public string ConsoleLogRedacted { get; set; }
+
         public bool IsAgentLoop { get; set; }
 
         private string _agentName = "";

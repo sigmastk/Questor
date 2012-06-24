@@ -16,9 +16,11 @@ namespace Questor.Modules.BackgroundTasks
         private static DateTime _lastCleanupAction;
         private DateTime _lastCleanupProcessState;
         private int _dronebayclosingattempts = 0;
+
         //private DateTime _lastChatWindowAction;
         //private bool _newprivateconvowindowhandled;
         private static DateTime CloseQuestorDelay { get; set; }
+
         private static bool _closeQuestor10SecWarningDone = false;
         private static bool _closeQuestorCMDUplink = true;
         public static bool CloseQuestorflag = true;

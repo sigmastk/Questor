@@ -12,8 +12,11 @@ namespace Questor.Modules.Actions
     public class Grab
     {
         public int Item { get; set; }
+
         public int Unit { get; set; }
+
         public string Hangar { get; set; }
+
         private double freeCargoCapacity;
 
         private DateTime _lastAction;
