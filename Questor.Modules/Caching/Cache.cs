@@ -918,8 +918,16 @@ namespace Questor.Modules.Caching
                 AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.Now >= i.DeclineTimer);
                 if (agent == null)
                 {
-                    agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
-                    Cache.Instance.AgentStationID = Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId);
+                    try
+                    {
+                        agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                        Cache.Instance.AgentStationID = Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId);
+                    }
+                    catch (Exception)
+                    {
+                        Logging.Log("Cache","SwitchAgent","Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it.");
+                        Cache.Instance.Paused = true;
+                    }
                     IsAgentLoop = true; //this literally means we have no agents available at the moment (decline timer likely)
                 }
                 else
@@ -950,12 +958,19 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.CharacterXMLExists)
                 {
-                    _agent = DirectEve.GetAgentByName(CurrentAgent);
-                    if (_agent != null)
+                    try
                     {
-                        _agentId = _agent.AgentId;
+                        _agent = DirectEve.GetAgentByName(CurrentAgent);
+                        if (_agent != null)
+                        {
+                            _agentId = _agent.AgentId;
+                        }
                     }
-
+                    catch (Exception)
+                    {
+                        Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it.");
+                        Cache.Instance.Paused = true;
+                    }
                     return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
                 }
                 return null;
