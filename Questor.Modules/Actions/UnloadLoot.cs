@@ -90,7 +90,7 @@ namespace Questor.Modules.Actions
                         Statistics.Instance.LootValue += (int)(invType.MedianBuy ?? 0) * Math.Max(item.Quantity, 1);
                     }
 
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangar)) // Corporate hangar = LootHangar
+                    if (string.IsNullOrEmpty(Settings.Instance.LootHangar)) // if we do NOT have the loot hangar configured. 
                     {
                         // Move loot to the loot hangar
                         int roominHangar = (999 - Cache.Instance.LootHangar.Items.Count);
@@ -112,7 +112,7 @@ namespace Questor.Modules.Actions
                                     Cache.Instance.CargoHold.Items.Where(
                                         i =>
                                         (i.TypeName ?? string.Empty).ToLower() != Cache.Instance.BringMissionItem &&
-                                        !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)).ToList().GetRange(1, 50);
+                                        !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)).ToList().GetRange(1, 50).ToList();
                             }
                             else if (roominHangar > 20)
                             {
@@ -120,10 +120,11 @@ namespace Questor.Modules.Actions
                                     Cache.Instance.CargoHold.Items.Where(
                                         i =>
                                         (i.TypeName ?? string.Empty).ToLower() != Cache.Instance.BringMissionItem &&
-                                        !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)).ToList().GetRange(1, 20);
+                                        !Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)).ToList().GetRange(1, 20).ToList();
                             }
                             if (lootToMove != null)
                             {
+                                Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "]  of [" + Cache.Instance.LootHangar.Items.Count + "] items into the loot hangar",Logging.white);
                                 Cache.Instance.LootHangar.Add(lootToMove);
                             }
                             else
