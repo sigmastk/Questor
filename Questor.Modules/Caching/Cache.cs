@@ -895,10 +895,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_agentName == "")
                     {
-                        _agentName = SwitchAgent;
-                        Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]",
-                                    Logging.white);
-                        Cache.Instance.CurrentAgent_text = CurrentAgent.ToString();
+                        try
+                        {
+                            _agentName = SwitchAgent;
+                            Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]",
+                                        Logging.white);
+                            Cache.Instance.CurrentAgent_text = CurrentAgent.ToString();
+                        }
+                        catch (Exception)
+                        {
+                            Logging.Log("Cache", "AgentId", "Unable to get agent details: trying again in a moment");
+                            return "";
+                        }
+
                     }
 
                     return _agentName;
@@ -943,10 +952,19 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.CharacterXMLExists)
                 {
-                    _agent = DirectEve.GetAgentByName(CurrentAgent);
-                    _agentId = _agent.AgentId;
+                    try
+                    {
+                        _agent = DirectEve.GetAgentByName(CurrentAgent);
+                        _agentId = _agent.AgentId;
 
-                    return _agentId ?? -1;
+                        return _agentId ?? -1;
+                    }
+                    catch (Exception)
+                    {
+                        Logging.Log("Cache", "AgentId", "Unable to get agent details: trying again in a moment");
+                        return -1;
+                    }
+                    
                 }
                 return -1;
             }
