@@ -486,14 +486,7 @@ namespace ValueDump
 
                             if (refinePrice > totalPrice)
                             {
-                                Logging.Log("ValueDumpUI",
-                                            "Refining gives a better price for item " + _currentItem.Name +
-                                            Logging.orange + " [" + Logging.white +
-                                            "Refine price: " + refinePrice.ToString("#,##0.00") +
-                                            Logging.orange + "][" + Logging.white +
-                                            "Sell price: " + totalPrice.ToString("#,##0.00") +
-                                            Logging.orange + "]", Logging.white);
-
+                                Logging.Log("ValueDump.InspectRefinery", "[" + _currentItem.Name + "[" + quantity + "units] is worth more as mins [Refine each: " + (refinePrice / portions).ToString("#,##0.00") + "][Sell each: " + price.ToString("#,##0.00") + "][Refine total: " + refinePrice.ToString("#,##0.00") + "][Sell total: " + totalPrice.ToString("#,##0.00") + "]", Logging.white);
                                 // Add it to the refine list
                                 ItemsToRefine.Add(_currentItem);
 
@@ -576,7 +569,7 @@ namespace ValueDump
 
                         if (refinePrice > totalPriceR || totalPriceR <= 1500000 || _currentItem.TypeId == 30497)
                         {
-                            Logging.Log("ValueDump", "Refining gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPriceR.ToString("#,##0.00") + "]", Logging.white);
+                            Logging.Log("ValueDump.InspectRefinery", "[" + _currentItem.Name + "[" + quantityR + "units] is worth more as mins [Refine each: " + (refinePrice / portions).ToString("#,##0.00") + "][Sell each: " + priceR.ToString("#,##0.00") + "][Refine total: " + refinePrice.ToString("#,##0.00") + "][Sell total: " + totalPriceR.ToString("#,##0.00") + "]", Logging.white);
                             // Add it to the refine list
                             ItemsToRefine.Add(_currentItem);
                         }
