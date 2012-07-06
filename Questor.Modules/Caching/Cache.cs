@@ -156,6 +156,11 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _aggressed;
 
         /// <summary>
+        ///   IDs in Inventory window tree (on left)
+        /// </summary>
+        public List<long> _idsinInventoryTree;
+        
+        /// <summary>
         ///   Returns all unlooted wrecks & containers
         /// </summary>
         private List<EntityCache> _unlootedContainers;
@@ -1085,6 +1090,35 @@ namespace Questor.Modules.Caching
         {
             get { return _targeting ?? (_targeting = Entities.Where(e => e.IsTargeting).ToList()); }
         }
+
+        public DateTime IDsInInventoryTreeTimeStamp;
+
+        public List<long> IDsinInventoryTree
+        {
+            get 
+            { 
+                if (_idsinInventoryTree.Any())
+                {
+                    if (DateTime.Now > IDsInInventoryTreeTimeStamp.AddSeconds(30))
+                    {
+                        Logging.Log("Cache.IDsinInventoryTree", "Refreshing IDs from inventory tree, it has been longer than 30 seconds since the last refresh", Logging.teal);
+                        IDsInInventoryTreeTimeStamp = DateTime.Now;
+                        return _idsinInventoryTree = Cache.Instance.InventoryWindow.GetIdsFromTree(false);
+                    }
+                    else
+                    {
+                        return _idsinInventoryTree ?? (_idsinInventoryTree = Cache.Instance.InventoryWindow.GetIdsFromTree(false));
+                    }
+                }
+                else
+                {
+                    IDsInInventoryTreeTimeStamp = DateTime.Now;
+                    return _idsinInventoryTree = Cache.Instance.InventoryWindow.GetIdsFromTree(false);
+                }
+
+            }
+        }
+
 
         public IEnumerable<EntityCache> TargetedBy
         {
@@ -2826,6 +2860,55 @@ namespace Questor.Modules.Caching
                 }
             }
             return true;
+        }
+
+        public bool OpenAndSelectInvItemByName(string module, string HangarName)
+        {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
+            if (Cache.Instance.DirectEve.GetCorpHangarId(HangarName) > -1) //should likely be changed to 0 once the DE corp hangar ID bug is resolved
+            {
+                if (!Cache.Instance.OpenInventoryWindow("Cache.OpenAndSelectInvItemByName")) return false;
+
+                if (Cache.Instance.InventoryWindow != null & Cache.Instance.InventoryWindow.IsReady)
+                {
+                    if (!Cache.Instance.InventoryWindow.Name.Contains(HangarName))
+                    {
+                        Logging.Log("OpenAndSelectInvItemByName", "InventoryTree Entry named [" + HangarName + "] is being selected", Logging.white);
+                        if (Settings.Instance.DebugHangars)
+                        {
+                            Logging.Log("OpenAndSelectInvItemByName", "--------------------------------------------------", Logging.orange);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.Name: [" + Cache.Instance.InventoryWindow.Name + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.Caption: [" + Cache.Instance.InventoryWindow.Caption + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.Type: [" + Cache.Instance.InventoryWindow.Type + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.IsModal: [" + Cache.Instance.InventoryWindow.IsModal + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.IsDialog: [" + Cache.Instance.InventoryWindow.IsDialog + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.Id: [" + Cache.Instance.InventoryWindow.Id + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.IsKillable: [" + Cache.Instance.InventoryWindow.IsKillable + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.IsReady: [" + Cache.Instance.InventoryWindow.IsReady + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.LocationFlag: [" + Cache.Instance.InventoryWindow.LocationFlag + "]", Logging.white);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.currInvIdName: " + Cache.Instance.InventoryWindow.currInvIdName, Logging.red);
+                            Logging.Log("OpenAndSelectInvItemByName", "InventoryWindow.currInvIdName: " + Cache.Instance.InventoryWindow.currInvIdItem, Logging.red);
+                            
+                            List<long> idsintree = Cache.Instance.InventoryWindow.GetIdsFromTree(false);
+                            foreach (Int64 itemintree in idsintree)
+                            {
+                                Cache.Instance.InventoryWindow.SelectTreeEntryByID(itemintree);
+                            }
+                        }
+                        //Cache.Instance.InventoryWindow.SelectTreeEntryByName(HangarName); - this needs to be fixed is currently using the divionname and needs to use the window name?
+                        Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                        Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                        return true;
+                    }
+                    return true;
+                }
+                return false;
+            }
+            Logging.Log("OpenAndSelectInvItemByName", "Inventory Item Selection named [" + HangarName + "] was not found! Check your settings", Logging.white);
+            return false;
         }
 
         public bool StackLootContainer(String module)
