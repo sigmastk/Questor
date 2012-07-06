@@ -461,37 +461,44 @@ namespace ValueDump
                     if (sellWindow != null)
                     {
                         double price = sellWindow.Price.Value;
-                        int quantity = (int)Math.Min(_currentItem.Quantity - _currentItem.QuantitySold, sellWindow.RemainingVolume.Value);
-                        double totalPrice = quantity * price;
+                        int quantity =
+                            (int)
+                            Math.Min(_currentItem.Quantity - _currentItem.QuantitySold, sellWindow.RemainingVolume.Value);
+                        double totalPrice = quantity*price;
 
                         string otherPrices = " ";
                         if (_currentItem.InvType.MedianBuy.HasValue)
-                            otherPrices += "[Median buy price: " + (_currentItem.InvType.MedianBuy.Value * quantity).ToString("#,##0.00") + "]";
+                            otherPrices += "[Median buy price: " +
+                                           (_currentItem.InvType.MedianBuy.Value*quantity).ToString("#,##0.00") + "]";
                         else
                             otherPrices += "[No median buy price]";
 
                         if (RefineCheckBox.Checked)
                         {
-                            int portions = quantity / _currentItem.PortionSize;
-                            double refinePrice = _currentItem.RefineOutput.Any() ? _currentItem.RefineOutput.Sum(m => m.Quantity * m.InvType.MedianBuy ?? 0) * portions : 0;
-                            refinePrice *= (double)RefineEfficiencyInput.Value / 100;
+                            int portions = quantity/_currentItem.PortionSize;
+                            double refinePrice = _currentItem.RefineOutput.Any()
+                                                     ? _currentItem.RefineOutput.Sum(
+                                                         m => m.Quantity*m.InvType.MedianBuy ?? 0)*portions
+                                                     : 0;
+                            refinePrice *= (double) RefineEfficiencyInput.Value/100;
 
                             otherPrices += "[Refine price: " + refinePrice.ToString("#,##0.00") + "]";
 
                             if (refinePrice > totalPrice)
                             {
-                                Logging.Log("ValueDumpUI", "Refining gives a better price for item " + _currentItem.Name +
-                                    Logging.orange + " [" + Logging.white +
-                                    "Refine price: " + refinePrice.ToString("#,##0.00") +
-                                    Logging.orange + "][" + Logging.white +
-                                    "Sell price: " + totalPrice.ToString("#,##0.00") +
-                                    Logging.orange + "]", Logging.white);
+                                Logging.Log("ValueDumpUI",
+                                            "Refining gives a better price for item " + _currentItem.Name +
+                                            Logging.orange + " [" + Logging.white +
+                                            "Refine price: " + refinePrice.ToString("#,##0.00") +
+                                            Logging.orange + "][" + Logging.white +
+                                            "Sell price: " + totalPrice.ToString("#,##0.00") +
+                                            Logging.orange + "]", Logging.white);
 
                                 // Add it to the refine list
                                 ItemsToRefine.Add(_currentItem);
 
                                 sellWindow.Cancel();
-                                 _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
+                                _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                                 break;
                             }
                         }
@@ -500,29 +507,31 @@ namespace ValueDump
                         {
                             if (!_currentItem.InvType.MedianBuy.HasValue)
                             {
-                                Logging.Log("ValueDumpUI", "No historical price available for " + _currentItem.Name, Logging.white);
+                                Logging.Log("ValueDumpUI", "No historical price available for " + _currentItem.Name,
+                                            Logging.white);
 
                                 sellWindow.Cancel();
-                                 _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
+                                _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                                 break;
                             }
 
-                            double perc = price / _currentItem.InvType.MedianBuy.Value;
-                            double total = _currentItem.InvType.MedianBuy.Value * _currentItem.Quantity;
+                            double perc = price/_currentItem.InvType.MedianBuy.Value;
+                            double total = _currentItem.InvType.MedianBuy.Value*_currentItem.Quantity;
                             // If percentage < 85% and total price > 1m isk then skip this item (we don't undersell)
                             if (perc < 0.85 && total > 1000000)
                             {
                                 Logging.Log("ValueDumpUI", "Not underselling item " + _currentItem.Name +
-                                    Logging.orange + " [" + Logging.white +
-                                    "Median buy price: " + _currentItem.InvType.MedianBuy.Value.ToString("#,##0.00") +
-                                    Logging.orange + "][" + Logging.white +
-                                    "Sell price: " + price.ToString("#,##0.00") +
-                                    Logging.orange + "][" + Logging.white +
-                                    perc.ToString("0%") +
-                                    Logging.orange + "]", Logging.white);
+                                                           Logging.orange + " [" + Logging.white +
+                                                           "Median buy price: " +
+                                                           _currentItem.InvType.MedianBuy.Value.ToString("#,##0.00") +
+                                                           Logging.orange + "][" + Logging.white +
+                                                           "Sell price: " + price.ToString("#,##0.00") +
+                                                           Logging.orange + "][" + Logging.white +
+                                                           perc.ToString("0%") +
+                                                           Logging.orange + "]", Logging.white);
 
                                 sellWindow.Cancel();
-                                 _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
+                                _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                                 break;
                             }
                         }
@@ -533,15 +542,15 @@ namespace ValueDump
                         // Update station price
                         if (!_currentItem.StationBuy.HasValue)
                             _currentItem.StationBuy = price;
-                        _currentItem.StationBuy = (_currentItem.StationBuy + price) / 2;
+                        _currentItem.StationBuy = (_currentItem.StationBuy + price)/2;
 
                         if (cbxSell.Checked)
                         {
                             Logging.Log("ValueDumpUI", "Selling " + quantity + " of " + _currentItem.Name +
-                                        Logging.orange + " [" + Logging.white +
-                                        "Sell price: " + (price * quantity).ToString("#,##0.00") +
-                            Logging.orange + "]" + Logging.white +
-                                        otherPrices, Logging.white);
+                                                       Logging.orange + " [" + Logging.white +
+                                                       "Sell price: " + (price*quantity).ToString("#,##0.00") +
+                                                       Logging.orange + "]" + Logging.white +
+                                                       otherPrices, Logging.white);
                             sellWindow.Accept();
                             // Update quantity sold
                             _currentItem.QuantitySold += quantity;
@@ -549,8 +558,12 @@ namespace ValueDump
                             if (_currentItem.QuantitySold < _currentItem.Quantity)
                                 ItemsToSell.Add(_currentItem);
                             _lastExecute = DateTime.Now;
-                            State = ValueDumpState.WaitingToFinishQuickSell;
+                            _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                             break;
+                        }
+                    }
+                    break;
+
                 case ValueDumpState.InspectRefinery:
                     if (_currentItem.InvType.MedianBuy != null)
                     {
