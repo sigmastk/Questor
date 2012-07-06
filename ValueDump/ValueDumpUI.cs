@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -7,7 +7,6 @@
 //    http://www.thehackerwithin.com/license.htm)
 //  </copyright>
 //-------------------------------------------------------------------------------
-
 #define manual
 
 namespace ValueDump
@@ -23,6 +22,7 @@ namespace ValueDump
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
     using Questor.Modules.Logging;
+    using Questor.Modules.States;
 
     public partial class ValueDumpUI : Form
     {
@@ -35,8 +35,6 @@ namespace ValueDump
         private List<ItemCacheMarket> ItemsToSell { get; set; }
 
         private List<ItemCacheMarket> ItemsToRefine { get; set; }
-
-        private ValueDumpState State { get; set; }
 
         private DirectEve _directEve { get; set; }
 
@@ -117,16 +115,16 @@ namespace ValueDump
                 Cache.Instance.LastupdateofSessionRunningTime = DateTime.Now;
             }
 
-            if (State == ValueDumpState.Idle)
+            if ( _States.CurrentValueDumpState == ValueDumpState.Idle)
                 return;
 
             XDocument invIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
             DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
             DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
             DirectReprocessingWindow reprorcessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
-            //bool block;
+            bool doNotSellTheseItems = false;
 
-            switch (State)
+            switch (_States.CurrentValueDumpState)
             {
                 case ValueDumpState.CheckMineralPrices:
                     if (RefineCheckBox.Checked)
@@ -139,7 +137,7 @@ namespace ValueDump
                     {
                         if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > (int)Time.Marketlookupdelay_seconds)
                         {
-                            State = ValueDumpState.SaveMineralPrices;
+                             _States.CurrentValueDumpState = ValueDumpState.SaveMineralPrices;
                             if (marketWindow != null)
                                 marketWindow.Close();
                         }
@@ -177,7 +175,7 @@ namespace ValueDump
                             _currentMineral.LastUpdate = DateTime.Now;
 
                             Logging.Log("ValuedumpUI", "No buy orders found for " + _currentMineral.Name, Logging.white);
-                            State = ValueDumpState.CheckMineralPrices;
+                             _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
                         }
 
                         // Take top 5 orders, average the buy price and consider that median-buy (it's not really median buy but its what we want)
@@ -204,7 +202,7 @@ namespace ValueDump
                             _currentMineral.LastUpdate = DateTime.Now;
 
                             Logging.Log("ValuedumpUI", "No sell orders found for " + _currentMineral.Name, Logging.white);
-                            State = ValueDumpState.CheckMineralPrices;
+                             _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
                         }
 
                         // Take top 1% orders and count median-sell price
@@ -271,7 +269,7 @@ namespace ValueDump
                         xdoc.Root.Add(type.Save());
                     xdoc.Save(InvTypesPath);
 
-                    State = ValueDumpState.Idle;
+                     _States.CurrentValueDumpState = ValueDumpState.Idle;
                     break;
 
                 case ValueDumpState.GetItems:
@@ -284,7 +282,7 @@ namespace ValueDump
                     if (hangarItems != null)
                         Items.AddRange(hangarItems.Where(i => i.ItemId > 0 && i.Quantity > 0).Select(i => new ItemCacheMarket(i, RefineCheckBox.Checked)));
 
-                    State = ValueDumpState.UpdatePrices;
+                     _States.CurrentValueDumpState = ValueDumpState.UpdatePrices;
                     break;
 
                 case ValueDumpState.UpdatePrices:
@@ -295,7 +293,7 @@ namespace ValueDump
                         InvTypeMarket invType;
                         if (!InvTypesById.TryGetValue(item.TypeId, out invType))
                         {
-                            Logging.Log("Valuedump","Unknown TypeId " + item.TypeId + " for " + item.Name + ", adding to the list",Logging.orange);
+                            Logging.Log("Valuedump", "Unknown TypeId " + item.TypeId + " for " + item.Name + ", adding to the list", Logging.orange);
                             invType = new InvTypeMarket(item);
                             InvTypesById.Add(item.TypeId, invType);
                             updated = true;
@@ -308,7 +306,7 @@ namespace ValueDump
                         {
                             if (!InvTypesById.TryGetValue(material.TypeId, out invType))
                             {
-                                Logging.Log("Valuedump","Unknown TypeId " + material.TypeId + " for " + material.Name,Logging.white);
+                                Logging.Log("Valuedump", "Unknown TypeId " + material.TypeId + " for " + material.Name, Logging.white);
                                 continue;
                             }
                             material.InvType = invType;
@@ -319,11 +317,11 @@ namespace ValueDump
                             {
                                 if (exists)
                                     Logging.Log("ValueDumpUI",
-                                        Logging.orange + " [" + Logging.white + 
+                                        Logging.orange + " [" + Logging.white +
                                         item.Name +
-                                        Logging.orange + "][" + Logging.white + 
+                                        Logging.orange + "][" + Logging.white +
                                         material.Name +
-                                        Logging.orange + "] old value: [" + Logging.white + 
+                                        Logging.orange + "] old value: [" + Logging.white +
                                         InvTypesById[(int)item.TypeId].Reprocess[material.Name] + ", new value: " +
                                         Logging.orange + "[" + Logging.white + matsPerItem +
                                         Logging.orange + "]", Logging.white);
@@ -338,9 +336,9 @@ namespace ValueDump
                     }
 
                     if (updated)
-                        State = ValueDumpState.SaveMineralPrices;
+                         _States.CurrentValueDumpState = ValueDumpState.SaveMineralPrices;
                     else
-                        State = ValueDumpState.Idle;
+                         _States.CurrentValueDumpState = ValueDumpState.Idle;
 
                     if (cbxSell.Checked || RefineCheckBox.Checked)
                     {
@@ -359,7 +357,7 @@ namespace ValueDump
 #else
                             ItemsToSell.AddRange(Items.Where(i => i.InvType != null && i.MarketGroupId > 0 && i.InvType.MedianBuy.HasValue));
 #endif
-                        State = ValueDumpState.NextItem;
+                         _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     }
                     break;
 
@@ -367,25 +365,38 @@ namespace ValueDump
                     if (ItemsToSell.Count == 0)
                     {
                         if (ItemsToRefine.Count != 0)
-                            State = ValueDumpState.RefineItems;
+                             _States.CurrentValueDumpState = ValueDumpState.RefineItems;
                         else
-                            State = ValueDumpState.Idle;
+                             _States.CurrentValueDumpState = ValueDumpState.Idle;
                         break;
                     }
-
+                    //if (!_form.RefineCheckBox.Checked)
                     Logging.Log("ValueDumpUI", ItemsToSell.Count + " items left to sell", Logging.white);
 
                     _currentItem = ItemsToSell[0];
                     ItemsToSell.RemoveAt(0);
 
                     // Do not sell containers
-                    if (_currentItem.GroupId == 448)
+                    if (_currentItem.GroupId == 448 || _currentItem.GroupId == 649)
                     {
                         Logging.Log("ValueDumpUI", "Skipping " + _currentItem.Name, Logging.white);
                         break;
                     }
+                    // Do not sell items in invignore.xml
+                    if (invIgnore.Root != null)
+                        foreach (XElement element in invIgnore.Root.Elements("invtype"))
+                        {
+                            if (_currentItem.TypeId == (int)element.Attribute("id"))
+                            {
+                                Logging.Log("ValueDump", "Skipping (block list) " + _currentItem.Name, Logging.white);
+                                doNotSellTheseItems = true;
+                                break;
+                            }
+                        }
+                    if (doNotSellTheseItems)
+                        break;
 
-                    State = ValueDumpState.StartQuickSell;
+                     _States.CurrentValueDumpState = ValueDumpState.StartQuickSell;
                     break;
 
                 case ValueDumpState.StartQuickSell:
@@ -400,18 +411,26 @@ namespace ValueDump
                         break;
                     }
 
-                    Logging.Log("ValueDumpUI", "Starting QuickSell for " + _currentItem.Name, Logging.white);
-                    if (!directItem.QuickSell())
-                    {
-                        _lastExecute = DateTime.Now.AddSeconds(-5);
-
-                        Logging.Log("ValueDumpUI", "QuickSell failed for " + _currentItem.Name + ", retrying in 5 seconds", Logging.white);
-                        break;
-                    }
-                    
                     // Update Quantity
-                    if (cbxSell.Checked) _currentItem.QuantitySold = _currentItem.Quantity - directItem.Quantity;
-                    State = ValueDumpState.WaitForSellWindow;
+                    _currentItem.QuantitySold = _currentItem.Quantity - directItem.Quantity;
+
+                    if (cbxSell.Checked)
+                    {
+                        Logging.Log("ValueDump", "Starting QuickSell for " + _currentItem.Name, Logging.white);
+                        if (!directItem.QuickSell())
+                        {
+                            _lastExecute = DateTime.Now.AddSeconds(-5);
+
+                            Logging.Log("ValueDumpUI", "QuickSell failed for " + _currentItem.Name + ", retrying in 5 seconds", Logging.white);
+                            break;
+                        }
+
+                        _States.CurrentValueDumpState = ValueDumpState.WaitForSellWindow;
+                    }
+                    else
+                    {
+                        _States.CurrentValueDumpState = ValueDumpState.InspectRefinery;
+                    }
                     break;
 
                 case ValueDumpState.WaitForSellWindow:
@@ -422,11 +441,11 @@ namespace ValueDump
                     _lastExecute = DateTime.Now;
 
                     Logging.Log("ValueDumpUI", "Inspecting sell order for " + _currentItem.Name, Logging.white);
-                    State = ValueDumpState.InspectOrder;
+                     _States.CurrentValueDumpState = ValueDumpState.InspectOrder;
                     break;
 
                 case ValueDumpState.InspectOrder:
-                    // Let the order window stay open for 2 seconds
+                    // Let the order window stay open for a few seconds
                     if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < (int)Time.Marketbuyorderdelay_seconds)
                         break;
 
@@ -435,7 +454,7 @@ namespace ValueDump
                         Logging.Log("ValueDumpUI", "No order available for " + _currentItem.Name, Logging.white);
 
                         sellWindow.Cancel();
-                        State = ValueDumpState.WaitingToFinishQuickSell;
+                         _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                         break;
                     }
 
@@ -461,10 +480,10 @@ namespace ValueDump
 
                             if (refinePrice > totalPrice)
                             {
-                                Logging.Log("ValueDumpUI", "Refining gives a better price for item " + _currentItem.Name + 
-                                    Logging.orange + " [" + Logging.white + 
-                                    "Refine price: " + refinePrice.ToString("#,##0.00") + 
-                                    Logging.orange + "][" + Logging.white + 
+                                Logging.Log("ValueDumpUI", "Refining gives a better price for item " + _currentItem.Name +
+                                    Logging.orange + " [" + Logging.white +
+                                    "Refine price: " + refinePrice.ToString("#,##0.00") +
+                                    Logging.orange + "][" + Logging.white +
                                     "Sell price: " + totalPrice.ToString("#,##0.00") +
                                     Logging.orange + "]", Logging.white);
 
@@ -472,7 +491,7 @@ namespace ValueDump
                                 ItemsToRefine.Add(_currentItem);
 
                                 sellWindow.Cancel();
-                                State = ValueDumpState.WaitingToFinishQuickSell;
+                                 _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                                 break;
                             }
                         }
@@ -484,7 +503,7 @@ namespace ValueDump
                                 Logging.Log("ValueDumpUI", "No historical price available for " + _currentItem.Name, Logging.white);
 
                                 sellWindow.Cancel();
-                                State = ValueDumpState.WaitingToFinishQuickSell;
+                                 _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                                 break;
                             }
 
@@ -494,19 +513,22 @@ namespace ValueDump
                             if (perc < 0.85 && total > 1000000)
                             {
                                 Logging.Log("ValueDumpUI", "Not underselling item " + _currentItem.Name +
-                                    Logging.orange + " [" + Logging.white +  
-                                    "Median buy price: " + _currentItem.InvType.MedianBuy.Value.ToString("#,##0.00") + 
-                                    Logging.orange  + "][" + Logging.white + 
+                                    Logging.orange + " [" + Logging.white +
+                                    "Median buy price: " + _currentItem.InvType.MedianBuy.Value.ToString("#,##0.00") +
+                                    Logging.orange + "][" + Logging.white +
                                     "Sell price: " + price.ToString("#,##0.00") +
                                     Logging.orange + "][" + Logging.white +
-                                    perc.ToString("0%") + 
+                                    perc.ToString("0%") +
                                     Logging.orange + "]", Logging.white);
 
                                 sellWindow.Cancel();
-                                State = ValueDumpState.WaitingToFinishQuickSell;
+                                 _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                                 break;
                             }
                         }
+
+                        // Update quantity sold
+                        _currentItem.QuantitySold += quantity;
 
                         // Update station price
                         if (!_currentItem.StationBuy.HasValue)
@@ -529,10 +551,30 @@ namespace ValueDump
                             _lastExecute = DateTime.Now;
                             State = ValueDumpState.WaitingToFinishQuickSell;
                             break;
+                case ValueDumpState.InspectRefinery:
+                    if (_currentItem.InvType.MedianBuy != null)
+                    {
+                        double priceR = _currentItem.InvType.MedianBuy.Value;
+                        int quantityR = _currentItem.Quantity;
+                        double totalPriceR = quantityR * priceR;
+                        int portions = quantityR / _currentItem.PortionSize;
+                        double refinePrice = _currentItem.RefineOutput.Any() ? _currentItem.RefineOutput.Sum(m => m.Quantity * m.InvType.MedianBuy ?? 0) * portions : 0;
+                        refinePrice *= (double)RefineEfficiencyInput.Value / 100;
+
+                        if (refinePrice > totalPriceR || totalPriceR <= 1500000 || _currentItem.TypeId == 30497)
+                        {
+                            Logging.Log("ValueDump", "Refining gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPriceR.ToString("#,##0.00") + "]", Logging.white);
+                            // Add it to the refine list
+                            ItemsToRefine.Add(_currentItem);
                         }
                     }
-                    
-                    State = ValueDumpState.NextItem;
+                    /*else
+                    {
+                        Logging.Log("Selling gives a better price for item " + _currentItem.Name + " [Refine price: " + refinePrice.ToString("#,##0.00") + "][Sell price: " + totalPrice_r.ToString("#,##0.00") + "]");
+                    }*/
+
+                    _lastExecute = DateTime.Now;
+                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     break;
 
                 case ValueDumpState.WaitingToFinishQuickSell:
@@ -542,7 +584,7 @@ namespace ValueDump
                         if (modal != null)
                             modal.Close();
 
-                        State = ValueDumpState.NextItem;
+                         _States.CurrentValueDumpState = ValueDumpState.NextItem;
                         break;
                     }
                     break;
@@ -583,15 +625,16 @@ namespace ValueDump
                     {
                         // TODO: We should wait for the items to appear in our hangar and then sell them...
                         reprorcessingWindow.Reprocess();
-                        State = ValueDumpState.Idle;
+                         _States.CurrentValueDumpState = ValueDumpState.Idle;
                     }
                     break;
             }
         }
 
+
         private void btnHangar_Click(object sender, EventArgs e)
         {
-            State = ValueDumpState.GetItems;
+             _States.CurrentValueDumpState = ValueDumpState.GetItems;
             ProcessItems();
         }
 
@@ -599,7 +642,7 @@ namespace ValueDump
         {
             // Wait for the items to load
             Logging.Log("ValueDumpUI", "Waiting for items", Logging.white);
-            while (State != ValueDumpState.Idle)
+            while ( _States.CurrentValueDumpState != ValueDumpState.Idle)
             {
                 System.Threading.Thread.Sleep(50);
                 Application.DoEvents();
@@ -642,12 +685,12 @@ namespace ValueDump
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            State = ValueDumpState.Idle;
+             _States.CurrentValueDumpState = ValueDumpState.Idle;
         }
 
         private void UpdateMineralPricesButton_Click(object sender, EventArgs e)
         {
-            State = ValueDumpState.CheckMineralPrices;
+             _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
         }
 
         private void lvItems_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -692,6 +735,11 @@ namespace ValueDump
 
         private void lvItems_SelectedIndexChanged(object sender, EventArgs e)
         {
+        }
+
+        private void RefineCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
