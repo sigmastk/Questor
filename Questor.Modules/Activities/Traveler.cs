@@ -151,10 +151,11 @@ namespace Questor.Modules.Activities
 
         public void ProcessState()
         {
-            if (DateTime.Now < _lastTravelerProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            // Only pulse state changes every 1.5s
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
                 return;
 
-            _lastTravelerProcessState = DateTime.Now;
+            _lastPulse = DateTime.Now;
 
             switch (_States.CurrentTravelerState)
             {

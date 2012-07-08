@@ -358,6 +358,8 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (DateTime.Now < _lastCleanupAction.AddMilliseconds(500))
                 return false;
+
+            _lastCleanupAction = DateTime.Now;
             //
             // go through *every* window
             //

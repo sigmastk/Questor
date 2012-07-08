@@ -580,7 +580,7 @@ namespace Questor.Modules.BackgroundTasks
 
         public void ProcessState()
         {
-            if (DateTime.Now < _lastSalvageProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.Now < _lastSalvageProcessState.AddMilliseconds(500)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
             _lastSalvageProcessState = DateTime.Now;

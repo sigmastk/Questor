@@ -27,11 +27,17 @@ namespace Questor.Modules.Actions
         private static DateTime _nextUnloadAction = DateTime.MinValue;
         private static DateTime _lastUnloadAction = DateTime.MinValue;
         private static int _lootToMoveWillStillNotFitCount = 0;
+        private static DateTime _lastPulse;
 
         //public double LootValue { get; set; }
 
         public void ProcessState()
         {
+            // Only pulse state changes every 1.5s
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
+                return;
+            _lastPulse = DateTime.Now;
+
             if (!Cache.Instance.InStation)
                 return;
 
