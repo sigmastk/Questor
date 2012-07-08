@@ -331,6 +331,11 @@ namespace Questor.Modules.Caching
         /// </summary>
         public bool AfterMissionSalvaging { get; set; }
 
+        public double MaxRange
+        {
+            get { return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange); }
+        }
+
         /// <summary>
         ///   Returns the maximum weapon distance
         /// </summary>
@@ -2109,14 +2114,6 @@ namespace Questor.Modules.Caching
         {
             var random = new Random();
             return random.Next(min, max);
-        }
-
-        public double MaxRange
-        {
-            get
-            {
-                return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
-            }
         }
 
         public DirectContainer ItemHangar { get; set; }
