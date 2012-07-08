@@ -88,6 +88,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDroneHealth { get; set; }
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugTraveler { get; set; }
+        public bool DebugValuedump { get; set; }
         public bool UseInnerspace { get; set; }
 
         //
@@ -540,6 +541,7 @@ namespace Questor.Modules.Lookup
                 DebugNavigateOnGrid = false;
                 DebugReloadAll = false;
                 DebugTraveler = false;
+                DebugValuedump = false;
                 UseInnerspace = true;
                 //
                 // Misc Settings
@@ -823,6 +825,7 @@ namespace Questor.Modules.Lookup
                     DebugNavigateOnGrid = (bool?)xml.Element("debugNavigateOnGrid") ?? false;
                     DebugReloadAll = (bool?)xml.Element("debugReloadAll") ?? false;
                     DebugTraveler = (bool?)xml.Element("debugTraveler") ?? false;
+                    DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
 
                     //
