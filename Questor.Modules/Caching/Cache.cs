@@ -258,6 +258,7 @@ namespace Questor.Modules.Caching
         public bool CourierMission = false;
         public string MissionName = "";
         public int MissionsThisSession = 0;
+        public int StopSessionAfterMissionNumber = int.MaxValue;
         public bool ConsoleLogOpened = false;
         public int TimeSpentReloading_seconds = 0;
         public int TimeSpentInMission_seconds = 0;
@@ -1388,6 +1389,10 @@ namespace Questor.Modules.Caching
         public bool StopTimeSpecified { get; set; }
 
         public DateTime StopTime { get; set; }
+
+        public DateTime ManualStopTime = DateTime.Now.AddHours(10);
+
+        public DateTime ManualRestartTime = DateTime.Now.AddHours(10);
 
         public DateTime StartTime { get; set; }
 
@@ -3320,7 +3325,7 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
-                    Cache.Instance.NextOpenJournalWindowAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(15, 30));
+                    Cache.Instance.NextOpenJournalWindowAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(10, 20));
                     Logging.Log(module, "Opening Journal Window: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenJournalWindowAction.Subtract(DateTime.Now).TotalSeconds,
                                            0) + "sec]", Logging.white);
@@ -3330,7 +3335,6 @@ namespace Questor.Modules.Caching
             }
             return false;
         }
-
 
         public DirectContainer ContainerInSpace { get; set; }
 
