@@ -369,6 +369,8 @@ namespace Questor.Modules.Lookup
         //
         // Speed and Movement Settings
         //
+        public bool AvoidBumpingThings { get; set; }
+
         public bool SpeedTank { get; set; }
 
         public int OrbitDistance { get; set; }
@@ -703,6 +705,7 @@ namespace Questor.Modules.Lookup
                 //
                 // Speed and Movement Settings
                 //
+                AvoidBumpingThings = true;
                 SpeedTank = false;
                 OrbitDistance = 0;
                 OrbitStructure = false;
@@ -1011,6 +1014,7 @@ namespace Questor.Modules.Lookup
                     //
                     // Speed and Movement Settings
                     //
+                    AvoidBumpingThings = (bool?)xml.Element("avoidBumpingThings") ?? true;
                     SpeedTank = (bool?)xml.Element("speedTank") ?? false;
                     OrbitDistance = (int?)xml.Element("orbitDistance") ?? 0;
                     OrbitStructure = (bool?) xml.Element("orbitStructure") ?? false;
