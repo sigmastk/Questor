@@ -70,7 +70,16 @@ namespace Questor
 
             Cache.Instance.StopTimeSpecified = Program.StopTimeSpecified;
             Cache.Instance.MaxRuntime = Program.MaxRuntime;
-            Cache.Instance.StopTime = Program.StopTime;
+            if (Program.StartTime.AddMinutes(10) < Program.StopTime)
+            {
+                Cache.Instance.StopTime = Program.StopTime;
+                Logging.Log("Questor", "Schedule: setup correctly: stoptime is [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.orange);
+            }
+            else
+            {
+                Cache.Instance.StopTime = DateTime.Now.AddHours(10);
+                Logging.Log("Questor", "Schedule: NOT setup correctly: stoptime is [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.orange);
+            }
             Cache.Instance.StartTime = Program.StartTime;
             Cache.Instance.QuestorStarted_DateTime = DateTime.Now;
 

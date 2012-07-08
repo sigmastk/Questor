@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -1386,9 +1386,9 @@ namespace Questor.Modules.Caching
 
         public bool? MissionKillSentries { get; set; }
 
-        public bool StopTimeSpecified { get; set; }
+        public bool StopTimeSpecified = true;
 
-        public DateTime StopTime { get; set; }
+        public DateTime StopTime = DateTime.Now.AddHours(10);
 
         public DateTime ManualStopTime = DateTime.Now.AddHours(10);
 
