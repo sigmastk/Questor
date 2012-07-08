@@ -250,10 +250,18 @@ namespace Questor
                 if (dateTimePicker1.Checked)
                 {
                     Cache.Instance.ManualStopTime = dateTimePicker1.Value;
+                    if (Cache.Instance.ManualStopTime > Cache.Instance.StopTime)
+                        Cache.Instance.StopTimeSpecified = false;
+                    if (Cache.Instance.ManualStopTime < Cache.Instance.StopTime)
+                        Cache.Instance.StopTimeSpecified = true;
                 }
-                else
+                else 
                 {
                     dateTimePicker1.Value = DateTime.Now.AddHours(1);
+                    if (!dateTimePicker2.Checked)
+                    {
+                        Cache.Instance.StopTimeSpecified = true;
+                    }
                 }
                 //
                 // if control is enabled (checked) then update ManualRestartTime so that on next idle questor will check to see if it needs to stop/restart
@@ -261,10 +269,18 @@ namespace Questor
                 if (dateTimePicker2.Checked)
                 {
                     Cache.Instance.ManualRestartTime = dateTimePicker2.Value;
+                    if (Cache.Instance.ManualRestartTime > Cache.Instance.StopTime)
+                        Cache.Instance.StopTimeSpecified = false;
+                    if (Cache.Instance.ManualRestartTime < Cache.Instance.StopTime)
+                        Cache.Instance.StopTimeSpecified = true;
                 }
                 else
                 {
                     dateTimePicker1.Value = DateTime.Now.AddHours(1);
+                    if (!dateTimePicker1.Checked)
+                    {
+                        Cache.Instance.StopTimeSpecified = true;
+                    }
                 }
             }
         }
