@@ -486,6 +486,17 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
+            if (!Cache.Instance.InSpace || !Cache.Instance.InStation)
+                return;
+
+            if (Cache.Instance.InSpace) 
+                if (DateTime.Now > Cache.Instance.LastInStation.AddSeconds(10))
+                    return;
+
+            if (Cache.Instance.InStation)
+                if (DateTime.Now > Cache.Instance.LastInSpace.AddSeconds(10))
+                    return;
+
             switch (_States.CurrentCleanupState)
             {
                 case CleanupState.Idle:
