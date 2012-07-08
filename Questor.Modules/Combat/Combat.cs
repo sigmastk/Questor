@@ -10,6 +10,7 @@
 
 using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Caching;
+using Questor.Modules.Activities;
 
 namespace Questor.Modules.Combat
 {
@@ -82,8 +83,23 @@ namespace Questor.Modules.Combat
                 {
                     if (DateTime.Now.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 4)
                     {
-                        Logging.Log("Combat", "ReloadNormalAmmo: We have ammo loaded that does not have a full reload available in the cargo.", Logging.orange); 
+                        Logging.Log("Combat", "ReloadNormalAmmo: We have ammo loaded that does not have a full reload available, checking cargo for other ammo", Logging.orange); 
                         Cache.Instance.LastLoggingAction = DateTime.Now;
+                        try
+                        {
+                            if (Settings.Instance.Ammo.Any())
+                            {
+                                DirectItem AvailableAmmo = cargo.Items.Where(a => Settings.Instance.Ammo.Any(i => i.TypeId == a.TypeId)).ToList().FirstOrDefault();
+                                Cache.Instance.DamageType = Settings.Instance.Ammo.ToList().Where(a => a.TypeId == AvailableAmmo.TypeId).FirstOrDefault().DamageType;
+                                Logging.Log("Combat", "ReloadNormalAmmo: found [" + AvailableAmmo.Quantity + "] units of  [" + AvailableAmmo.TypeName + "] changed DamageType to [" + Cache.Instance.DamageType.ToString() + "]", Logging.orange);
+                                return false;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            Logging.Log("Combat", "ReloadNormalAmmo: unable to find any alternate ammo in your cargo", Logging.teal);
+                        }
+                        return false;
                     }
                 }
             }

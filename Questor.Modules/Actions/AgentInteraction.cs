@@ -70,7 +70,7 @@ namespace Questor.Modules.Actions
 
         public bool ForceAccept { get; set; }
 
-        public AgentInteractionPurpose Purpose { get; set; }
+        public static AgentInteractionPurpose Purpose { get; set; }
 
         public List<Ammo> AmmoToLoad { get; private set; }
 

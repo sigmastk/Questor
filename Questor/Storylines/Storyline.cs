@@ -228,7 +228,7 @@ namespace Questor.Storylines
                         Logging.Log("Storyline.AgentInteraction", "Start conversation [Start Mission]", Logging.yellow);
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
-                        _agentInteraction.Purpose = AgentInteractionPurpose.StartMission;
+                        AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
                         _agentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
                         _agentInteraction.ForceAccept = true;
                     }
@@ -260,7 +260,7 @@ namespace Questor.Storylines
                         Logging.Log("AgentInteraction", "Start Conversation [Complete Mission]", Logging.yellow);
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
-                        _agentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
+                        AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
                     _agentInteraction.ProcessState();
