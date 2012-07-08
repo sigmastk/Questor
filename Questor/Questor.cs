@@ -165,7 +165,7 @@ namespace Questor
             {
                 if (DateTime.Now >= Cache.Instance.StopTime)
                 {
-                    Logging.Log("Questor", "Time to stop.  Quitting game.", Logging.white);
+                    Logging.Log("Questor", "Time to stop. StopTimeSpecified and reached. Quitting game.", Logging.white);
                     Cache.Instance.ReasonToStopQuestor = "StopTimeSpecified and reached.";
                     Settings.Instance.AutoStart = false;
                     Cache.Instance.CloseQuestorCMDLogoff = false;

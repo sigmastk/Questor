@@ -149,6 +149,11 @@ namespace Questor.Modules.Combat
             }
             else
             {
+                if (DateTime.Now.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
+                {
+                    Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + (int)Time.ReloadWeaponDelayBeforeUsable_seconds;
+                    Cache.Instance.LastLoggingAction = DateTime.Now;
+                }
                 Logging.Log("Combat", "Changing [" + weaponNumber + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range / 1000, 0) + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.teal);
                 Cache.Instance.NextReload = DateTime.Now.AddSeconds((int)Time.ReloadWeaponDelayBeforeUsable_seconds);
                 weapon.ChangeAmmo(charge);
@@ -706,7 +711,6 @@ namespace Questor.Modules.Combat
             //
             if (!Cache.Instance.OpenCargoHold("Combat.TargetCombatants")) return;
             // What is the range that we can target at
-            double maxRange = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange, Cache.Instance.WeaponRange);
 
             // Get a list of combat targets (combine targets + targeting)
             var targets = new List<EntityCache>();
@@ -809,7 +813,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    Logging.Log("Combat", "Targeting priority target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.teal);
+                    Logging.Log("Combat", "Targeting priority target [" + entity.Name + "][ID:" + entity.Id + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.teal);
                     entity.LockTarget();
                     highValueTargets.Add(entity);
                     //Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
@@ -829,7 +833,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    Logging.Log("Combat", "Targeting high value target [" + entity.Name + "][ID:" + entity.Id + "]{" + highValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.teal);
+                    Logging.Log("Combat", "Targeting high value target [" + entity.Name + "][ID:" + entity.Id + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.teal);
                     entity.LockTarget();
                     highValueTargets.Add(entity);
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
@@ -849,7 +853,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    Logging.Log("Combat", "Targeting low  value target [" + entity.Name + "][ID:" + entity.Id + "]{" + lowValueTargets.Count + "} [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.teal);
+                    Logging.Log("Combat", "Targeting low  value target [" + entity.Name + "][ID:" + entity.Id + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] lowValueTargets.Count [" + lowValueTargets.Count + "]", Logging.teal);
                     entity.LockTarget();
                     lowValueTargets.Add(entity);
                     Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
