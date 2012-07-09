@@ -1072,7 +1072,7 @@ namespace Questor.Behaviors
                     _traveler.ProcessState();
                     string target = "Acceleration Gate";
                     Cache.Instance.EntitiesByName(target);
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination || GateInSalvage())
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination || Cache.Instance.GateInGrid())
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -1145,7 +1145,6 @@ namespace Questor.Behaviors
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room", Logging.white);
 
-                            bool gatesInRoom = GateInSalvage();
                             List<DirectBookmark> afterMissionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                             DirectBookmark onGridBookmark = afterMissionSalvageBookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
 
@@ -1173,7 +1172,7 @@ namespace Questor.Behaviors
                                 Statistics.Instance.FinishedSalvaging = DateTime.Now;
                             }
 
-                            if (afterMissionSalvageBookmarks.Count == 0 && !gatesInRoom)
+                            if (afterMissionSalvageBookmarks.Count == 0 && !Cache.Instance.GateInGrid())
                             {
                                 Logging.Log("CombatMissionsBehavior.Salvage", "We have salvaged all bookmarks, go to base", Logging.white);
                                 Cache.Instance.SalvageAll = false;
@@ -1183,7 +1182,7 @@ namespace Questor.Behaviors
                             }
                             else
                             {
-                                if (!gatesInRoom)
+                                if (!Cache.Instance.GateInGrid())
                                 {
                                     Logging.Log("CombatMissionsBehavior.Salvage", "Go to the next salvage bookmark", Logging.white);
                                     var bookmark = afterMissionSalvageBookmarks.FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ?? afterMissionSalvageBookmarks.FirstOrDefault();
@@ -1439,16 +1438,6 @@ namespace Questor.Behaviors
                     if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Default) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                     break;
             }
-        }
-
-        private bool GateInSalvage()
-        {
-            const string target = "Acceleration Gate";
-
-            var targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || !targets.Any())
-                return false;
-            return true;
         }
     }
 }

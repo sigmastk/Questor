@@ -1308,13 +1308,13 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public IEnumerable<EntityCache> Gates
+        public IEnumerable<EntityCache> AccelerationGates
         {
             get
             {
                 return _gates ?? (_gates = Entities.Where(e =>
                        e.GroupId == (int)Group.AccellerationGate ||
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -3421,6 +3421,13 @@ namespace Questor.Modules.Caching
                 Logging.Log(module, "OpenContainerInSpace: how did we get this far?", Logging.white);
             }
             return false;
+        }
+        public bool GateInGrid()
+        {
+            var gates = Cache.Instance.AccelerationGates;
+            if (gates == null || !gates.Any())
+                return false;
+            else return true;
         }
     }
 }

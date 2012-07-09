@@ -543,7 +543,7 @@ namespace Questor.Behaviors
 
                 case DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark:
                     _traveler.ProcessState();
-                    if (GateInSalvage())
+                    if (Cache.Instance.GateInGrid())
                     {
                         //we know we are connected here
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -555,7 +555,7 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination || GateInSalvage())
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination || Cache.Instance.GateInGrid())
                     {
                         //we know we are connected here
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -682,14 +682,6 @@ namespace Questor.Behaviors
                     _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
                     break;
             }
-        }
-
-        private bool GateInSalvage()
-        {
-            var gates = Cache.Instance.Gates;
-            if (gates == null || !gates.Any())
-                return false;
-            return true;
         }
     }
 }
