@@ -1186,12 +1186,19 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null)
+                try
                 {
-                    Cache.Instance.LastInSpace = DateTime.Now;
-                    return true;
+                    if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null)
+                    {
+                        Cache.Instance.LastInSpace = DateTime.Now;
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
 
@@ -1199,12 +1206,19 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
+                try
                 {
-                    Cache.Instance.LastInStation = DateTime.Now;
-                    return true;
+                    if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
+                    {
+                        Cache.Instance.LastInStation = DateTime.Now;
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
 
