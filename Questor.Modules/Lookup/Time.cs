@@ -66,5 +66,6 @@ namespace Questor.Modules.Lookup
         Marketlookupdelay_seconds = 3,
         Marketsellorderdelay_seconds = 5,
         Marketbuyorderdelay_seconds = 5,
+        QuestorScheduleNotUsed_Hours = 10,
     }
 }
