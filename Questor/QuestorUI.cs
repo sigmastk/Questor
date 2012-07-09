@@ -161,6 +161,8 @@ namespace Questor
                 _nextUIDataRefresh = DateTime.Now.AddMilliseconds(1000);
                 try
                 {
+                    CurrentTimeData1.Text = DateTime.Now.ToLongTimeString();
+                    CurrentTimeData2.Text = DateTime.Now.ToLongTimeString();
                     NextOpenContainerInSpaceActionData.Text = Cache.Instance.NextOpenContainerInSpaceAction.ToLongTimeString();
                     NextOpenJournalWindowActionData.Text = Cache.Instance.NextOpenJournalWindowAction.ToLongTimeString();
                     NextOpenLootContainerActionData.Text = Cache.Instance.NextOpenLootContainerAction.ToLongTimeString();
