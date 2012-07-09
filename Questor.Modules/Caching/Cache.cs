@@ -905,7 +905,13 @@ namespace Questor.Modules.Caching
         public bool Missionbookmarktimerset = false;
         public DateTime Missionbookmarktimeout = DateTime.MaxValue;
 
-        public string AgentStationID { get; set; }
+        public long AgentStationID { get; set; }
+
+        public string AgentStationName { get; set; }
+
+        public long AgentSolarSystemID { get; set; }
+
+        public string AgentSolarSystemName { get; set; }
 
         public string CurrentAgent_text = string.Empty;
         public string CurrentAgent
@@ -951,7 +957,6 @@ namespace Questor.Modules.Caching
                     try
                     {
                         agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
-                        Cache.Instance.AgentStationID = Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId);
                     }
                     catch (Exception)
                     {
@@ -1003,11 +1008,20 @@ namespace Questor.Modules.Caching
                         if (_agent != null)
                         {
                             _agentId = _agent.AgentId;
+                            //Logging.Log("Cache: CurrentAgent", "Processing Agent Info...", Logging.white);
+                            Cache.Instance.AgentStationName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.StationId);
+                            Cache.Instance.AgentStationID = Cache.Instance._agent.StationId;
+                            Cache.Instance.AgentSolarSystemName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.SolarSystemId);
+                            Cache.Instance.AgentSolarSystemID = Cache.Instance._agent.SolarSystemId;
+                            //Logging.Log("Cache: CurrentAgent", "AgentStationName [" + Cache.Instance.AgentStationName + "]", Logging.white);
+                            //Logging.Log("Cache: CurrentAgent", "AgentStationID [" + Cache.Instance.AgentStationID + "]", Logging.white);
+                            //Logging.Log("Cache: CurrentAgent", "AgentSolarSystemName [" + Cache.Instance.AgentSolarSystemName + "]", Logging.white);
+                            //Logging.Log("Cache: CurrentAgent", "AgentSolarSystemID [" + Cache.Instance.AgentSolarSystemID + "]", Logging.white);
                         }
                     }
                     catch (Exception)
                     {
-                        Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it.");
+                        Logging.Log("Cache", "Agent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it.");
                         Cache.Instance.Paused = true;
                     }
                     return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
