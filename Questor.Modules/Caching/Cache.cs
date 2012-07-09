@@ -69,6 +69,16 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _bigobjects;
 
         /// <summary>
+        ///   BigObjects we are likely to bump into (mainly LCOs)
+        /// </summary>
+        private List<EntityCache> _gates;
+
+        /// <summary>
+        ///   BigObjects we are likely to bump into (mainly LCOs)
+        /// </summary>
+        private List<EntityCache> _bigobjectsandgates;
+
+        /// <summary>
         ///   objects we are likely to bump into (Anything that isnt an NPC a wreck or a can)
         /// </summary>
         private List<EntityCache> _objects;
@@ -1270,11 +1280,21 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public IEnumerable<EntityCache> Gates
+        {
+            get
+            {
+                return _gates ?? (_gates = Entities.Where(e =>
+                       e.GroupId == (int)Group.AccellerationGate ||
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+            }
+        }
+
         public IEnumerable<EntityCache> BigObjectsandGates
         {
             get
             {
-                return _bigobjects ?? (_bigobjects = Entities.Where(e =>
+                return _bigobjectsandgates ?? (_bigobjectsandgates = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
                        e.GroupId == (int)Group.AccellerationGate ||
                        e.TypeId == 21609 || //Dysfunctional Solar Harvester in Gone Berserk (not an LCO)

@@ -280,6 +280,8 @@ namespace Questor.Behaviors
 
                     if (Cache.Instance.InSpace)
                     {
+                        // Questor does not handle in space starts very well, head back to base to try again
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.white);
                         LastAction = DateTime.Now;
                         _nextSalvageTrip = DateTime.Now;
                          _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
@@ -541,9 +543,6 @@ namespace Questor.Behaviors
 
                 case DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark:
                     _traveler.ProcessState();
-                    string target = "Acceleration Gate";
-                    Cache.Instance.EntitiesByName(target);
-
                     if (GateInSalvage())
                     {
                         //we know we are connected here
@@ -687,10 +686,8 @@ namespace Questor.Behaviors
 
         private bool GateInSalvage()
         {
-            const string target = "Acceleration Gate";
-
-            var targets = Cache.Instance.EntitiesByName(target);
-            if (targets == null || !targets.Any())
+            var gates = Cache.Instance.Gates;
+            if (gates == null || !gates.Any())
                 return false;
             return true;
         }
