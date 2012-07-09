@@ -545,17 +545,16 @@ namespace Questor.Behaviors
                     _traveler.ProcessState();
                     if (Cache.Instance.GateInGrid())
                     {
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoSalvageBookmark: We found gate in salvage bookmark. Going back to Base", Logging.white);
                         //we know we are connected here
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
                         _traveler.Destination = null;
-                        _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                        _nextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes); 
                         return;
                     }
-
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination || Cache.Instance.GateInGrid())
+                    else if (_States.CurrentTravelerState == TravelerState.AtDestination)
                     {
                         //we know we are connected here
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;

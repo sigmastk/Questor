@@ -361,6 +361,11 @@ namespace Questor.Modules.Actions
             if (nextAction > DateTime.Now)
                 return false;
 
+            if (Cache.Instance.GateInGrid() && distance < (int)Distance.OnGridWithMe)
+            {
+                Logging.Log("QuestorManager.BookmarkDestination", "Bookmark [" + bookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + "] AU away. Which is [" + Math.Round((distance / 1000), 2) + "].", Logging.white);
+            }
+
             Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.yellow + bookmark.Title + Logging.green + "][" + Logging.yellow + Math.Round((distance / 1000) / 149598000, 2) +  Logging.green + " AU away]", Logging.green);
             Cache.Instance.DoNotBreakInvul = false;
             //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false; 

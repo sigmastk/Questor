@@ -1072,7 +1072,19 @@ namespace Questor.Behaviors
                     _traveler.ProcessState();
                     string target = "Acceleration Gate";
                     Cache.Instance.EntitiesByName(target);
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination || Cache.Instance.GateInGrid())
+
+                    if (Cache.Instance.GateInGrid())
+                    {
+                        Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoSalvageBookmark: We found gate in salvage bookmark. Going back to Base", Logging.white);
+                        //we know we are connected here
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                        _traveler.Destination = null;
+                        //Cache.Instance.NextSalvageTrip = DateTime.Now.AddMinutes((int)Time.DelayBetweenSalvagingSessions_minutes);
+                        return;
+                    }
+                    else if (_States.CurrentTravelerState == TravelerState.AtDestination)
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -1227,14 +1239,9 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.SalvageUseGate:
                     Cache.Instance.OpenWrecks = true;
 
-                    target = "Acceleration Gate";
-                    IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
-                    if (targets == null || !targets.Any())
+                    if (!Cache.Instance.GateInGrid())
                     {
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageUseGate)
-                        {
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoSalvageBookmark;
-                        }
+                       _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoSalvageBookmark;
                         return;
                     }
 
@@ -1242,7 +1249,7 @@ namespace Questor.Behaviors
                     _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
                     _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
-                    EntityCache closest = targets.OrderBy(t => t.Distance).First();
+                    EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).First();
                     if (closest.Distance < (int)Distance.DecloakRange)
                     {
                         Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - GroupID=" + closest.GroupId, Logging.white);
