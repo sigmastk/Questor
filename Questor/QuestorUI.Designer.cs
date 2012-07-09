@@ -3040,8 +3040,8 @@
         private System.Windows.Forms.Label AgentInteractionPurposelbl;
         private System.Windows.Forms.Label AgentInteractionPurposeData;
         private System.Windows.Forms.Label CurrentTimelbl2;
-        private System.Windows.Forms.Label label32;
-        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label CurrentTimeData2;
+        private System.Windows.Forms.Label CurrentTimeData1;
         private System.Windows.Forms.Label CurrentTimelbl;
     }
 }

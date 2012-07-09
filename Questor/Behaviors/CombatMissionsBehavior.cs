@@ -67,7 +67,7 @@ namespace Questor.Behaviors
         public bool CloseQuestorflag = true;
 
         public string CharacterName { get; set; }
-        private StationDestination baseDestination;
+        
         private List<long> EVENavdestination { get; set; }
 
         //DateTime _nextAction = DateTime.Now;
