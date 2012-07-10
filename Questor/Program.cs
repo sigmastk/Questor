@@ -325,6 +325,12 @@ namespace Questor
 
         private static void OnFrame(object sender, EventArgs e)
         {
+            // New frame, invalidate old cache
+            Cache.Instance.InvalidateCache();
+
+            Cache.Instance.LastFrame = DateTime.Now;
+            Cache.Instance.LastSessionIsReady = DateTime.Now; //update this reguardless before we login there is no session
+
             if (!_readyToStart || _humaninterventionrequired)
             {
                 //Logging.Log("if (!_readyToStart) then return");
@@ -349,6 +355,7 @@ namespace Questor
             if (_directEve.Session.IsReady)
             {
                 Logging.Log("Startup", "We've successfully logged in", Logging.white);
+                Cache.Instance.LastSessionIsReady = DateTime.Now;
                 _done = true;
                 return;
             }
