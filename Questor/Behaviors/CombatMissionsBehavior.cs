@@ -304,9 +304,9 @@ namespace Questor.Behaviors
         public void ProcessState()
         {
             // Only pulse state changes every 1.5s
-            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
-                return;
-            _lastPulse = DateTime.Now;
+            //if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+            //    return;
+            //_lastPulse = DateTime.Now;
 
             // Invalid settings, quit while we're ahead
             if (!ValidSettings)
