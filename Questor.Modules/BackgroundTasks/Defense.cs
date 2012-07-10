@@ -73,7 +73,7 @@ namespace Questor.Modules.BackgroundTasks
                 // at this point the module should be active but isn't: activate it, set the delay and return. The process will resume on the next tick
                 //
                 module.Click();
-                Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                 Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "] waiting [" + Math.Round(Cache.Instance.NextActivateSupportModules.Subtract(DateTime.Now).TotalSeconds, 0) + " sec]", Logging.white);
                 
                 continue;
@@ -136,7 +136,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     module.Click();
                     Cache.Instance.StartedBoosting = DateTime.Now;
-                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (module.GroupId == (int)Group.ShieldBoosters)
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
@@ -159,7 +159,7 @@ namespace Questor.Modules.BackgroundTasks
                 else if (module.IsActive && perc >= Settings.Instance.DeactivateRepairModules)
                 {
                     module.Click();
-                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds((int)Time.DefenceDelay_milliseconds);
+                    Cache.Instance.NextRepModuleAction = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     Cache.Instance.RepairCycleTimeThisPocket = Cache.Instance.RepairCycleTimeThisPocket + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
                     Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.Now.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -222,15 +222,14 @@ namespace Questor.Modules.BackgroundTasks
                 if (activate && !module.IsActive)
                 {
                     module.Click();
-                    Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
-                    return;
+                    Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                 }
                 else if (deactivate && module.IsActive)
                 {
                     module.Click();
-                    Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds((int)Time.AfterburnerDelay_milliseconds);
-                    return;
+                    Cache.Instance.NextAfterburnerAction = DateTime.Now.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                 }
+                return;
             }
         }
 

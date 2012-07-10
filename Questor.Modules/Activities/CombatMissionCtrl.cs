@@ -73,7 +73,7 @@ namespace Questor.Modules.Activities
                 // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
                 if (DateTime.Now > Cache.Instance.NextBookmarkPocketAttempt)
                 {
-                    Cache.Instance.NextBookmarkPocketAttempt = DateTime.Now.AddSeconds((int)Time.BookmarkPocketRetryDelay_seconds);
+                    Cache.Instance.NextBookmarkPocketAttempt = DateTime.Now.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
                     if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
                     {
                         Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.teal);
@@ -148,7 +148,7 @@ namespace Questor.Modules.Activities
                 }
                 else if (_waiting)
                 {
-                    if (DateTime.Now.Subtract(_waitingSince).TotalSeconds > (int)Time.NoGateFoundRetryDelay_seconds)
+                    if (DateTime.Now.Subtract(_waitingSince).TotalSeconds > Time.Instance.NoGateFoundRetryDelay_seconds)
                     {
                         Logging.Log("CombatMissionCtrl",
                                     "Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error",
@@ -184,7 +184,7 @@ namespace Questor.Modules.Activities
                     {
                         closest.Orbit(1000);
                         Logging.Log("CombatMissionCtrl", "Activate: We are too close to [" + closest.Name + "] Initiating orbit", Logging.orange);
-                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                     }
                     return;
                 }
@@ -193,7 +193,7 @@ namespace Questor.Modules.Activities
                 //{
                 //    Logging.Log("CombatMissionCtrl.Activate: Too close to Structure to activate: orbiting");
                 //    closest.Orbit((int)Distance.GateActivationRange); // 1000 meters
-                //    Cache.Instance._nextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                //    Cache.Instance._nextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                 //}
 
                 //if (closest.Distance >= (int)Distance.TooCloseToStructure) //If we aren't so close that we may get tangled in the structure, activate it
@@ -228,10 +228,10 @@ namespace Questor.Modules.Activities
                 // Move to the target
                 if (DateTime.Now > Cache.Instance.NextApproachAction && (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                 {
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.teal);
                     closest.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 }
                 else if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
                 {
@@ -250,7 +250,7 @@ namespace Questor.Modules.Activities
                     // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
                     Logging.Log("CombatMissionCtrl", "Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distance.CloseToGateActivationRange + "]", Logging.teal);
                     closest.AlignTo();
-                    Cache.Instance.NextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
+                    Cache.Instance.NextAlign = DateTime.Now.AddMinutes(Time.Instance.AlignDelay_minutes);
                 }
                 else
                 {
@@ -544,7 +544,7 @@ namespace Questor.Modules.Activities
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.teal);
                     closest.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 }
                 return;
             }
@@ -555,7 +555,7 @@ namespace Questor.Modules.Activities
                     // Probably never happens
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Aligning to target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.teal);
                     closest.AlignTo();
-                    Cache.Instance.NextAlign = DateTime.Now.AddMinutes((int)Time.AlignDelay_minutes);
+                    Cache.Instance.NextAlign = DateTime.Now.AddMinutes(Time.Instance.AlignDelay_minutes);
                 }
                 return;
             }
@@ -1088,7 +1088,7 @@ namespace Questor.Modules.Activities
                 {
                     Logging.Log("CombatMission." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.teal);
                     closest.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 }
             }
         }
@@ -1124,7 +1124,7 @@ namespace Questor.Modules.Activities
                     {
                         Logging.Log("MissionController.DropItem", "Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.white);
                         closest.Approach(1000);
-                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     }
                 }
             }
@@ -1227,7 +1227,7 @@ namespace Questor.Modules.Activities
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][ID: " + container.Id + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.teal);
                     container.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 }
             }
         }
@@ -1281,7 +1281,7 @@ namespace Questor.Modules.Activities
                 {
                     Logging.Log("CombatMission." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.teal);
                     closest.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 }
             }
         }
@@ -1336,7 +1336,7 @@ namespace Questor.Modules.Activities
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][ID: " + container.Id + "][" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.teal);
                     container.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 }
             }
         }

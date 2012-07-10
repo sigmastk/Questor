@@ -59,7 +59,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]", Logging.white);
                         closestWreck.WarpTo();
-                        Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                        Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                     }
                 }
                 else
@@ -68,14 +68,18 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]", Logging.white);
                         closestWreck.Approach();
-                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     }
                 }
             }
             else if (closestWreck.Distance <= (int)Distance.SafeScoopRange && Cache.Instance.Approaching != null)
             {
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
-                Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching", Logging.white);
+                if (Cache.Instance.NextApproachAction < DateTime.Now)
+                {
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
+                    Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching", Logging.white);
+                }
             }
         }
         /// <summary>
@@ -83,7 +87,8 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private void ActivateTractorBeams()
         {
-            if (Cache.Instance.NextSalvageAction > DateTime.Now) return;
+            if (Cache.Instance.NextSalvageAction > DateTime.Now) 
+                return;
             List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
             if (tractorBeams.Count == 0)
                 return;
@@ -107,8 +112,8 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     tractorBeam.Click();
                     tractorsProcessedThisTick++;
-                    Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
-                    if (tractorsProcessedThisTick < 2)
+                    Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                    if (tractorsProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
                         continue;
                     else
                     {
@@ -137,10 +142,17 @@ namespace Questor.Modules.BackgroundTasks
                 ModuleCache tractorBeam = tractorBeams[0];
                 tractorBeams.RemoveAt(0);
                 tractorBeam.Activate(wreck.Id);
+                tractorsProcessedThisTick++;
 
                 Logging.Log("Salvage", "Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "]["+ Math.Round(wreck.Distance/1000,0) +"k][ID: " + wreck.Id + "]", Logging.white);
-                Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
+                Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                if (tractorsProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
                 continue;
+                else
+                {
+                    tractorsProcessedThisTick = 0;
+                    return;
+                }
             }
         }
 
@@ -149,7 +161,8 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private void ActivateSalvagers()
         {
-            if (Cache.Instance.NextSalvageAction > DateTime.Now) return;
+            if (Cache.Instance.NextSalvageAction > DateTime.Now) 
+                return;
             List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
             if (salvagers.Count == 0)
                 return;
@@ -178,8 +191,8 @@ namespace Questor.Modules.BackgroundTasks
                 Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]", Logging.white);
                 salvager.Activate(wreck.Id);
                 salvagersProcessedThisTick++;
-                Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds((int)Time.SalvageDelayBetweenActions_milliseconds);
-                if (salvagersProcessedThisTick < 2)
+                Cache.Instance.NextSalvageAction = DateTime.Now.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
                     continue;
                 else
                 {
@@ -194,7 +207,8 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private void TargetWrecks()
         {
-            if (DateTime.Now < Cache.Instance.NextTargetAction) return;
+            if (DateTime.Now < Cache.Instance.NextTargetAction) 
+                return;
 
             // We are jammed, we do not need to log (Combat does this already)
             if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
@@ -219,7 +233,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + wreck.Id + "] on the ignore list, ignoring.", Logging.white);
                     wreck.UnlockTarget();
-                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                     continue;
                 }
 
@@ -229,7 +243,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + wreck.Id + "] within loot range,wreck is empty, or wreck is on our blacklist, unlocking container.", Logging.white);
                         wreck.UnlockTarget();
-                        Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                        Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                         continue;
                     }
                 }
@@ -242,7 +256,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + wreck.Id + "] within loot range, unlocking container.", Logging.white);
                     wreck.UnlockTarget();
-                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_milliseconds);
+                    Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                     continue;
                 }
             }
@@ -306,24 +320,32 @@ namespace Questor.Modules.BackgroundTasks
                 wreck.LockTarget();
                 wreckTargets.Add(wreck);
                 wrecksProcessedThisTick++;
-                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.teal);
+                if (Settings.Instance.DebugSalvage) 
+                    Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.teal);
 
-                //_nextTargetAction = DateTime.Now.AddMilliseconds((int)Time.TargetDelay_miliseconds);
                 if (Cache.Instance.MissionLoot)
                 {
                     if (wreckTargets.Count >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets))
                     {
-                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) [" + Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) + "]", Logging.teal);
+                        if (Settings.Instance.DebugSalvage) 
+                            Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) [" + Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) + "]", Logging.teal);
                         return;
                     }
                 }
                 else
                     if (wreckTargets.Count >= MaximumWreckTargets)
                     {
-                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage"," wreckTargets.Count [" + wreckTargets.Count + "] >= MaximumWreckTargets [" + MaximumWreckTargets + "]",Logging.teal);
+                        if (Settings.Instance.DebugSalvage) 
+                            Logging.Log("Salvage"," wreckTargets.Count [" + wreckTargets.Count + "] >= MaximumWreckTargets [" + MaximumWreckTargets + "]",Logging.teal);
                         return;
                     }
-                //return;
+                if (wrecksProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                    continue;
+                else
+                {
+                    wrecksProcessedThisTick = 0;
+                        return;
+                    }
             }
         }
 
@@ -332,9 +354,11 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private void LootWrecks()
         {
-            if (Cache.Instance.NextLootAction > DateTime.Now) return;
+            if (Cache.Instance.NextLootAction > DateTime.Now) 
+                return;
 
-            if (!Cache.Instance.OpenCargoHold("Salvage")) return;
+            if (!Cache.Instance.OpenCargoHold("Salvage")) 
+                return;
 
             List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
@@ -377,8 +401,12 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
                     {
-                        Logging.Log("Salvage", "We are full, going to base to unload because: UnloadLootAtStation == true", Logging.white);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatHelperBehaviorState = States.CombatHelperBehaviorState.GotoBase;
+                    }
+                    else if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == States.DedicatedBookmarkSalvagerBehaviorState.Salvage)
+                    {
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                        Cache.Instance.NextSalvageTrip = DateTime.Now;
                     }
                     break;
                 }
@@ -478,7 +506,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (moveTheseItems.Count > 0)
                         {
                             // jettison loot
-                            if (DateTime.Now.Subtract(Cache.Instance.LastJettison).TotalSeconds < (int)Time.DelayBetweenJetcans_seconds)
+                                if (DateTime.Now.Subtract(Cache.Instance.LastJettison).TotalSeconds < Time.Instance.DelayBetweenJetcans_seconds)
                                 return;
 
                             Logging.Log("Salvage", "Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot", Logging.white);
@@ -486,7 +514,7 @@ namespace Questor.Modules.BackgroundTasks
                             // then picking it up again :/ (granted it should never happen unless
                             // mission item volume > reserved volume
                             Cache.Instance.CargoHold.Jettison(moveTheseItems.Select(i => i.ItemId));
-                            Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                            Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                             Cache.Instance.LastJettison = DateTime.Now;
                             return;
                         }
@@ -512,8 +540,10 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // Open a container in range
+            int containersProcessedThisTick = 0;
             foreach (EntityCache containerEntity in Cache.Instance.Containers.Where(e => e.Distance <= (int)Distance.SafeScoopRange))
             {
+                containersProcessedThisTick++;
                 // Empty wreck, ignore
                 if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
                     continue;
@@ -551,13 +581,14 @@ namespace Questor.Modules.BackgroundTasks
                 if (Cache.Instance.ContainerInSpace.Window == null)
                 {
                     containerEntity.OpenCargo();    
-                    Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                    Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                     return;
                 }
 
                 if (!Cache.Instance.ContainerInSpace.Window.IsReady)
                 {
-                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.white);
+                    if (Settings.Instance.DebugLootWrecks) 
+                        Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.white);
                     return;
                 }
 
@@ -571,10 +602,17 @@ namespace Questor.Modules.BackgroundTasks
                     //    return;
                     //}
                     OpenedContainers[containerEntity.Id] = DateTime.Now;
-                    Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds((int)Time.LootingDelay_milliseconds);
+                    Cache.Instance.NextLootAction = DateTime.Now.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                     return;
                 }
-                return;
+                //add cont proceed thistick
+                if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                    continue;
+                else
+                {
+                    containersProcessedThisTick = 0;
+                    return;
+                }
             }
         }
 
@@ -620,8 +658,8 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (!Cache.Instance.OpenCargoHold("Salvge")) return;
-
+            if (!Cache.Instance.OpenCargoHold("Salvge")) 
+                return;
             switch (_States.CurrentSalvageState)
             {
                 case SalvageState.TargetWrecks:
@@ -650,7 +688,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (duplicates)
                         {
                             _States.CurrentSalvageState = SalvageState.StackItems;
-                            Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItems_seconds);
+                            Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds(Time.Instance.SalvageStackItems_seconds);
                         }
                     }
                     break;
@@ -661,7 +699,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.CargoHold.Window.IsReady)
                         Cache.Instance.CargoHold.StackAll();
 
-                    Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds((int)Time.SalvageStackItemsDelayBeforeResuming_seconds);
+                    Cache.Instance.NextSalvageAction = DateTime.Now.AddSeconds(Time.Instance.SalvageStackItemsDelayBeforeResuming_seconds);
                     _States.CurrentSalvageState = SalvageState.WaitForStacking;
                     break;
 

@@ -76,7 +76,7 @@ namespace ValueDump
         {
             Cache.Instance.LastFrame = DateTime.Now;
             // Only pulse state changes every .5s
-            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.ValueDumpPulse_milliseconds) //default: 500ms
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.ValueDumpPulse_milliseconds) //default: 500ms
                 return;
             _lastPulse = DateTime.Now;
             
@@ -108,7 +108,7 @@ namespace ValueDump
             }
             
             if (DateTime.Now.Subtract(Cache.Instance.LastupdateofSessionRunningTime).TotalSeconds <
-                (int)Time.SessionRunningTimeUpdate_seconds)
+                Time.Instance.SessionRunningTimeUpdate_seconds)
             {
                 Cache.Instance.SessionRunningTime =
                     (int)DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
@@ -135,7 +135,7 @@ namespace ValueDump
                     //_currentMineral = InvTypesById.Values.FirstOrDefault(i => i.Id == 20236 && i.LastUpdate < DateTime.Now.AddMinutes(-1));
                     if (_currentMineral == null)
                     {
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > (int)Time.Marketlookupdelay_seconds)
+                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
                         {
                              _States.CurrentValueDumpState = ValueDumpState.SaveMineralPrices;
                             if (marketWindow != null)
@@ -147,7 +147,7 @@ namespace ValueDump
                         //State = ValueDumpState.GetMineralPrice;
                         if (marketWindow == null)
                         {
-                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > (int)Time.Marketlookupdelay_seconds)
+                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
                             {
                                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
                                 _lastExecute = DateTime.Now;
@@ -160,7 +160,7 @@ namespace ValueDump
 
                         if (marketWindow.DetailTypeId != _currentMineral.Id)
                         {
-                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < (int)Time.Marketlookupdelay_seconds)
+                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < Time.Instance.Marketlookupdelay_seconds)
                                 return;
 
                             Logging.Log("ValuedumpUI", "Loading orders for " + _currentMineral.Name, Logging.white);
@@ -400,7 +400,7 @@ namespace ValueDump
                     break;
 
                 case ValueDumpState.StartQuickSell:
-                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < (int)Time.Marketsellorderdelay_seconds)
+                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < Time.Instance.Marketsellorderdelay_seconds)
                         break;
                     _lastExecute = DateTime.Now;
 
@@ -446,7 +446,7 @@ namespace ValueDump
 
                 case ValueDumpState.InspectOrder:
                     // Let the order window stay open for a few seconds
-                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < (int)Time.Marketbuyorderdelay_seconds)
+                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds < Time.Instance.Marketbuyorderdelay_seconds)
                         break;
 
                     if (sellWindow != null && (!sellWindow.OrderId.HasValue || !sellWindow.Price.HasValue || !sellWindow.RemainingVolume.HasValue))
@@ -603,47 +603,70 @@ namespace ValueDump
                     break;
 
                 case ValueDumpState.RefineItems:
-                    if (reprorcessingWindow == null)
+                    bool refine = true;
+                    if (refine)
                     {
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > (int)Time.Marketlookupdelay_seconds)
+                        if (reprorcessingWindow == null)
                         {
-                            IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
-                            Cache.Instance.DirectEve.ReprocessStationItems(refineItems);
+                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
+                            {
+                                IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
+                                Cache.Instance.DirectEve.ReprocessStationItems(refineItems);
 
-                            _lastExecute = DateTime.Now;
-                        }
-                        return;
-                    }
-
-                    if (reprorcessingWindow.NeedsQuote)
-                    {
-                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > (int)Time.Marketlookupdelay_seconds)
-                        {
-                            reprorcessingWindow.GetQuotes();
-                            _lastExecute = DateTime.Now;
+                                _lastExecute = DateTime.Now;
+                            }
+                            return;
                         }
 
-                        return;
-                    }
+                        if (reprorcessingWindow.NeedsQuote)
+                        {
+                            if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
+                            {
+                                reprorcessingWindow.GetQuotes();
+                                _lastExecute = DateTime.Now;
+                            }
 
-                    // Wait till we have a quote
-                    if (reprorcessingWindow.Quotes.Count == 0)
-                    {
-                        _lastExecute = DateTime.Now;
-                        return;
-                    }
+                            return;
+                        }
 
-                    // Wait another 5 seconds to view the quote and then reprocess the stuff
-                    if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > (int)Time.Marketlookupdelay_seconds)
+                        // Wait till we have a quote
+                        if (reprorcessingWindow.Quotes.Count == 0)
+                        {
+                            _lastExecute = DateTime.Now;
+                            return;
+                        }
+
+                        // Wait another 5 seconds to view the quote and then reprocess the stuff
+                        if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
+                        {
+                            // TODO: We should wait for the items to appear in our hangar and then sell them...
+                            reprorcessingWindow.Reprocess();
+                            _States.CurrentValueDumpState = ValueDumpState.Idle;
+                        }
+                    }
+                    else
                     {
-                        // TODO: We should wait for the items to appear in our hangar and then sell them...
-                        reprorcessingWindow.Reprocess();
-                         _States.CurrentValueDumpState = ValueDumpState.Idle;
+                        IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
+                        if (!Cache.Instance.OpenCargoHold("ValueDump")) break;
+
+                        if (!Cache.Instance.OpenAmmoHangar("ValueDump")) break;
+                        if (refineItems != null)
+                        {
+                            Logging.Log("Arm", "Moving loot to refine to CargoHold", Logging.white);
+
+                            Cache.Instance.CargoHold.Add(refineItems);
+                            _lastExecute = DateTime.Now;
+                            break;
+                        }
+                        else
+                        {
+                            _States.CurrentValueDumpState = ValueDumpState.Idle;
+                        }
+
                     }
                     break;
             }
         }
-
 
         private void btnHangar_Click(object sender, EventArgs e)
         {

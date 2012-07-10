@@ -91,6 +91,7 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DebugOnframe { get; set; }
         public bool DebugCleanup { get; set; }
+        public bool DebugScheduler { get; set; }
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
 
@@ -145,6 +146,9 @@ namespace Questor.Modules.Lookup
         // KillSentries Setting
         //
         private bool _killSentries;
+        public int NumberOfModulesToActivateInCycle = 1;
+        public int NoOfBookmarksDeletedAtOnce = 1;
+        public int NumberOfTriesToDeleteBookmarks = 3;
         public bool KillSentries
         {
             get
@@ -238,7 +242,7 @@ namespace Questor.Modules.Lookup
 
         public int MaximumWreckTargets { get; set; }
         public int AgeofBookmarksForSalvageBehavior { get; set; } //in minutes
-
+        public bool DeleteBookmarksWithNPC { get; set; }
         //
         // undocking settings
         //
@@ -547,6 +551,7 @@ namespace Questor.Modules.Lookup
                 DebugValuedump = false;
                 DebugOnframe = false;
                 DebugCleanup = false;
+                DebugScheduler = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
                 //
@@ -687,8 +692,8 @@ namespace Questor.Modules.Lookup
                 MaximumWreckTargets = 0;
                 WreckBlackListSmallWrecks = false;
                 WreckBlackListMediumWrecks = false;
-                AgeofBookmarksForSalvageBehavior = 45;
-
+                AgeofBookmarksForSalvageBehavior = 60;
+                DeleteBookmarksWithNPC = false;
                 //
                 // Enable / Disable the different types of logging that are available
                 //
@@ -832,6 +837,7 @@ namespace Questor.Modules.Lookup
                     DebugReloadAll = (bool?)xml.Element("debugReloadAll") ?? false;
                     DebugTraveler = (bool?)xml.Element("debugTraveler") ?? false;
                     DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
+                    DebugScheduler = (bool?)xml.Element("debugScheduler") ?? false;
                     DebugOnframe = (bool?)xml.Element("debugOnframe") ?? false;
                     DebugCleanup = (bool?)xml.Element("debugCleanup") ?? false;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;

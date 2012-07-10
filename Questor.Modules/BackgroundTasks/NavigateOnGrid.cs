@@ -69,7 +69,7 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log(module, 
                                        ": initiating Orbit of [" + thisBigObject.Name +
                                           "] orbiting at [" + ((int)Distance.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.white);
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         }
                         return;
                         //we are still too close, do not continue through the rest until we are not "too close" anymore
@@ -108,7 +108,7 @@ namespace Questor.Modules.BackgroundTasks
                             target.Orbit(Cache.Instance.OrbitDistance);
                             Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.teal);
                         }
-                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         return;
                     }
                 }
@@ -117,9 +117,10 @@ namespace Questor.Modules.BackgroundTasks
                     Logging.Log(module, "Possible out of range. ignoring orbit around structure", Logging.teal);
                     target.Orbit(Cache.Instance.OrbitDistance);
                     Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.teal);
-                    Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                    Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                     return;
                 }
+                return;
             }
         }
 
@@ -208,7 +209,7 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log(module, "Using Weapons Range: Stop ship, target is in orbit range", Logging.teal);
                         }
                     }
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     return;
                 }
             }
@@ -239,7 +240,7 @@ namespace Questor.Modules.BackgroundTasks
                                 target.Orbit(Cache.Instance.OrbitDistance);
                                 Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.teal);
                             }
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                             return;
                         }
                     }
@@ -248,7 +249,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log(module, "Possible out of range. ignoring orbit around structure", Logging.teal);
                         target.Orbit(Cache.Instance.OrbitDistance);
                         Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.teal);
-                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.OrbitDelay_seconds);
+                        Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         return;
                     }
                 }
@@ -264,7 +265,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                     {
                         target.Approach((int)(Distance.SafeDistancefromStructure));
-                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                     }
                     return;

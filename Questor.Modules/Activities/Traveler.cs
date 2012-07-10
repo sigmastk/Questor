@@ -26,9 +26,8 @@ namespace Questor.Modules.Activities
         private TravelerDestination _destination;
         private DateTime _nextTravelerAction;
         private DateTime _lastPulse;
-        private DateTime _nextGetDestinationPath;
         private DateTime _nextGetLocation;
-        private DateTime _nextGetLocationName;
+        
         private List<long> destination = null;
         private DirectLocation location;
         private string locationName;
@@ -67,7 +66,7 @@ namespace Questor.Modules.Activities
             {
                 if (Settings.Instance.DebugTraveler) if (destination.Count == 0) Logging.Log("Traveler", "We have no destination", Logging.teal);
                 if (Settings.Instance.DebugTraveler) if (!destination.Any(d => d == solarSystemId)) Logging.Log("Traveler", "the destination is not currently set to solarsystemId [" + solarSystemId + "]", Logging.teal);
-                _nextGetDestinationPath = DateTime.Now;
+                
                 // We do not have the destination set
                 if (DateTime.Now > _nextGetLocation || location == null)
                 {
@@ -82,6 +81,7 @@ namespace Questor.Modules.Activities
                 {
                     locationErrors = 0;
                     Logging.Log("Traveler", "Setting destination to [" + Logging.yellow + location.Name + Logging.green + "]", Logging.green);
+                    if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Setting destination to [" + Logging.yellow + location.Name + Logging.green + "]", Logging.teal);
                     location.SetDestination();
                     Cache.Instance.NextTravelerAction = DateTime.Now.AddSeconds(3);
                     return;
@@ -106,7 +106,7 @@ namespace Questor.Modules.Activities
                     if (Cache.Instance.InStation)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                        _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerExitStationAmIInSpaceYet_seconds);
+                        _nextTravelerAction = DateTime.Now.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
                     }
                     Cache.Instance.NextActivateSupportModules = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(1, 2));
                     // We are not yet in space, wait for it
@@ -128,8 +128,8 @@ namespace Questor.Modules.Activities
                 if (!stargates.Any())
                 {
                     // not found, that cant be true?!?!?!?!
-                    Logging.Log("Traveler", "Error [" + Logging.yellow + locationName + Logging.green + "] not found, most likely lag waiting [" + (int)Time.TravelerNoStargatesFoundRetryDelay_seconds + "] seconds.", Logging.red);
-                    _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerNoStargatesFoundRetryDelay_seconds);
+                    Logging.Log("Traveler", "Error [" + Logging.yellow + locationName + Logging.green + "] not found, most likely lag waiting [" + Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds + "] seconds.", Logging.red);
+                    _nextTravelerAction = DateTime.Now.AddSeconds(Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds);
                     return;
                 }
 
@@ -140,8 +140,8 @@ namespace Questor.Modules.Activities
                     Logging.Log("Traveler", "Jumping to [" + Logging.yellow + locationName + Logging.green + "]", Logging.green);
                     stargate.Jump();
                     Cache.Instance.NextInSpaceorInStation = DateTime.Now;
-                    _nextTravelerAction = DateTime.Now.AddSeconds((int)Time.TravelerJumpedGateNextCommandDelay_seconds);
-                    Cache.Instance.NextActivateSupportModules = DateTime.Now.AddSeconds((int)Time.TravelerJumpedGateNextCommandDelay_seconds);
+                    _nextTravelerAction = DateTime.Now.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                    Cache.Instance.NextActivateSupportModules = DateTime.Now.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
                     return;
                 }
                 else if (stargate.Distance < (int)Distance.WarptoDistance)
@@ -150,7 +150,7 @@ namespace Questor.Modules.Activities
                     {
                         if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: approaching stargate", Logging.teal);
                         stargate.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
-                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.ApproachDelay_seconds);
+                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         return;
                     }
                     if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: we are already approaching the stargate", Logging.teal);
@@ -166,7 +166,7 @@ namespace Questor.Modules.Activities
                                         "Warping to [" + Logging.yellow + locationName + Logging.green + "][" + Logging.yellow + 
                                         Math.Round((stargate.Distance / 1000) / 149598000, 2) + Logging.green + " AU away]", Logging.green);
                             stargate.WarpTo();
-                            Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds((int)Time.WarptoDelay_seconds);
+                            Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             return;
                         }
                         return;
@@ -180,7 +180,7 @@ namespace Questor.Modules.Activities
         public void ProcessState()
         {
             // Only pulse state changes every 1.5s
-            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
                 return;
 
             _lastPulse = DateTime.Now;

@@ -77,8 +77,8 @@ namespace Questor
             }
             else
             {
-                Cache.Instance.StopTime = DateTime.Now.AddHours((int)Time.QuestorScheduleNotUsed_Hours);
-                Logging.Log("Questor", "Schedule: NOT setup correctly: stoptime  set to [" + (int)Time.QuestorScheduleNotUsed_Hours + "] hours from now at [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.orange);
+                Cache.Instance.StopTime = DateTime.Now.AddHours(Time.Instance.QuestorScheduleNotUsed_Hours);
+                Logging.Log("Questor", "Schedule: NOT setup correctly: stoptime  set to [" + (int)Time.Instance.QuestorScheduleNotUsed_Hours + "] hours from now at [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.orange);
                 Logging.Log("Questor", "You can correct this by editing schedules.xml to have an entry for this toon", Logging.orange);
                 Logging.Log("Questor", "Ex: <char user=\"" + Settings.Instance.CharacterName + "\" pw=\"MyPasswordForEVEHere\" name=\"MyLoginNameForEVEHere\" start=\"06:45\" stop=\"08:10\" start2=\"09:05\" stop2=\"14:20\"/>", Logging.orange);
                 Logging.Log("Questor", "make sure each toon has its own innerspace profile and specify the following startup program line:", Logging.orange);
@@ -162,6 +162,15 @@ namespace Questor
         public static void TimeCheck()
         {
             Cache.Instance.LastTimeCheckAction = DateTime.Now;
+            Logging.Log("Questor", "Checking schedules", Logging.green);
+            if (Settings.Instance.DebugScheduler)
+            {
+                Logging.Log("DebugSchedules", "Current time is:" + DateTime.Now.ToString(), Logging.white);
+                Logging.Log("DebugSchedules", "StopTimeSpecified ="+Cache.Instance.StopTimeSpecified, Logging.white);
+                Logging.Log("DebugSchedules", "StopTime = " + Cache.Instance.StopTime, Logging.white);
+                Logging.Log("DebugSchedules", "ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.white);
+            }
+
             if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes >
                 Cache.Instance.MaxRuntime)
             {
@@ -361,7 +370,7 @@ namespace Questor
             Cache.Instance.LastFrame = DateTime.Now;
 
             // Only pulse state changes every 1.5s
-            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < (int)Time.QuestorPulse_milliseconds) //default: 1500ms
+            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
                 return false;
             _lastPulse = DateTime.Now;
 
@@ -414,7 +423,7 @@ namespace Questor
                 Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
 
             if (DateTime.Now.Subtract(Cache.Instance.LastupdateofSessionRunningTime).TotalSeconds <
-                (int)Time.SessionRunningTimeUpdate_seconds)
+                Time.Instance.SessionRunningTimeUpdate_seconds)
             {
                 Cache.Instance.SessionRunningTime =
                     (int)DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
@@ -426,11 +435,11 @@ namespace Questor
         private void OnFrame(object sender, EventArgs e)
         {
             if (!OnframeProcessEveryPulse()) return;
-            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "Onframe: this is Questor.cs [" + DateTime.Now + "] by default the next pulse will be in [" + (int)Time.QuestorPulse_milliseconds + "]milliseconds", Logging.teal);
+            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "Onframe: this is Questor.cs [" + DateTime.Now + "] by default the next pulse will be in [" + (int)Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.teal);
 
             if (!Cache.Instance.Paused)
             {
-                if (DateTime.Now.Subtract(Cache.Instance.LastWalletCheck).TotalMinutes > (int)Time.WalletCheck_minutes && !Settings.Instance.Defaultsettingsloaded)
+                if (DateTime.Now.Subtract(Cache.Instance.LastWalletCheck).TotalMinutes > Time.Instance.WalletCheck_minutes && !Settings.Instance.Defaultsettingsloaded)
                 {
                     WalletCheck();
                 }

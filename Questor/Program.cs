@@ -34,7 +34,7 @@ namespace Questor
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 
-        private static int _pulsedelay = (int)Time.QuestorBeforeLoginPulseDelay_seconds;
+        private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
         public static DateTime AppStarted = DateTime.Now;
         private static string _username;
@@ -159,6 +159,7 @@ namespace Questor
                         {
                             StartTime = schedule.Start1;
                             StopTime = schedule.Stop1;
+                            StopTimeSpecified = true;
                             Logging.Log("Startup", "Schedule1: Start1: " + schedule.Start1 + " Stop1: " + schedule.Stop1, Logging.white);
                         }
                     }
@@ -166,11 +167,12 @@ namespace Questor
                     {
                         if (DateTime.Now > schedule.Stop1 || DateTime.Now.DayOfYear > schedule.Stop1.DayOfYear) //if after schedule1 stoptime or the next day
                         {
-                            if (schedule.Start2 < schedule.Stop2) schedule.Stop2 = schedule.Stop2.AddDays(1);
+                            if (schedule.Start2 > schedule.Stop2) schedule.Stop2 = schedule.Stop2.AddDays(1);
                             if (DateTime.Now.AddHours(2) > schedule.Start2 && DateTime.Now < schedule.Stop2)
                             {
                                 StartTime = schedule.Start2;
                                 StopTime = schedule.Stop2;
+                                StopTimeSpecified = true;
                                 Logging.Log("Startup", "Schedule2: Start2: " + schedule.Start2 + " Stop2: " + schedule.Stop2, Logging.white);
                             }
                         }
@@ -179,11 +181,12 @@ namespace Questor
                     {
                         if (DateTime.Now > schedule.Stop2 || DateTime.Now.DayOfYear > schedule.Stop2.DayOfYear) //if after schedule2 stoptime or the next day
                         {
-                            if (schedule.Start3 < schedule.Stop3) schedule.Stop3 = schedule.Stop3.AddDays(1);
+                            if (schedule.Start3 > schedule.Stop3) schedule.Stop3 = schedule.Stop3.AddDays(1);
                             if (DateTime.Now.AddHours(2) > schedule.Start3 && DateTime.Now < schedule.Stop3)
                             {
                                 StartTime = schedule.Start3;
                                 StopTime = schedule.Stop3;
+                                StopTimeSpecified = true;
                                 Logging.Log("Startup",
                                             "Schedule3: Start3: " + schedule.Start3 + " Stop3: " + schedule.Stop3,
                                             Logging.white);
@@ -536,7 +539,7 @@ namespace Questor
                     Logging.Log("Startup", "Login account [" + _username + "]", Logging.white);
                     _directEve.Login.Login(_username, _password);
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.white);
-                    _pulsedelay = (int)Time.QuestorBeforeLoginPulseDelay_seconds;
+                    _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
                     return;
                 }
             }
