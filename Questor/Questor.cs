@@ -161,15 +161,15 @@ namespace Questor
 
         public static void TimeCheck()
         {
-            Cache.Instance.LastTimeCheckAction = DateTime.Now;
-            Logging.Log("Questor", "Checking schedules", Logging.green);
-            if (Settings.Instance.DebugScheduler)
-            {
-                Logging.Log("DebugSchedules", "Current time is:" + DateTime.Now.ToString(), Logging.white);
-                Logging.Log("DebugSchedules", "StopTimeSpecified ="+Cache.Instance.StopTimeSpecified, Logging.white);
-                Logging.Log("DebugSchedules", "StopTime = " + Cache.Instance.StopTime, Logging.white);
-                Logging.Log("DebugSchedules", "ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.white);
-            }
+            if (DateTime.Now < Cache.Instance.NextTimeCheckAction)
+                return;
+
+            Cache.Instance.NextTimeCheckAction = DateTime.Now.AddMinutes(5);
+            Logging.Log("Questor",
+                        "Checking: Current time [" + DateTime.Now.ToString(CultureInfo.InvariantCulture) +
+                        "] StopTimeSpecified [" + Cache.Instance.StopTimeSpecified +
+                        "] StopTime [ " + Cache.Instance.StopTime +
+                        "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.white);
 
             if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes >
                 Cache.Instance.MaxRuntime)
@@ -482,11 +482,9 @@ namespace Questor
             switch (_States.CurrentQuestorState)
             {
                 case QuestorState.Idle:
-                    // Every 5 min of idle check and make sure we aren't supposed to stop...
-                    if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastTimeCheckAction).TotalMinutes) > 5)
-                    {
-                        TimeCheck(); //Should we close questor due to stoptime or runtime?
-                    }
+                    
+                    TimeCheck(); //Should we close questor due to stoptime or runtime?
+                    
                     if (Cache.Instance.StopBot)
                         return;
 

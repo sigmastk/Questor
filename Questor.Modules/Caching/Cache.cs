@@ -858,7 +858,7 @@ namespace Questor.Modules.Caching
 
         public DateTime LastupdateofSessionRunningTime;
         public DateTime NextInSpaceorInStation;
-        public DateTime LastTimeCheckAction = DateTime.MinValue;
+        public DateTime NextTimeCheckAction = DateTime.MinValue;
 
         public DateTime LastFrame = DateTime.Now;
         public DateTime LastSessionIsReady = DateTime.Now;
