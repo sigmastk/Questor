@@ -501,7 +501,7 @@ namespace Questor.Behaviors
                         break;
 
                     _storyline.Reset();
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Cleanup;
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Cleanup;
                     break;
 
                 case CombatMissionsBehaviorState.DelayedGotoBase:

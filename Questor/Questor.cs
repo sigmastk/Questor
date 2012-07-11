@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Globalization;
 using Questor.Behaviors;
 using Questor.Modules.Combat;
 
@@ -33,14 +34,12 @@ namespace Questor
         private readonly DirectEve _directEve;
 
         private DateTime _lastPulse;
-        private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
         private readonly CombatHelperBehavior _combatHelperBehavior;
         private readonly DedicatedBookmarkSalvagerBehavior _dedicatedBookmarkSalvagerBehavior;
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly Cleanup _cleanup;
 
-        public DateTime LastFrame;
         public DateTime LastAction;
 
         public bool Panicstatereset = false;
@@ -171,8 +170,7 @@ namespace Questor
                         "] StopTime [ " + Cache.Instance.StopTime +
                         "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.white);
 
-            if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes >
-                Cache.Instance.MaxRuntime)
+            if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
             {
                 // quit questor
                 Logging.Log("Questor", "Maximum runtime exceeded.  Quiting...", Logging.white);
