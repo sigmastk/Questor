@@ -1,4 +1,4 @@
-﻿// ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //   <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //     Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -482,13 +482,22 @@ namespace Questor
                 case QuestorState.Idle:
                     
                     TimeCheck(); //Should we close questor due to stoptime or runtime?
-                    
+
                     if (Cache.Instance.StopBot)
+                    {
+                        if (Settings.Instance.DebugIdle) Logging.Log("Questor", "Cache.Instance.StopBot = true - this is set by the localwatch code so that we stay in station when local is unsafe", Logging.orange);
                         return;
+                    }
 
                     if (_States.CurrentQuestorState == QuestorState.Idle && Settings.Instance.CharacterMode != "none")
                     {
                         _States.CurrentQuestorState = QuestorState.Start;
+                        return;
+                    }
+                    else
+                    {
+                        Logging.Log("Questor", "Settings.Instance.CharacterMode = [" + Settings.Instance.CharacterMode + "]", Logging.orange);
+                        _States.CurrentQuestorState = QuestorState.Error;
                         return;
                     }
                     break;
