@@ -3429,11 +3429,22 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(_agedDate) < 0).ToList();
+                if (Settings.Instance.CharacterMode.ToLower() == "Salvage".ToLower())
+                {
+                    return
+                        Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(
+                            e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) < 0).ToList();
+                }
+                else
+                {
+                    return
+                        Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").ToList();
+                }
+
             }
         }
 
-        private DateTime _agedDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior + 120);
+        private DateTime _agedDate = DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior + 120);
         public DateTime AgedDate
         {
             get
