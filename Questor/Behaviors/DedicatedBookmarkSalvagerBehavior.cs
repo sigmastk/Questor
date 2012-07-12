@@ -509,7 +509,7 @@ namespace Questor.Behaviors
                     {
 
                         _States.CurrentArmState = ArmState.Idle;
-                        DirectBookmark bookmark = Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault();
+                        DirectBookmark bookmark = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
                         if (bookmark == null)
                         {
                             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
