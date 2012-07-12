@@ -3433,7 +3433,7 @@ namespace Questor.Modules.Caching
                 {
                     return
                         Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(
-                            e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) < 0).ToList();
+                            e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) > 0).ToList(); 
                 }
                 else
                 {
@@ -3457,17 +3457,24 @@ namespace Questor.Modules.Caching
         {
             get
             {
+                List<DirectBookmark> List_oldBktoDelete = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) < 0).ToList();
+                foreach (DirectBookmark oldBktoDelete in List_oldBktoDelete)
+                {
+                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Remove old Bookmark: " + oldBktoDelete.Title + " Created: " + oldBktoDelete.CreatedOn.Value.ToShortTimeString(), Logging.teal);
+                    oldBktoDelete.Delete();
+                }
+
                 if (Settings.Instance.FirstSalvageBookmarksInSystem)
                 {
                     Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.white);
-                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId && c.CreatedOn != null && c.CreatedOn.Value.CompareTo(_agedDate) > 0);
                 }
                 else
                 {
                     Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first oldest bookmarks", Logging.white);
-                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
+                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) > 0);
 
-                }
+                } 
             }
         }
         public bool GateInGrid()
