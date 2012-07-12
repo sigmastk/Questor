@@ -504,10 +504,11 @@ namespace Questor.Modules.BackgroundTasks
                         }
 
                         if (moveTheseItems.Count > 0)
-                        {
+                        {                        
                             // jettison loot
-                                if (DateTime.Now.Subtract(Cache.Instance.LastJettison).TotalSeconds < Time.Instance.DelayBetweenJetcans_seconds)
+                            if (DateTime.Now.Subtract(Cache.Instance.LastJettison).TotalSeconds < Time.Instance.DelayBetweenJetcans_seconds)
                                 return;
+                            Cache.Instance.LootedContainers.Add(containerEntity.Id); //new add
 
                             Logging.Log("Salvage", "Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot", Logging.white);
                             // Note: This could (in theory) fuck up with the bot jettison an item and
