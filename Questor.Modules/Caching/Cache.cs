@@ -3444,7 +3444,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _agedDate = DateTime.Now.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior + 120);
+        private DateTime _agedDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior);
         public DateTime AgedDate
         {
             get
