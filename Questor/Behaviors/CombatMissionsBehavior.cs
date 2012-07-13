@@ -954,7 +954,7 @@ namespace Questor.Behaviors
                         //This salvaging decision tree does not belong here and should be separated out into a different questorstate
                         if (Settings.Instance.AfterMissionSalvaging)
                         {
-                            if (Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count == 0)
+                            if (Cache.Instance.GetSalvagingBookmark == null)
                             {
                                 Logging.Log("CombatMissionsBehavior.Unloadloot", " No more salvaging bookmarks. Setting FinishedSalvaging Update.", Logging.white);
                                 //if (Settings.Instance.CharacterMode == "Salvager")
