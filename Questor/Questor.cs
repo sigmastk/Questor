@@ -480,7 +480,6 @@ namespace Questor
             switch (_States.CurrentQuestorState)
             {
                 case QuestorState.Idle:
-                    
                     TimeCheck(); //Should we close questor due to stoptime or runtime?
 
                     if (Cache.Instance.StopBot)

@@ -430,7 +430,7 @@ namespace Questor.Behaviors
                         // Questor does not handle in space starts very well, head back to base to try again
                         Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.white);
                         LastAction = DateTime.Now;
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Idle) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
                         break;
                     }
                     else
@@ -1271,7 +1271,7 @@ namespace Questor.Behaviors
 
                         Logging.Log("CombatMissionsBehavior.Salvage", "We've moved to the next Pocket [" + Math.Round(distance / 1000, 0) + "k away]", Logging.white);
 
-                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
                         return;
                     }
                     else //we have not moved to the next pocket quite yet
