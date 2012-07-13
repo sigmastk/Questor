@@ -858,7 +858,7 @@ namespace Questor.Modules.Caching
 
         public DateTime LastupdateofSessionRunningTime;
         public DateTime NextInSpaceorInStation;
-        public DateTime LastTimeCheckAction = DateTime.MinValue;
+        public DateTime NextTimeCheckAction = DateTime.MinValue;
 
         public DateTime LastFrame = DateTime.Now;
         public DateTime LastSessionIsReady = DateTime.Now;
@@ -1315,7 +1315,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _gates ?? (_gates = Entities.Where(e =>
-                       e.GroupId == (int)Group.AccellerationGate ||
+                       e.GroupId == (int)Group.AccellerationGate &&
                        e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList());
             }
         }
@@ -3475,11 +3475,22 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn.Value.CompareTo(_agedDate) < 0).ToList();
+                if (Settings.Instance.CharacterMode.ToLower() == "Salvage".ToLower())
+                {
+                    return
+                        Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(
+                            e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) > 0).ToList(); 
+                }
+                else
+                {
+                    return
+                        Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").ToList();
+                }
+
             }
         }
 
-        private DateTime _agedDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior + 120);
+        private DateTime _agedDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior);
         public DateTime AgedDate
         {
             get
@@ -3492,17 +3503,24 @@ namespace Questor.Modules.Caching
         {
             get
             {
+                List<DirectBookmark> List_oldBktoDelete = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) < 0).ToList();
+                foreach (DirectBookmark oldBktoDelete in List_oldBktoDelete)
+                {
+                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Remove old Bookmark: " + oldBktoDelete.Title + " Created: " + oldBktoDelete.CreatedOn.Value.ToShortTimeString(), Logging.teal);
+                    oldBktoDelete.Delete();
+                }
+
                 if (Settings.Instance.FirstSalvageBookmarksInSystem)
                 {
                     Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.white);
-                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId && c.CreatedOn != null && c.CreatedOn.Value.CompareTo(_agedDate) > 0);
                 }
                 else
                 {
                     Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first oldest bookmarks", Logging.white);
-                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
+                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(_agedDate) > 0);
 
-                }
+                } 
             }
         }
         public bool GateInGrid()
@@ -3514,7 +3532,7 @@ namespace Questor.Modules.Caching
         }
         private int _bookmarkdeletionattempt = 0;
         public DateTime _nextBookmarkDeletionAttempt = DateTime.MinValue;
-        public void DeleteBookmarksOnGrid(string module)
+        public bool DeleteBookmarksOnGrid(string module)
         {
             Logging.Log(module, "salvage: no unlooted containers left on grid", Logging.white);
             var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
@@ -3535,9 +3553,8 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log(module, "You are unable to delete the bookmark named: [" + onGridBookmark.Title + "] if it is a corp bookmark you may need a role", Logging.red);
                     _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Error;
-                
                 }
-                return;
+                return false;
             }
             else
             {
@@ -3545,6 +3562,7 @@ namespace Questor.Modules.Caching
                 Cache.Instance.NextSalvageTrip = DateTime.Now;
                 Statistics.Instance.FinishedSalvaging = DateTime.Now;
                 _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
+                return true;
             }
         }
     }
