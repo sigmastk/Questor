@@ -56,7 +56,7 @@ namespace Questor
         private static readonly Random R = new Random();
         public static bool StopTimeSpecified; //false;
 
-        private static DateTime _lastPulse;
+        private static DateTime _nextPulse;
         public static DateTime StartTime = DateTime.MaxValue;
         public static DateTime StopTime = DateTime.MinValue;
         
@@ -331,7 +331,14 @@ namespace Questor
             Cache.Instance.LastFrame = DateTime.Now;
             Cache.Instance.LastSessionIsReady = DateTime.Now; //update this reguardless before we login there is no session
 
-            if (!_readyToStart || _humaninterventionrequired)
+            if (DateTime.Now < _nextPulse)
+            {
+                //Logging.Log("if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
+                return;
+            }
+            _nextPulse = DateTime.Now.AddSeconds(_pulsedelay);
+            
+            if (!_readyToStart)
             {
                 //Logging.Log("if (!_readyToStart) then return");
                 return;
@@ -343,13 +350,11 @@ namespace Questor
                 return;
             }
 
-            if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay)
+            if (_humaninterventionrequired)
             {
-                //Logging.Log("if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
+                Logging.Log("Startup", "Onframe: _humaninterventionrequired is true (this will spam every second or so)", Logging.orange);
                 return;
             }
-
-            _lastPulse = DateTime.Now;
 
             // If the session is ready, then we are done :)
             if (_directEve.Session.IsReady)
