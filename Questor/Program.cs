@@ -333,20 +333,19 @@ namespace Questor
 
             if (DateTime.Now < _nextPulse)
             {
-                //Logging.Log("if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
                 return;
             }
             _nextPulse = DateTime.Now.AddSeconds(_pulsedelay);
             
             if (!_readyToStart)
             {
-                //Logging.Log("if (!_readyToStart) then return");
+                Logging.Log("Startup","if (!_readyToStart) then return",Logging.white);
                 return;
             }
 
             if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta)
             {
-                //Logging.Log("if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return");
+                Logging.Log("Startup","if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return",Logging.white);
                 return;
             }
 
