@@ -289,6 +289,21 @@ namespace Questor
                 }
             }
 
+            if (string.IsNullOrEmpty(_username))
+            {
+                Logging.Log("Startup", "Missing username, cant login without it...", Logging.red);
+            }
+
+            if (string.IsNullOrEmpty(_password))
+            {
+                Logging.Log("Startup", "Missing password, cant login without it...", Logging.red);
+            }
+
+            if (string.IsNullOrEmpty(_character))
+            {
+                Logging.Log("Startup", "Missing character, cant login without it...", Logging.red);
+            }
+
             if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password) && !string.IsNullOrEmpty(_character))
             {
                 _readyToStart = true;
