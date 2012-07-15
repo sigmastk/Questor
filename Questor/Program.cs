@@ -336,7 +336,9 @@ namespace Questor
                 return;
             }
             _nextPulse = DateTime.Now.AddSeconds(_pulsedelay);
-            
+
+            Logging.Log("Startup", "Onframe: __starting__ onframe checks...)", Logging.orange);
+
             if (!_readyToStart)
             {
                 Logging.Log("Startup","if (!_readyToStart) then return",Logging.white);
@@ -354,6 +356,8 @@ namespace Questor
                 Logging.Log("Startup", "Onframe: _humaninterventionrequired is true (this will spam every second or so)", Logging.orange);
                 return;
             }
+
+            Logging.Log("Startup", "Onframe: __next__ we check on: _directEve.Session.IsReady)", Logging.orange);
 
             // If the session is ready, then we are done :)
             if (_directEve.Session.IsReady)
