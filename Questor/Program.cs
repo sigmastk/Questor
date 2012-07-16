@@ -121,6 +121,7 @@ namespace Questor
 
             if (_chantlingScheduler && !string.IsNullOrEmpty(_character))
             {
+                Logging.Log("Startup", "questor: using scheduler: debug build for grio", Logging.white);
                 string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 _character = _character.Replace("\"", "");  // strip quotation marks if any are present
 
