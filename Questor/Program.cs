@@ -260,6 +260,7 @@ namespace Questor
                 //
                 try
                 {
+                    Logging.Log("Startup", "_directEve = new DirectEve();", Logging.white);
                     _directEve = new DirectEve();
                 }
                 catch (Exception ex)
@@ -269,6 +270,7 @@ namespace Questor
 
                 try
                 {
+                    Logging.Log("Startup", "_directEve.OnFrame += OnFrame;", Logging.white);
                     _directEve.OnFrame += OnFrame;
                 }
                 catch (Exception ex)
@@ -341,9 +343,11 @@ namespace Questor
 
         private static void OnFrame(object sender, EventArgs e)
         {
+            Logging.Log("Startup", "Onframe Check 1", Logging.white);
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
 
+            Logging.Log("Startup", "Onframe Check 2", Logging.white);
             Cache.Instance.LastFrame = DateTime.Now;
             Cache.Instance.LastSessionIsReady = DateTime.Now; //update this reguardless before we login there is no session
 
