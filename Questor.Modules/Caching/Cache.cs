@@ -1026,7 +1026,7 @@ namespace Questor.Modules.Caching
                         Logging.Log("Cache", "Agent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it.");
                         Cache.Instance.Paused = true;
                     }
-                    return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
+                    if (_agentId != null) return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
                 }
                 return null;
             }
