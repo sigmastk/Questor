@@ -3490,6 +3490,12 @@ namespace Questor.Modules.Caching
         public DateTime _nextBookmarkDeletionAttempt = DateTime.MinValue;
         public bool DeleteBookmarksOnGrid(string module)
         {
+            if (DateTime.Now < _nextBookmarkDeletionAttempt)
+            {
+                return false;
+            }
+            _nextBookmarkDeletionAttempt = DateTime.Now.AddSeconds(5 + Settings.Instance.RandomNumber(1,5));
+
             Logging.Log(module, "salvage: no unlooted containers left on grid", Logging.white);
             var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                    OrderBy(b => b.CreatedOn));
@@ -3497,18 +3503,15 @@ namespace Questor.Modules.Caching
             if (onGridBookmark != null)
             {
                 _bookmarkdeletionattempt++;
-                Cache.Instance.NextRemoveBookmarkAction = DateTime.Now.AddSeconds((int)Time.Instance.RemoveBookmarkDelay_seconds);
-                if (_bookmarkdeletionattempt <= Settings.Instance.NoOfBookmarksDeletedAtOnce && DateTime.Now > _nextBookmarkDeletionAttempt)
+                if (_bookmarkdeletionattempt <= 5)
                 {
                     Logging.Log(module, "Finished salvaging the room: removing salvage bookmark:" + onGridBookmark.Title, Logging.white);
                     onGridBookmark.Delete();
-                    _nextBookmarkDeletionAttempt = DateTime.Now.AddSeconds(10);
-                
                 }
-                else if (DateTime.Now > _nextBookmarkDeletionAttempt)
+                if (_bookmarkdeletionattempt > 5)
                 {
-                    Logging.Log(module, "You are unable to delete the bookmark named: [" + onGridBookmark.Title + "] if it is a corp bookmark you may need a role", Logging.red);
-                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Error;
+                    Logging.Log(module, "Finished salvaging the room: error removing salvage bookmark!" + onGridBookmark.Title, Logging.white);
+                    _States.CurrentQuestorState = QuestorState.Error;
                 }
                 return false;
             }
