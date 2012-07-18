@@ -1380,7 +1380,14 @@ namespace Questor.Modules.Caching
 
         public List<DirectWindow> Windows
         {
-            get { return _windows ?? (_windows = DirectEve.Windows); }
+            get
+            {
+                if (Cache.Instance.InSpace || Cache.Instance.InStation)
+                {
+                    return _windows ?? (_windows = DirectEve.Windows);
+                }
+                return null;
+            }
         }
 
         /// <summary>
