@@ -287,7 +287,7 @@ namespace Questor.Modules.Caching
 
         public DateTime QuestorStarted_DateTime = DateTime.Now;
 
-        public DateTime NextSalvageTrip = DateTime.MinValue;
+        public DateTime NextSalvageTrip = DateTime.Now;
 
         public bool MissionXMLIsAvailable { get; set; }
 
@@ -512,7 +512,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _lastAction = DateTime.MinValue;
+        private DateTime _lastAction = DateTime.Now;
 
         public DateTime LastAction
         {
@@ -526,7 +526,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextArmAction = DateTime.MinValue;
+        private DateTime _nextArmAction = DateTime.Now;
 
         public DateTime NextArmAction
         {
@@ -541,7 +541,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextSalvageAction = DateTime.MinValue;
+        private DateTime _nextSalvageAction = DateTime.Now;
 
         public DateTime NextSalvageAction
         {
@@ -556,7 +556,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextLootAction = DateTime.MinValue;
+        private DateTime _nextLootAction = DateTime.Now;
 
         public DateTime NextLootAction
         {
@@ -571,7 +571,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _lastJettison = DateTime.MinValue;
+        private DateTime _lastJettison = DateTime.Now;
 
         public DateTime LastJettison
         {
@@ -586,7 +586,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextDefenceModuleAction = DateTime.MinValue;
+        private DateTime _nextDefenceModuleAction = DateTime.Now;
 
         public DateTime NextDefenceModuleAction
         {
@@ -601,7 +601,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextAfterburnerAction = DateTime.MinValue;
+        private DateTime _nextAfterburnerAction = DateTime.Now;
 
         public DateTime NextAfterburnerAction
         {
@@ -613,7 +613,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextRepModuleAction = DateTime.MinValue;
+        private DateTime _nextRepModuleAction = DateTime.Now;
 
         public DateTime NextRepModuleAction
         {
@@ -625,7 +625,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextActivateSupportModules = DateTime.MinValue;
+        private DateTime _nextActivateSupportModules = DateTime.Now;
 
         public DateTime NextActivateSupportModules
         {
@@ -637,7 +637,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextRemoveBookmarkAction = DateTime.MinValue;
+        private DateTime _nextRemoveBookmarkAction = DateTime.Now;
 
         public DateTime NextRemoveBookmarkAction
         {
@@ -649,7 +649,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextApproachAction = DateTime.MinValue;
+        private DateTime _nextApproachAction = DateTime.Now;
 
         public DateTime NextApproachAction
         {
@@ -661,7 +661,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextOrbit = DateTime.MinValue;
+        private DateTime _nextOrbit;
 
         public DateTime NextOrbit
         {
@@ -685,7 +685,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextTravelerAction = DateTime.MinValue;
+        private DateTime _nextTravelerAction = DateTime.Now;
 
         public DateTime NextTravelerAction
         {
@@ -697,7 +697,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextTargetAction = DateTime.MinValue;
+        private DateTime _nextTargetAction = DateTime.Now;
 
         public DateTime NextTargetAction
         {
@@ -709,8 +709,8 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextWeaponAction = DateTime.MinValue;
-        private DateTime _nextReload = DateTime.MinValue;
+        private DateTime _nextWeaponAction = DateTime.Now;
+        private DateTime _nextReload = DateTime.Now;
 
         public DateTime NextReload
         {
@@ -732,7 +732,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextWebAction = DateTime.MinValue;
+        private DateTime _nextWebAction = DateTime.Now;
 
         public DateTime NextWebAction
         {
@@ -744,7 +744,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextNosAction = DateTime.MinValue;
+        private DateTime _nextNosAction = DateTime.Now;
 
         public DateTime NextNosAction
         {
@@ -756,7 +756,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextPainterAction = DateTime.MinValue;
+        private DateTime _nextPainterAction = DateTime.Now;
 
         public DateTime NextPainterAction
         {
@@ -768,7 +768,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextActivateAction = DateTime.MinValue;
+        private DateTime _nextActivateAction = DateTime.Now;
 
         public DateTime NextActivateAction
         {
@@ -780,7 +780,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextBookmarkPocketAttempt = DateTime.MinValue;
+        private DateTime _nextBookmarkPocketAttempt = DateTime.Now;
 
         public DateTime NextBookmarkPocketAttempt
         {
@@ -792,7 +792,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextAlign = DateTime.MinValue;
+        private DateTime _nextAlign = DateTime.Now;
 
         public DateTime NextAlign
         {
@@ -816,7 +816,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DateTime _nextDockAction = DateTime.MinValue; //unused
+        private DateTime _nextDockAction = DateTime.Now; //unused
 
         public DateTime NextDockAction
         {
@@ -858,7 +858,7 @@ namespace Questor.Modules.Caching
 
         public DateTime LastupdateofSessionRunningTime;
         public DateTime NextInSpaceorInStation;
-        public DateTime NextTimeCheckAction = DateTime.MinValue;
+        public DateTime NextTimeCheckAction = DateTime.Now;
 
         public DateTime LastFrame = DateTime.Now;
         public DateTime LastSessionIsReady = DateTime.Now;
@@ -2492,16 +2492,23 @@ namespace Questor.Modules.Caching
         public bool OpenShipsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
                 return false;
+            }
 
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
+            {
                 return false;
+            }
 
             if (Cache.Instance.InStation)
             {
                 Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
                 if (Cache.Instance.ShipHangar == null)
+                {
+                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
                     return false;
+                }
 
                 // Is the ship hangar open?
                 if (Cache.Instance.ShipHangar.Window == null)
@@ -2515,7 +2522,10 @@ namespace Questor.Modules.Caching
                     return false;
                 }
                 if (!Cache.Instance.ShipHangar.Window.IsReady)
+                {
+                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
                     return false;
+                }
                 if (Cache.Instance.ShipHangar.Window.IsReady)
                 {
                     if (Cache.Instance.ShipHangar.Window.IsPrimary())
@@ -3494,7 +3504,7 @@ namespace Questor.Modules.Caching
             else return true;
         }
         private int _bookmarkdeletionattempt = 0;
-        public DateTime _nextBookmarkDeletionAttempt = DateTime.MinValue;
+        public DateTime _nextBookmarkDeletionAttempt = DateTime.Now;
         public bool DeleteBookmarksOnGrid(string module)
         {
             if (DateTime.Now < _nextBookmarkDeletionAttempt)
@@ -3503,7 +3513,6 @@ namespace Questor.Modules.Caching
             }
             _nextBookmarkDeletionAttempt = DateTime.Now.AddSeconds(5 + Settings.Instance.RandomNumber(1,5));
 
-            Logging.Log(module, "salvage: no unlooted containers left on grid", Logging.white);
             var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                    OrderBy(b => b.CreatedOn));
             DirectBookmark onGridBookmark = bookmarksinlocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
@@ -3512,12 +3521,12 @@ namespace Questor.Modules.Caching
                 _bookmarkdeletionattempt++;
                 if (_bookmarkdeletionattempt <= 5)
                 {
-                    Logging.Log(module, "Finished salvaging the room: removing salvage bookmark:" + onGridBookmark.Title, Logging.white);
+                    Logging.Log(module, "removing salvage bookmark:" + onGridBookmark.Title, Logging.white);
                     onGridBookmark.Delete();
                 }
                 if (_bookmarkdeletionattempt > 5)
                 {
-                    Logging.Log(module, "Finished salvaging the room: error removing salvage bookmark!" + onGridBookmark.Title, Logging.white);
+                    Logging.Log(module, "error removing bookmark!" + onGridBookmark.Title, Logging.white);
                     _States.CurrentQuestorState = QuestorState.Error;
                 }
                 return false;

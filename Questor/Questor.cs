@@ -50,7 +50,7 @@ namespace Questor
         public Questor(QuestorfrmMain form1)
         {
             m_Parent = form1;
-            _lastPulse = DateTime.MinValue;
+            _lastPulse = DateTime.Now;
 
             _defense = new Defense();
             _localwatch = new LocalWatch();
