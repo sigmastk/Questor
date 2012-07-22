@@ -1304,7 +1304,9 @@ namespace Questor.Modules.Caching
             {
                 return _bigobjects ?? (_bigobjects = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
-                       e.TypeId == 21609 || //Dysfunctional Solar Harvester in Gone Berserk (not an LCO)
+                       e.GroupId == (int)Group.LargeCollidableObject ||
+                       e.GroupId == (int)Group.LargeCollidableShip ||
+                       e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.SpawnContainer &&
                        e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
@@ -1326,8 +1328,10 @@ namespace Questor.Modules.Caching
             {
                 return _bigobjectsandgates ?? (_bigobjectsandgates = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
+                       e.GroupId == (int)Group.LargeCollidableObject ||
+                       e.GroupId == (int)Group.LargeCollidableShip ||
+                       e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccellerationGate ||
-                       e.TypeId == 21609 || //Dysfunctional Solar Harvester in Gone Berserk (not an LCO)
                        e.GroupId == (int)Group.SpawnContainer &&
                        e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
