@@ -575,6 +575,8 @@ namespace Questor.Modules.BackgroundTasks
 
                                 //errors that are repeatable and unavoidable even after a restart of eve/questor
                                 needhumanintervention = window.Html.Contains("Please check your mission journal for further information.");
+                                //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
+                                needhumanintervention = window.Html.Contains("Not all the items could be fitted");
 
                                 // Server going down
                                 close |= window.Html.Contains("Please make sure your characters are out of harm");
@@ -592,6 +594,8 @@ namespace Questor.Modules.BackgroundTasks
                                 // Yes we know the mission is not complete, Questor will just redo the mission
                                 close |= window.Html.Contains("weapons in that group are already full");
                                 close |= window.Html.Contains("You have to be at the drop off location to deliver the items in person");
+                                //fitting window message(s)
+                                close |= window.Html.Contains("No rigs were added to or removed from the ship");
                                 // Lag :/
                                 close |= window.Html.Contains("This gate is locked!");
                                 close |= window.Html.Contains("The Zbikoki's Hacker Card");
@@ -599,6 +603,7 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("already full");
                                 //windows that can be disabled, but may not yet be disabled 
                                 close |= window.Html.Contains("Are you sure you would like to decline this mission");
+                                close |= window.Html.Contains("You can decline a mission every four hours without penalty");
                                 //why are we reloading an already full weapon?
                                 close |= window.Html.Contains("All the weapons in this group are already full");
                                 //trial account
