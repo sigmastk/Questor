@@ -943,10 +943,10 @@ namespace Questor.Modules.Lookup
                     //
                     // Ship Names
                     //
-                    CombatShipName = (string)xml.Element("combatShipName") ?? "";
-                    SalvageShipName = (string)xml.Element("salvageShipName") ?? "";
-                    TransportShipName = (string)xml.Element("transportShipName") ?? "";
-                    TravelShipName = (string)xml.Element("travelShipName") ?? "";
+                    CombatShipName = (string)xml.Element("combatShipName") ?? "My frigate of doom";
+                    SalvageShipName = (string)xml.Element("salvageShipName") ?? "My Destroyer of salvage";
+                    TransportShipName = (string)xml.Element("transportShipName") ?? "My Hauler of transportation";
+                    TravelShipName = (string)xml.Element("travelShipName") ?? "My Shuttle of traveling";
 
                     //
                     // Storage Location for Loot, Ammo, Bookmarks
