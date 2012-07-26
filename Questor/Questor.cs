@@ -127,12 +127,28 @@ namespace Questor
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("Questor", "Running Innerspace command: windowtaskbar on" + Settings.Instance.CharacterName, Logging.white);
                         LavishScript.ExecuteCommand("windowtaskbar on" + Settings.Instance.CharacterName);
+                        if (Settings.Instance.LoginQuestorArbitraryOSCmd)
+                        {
+                            Logging.Log("Questor", "After Questor Login: executing LoginQuestorArbitraryOSCmd", Logging.white);
+                            LavishScript.ExecuteCommand("Echo [${Time}] OSExecute " + Settings.Instance.LoginQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
+                            LavishScript.ExecuteCommand("OSExecute " + Settings.Instance.LoginQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
+                            Logging.Log("Questor", "Done: executing LoginQuestorArbitraryOSCmd", Logging.white);
+                        }
+                        if (Settings.Instance.LoginQuestorLavishScriptCmd)
+                        {
+                            Logging.Log("Questor", "After Questor Login: executing LoginQuestorLavishScriptCmd", Logging.white);
+                            LavishScript.ExecuteCommand("Echo [${Time}] runscript " + Settings.Instance.LoginQuestorLavishScriptContents.ToString(CultureInfo.InvariantCulture));
+                            LavishScript.ExecuteCommand("runscript " + Settings.Instance.LoginQuestorLavishScriptContents.ToString(CultureInfo.InvariantCulture));
+                            Logging.Log("Questor", "Done: executing LoginQuestorLavishScriptCmd", Logging.white);
+                        }
                     }
                 }
                 else
                 {
                     Logging.Log("Questor", "RunOnce30SecAfterStartup: Settings.Instance.CharacterName is still null", Logging.orange);
                     Cache.Instance.NextStartupAction = DateTime.Now.AddSeconds(30);
+                    _runOnce30SecAfterStartupalreadyProcessed = false;
+                    return;
                 }
             }
         }
