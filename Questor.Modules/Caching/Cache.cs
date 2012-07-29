@@ -2001,14 +2001,24 @@ namespace Questor.Modules.Caching
             if (warpscramblingtarget != null)
                 return warpscramblingtarget;
 
-            if (Settings.Instance.SpeedTank)
+            if (Settings.Instance.SpeedTank) //all webbers have to be relatively close so processing them all is ok
             {
                 // Is our current target a webbing priority target?
                 if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWebbingMe && pt.IsTarget))
                     return currentTarget;
 
-                // Get the closest webbing priority target
-                EntityCache webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && (pt.IsNPCFrigate || pt.IsNPCCruiser) && pt.IsTarget);
+                // Get the closest webbing priority target frigate
+                EntityCache webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsNPCFrigate && pt.IsTarget); //frigates
+                if (webbingtarget != null)
+                    return webbingtarget;
+
+                // Get the closest webbing priority target cruiser
+                webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsNPCCruiser && pt.IsTarget); //cruisers
+                if (webbingtarget != null)
+                    return webbingtarget;
+
+                // Get the closest webbing priority target (anything else)
+                webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsTarget); //everything else
                 if (webbingtarget != null)
                     return webbingtarget;
             }
