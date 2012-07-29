@@ -224,6 +224,7 @@ namespace Questor.Modules.Logging
                      (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != null && !string.IsNullOrEmpty(Settings.Instance.TransportShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower()) &&
                      (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != null && !string.IsNullOrEmpty(Settings.Instance.SalvageShipName)   && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && 
+                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Frigate && 
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && 
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip)
                 {
