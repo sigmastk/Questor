@@ -564,6 +564,7 @@ namespace Questor.Modules.BackgroundTasks
                             bool sayyes = false;
                             bool sayok = false;
                             bool needhumanintervention = false;
+                            bool pause = false;
 
                             //bool sayno = false;
                             if (!string.IsNullOrEmpty(window.Html))
@@ -574,9 +575,10 @@ namespace Questor.Modules.BackgroundTasks
                                 gotobasenow |= window.Html.Contains("for a short unscheduled reboot");
 
                                 //errors that are repeatable and unavoidable even after a restart of eve/questor
-                                needhumanintervention = window.Html.Contains("Please check your mission journal for further information.");
+                                needhumanintervention = window.Html.Contains("One or more mission objectives have not been completed");
+                                needhumanintervention = window.Html.Contains("Please check your mission journal for further information");
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
-                                needhumanintervention = window.Html.Contains("Not all the items could be fitted");
+                                pause = window.Html.Contains("Not all the items could be fitted");
 
                                 // Server going down
                                 close |= window.Html.Contains("Please make sure your characters are out of harm");
@@ -642,6 +644,7 @@ namespace Questor.Modules.BackgroundTasks
                                 //
                                 //sayno |= window.Html.Contains("Do you wish to proceed with this dangerous action
                             }
+
                             if (restartharsh)
                             {
                                 Logging.Log("Cleanup: RestartWindow", "Restarting eve...", Logging.white);
@@ -655,6 +658,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cleanup.CloseQuestor();
                                 return;
                             }
+                            
                             if (restart)
                             {
                                 Logging.Log("Cleanup", "Restarting eve...", Logging.white);
@@ -669,6 +673,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cleanup.CloseQuestor();
                                 return;
                             }
+                            
                             if (sayyes)
                             {
                                 Logging.Log("Cleanup", "Found a window that needs 'yes' chosen...", Logging.white);
@@ -676,18 +681,11 @@ namespace Questor.Modules.BackgroundTasks
                                 window.AnswerModal("Yes");
                                 continue;
                             }
+
                             if (sayok)
                             {
                                 Logging.Log("Cleanup", "Saying OK to modal window for lpstore offer.", Logging.white); 
                                 window.AnswerModal("OK");
-                                continue;
-                            }
-
-                            if (close)
-                            {
-                                Logging.Log("Cleanup", "Closing modal window...", Logging.white);
-                                Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.white);
-                                window.Close();
                                 continue;
                             }
 
@@ -707,6 +705,13 @@ namespace Questor.Modules.BackgroundTasks
                                 window.Close();
                                 continue;
                             }
+
+                            if (pause)
+                            {
+                                Logging.Log("Cleanup", "This window indicates an error fitting the ship. pausing", Logging.white);
+                                Cache.Instance.Paused = true;
+                            }
+
                             if (needhumanintervention)
                             {
                                 Statistics.Instance.MissionCompletionErrors++;
@@ -738,6 +743,15 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 break;
                             }
+
+                            if (close)
+                            {
+                                Logging.Log("Cleanup", "Closing modal window...", Logging.white);
+                                Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.white);
+                                window.Close();
+                                continue;
+                            }
+
                         }
                     if (Cache.Instance.InSpace)
                     {
