@@ -1997,9 +1997,21 @@ namespace Questor.Modules.Caching
                 return currentTarget;
 
             // Get the closest warp scrambling priority target
-            EntityCache target = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWarpScramblingMe && pt.IsTarget);
-            if (target != null)
-                return target;
+            EntityCache warpscramblingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWarpScramblingMe && pt.IsTarget);
+            if (warpscramblingtarget != null)
+                return warpscramblingtarget;
+
+            if (Settings.Instance.SpeedTank)
+            {
+                // Is our current target a webbing priority target?
+                if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWebbingMe && pt.IsTarget))
+                    return currentTarget;
+
+                // Get the closest webbing priority target
+                EntityCache webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && (pt.IsNPCFrigate || pt.IsNPCCruiser) && pt.IsTarget);
+                if (webbingtarget != null)
+                    return webbingtarget;
+            }
 
             // Is our current target any other priority target?
             if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id))
@@ -2049,9 +2061,9 @@ namespace Questor.Modules.Caching
             }
 
             // Get the closest priority target
-            target = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
-            if (target != null)
-                return target;
+            EntityCache prioritytarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (prioritytarget != null)
+                return prioritytarget;
 
             // Do we have a target?
             if (currentTarget != null)
