@@ -542,7 +542,8 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
                     }
-
+                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Checking Each window in Cache.Instance.Windows", Logging.teal);
+                    
                     foreach (DirectWindow window in Cache.Instance.Windows)
                     {
                         // Telecom messages are generally mission info messages: close them
@@ -753,26 +754,26 @@ namespace Questor.Modules.BackgroundTasks
                             }
 
                         }
-                    if (Cache.Instance.InSpace)
-                    {
+                        if (Cache.Instance.InSpace)
+                        {
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
-                        if (Settings.Instance.UseDrones && 
-                           (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && 
-                            Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && 
-                            Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&  
-                            _dronebayclosingattempts <= 1))
-                        {
-                            _lastCleanupAction = DateTime.Now;
-                            _dronebayclosingattempts++;
-                            // Close the drone bay, its not required in space.
+                                if (Settings.Instance.UseDrones && 
+                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && 
+                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && 
+                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&  
+                                   _dronebayclosingattempts <= 1))
+                                {
+                                    _lastCleanupAction = DateTime.Now;
+                                    _dronebayclosingattempts++;
+                                    // Close the drone bay, its not required in space.
                                     window.Close();
-                        }
-                    }
-                    else
-                    {
-                        _dronebayclosingattempts = 0;
-                    }
+                                }
+                            }
+                            else
+                            {
+                                _dronebayclosingattempts = 0;
+                            }
                         }
                     }
                     _States.CurrentCleanupState = CleanupState.CheckWindowsThatDontBelongInSpace;
