@@ -33,25 +33,6 @@
     <CodeAnalysisRuleSetDirectories>$(CodeAnalysisStaticAnalysisDirectory)Rule Sets</CodeAnalysisRuleSetDirectories>
     <CodeAnalysisRuleDirectories>$(CodeAnalysisPath)Rules</CodeAnalysisRuleDirectories>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug_3.5|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_3.5|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -100,29 +81,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="frmMain.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmMain.Designer.cs">
-      <DependentUpon>frmMain.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Behaviors\CombatHelperBehavior.cs" />
+    <Compile Include="Behaviors\CombatMissionsBehavior.cs" />
+    <Compile Include="Behaviors\DedicatedBookmarkSalvagerBehavior.cs" />
+    <Compile Include="Behaviors\DirectionalScannerBehavior.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Questor.cs" />
-    <Compile Include="QuestorState.cs" />
+    <Compile Include="QuestorUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuestorUI.Designer.cs">
+      <DependentUpon>QuestorUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="Storylines\GenericCombatStoryline.cs" />
     <Compile Include="Storylines\GenericCombatStorylineState.cs" />
+    <Compile Include="Storylines\GenericCourierStoryline.cs" />
+    <Compile Include="Storylines\GenericCourierStorylineState.cs" />
     <Compile Include="Storylines\IStoryline.cs" />
     <Compile Include="Storylines\MaterialsForWarPreparation.cs" />
     <Compile Include="Storylines\Storyline.cs" />
-    <Compile Include="Storylines\StorylineState.cs" />
     <Compile Include="Storylines\TransactionDataDelivery.cs" />
     <Compile Include="Storylines\TransactionDataDeliveryState.cs" />
-    <EmbeddedResource Include="frmMain.resx">
-      <DependentUpon>frmMain.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -133,6 +114,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="QuestorUI.resx">
+      <DependentUpon>QuestorUI.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

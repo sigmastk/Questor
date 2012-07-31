@@ -50,17 +50,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FrmMain.cs">
+    <Compile Include="QuestorStatisticsUI.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmMain.Designer.cs">
-      <DependentUpon>FrmMain.cs</DependentUpon>
+    <Compile Include="QuestorStatisticsUI.Designer.cs">
+      <DependentUpon>QuestorStatisticsUI.cs</DependentUpon>
     </Compile>
     <Compile Include="ListViewColumnSorter.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="QuestorStatistics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FrmMain.resx">
-      <DependentUpon>FrmMain.cs</DependentUpon>
+    <EmbeddedResource Include="QuestorStatisticsUI.resx">
+      <DependentUpon>QuestorStatisticsUI.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
