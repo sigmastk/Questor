@@ -64,7 +64,22 @@ namespace Questor
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;
 
-            _directEve = new DirectEve();
+            try
+            {
+                _directEve = new DirectEve();
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.orange);
+                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.white);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe lic server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor();
+            }
             Cache.Instance.DirectEve = _directEve;
 
             Cache.Instance.StopTimeSpecified = Program.StopTimeSpecified;
@@ -96,7 +111,21 @@ namespace Questor
             Cache.Instance.SessionLootGenerated = 0;
             Cache.Instance.SessionLPGenerated = 0;
             Settings.Instance.CharacterMode = "none";
-            _directEve.OnFrame += OnFrame;
+            try
+            {
+                _directEve.OnFrame += OnFrame;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.white);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe lic server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor();
+            }
         }
 
         public string CharacterName { get; set; }
