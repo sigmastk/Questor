@@ -92,6 +92,7 @@ namespace Questor.Modules.Lookup
         public bool DebugOnframe { get; set; }
         public bool DebugCleanup { get; set; }
         public bool DebugScheduler { get; set; }
+        public bool DebugUnloadLoot { get; set; }
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
 
@@ -563,6 +564,7 @@ namespace Questor.Modules.Lookup
                 DebugOnframe = false;
                 DebugCleanup = false;
                 DebugScheduler = false;
+                DebugUnloadLoot = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
                 //
@@ -857,6 +859,7 @@ namespace Questor.Modules.Lookup
                     DebugScheduler = (bool?)xml.Element("debugScheduler") ?? false;
                     DebugOnframe = (bool?)xml.Element("debugOnframe") ?? false;
                     DebugCleanup = (bool?)xml.Element("debugCleanup") ?? false;
+                    DebugUnloadLoot = (bool?)xml.Element("debugUnloadLoot") ?? false;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
 
