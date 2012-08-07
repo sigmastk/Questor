@@ -88,7 +88,7 @@ namespace Questor.Storylines
                 {
                     Logging.Log("Arm.ActivateTransportShip", "Done", Logging.white);
                     _States.CurrentArmState = ArmState.Done;
-                return StorylineState.GotoAgent;
+                    return StorylineState.GotoAgent;
                 }
             }
 

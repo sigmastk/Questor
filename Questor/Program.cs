@@ -201,7 +201,7 @@ namespace Questor
                     {
                         StartTime = schedule.Start1;
                         StopTime = schedule.Stop1;
-                        Logging.Log("Startup", "Forcing Schedule 1 because none of the schedules started within 2 hours or were already in progress", Logging.white);
+                        Logging.Log("Startup", "Forcing Schedule 1 because none of the schedules started within 2 hours", Logging.white);
                         Logging.Log("Startup", "Schedule 1: Start1: " + schedule.Start1 + " Stop1: " + schedule.Stop1, Logging.white);
                     }
 

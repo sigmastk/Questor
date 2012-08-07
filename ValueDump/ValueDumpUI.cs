@@ -44,7 +44,7 @@ namespace ValueDump
         {
             get
             {
-                return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\InvTypes.xml";
+                return Path.GetDirectoryName(Settings.Instance.Path + "\\InvTypes.xml");
             }
         }
 

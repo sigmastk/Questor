@@ -128,16 +128,17 @@ namespace Questor.Storylines
         {
             get
             {
-                IEnumerable<DirectAgentMission> missionsinjournal = Cache.Instance.DirectEve.AgentMissions;
+                IEnumerable<DirectAgentMission> missionsinjournal = Cache.Instance.DirectEve.AgentMissions.ToList();
                 if (Cache.Instance.CurrentStorylineAgentId != 0)
                     return missionsinjournal.FirstOrDefault(m => m.AgentId == Cache.Instance.CurrentStorylineAgentId);
 
-                missionsinjournal = missionsinjournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId));
-                missionsinjournal = missionsinjournal.Where(m => m.Important);
+                missionsinjournal = missionsinjournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId)).ToList();
+                missionsinjournal = missionsinjournal.Where(m => m.Important).ToList();
                 Logging.Log("Storyline", "Currently have  [" + missionsinjournal.Count() + "] availible storyline missions", Logging.yellow);
                 missionsinjournal = missionsinjournal.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name)));
-                missionsinjournal = missionsinjournal.Where(m => !Settings.Instance.MissionBlacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
-                Logging.Log("Storyline", "Currently have  [" + missionsinjournal.Count() + "] to do storyline missions", Logging.yellow);
+                Logging.Log("Storyline", "Currently have  [" + missionsinjournal.Count() + "] storyline missions questor knows how to do", Logging.yellow);
+                missionsinjournal = missionsinjournal.Where(m => !Settings.Instance.MissionBlacklist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower())).ToList();
+                Logging.Log("Storyline", "Currently have  [" + missionsinjournal.Count() + "] storyline missions questor knows how to do and are not blacklisted", Logging.yellow);
                 //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
                 return missionsinjournal.FirstOrDefault();
             }
