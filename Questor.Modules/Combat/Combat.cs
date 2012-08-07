@@ -76,6 +76,7 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
+            /******
             if (weapon.Charge != null)
             {
                 IEnumerable<Ammo> areWeMissingAmmo = correctAmmo.Where(a => a.TypeId == weapon.Charge.TypeId);
@@ -111,6 +112,7 @@ namespace Questor.Modules.Combat
                     }
                 }
             }
+            *****/
 
             // Get the best possible ammo
             Ammo ammo = correctAmmoIncargo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
@@ -163,7 +165,6 @@ namespace Questor.Modules.Combat
                     Cache.Instance.LastLoggingAction = DateTime.Now;
                 }
                 Logging.Log("Combat", "Changing [" + weaponNumber + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range / 1000, 0) + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.teal);
-                Cache.Instance.NextReload = DateTime.Now.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds);
                 weapon.ChangeAmmo(charge);
                 weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
@@ -261,7 +262,6 @@ namespace Questor.Modules.Combat
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
                 Logging.Log("Combat", "Reloading [" + weaponNumber + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range / 1000, 0) + "][TypeID: " + charge.TypeId + "]", Logging.teal);
-                Cache.Instance.NextReload = DateTime.Now.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds);
                 weapon.ReloadAmmo(charge);
                 weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + 1;
             }
