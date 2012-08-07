@@ -1011,84 +1011,6 @@ namespace Questor.Modules.Activities
             NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
         }
 
-        //
-        // this action still needs some TLC - currently broken (unimplemented)
-        //
-        private void PutItemAction(Actions.Action action)
-        {
-            //
-            // example syntax:
-            // <action name="PutItem">
-            //    <parameter name="Item" value="Fajah Ateshi" />
-            //    <parameter name="Container" value="Rogue Drone" />
-            // </action>
-            //
-            bool nottheclosest;
-            if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
-                nottheclosest = false;
-
-            int numbertoignore;
-            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numbertoignore))
-                numbertoignore = 0;
-
-            string container = action.GetParameterValue("container");
-            // No parameter? Although we shouldn't really allow it, assume its one of the few missions that needs the put action
-            if (string.IsNullOrEmpty(container))
-                container = "Rogue Drone"; //http://eve-survival.org/wikka.php?wakka=Anomaly4
-
-            Cache.Instance.MissionLoot = true;
-            List<string> items = action.GetParameterValues("item");
-            List<string> targetNames = action.GetParameterValues("target");
-            // if we aren't generally looting we need to re-enable the opening of wrecks to
-            // find this LootItems we are looking for
-            Cache.Instance.OpenWrecks = true;
-
-            int quantity;
-            if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
-                quantity = 1;
-            //
-            // we need to make sure we are in scoop range before calling this...
-            //
-            //if (!Cache.Instance.OpenContainerInSpace("PutItemAction", container)) return;
-
-            bool done = items.Count == 0;
-            if (!done)
-            {
-                //DirectContainer cargo = Cache.Instance.DirectEve.;
-                // We assume that the ship's cargo will be opened somewhere else
-                //if (cargo.Window.IsReady)
-                //    done |= cargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));
-            }
-            if (done)
-            {
-                Logging.Log("CombatMission." + _pocketActions[_currentAction], "We are done looting", Logging.teal);
-                Nextaction();
-                return;
-            }
-
-            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-            //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Id);
-            //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.Id);
-            if (!containers.Any())
-            {
-                Logging.Log("CombatMission." + _pocketActions[_currentAction], "We are done looting", Logging.teal);
-                containers = null;
-                Nextaction();
-                return;
-            }
-
-            EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-            if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
-            {
-                if (DateTime.Now > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
-                {
-                    Logging.Log("CombatMission." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.teal);
-                    closest.Approach();
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
-                }
-            }
-        }
-
         private void DropItemAction(Actions.Action action)
         {
             Cache.Instance.DropMode = true;
@@ -1171,8 +1093,6 @@ namespace Questor.Modules.Activities
                 }
             }
         }
-
-
 
         private void LootItemAction(Actions.Action action)
         {
