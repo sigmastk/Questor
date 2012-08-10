@@ -68,11 +68,11 @@ namespace Questor.Storylines
                                //{"A Fathers Love", new GenericCourier()},
 
                                /* COMBAT - ALL RACES */
-                               //{"Covering Your Tracks", new GenericCombatStoryline()},
-                               //{"Evolution", new GenericCombatStoryline()},
-                               //{"Patient Zero", new GenericCombatStoryline()},
-                               //{"Record Cleaning", new GenericCombatStoryline()},
-                               //{"Shipyard Theft", new GenericCombatStoryline()},
+                               {"Covering Your Tracks", new GenericCombatStoryline()},
+                               {"Evolution", new GenericCombatStoryline()},
+                               {"Patient Zero", new GenericCombatStoryline()},
+                               {"Record Cleaning", new GenericCombatStoryline()},
+                               {"Shipyard Theft", new GenericCombatStoryline()},
                                //{"Soothe the Salvage Beast", new GenericCombatStoryline()},
                                /* COMBAT - AMARR */
                                //{"Blood Farm", new GenericCombatStoryline()},
@@ -82,7 +82,7 @@ namespace Questor.Storylines
                                //{"Racetrack Ruckus", new GenericCombatStoryline()},
                                //{"The Mouthy Merc", new GenericCombatStoryline()},
                                /* COMBAT - CALDARI */
-                               //{"Crowd Control", new GenericCombatStoryline()},
+                               {"Crowd Control", new GenericCombatStoryline()},
                                //{"Forgotten Outpost", new GenericCombatStoryline()},
                                //{"Illegal Mining", new GenericCombatStoryline()},
                                //{"Innocents in the Crossfire", new GenericCombatStoryline()},
