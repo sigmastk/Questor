@@ -671,8 +671,9 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (!Cache.Instance.OpenCargoHold("Salvge")) 
+            if (!Cache.Instance.OpenCargoHold("Salvage")) 
                 return;
+
             switch (_States.CurrentSalvageState)
             {
                 case SalvageState.TargetWrecks:
