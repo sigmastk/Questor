@@ -373,7 +373,15 @@ namespace Questor.Modules.Actions
             Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.yellow + bookmark.Title + Logging.green + "][" + Logging.yellow + Math.Round((distance / 1000) / 149598000, 2) +  Logging.green + " AU away]", Logging.green);
             Cache.Instance.DoNotBreakInvul = false;
             //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false; 
-            bookmark.WarpTo();
+            if (Cache.Instance.MissionWarpAtDistanceRange != 0 && bookmark.Title.Contains("Encounter"))
+            {
+                Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.yellow + bookmark.Title + Logging.green + "][" + Logging.yellow + " At " + Cache.Instance.MissionWarpAtDistanceRange + Logging.green + " km]", Logging.green);
+                bookmark.WarpTo(Cache.Instance.MissionWarpAtDistanceRange * 1000);
+            }
+            else
+            {
+                bookmark.WarpTo();    
+            }
             nextAction = DateTime.Now.AddSeconds(Time.Instance.TravelerInWarpedNextCommandDelay_seconds);
             return false;
         }

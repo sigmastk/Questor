@@ -1421,6 +1421,11 @@ namespace Questor.Modules.Caching
 
         public int BringOptionalMissionItemQuantity { get; private set; }
 
+        /// <summary>         
+        ///   Range for warp to mission bookmark         
+        /// </summary>
+        public double MissionWarpAtDistanceRange { get; set; } //in km
+
         public string Fitting { get; set; } // stores name of the final fitting we want to use
 
         public string MissionShip { get; set; } //stores name of mission specific ship

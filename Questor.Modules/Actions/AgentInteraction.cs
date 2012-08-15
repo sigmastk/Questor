@@ -588,6 +588,7 @@ namespace Questor.Modules.Actions
                             Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
                             Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //do not set default here, use character level settings if avail
                             Cache.Instance.MissionKillSentries = (bool?)missionXml.Root.Element("killSentries"); //do not set default here, use character level settings if avail
+                            Cache.Instance.MissionWarpAtDistanceRange = (int?) missionXml.Root.Element("missionWarpAtDistanceRange") ?? 0; //distance in km
                         }
 
                         //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
