@@ -2,6 +2,10 @@
 <!-- Mission XML Examples -->
 <Missions>
   <bring>Item</bring>
+  <usedrones>false</usedrones> <!-- turn drones off for this mission if needed: false == off, true == on-->
+  <weaponGroupId></weaponGroupId> <!-- if you want to use a different weapongroupID for this mission (small fast frigate?) -->
+  <killSentries>true</killSentries> <!-- if set to true questor's clearpocket action will not ignore sentries -->
+  <missionWarpAtDistanceRange>100</missionWarpAtDistanceRange> <!-- distance to warp to bookmark at in km (this only works 2nd through nth times, 1st time you will warpto 0 -->
   <pockets>
     <pocket id="0">
       <action name="MoveTo">
