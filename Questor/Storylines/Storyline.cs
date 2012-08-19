@@ -89,6 +89,11 @@ namespace Questor.Storylines
                                {"Jealous Rivals", new GenericCombatStoryline()},
                                {"Stem the Flow", new GenericCombatStoryline()},
                                /* COMBAT - GALLENTE */
+                               {"On the Run", new GenericCourier()},
+                               {"A Fathers Love", new GenericCourier()},
+                               {"A Greener World", new GenericCourier()},
+                               {"Eradication", new GenericCourier()},
+                               {"Evacuation", new GenericCourier()},
                                /* COMBAT - MINMATAR */
                                {"Amarrian Excavators", new GenericCombatStoryline()},
                                {"Diplomatic Incident", new GenericCombatStoryline()},
