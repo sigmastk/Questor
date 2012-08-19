@@ -2009,27 +2009,27 @@ namespace Questor.Modules.Caching
             if (Settings.Instance.SpeedTank) //all webbers have to be relatively close so processing them all is ok
             {
                 // Is our current target a webbing priority target?
-                if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWebbingMe && pt.IsTarget))
+                if (currentTarget != null && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && PriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWebbingMe && pt.IsTarget))
                     return currentTarget;
 
                 // Get the closest webbing priority target frigate
                 EntityCache webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsNPCFrigate && pt.IsTarget); //frigates
-                if (webbingtarget != null)
+                if (webbingtarget != null && !Cache.Instance.IgnoreTargets.Contains(webbingtarget.Name.Trim()))
                     return webbingtarget;
 
                 // Get the closest webbing priority target cruiser
                 webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsNPCCruiser && pt.IsTarget); //cruisers
-                if (webbingtarget != null)
+                if (webbingtarget != null && !Cache.Instance.IgnoreTargets.Contains(webbingtarget.Name.Trim()))
                     return webbingtarget;
 
                 // Get the closest webbing priority target (anything else)
                 webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsTarget); //everything else
-                if (webbingtarget != null)
+                if (webbingtarget != null && !Cache.Instance.IgnoreTargets.Contains(webbingtarget.Name.Trim()))
                     return webbingtarget;
             }
 
             // Is our current target any other priority target?
-            if (currentTarget != null && PriorityTargets.Any(pt => pt.Id == currentTarget.Id))
+            if (currentTarget != null && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && PriorityTargets.Any(pt => pt.Id == currentTarget.Id))
                 return currentTarget;
 
             bool currentTargetHealthLogNow = true;
@@ -2069,7 +2069,7 @@ namespace Questor.Modules.Caching
                     }
             }
             // Is our current target already in armor? keep shooting the same target if so...
-            if (currentTarget != null && currentTarget.ArmorPct * 100 < 60)
+            if (currentTarget != null && currentTarget.ArmorPct * 100 < 60 && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
             {
                 //Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget has less than 60% armor, keep killing this target");
                 return currentTarget;
@@ -2077,7 +2077,7 @@ namespace Questor.Modules.Caching
 
             // Get the closest priority target
             EntityCache prioritytarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
-            if (prioritytarget != null)
+            if (prioritytarget != null && !Cache.Instance.IgnoreTargets.Contains(prioritytarget.Name.Trim()))
                 return prioritytarget;
 
             // Do we have a target?
