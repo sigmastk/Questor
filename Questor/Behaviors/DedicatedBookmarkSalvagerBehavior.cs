@@ -600,6 +600,15 @@ namespace Questor.Behaviors
                     }
                     else
                     {
+                        if (!Cache.Instance.OpenCargoHold("DedicatedBookmarkSalvageBehavior: Salvage")) break;
+
+                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
+                        {
+                            Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We are full, go to base to unload", Logging.white);
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                            break;
+                        }
+
                         if (!Cache.Instance.UnlootedContainers.Any())
                         {
                             Cache.Instance.DeleteBookmarksOnGrid("DedicatedBookmarkSalvageBehavior");

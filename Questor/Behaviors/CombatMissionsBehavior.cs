@@ -1171,7 +1171,7 @@ namespace Questor.Behaviors
                     {
                         if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
 
-                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < 100)
+                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.white);
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
