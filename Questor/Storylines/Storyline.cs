@@ -57,6 +57,11 @@ namespace Questor.Storylines
                                {"Hunting Black Dog", new GenericCourier()},
                                {"Operation Doorstop", new GenericCourier()},
                                /* COURIER/DELIVERY - GALLENTE */
+                               {"On the Run", new GenericCourier()},
+                               {"A Fathers Love", new GenericCourier()},
+                               {"A Greener World", new GenericCourier()},
+                               {"Eradication", new GenericCourier()},
+                               {"Evacuation", new GenericCourier()},
                                /* COURIER/DELIVERY - MINMATAR */
                                {"A Cargo With Attitude", new GenericCourier()},
                                {"A Load of Scrap", new GenericCourier()},
@@ -89,11 +94,6 @@ namespace Questor.Storylines
                                {"Jealous Rivals", new GenericCombatStoryline()},
                                {"Stem the Flow", new GenericCombatStoryline()},
                                /* COMBAT - GALLENTE */
-                               {"On the Run", new GenericCourier()},
-                               {"A Fathers Love", new GenericCourier()},
-                               {"A Greener World", new GenericCourier()},
-                               {"Eradication", new GenericCourier()},
-                               {"Evacuation", new GenericCourier()},
                                /* COMBAT - MINMATAR */
                                {"Amarrian Excavators", new GenericCombatStoryline()},
                                {"Diplomatic Incident", new GenericCombatStoryline()},
