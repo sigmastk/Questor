@@ -1939,10 +1939,17 @@ namespace Questor.Modules.Caching
         /// <param name = "label"></param>
         public void CreateBookmark(string label)
         {
-            if (Settings.Instance.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
-                DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+            if (Cache.Instance.AfterMissionSalvageBookmarks.Count() < 100)
+            {
+                if (Settings.Instance.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
+                    DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+                else
+                    DirectEve.BookmarkCurrentLocation(label, "", null);
+            }
             else
-                DirectEve.BookmarkCurrentLocation(label, "", null);
+            {
+                Logging.Log("CreateBookmark","We already have over 100 AfterMissionSalvage bookmarks: their must be a issue processing or deleting bookmarks. No additional bookmarks will be created until the number of salvage bookmarks drops below 100.",Logging.orange);
+            }
         }
 
         /// <summary>
@@ -3594,8 +3601,39 @@ namespace Questor.Modules.Caching
             }
             _nextBookmarkDeletionAttempt = DateTime.Now.AddSeconds(5 + Settings.Instance.RandomNumber(1,5));
 
+            //
+            // remove all salvage bookmarks over 48hrs old - they have long since been rendered useless
+            //
+            try
+            {
+                var uselessSalvageBookmarks = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.CreatedOn < DateTime.Now.AddDays(-2)).OrderByDescending(b => b.CreatedOn));
+
+                DirectBookmark uselessSalvageBookmark = uselessSalvageBookmarks.FirstOrDefault();
+                if (uselessSalvageBookmark != null)
+                {
+                    _bookmarkdeletionattempt++;
+                    if (_bookmarkdeletionattempt <= 5)
+                    {
+                        Logging.Log(module, "removing salvage bookmark that aged more than 48 hours (is their a dedicated or aftermissions salvager cleaning these up?):" + uselessSalvageBookmark.Title, Logging.white);
+                        uselessSalvageBookmark.Delete();
+                    }
+                    if (_bookmarkdeletionattempt > 5)
+                    {
+                        Logging.Log(module, "error removing bookmark!" + uselessSalvageBookmark.Title, Logging.white);
+                        _States.CurrentQuestorState = QuestorState.Error;
+                    }
+                    return false;
+                } 
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Cache.DeleteBookmarksOnGrid", "Delete old unprocessed salvage bookmarks: exception generated:" + ex, Logging.white);
+            }
+            
+
             var bookmarksinlocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                    OrderBy(b => b.CreatedOn));
+
             DirectBookmark onGridBookmark = bookmarksinlocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
             if (onGridBookmark != null)
             {
