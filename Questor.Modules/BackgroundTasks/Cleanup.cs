@@ -599,6 +599,8 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("You have to be at the drop off location to deliver the items in person");
                                 //fitting window message(s)
                                 close |= window.Html.Contains("No rigs were added to or removed from the ship");
+                                //In station - Flying Between Hangars
+                                close |= window.Html.Contains("You can't fly your active ship into someone else's hangar");
                                 // Lag :/
                                 close |= window.Html.Contains("This gate is locked!");
                                 close |= window.Html.Contains("The Zbikoki's Hacker Card");
