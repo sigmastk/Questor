@@ -76,11 +76,11 @@ namespace Questor.Storylines
                                //{"Soothe the Salvage Beast", new GenericCombatStoryline()},
                                /* COMBAT - AMARR */
                                //{"Blood Farm", new GenericCombatStoryline()},
-                               //{"Dissidents", new GenericCombatStoryline()},
+                               {"Dissidents", new GenericCombatStoryline()},
                                //{"Extract the Renegade", new GenericCombatStoryline()},
                                //{"Gate to Nowhere", new GenericCombatStoryline()},
                                //{"Racetrack Ruckus", new GenericCombatStoryline()},
-                               //{"The Mouthy Merc", new GenericCombatStoryline()},
+                               {"The Mouthy Merc", new GenericCombatStoryline()},
                                /* COMBAT - CALDARI */
                                {"Crowd Control", new GenericCombatStoryline()},
                                //{"Forgotten Outpost", new GenericCombatStoryline()},
@@ -104,11 +104,11 @@ namespace Questor.Storylines
                                /* COMBAT - MINMATAR */
                                //{"Amarrian Excavators", new GenericCombatStoryline()},
                                //{"Diplomatic Incident", new GenericCombatStoryline()},
-                               //{"Matriarch", new GenericCombatStoryline()},
-                               //{"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
-                               //{"Postmodern Primitives", new GenericCombatStoryline()},
+                               {"Matriarch", new GenericCombatStoryline()},
+                               {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
+                               {"Postmodern Primitives", new GenericCombatStoryline()},
                                //{"Quota Season", new GenericCombatStoryline()},
-                               //{"The Blood of Angry Men", new GenericCombatStoryline()},
+                               {"The Blood of Angry Men", new GenericCombatStoryline()},
                                /* COMBAT - NEEDS SORTING */
                             };
         }
