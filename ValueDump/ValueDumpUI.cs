@@ -44,7 +44,7 @@ namespace ValueDump
         {
             get
             {
-                return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\InvTypes.xml";
+                return Path.GetDirectoryName(Settings.Instance.Path + "\\InvTypes.xml");
             }
         }
 
@@ -54,11 +54,18 @@ namespace ValueDump
             InitializeComponent();
 
             InvTypesById = new Dictionary<int, InvTypeMarket>();
-            XDocument invTypes = XDocument.Load(InvTypesPath);
-            if (invTypes.Root != null)
-                foreach (XElement element in invTypes.Root.Elements("invtype"))
-                    InvTypesById.Add((int)element.Attribute("id"), new InvTypeMarket(element));
-
+            try
+            {
+                XDocument invTypes = XDocument.Load(InvTypesPath);
+                if (invTypes.Root != null)
+                    foreach (XElement element in invTypes.Root.Elements("invtype"))
+                        InvTypesById.Add((int)element.Attribute("id"), new InvTypeMarket(element));
+            }
+            catch (Exception)
+            {
+                Logging.Log("ValueDumpUI","Unable to load [" + InvTypesPath + "]",Logging.orange);
+            }
+            
             Items = new List<ItemCacheMarket>();
             ItemsToSell = new List<ItemCacheMarket>();
             ItemsToRefine = new List<ItemCacheMarket>();

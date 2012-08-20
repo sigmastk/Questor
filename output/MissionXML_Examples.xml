@@ -2,21 +2,25 @@
 <!-- Mission XML Examples -->
 <Missions>
   <bring>Item</bring>
+  <usedrones>false</usedrones> <!-- turn drones off for this mission if needed: false == off, true == on-->
+  <weaponGroupId></weaponGroupId> <!-- if you want to use a different weapongroupID for this mission (small fast frigate?) -->
+  <killSentries>true</killSentries> <!-- if set to true questor's clearpocket action will not ignore sentries -->
+  <missionWarpAtDistanceRange>100</missionWarpAtDistanceRange> <!-- distance to warp to bookmark at in km (this only works 2nd through nth times, 1st time you will warpto 0 -->
   <pockets>
     <pocket id="0">
-      <action name="MoveTo">
+      <action name="MoveTo"> <!-- initiate movement to the "target" and fight only those NPCs that target you while you are on the way, process no other actions until you reach the target-->
         <parameter name="Target">Acceleration Gate</parameter>
         <parameter name="Distance" value="5000"></parameter>
       </action>
-      <action name="MoveToBackground">
+      <action name="MoveToBackground"> <!-- initiate movement to to the "target" and move on to the next action, using this action assumes that the actions used after this will not move the ship as we likely need to stay moving toward the target-->
         <parameter name="Target">Acceleration Gate</parameter>
         <parameter name="Distance" value="5000"></parameter>
       </action>
-      <action name="WaitUntilTargeted">
+      <action name="WaitUntilTargeted"> <!-- wait this # of seconds before proceeding to the next action (basically a pause for NPCs to spawn)-->
         <parameter name="Timeout" value="15"></parameter>
       </action>
-      <action name="ClearPocket"></action>
-      <action name="ClearWithinWeaponsRangeOnly"></action>
+      <action name="ClearPocket"></action> <!-- This is a commonly used action that clears the pocket of NPCs -->
+      <action name="ClearWithinWeaponsRangeOnly"></action> <!-- This is used in combination with MoveToBackground, only NPCs in weapons range will be killed/cleared, because of the nature of this command no movement commands are given to the ship, you only kill what is in range thus you may need to add a regular clearpocket after this command to cleanup anything possibly out of range -->
       <action name="AggroOnly">
         <parameter name="IgnoreAttackers" value="true"></parameter>
         <parameter name="BreakOnAttackers" value="true"></parameter>

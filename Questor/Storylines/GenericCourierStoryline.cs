@@ -78,7 +78,7 @@ namespace Questor.Storylines
             catch (Exception ex)
             {
                 Logging.Log("GenericCourierStoryline","Exception thrown while attempting to switch to transport ship:" + ex.Message,Logging.white);
-                Logging.Log("GenericCourierStoryline", "blacklisting this storyline agent for this session", Logging.white);
+                Logging.Log("GenericCourierStoryline", "blacklisting this storyline agent for this session because we could not switch to the configured transportship named [" + transportshipName + "]", Logging.white);
                 return StorylineState.BlacklistAgent;
             }
             
@@ -88,7 +88,7 @@ namespace Questor.Storylines
                 {
                     Logging.Log("Arm.ActivateTransportShip", "Done", Logging.white);
                     _States.CurrentArmState = ArmState.Done;
-                return StorylineState.GotoAgent;
+                    return StorylineState.GotoAgent;
                 }
             }
 

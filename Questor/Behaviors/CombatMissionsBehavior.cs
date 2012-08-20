@@ -608,6 +608,14 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.Switch:
+                    //
+                    // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
+                    //
+                    if (Cache.Instance.InSpace)
+                    {
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.white);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                    }
 
                     if (_States.CurrentSwitchShipState == SwitchShipState.Idle)
                     {
@@ -625,6 +633,15 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.Arm:
+                    //
+                    // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
+                    //
+                    if (Cache.Instance.InSpace)
+                    {
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.white);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                    }
+
                     if (_States.CurrentArmState == ArmState.Idle)
                     {
                         if (Cache.Instance.CourierMission)
@@ -887,6 +904,15 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.CompleteMission:
+                    //
+                    // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
+                    //
+                    if (Cache.Instance.InSpace)
+                    {
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.white);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                    }
+
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
                         if (DateTime.Now > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have ben docked for at least a few seconds
@@ -925,6 +951,15 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.UnloadLoot:
+                    //
+                    // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
+                    //
+                    if (Cache.Instance.InSpace)
+                    {
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.white);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                    }
+
                     if (_States.CurrentUnloadLootState == UnloadLootState.Idle)
                     {
                         Logging.Log("CombatMissionsBehavior", "UnloadLoot: Begin", Logging.white);
@@ -1136,7 +1171,7 @@ namespace Questor.Behaviors
                     {
                         if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
 
-                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < 100)
+                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.white);
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
@@ -1352,22 +1387,19 @@ namespace Questor.Behaviors
                             if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                             {
                                 Logging.Log("CombatMissionsBehavior.Traveler", "an error has occurred", Logging.white);
-                                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler)
-                                {
-                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
-                                }
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
                                 return;
                             }
                             else if (Cache.Instance.InSpace)
                             {
                                 Logging.Log("CombatMissionsBehavior.Traveler", "Arrived at destination (in space, Questor stopped)", Logging.white);
-                                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
                                 return;
                             }
                             else
                             {
                                 Logging.Log("CombatMissionsBehavior.Traveler", "Arrived at destination", Logging.white);
-                                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                                 return;
                             }
                         }
@@ -1384,7 +1416,7 @@ namespace Questor.Behaviors
                             Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                             station.WarpToAndDock();
                             Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoNearestStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
                             break;
                         }
                         else
@@ -1411,12 +1443,12 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoNearestStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error; //should we goto idle here?
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error; //should we goto idle here?
                     }
                     break;
 
                 case CombatMissionsBehaviorState.Default:
-                    if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Default) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                     break;
             }
         }

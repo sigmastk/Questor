@@ -54,7 +54,7 @@ namespace Questor.Modules.Actions
 
         private bool _waitingonagentresponse;
         private DateTime _waitingonagentresponsetimer = DateTime.Now;
-        private DateTime AgentWindowTimeStamp = DateTime.MinValue;
+        private DateTime _agentWindowTimeStamp = DateTime.MinValue;
 
         public bool WaitDecline { get; set; }
 
@@ -177,7 +177,7 @@ namespace Questor.Modules.Actions
                     if (Purpose != AgentInteractionPurpose.StartMission)
                     {
                         Logging.Log("Agentinteraction", "ReplyToAgent: Found acceopt button, Changing Purpose to StartMission", Logging.white);
-                    AgentWindowTimeStamp = DateTime.Now;
+                    _agentWindowTimeStamp = DateTime.Now;
                     Purpose = AgentInteractionPurpose.StartMission;
                     }
                 }
@@ -188,7 +188,7 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Agentinteraction", "ReplyToAgent: Found complete button, Changing Purpose to CompleteMission", Logging.white);
                         //we have a mission in progress here, attempt to complete it
-                        if (DateTime.Now > AgentWindowTimeStamp.AddSeconds(30))
+                        if (DateTime.Now > _agentWindowTimeStamp.AddSeconds(30))
                         {
                             Purpose = AgentInteractionPurpose.CompleteMission;
                         }
@@ -201,7 +201,7 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Agentinteraction", "ReplyToAgent: Found request button, Changing Purpose to StartMission", Logging.white);
                         //we do not have a mission yet, request one?
-                        if (DateTime.Now > AgentWindowTimeStamp.AddSeconds(30))
+                        if (DateTime.Now > _agentWindowTimeStamp.AddSeconds(30))
                         {
                             Purpose = AgentInteractionPurpose.StartMission;
                         }
@@ -588,6 +588,7 @@ namespace Questor.Modules.Actions
                             Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
                             Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //do not set default here, use character level settings if avail
                             Cache.Instance.MissionKillSentries = (bool?)missionXml.Root.Element("killSentries"); //do not set default here, use character level settings if avail
+                            Cache.Instance.MissionWarpAtDistanceRange = (int?) missionXml.Root.Element("missionWarpAtDistanceRange") ?? 0; //distance in km
                         }
 
                         //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;

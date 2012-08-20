@@ -50,7 +50,7 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void MoveIntoRangeOfWrecks() // DO NOT USE THIS ANYWHERE EXCEPT A PURPOSEFUL SALVAGE BEHAVIOR! - if you use this while in combat it will make you go poof quickly.
         {
-            EntityCache closestWreck = Cache.Instance.UnlootedContainers.First();
+            EntityCache closestWreck = Cache.Instance.UnlootedContainers.OrderBy(o => o.Distance).First();
             if (Math.Round(closestWreck.Distance, 0) > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
             {
                 if (closestWreck.Distance > (int)Distance.WarptoDistance)
@@ -106,9 +106,21 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 EntityCache wreck = wrecks.FirstOrDefault(w => w.Id == tractorBeam.TargetId);
+
+                //for  Cache.Instance.UnlootedContainers.Contains()
+                bool currentWreckUnlooted = false;
+                foreach (EntityCache unlootedcontainer in Cache.Instance.UnlootedContainers)
+                {
+                    if (tractorBeam.TargetId == unlootedcontainer.Id)
+                    {
+                        currentWreckUnlooted = true;
+                        break;
+                    }
+                }
+                
                 // If the wreck no longer exists, or its within loot range then disable the tractor beam
                 // If the wreck no longer exist, beam should be deactivated automatically. Without our interaction.
-                if (tractorBeam.IsActive && (wreck == null || wreck.Distance <= (int)Distance.SafeScoopRange))
+                if (tractorBeam.IsActive && (wreck == null || (wreck.Distance <= (int)Distance.SafeScoopRange && !currentWreckUnlooted)))
                 {
                     tractorBeam.Click();
                     tractorsProcessedThisTick++;
@@ -364,19 +376,19 @@ namespace Questor.Modules.BackgroundTasks
             double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
             
             DirectContainerWindow lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.Type == "form.Inventory" && w.IsPrimary());
-            List<long> ContainersID = new List<long>();
+            List<long> containersID = new List<long>();
             if(lootWindows != null)
-                ContainersID = lootWindows.GetIdsFromTree();
+                containersID = lootWindows.GetIdsFromTree();
 
-            foreach (long ContainerID in ContainersID) //ItemWreck and ItemFloatingCargo
+            foreach (long containerID in containersID) //ItemWreck and ItemFloatingCargo
             {
-                lootWindows.SelectTreeEntryByID(ContainerID);
+                if (lootWindows != null) lootWindows.SelectTreeEntryByID(containerID);
 
                 // Get the container entity
-                    EntityCache containerEntity = Cache.Instance.EntityById(ContainerID);
+                    EntityCache containerEntity = Cache.Instance.EntityById(containerID);
 
                 // Get the container that is associated with the cargo container
-                    DirectContainer container = Cache.Instance.DirectEve.GetContainer(ContainerID);
+                    DirectContainer container = Cache.Instance.DirectEve.GetContainer(containerID);
 
                 // List its items
                 IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i)).ToList();
@@ -393,7 +405,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Does it no longer exist or is it out of transfer range or its looted
                 if (containerEntity == null || containerEntity.Distance > (int)Distance.SafeScoopRange || Cache.Instance.LootedContainers.Contains(containerEntity.Id))
                 {
-                    lootWindows.CloseTreeEntry(ContainerID);
+                    if (lootWindows != null) lootWindows.CloseTreeEntry(containerID);
                     return;
                 }
 
@@ -659,8 +671,9 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (!Cache.Instance.OpenCargoHold("Salvge")) 
+            if (!Cache.Instance.OpenCargoHold("Salvage")) 
                 return;
+
             switch (_States.CurrentSalvageState)
             {
                 case SalvageState.TargetWrecks:

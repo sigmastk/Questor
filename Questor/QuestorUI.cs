@@ -156,57 +156,64 @@ namespace Questor
 
         private void RefreshInfoDisplayedInUI()
         {
-            if (DateTime.Now > _nextUIDataRefresh && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30) && (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now || Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now))
+            if (DateTime.Now > _nextUIDataRefresh && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
                 _nextUIDataRefresh = DateTime.Now.AddMilliseconds(1000);
                 try
                 {
-                    CurrentTimeData1.Text = DateTime.Now.ToLongTimeString();
-                    CurrentTimeData2.Text = DateTime.Now.ToLongTimeString();
-                    NextOpenContainerInSpaceActionData.Text = Cache.Instance.NextOpenContainerInSpaceAction.ToLongTimeString();
-                    NextOpenJournalWindowActionData.Text = Cache.Instance.NextOpenJournalWindowAction.ToLongTimeString();
-                    NextOpenLootContainerActionData.Text = Cache.Instance.NextOpenLootContainerAction.ToLongTimeString();
-                    NextDroneBayActionData.Text = Cache.Instance.NextDroneBayAction.ToLongTimeString();
-                    NextOpenHangarActionData.Text = Cache.Instance.NextOpenHangarAction.ToLongTimeString();
-                    NextOpenCargoActionData.Text = Cache.Instance.NextOpenCargoAction.ToLongTimeString();
-                    LastActionData.Text = Cache.Instance.LastAction.ToLongTimeString();
-                    NextArmActionData.Text = Cache.Instance.NextArmAction.ToLongTimeString();
-                    NextSalvageActionData.Text = Cache.Instance.NextSalvageAction.ToLongTimeString();
-                    NextLootActionData.Text = Cache.Instance.NextLootAction.ToLongTimeString();
-                    LastJettisonData.Text = Cache.Instance.LastJettison.ToLongTimeString();
-                    NextDefenceModuleActionData.Text = Cache.Instance.NextDefenceModuleAction.ToLongTimeString();
-                    NextAfterburnerActionlbl.Text = Cache.Instance.NextAfterburnerAction.ToLongTimeString();
-                    NextRepModuleActionData.Text = Cache.Instance.NextRepModuleAction.ToLongTimeString();
-                    NextActivateSupportModulesData.Text = Cache.Instance.NextActivateSupportModules.ToLongTimeString();
-                    NextApproachActionData.Text = Cache.Instance.NextApproachAction.ToLongTimeString();
-                    NextOrbitData.Text = Cache.Instance.NextOrbit.ToLongTimeString();
-                    NextWarpToData.Text = Cache.Instance.NextWarpTo.ToLongTimeString();
-                    NextTravelerActionData.Text = Cache.Instance.NextTravelerAction.ToLongTimeString();
-                    NextTargetActionData.Text = Cache.Instance.NextTargetAction.ToLongTimeString();
-                    NextReloadData.Text = Cache.Instance.NextReload.ToLongTimeString();
-                    NextWeaponActionData.Text = Cache.Instance.NextWeaponAction.ToLongTimeString();
-                    NextWebActionData.Text = Cache.Instance.NextWebAction.ToLongTimeString();
-                    NextNosActionData.Text = Cache.Instance.NextNosAction.ToLongTimeString();
-                    NextPainterActionData.Text = Cache.Instance.NextPainterAction.ToLongTimeString();
-                    NextActivateActionData.Text = Cache.Instance.NextActivateAction.ToLongTimeString();
-                    NextAlignData.Text = Cache.Instance.NextAlign.ToLongTimeString();
-                    NextUndockActionData.Text = Cache.Instance.NextUndockAction.ToLongTimeString();
-                    NextDockActionData.Text = Cache.Instance.NextDockAction.ToLongTimeString();
-                    NextDroneRecallData.Text = Cache.Instance.NextDroneRecall.ToLongTimeString();
-                    NextStartupActionData.Text = Cache.Instance.NextStartupAction.ToLongTimeString();
-                    LastSessionChangeData.Text = Cache.Instance.LastSessionChange.ToLongTimeString();
-                    AutostartData.Text = Settings.Instance.AutoStart.ToString(CultureInfo.InvariantCulture);
-
-                    DamageTypeData.Text = Cache.Instance.DamageType.ToString();
-                    //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
-                    //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
-                    //AgentIdData.Text = Cache.Instance.AgentId.ToString(CultureInfo.InvariantCulture);
-                    //AgentData.Text = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
-                    AgentInteractionPurposeData.Text = AgentInteraction.Purpose.ToString();
-                    MissionsThisSessionData.Text = Cache.Instance.MissionsThisSession.ToString(CultureInfo.InvariantCulture);
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now)
+                    if (Cache.Instance.LastInSpace.AddMilliseconds(1000) > DateTime.Now)
                     {
-                        //MaxRangeData.Text = Cache.Instance.MaxRange.ToString(CultureInfo.InvariantCulture);       //causes problems / crashes
+	                    CurrentTimeData1.Text = DateTime.Now.ToLongTimeString();
+	                    CurrentTimeData2.Text = DateTime.Now.ToLongTimeString();
+	                    NextOpenContainerInSpaceActionData.Text = Cache.Instance.NextOpenContainerInSpaceAction.ToLongTimeString();
+	                    NextOpenJournalWindowActionData.Text = Cache.Instance.NextOpenJournalWindowAction.ToLongTimeString();
+	                    NextOpenLootContainerActionData.Text = Cache.Instance.NextOpenLootContainerAction.ToLongTimeString();
+	                    NextDroneBayActionData.Text = Cache.Instance.NextDroneBayAction.ToLongTimeString();
+	                    NextOpenHangarActionData.Text = Cache.Instance.NextOpenHangarAction.ToLongTimeString();
+	                    NextOpenCargoActionData.Text = Cache.Instance.NextOpenCargoAction.ToLongTimeString();
+	                    LastActionData.Text = Cache.Instance.LastAction.ToLongTimeString();
+	                    NextArmActionData.Text = Cache.Instance.NextArmAction.ToLongTimeString();
+	                    NextSalvageActionData.Text = Cache.Instance.NextSalvageAction.ToLongTimeString();
+	                    NextLootActionData.Text = Cache.Instance.NextLootAction.ToLongTimeString();
+	                    LastJettisonData.Text = Cache.Instance.LastJettison.ToLongTimeString();
+	                    NextDefenceModuleActionData.Text = Cache.Instance.NextDefenceModuleAction.ToLongTimeString();
+	                    NextAfterburnerActionlbl.Text = Cache.Instance.NextAfterburnerAction.ToLongTimeString();
+	                    NextRepModuleActionData.Text = Cache.Instance.NextRepModuleAction.ToLongTimeString();
+	                    NextActivateSupportModulesData.Text = Cache.Instance.NextActivateSupportModules.ToLongTimeString();
+	                    NextApproachActionData.Text = Cache.Instance.NextApproachAction.ToLongTimeString();
+	                    NextOrbitData.Text = Cache.Instance.NextOrbit.ToLongTimeString();
+	                    NextWarpToData.Text = Cache.Instance.NextWarpTo.ToLongTimeString();
+	                    NextTravelerActionData.Text = Cache.Instance.NextTravelerAction.ToLongTimeString();
+	                    NextTargetActionData.Text = Cache.Instance.NextTargetAction.ToLongTimeString();
+	                    NextReloadData.Text = Cache.Instance.NextReload.ToLongTimeString();
+	                    NextWeaponActionData.Text = Cache.Instance.NextWeaponAction.ToLongTimeString();
+	                    NextWebActionData.Text = Cache.Instance.NextWebAction.ToLongTimeString();
+	                    NextNosActionData.Text = Cache.Instance.NextNosAction.ToLongTimeString();
+	                    NextPainterActionData.Text = Cache.Instance.NextPainterAction.ToLongTimeString();
+	                    NextActivateActionData.Text = Cache.Instance.NextActivateAction.ToLongTimeString();
+	                    NextAlignData.Text = Cache.Instance.NextAlign.ToLongTimeString();
+	                    NextUndockActionData.Text = Cache.Instance.NextUndockAction.ToLongTimeString();
+	                    NextDockActionData.Text = Cache.Instance.NextDockAction.ToLongTimeString();
+	                    NextDroneRecallData.Text = Cache.Instance.NextDroneRecall.ToLongTimeString();
+	                    NextStartupActionData.Text = Cache.Instance.NextStartupAction.ToLongTimeString();
+	                    LastSessionChangeData.Text = Cache.Instance.LastSessionChange.ToLongTimeString();
+	                    AutostartData.Text = Settings.Instance.AutoStart.ToString(CultureInfo.InvariantCulture);
+	
+	                    DamageTypeData.Text = Cache.Instance.DamageType.ToString();
+	                    //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
+	                    //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
+	                    //AgentIdData.Text = Cache.Instance.AgentId.ToString(CultureInfo.InvariantCulture);
+	                    //AgentData.Text = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
+	                    AgentInteractionPurposeData.Text = AgentInteraction.Purpose.ToString();
+	                    MissionsThisSessionData.Text = Cache.Instance.MissionsThisSession.ToString(CultureInfo.InvariantCulture);
+
+                        //crashes questor when in station?
+                        //
+                        //if (Cache.Instance.MaxRange > 0)
+                        //{
+                        //    MaxRangeData.Text = Cache.Instance.MaxRange.ToString(CultureInfo.InvariantCulture);
+                                //causes problems / crashes
+                        //}
                         //WeaponRangeData.Text = Cache.Instance.WeaponRange.ToString(CultureInfo.InvariantCulture); //causes problems / crashes
                         //ActiveDronesData.Text = Cache.Instance.ActiveDrones.Count().ToString();                   //causes problems / crashes
                         //if (!Cache.Instance.InWarp && DateTime.Now > _nextWreckUpdate)                            //this was causing exceptions we cant check inarp from the UI?
@@ -220,8 +227,8 @@ namespace Questor
                         //PriorityTargetsData.Text = Cache.Instance.PriorityTargets.Count().ToString(CultureInfo.InvariantCulture);
                         //if (Cache.Instance.IsMissionPocketDone) IsMissionPocketDoneData.Text = "true";
                         //else if (!Cache.Instance.IsMissionPocketDone) IsMissionPocketDoneData.Text = "false";
-                        
                     }
+
                     if (Cache.Instance.LastInStation.AddSeconds(2) > DateTime.Now)
                     {
                         MaxRangeData.Text = "n/a";
@@ -620,7 +627,7 @@ namespace Questor
             LastFrameData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] sec ago";
             lastInSpaceData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInSpace).TotalSeconds, 0) + "] sec ago";
             lastInStationData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInStation).TotalSeconds, 0) + "] sec ago";
-            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalSeconds, 0) + "] min ago";
+            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
 
             if (Cache.Instance.SessionState == "Quitting")
             {
@@ -913,7 +920,7 @@ namespace Questor
             }
 
             if (DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds > (Time.Instance.NoSessionIsReadyRestart_seconds + extraWaitSeconds) &&
-                    DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
+                    DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 210)
             {
                 if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
                 {
@@ -967,28 +974,6 @@ namespace Questor
         {
             ((HandledMouseEventArgs)e).Handled = true;
         }
-
-        //private void textBoxMaxRunTime_TextChanged(object sender, EventArgs e)
-        //{
-        //    int number2;
-        //    if (int.TryParse(textBoxMaxRunTime.Text, out number2))
-        //    {
-        //Cache.Instance.MaxRuntime = number2;
-        //    }
-        //    else
-        //    {
-        //        textBoxMaxRunTime.Text = Cache.Instance.MaxRuntime.ToString();
-        //    }
-        //}
-
-        //private void textBoxMaxRunTime_KeyPress(object sender, KeyPressEventArgs e)
-        // {
-        //     if (!char.IsControl(e.KeyChar)
-        //         && !char.IsDigit(e.KeyChar))
-        //     {
-        //        e.Handled = true;
-        //     }
-        //}
 
         private void ButtonQuestorStatisticsClick(object sender, EventArgs e)
         {

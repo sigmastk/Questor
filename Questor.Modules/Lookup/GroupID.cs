@@ -87,6 +87,8 @@ namespace Questor.Modules.Lookup
         Shuttle = 31,
         Industrial = 28,
         TransportShip = 380,
+        Freighter = 513,
+
         Frigate = 25,
         AssaultShip = 324,
         Destroyer = 420,
