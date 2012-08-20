@@ -40,7 +40,7 @@ namespace Questor.Storylines
                                //{"StorylineCombatNameHere", new GenericCombatStoryline()},
                                //{"StorylineCourierNameHere", new GenericCourier()},
 
-                               /* COURIER/DELIVERY - ALL RACES */
+                               /* COURIER/DELIVERY - ALL FACTIONS */
                                {"Materials For War Preparation", new MaterialsForWarPreparation()},
                                {"Transaction Data Delivery", new TransactionDataDelivery()},
                                //{"A Special Delivery", new GenericCourier()}, // Needs 40k m3 cargo capacity (i.e. Iteron Mark V, T2 CHO rigs)
@@ -68,11 +68,9 @@ namespace Questor.Storylines
                                {"Brand New Harvesters", new GenericCourier()},
                                {"Heart of the Rogue Drone", new GenericCourier()},
                                {"Their Secret Defense", new GenericCourier()},
-                               /* COURIER/DELIVERY - NEEDS SORTING */
-                               {"On the Run", new GenericCourier()},
-                               {"A Fathers Love", new GenericCourier()},
-
-                               /* COMBAT - ALL RACES */
+                               /* COURIER/DELIVERY - More Than One Race */
+                               
+                               /* COMBAT - ALL FACTIONS */
                                {"Covering Your Tracks", new GenericCombatStoryline()},
                                {"Evolution", new GenericCombatStoryline()},
                                {"Patient Zero", new GenericCombatStoryline()},
