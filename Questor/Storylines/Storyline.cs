@@ -1,4 +1,4 @@
-﻿
+
 namespace Questor.Storylines
 {
     using System;
@@ -40,7 +40,7 @@ namespace Questor.Storylines
                                //{"StorylineCombatNameHere", new GenericCombatStoryline()},
                                //{"StorylineCourierNameHere", new GenericCourier()},
 
-                               /* COURIER/DELIVERY - ALL RACES */
+                               /* COURIER/DELIVERY - ALL FACTIONS */
                                {"Materials For War Preparation", new MaterialsForWarPreparation()},
                                {"Transaction Data Delivery", new TransactionDataDelivery()},
                                //{"A Special Delivery", new GenericCourier()}, // Needs 40k m3 cargo capacity (i.e. Iteron Mark V, T2 CHO rigs)
@@ -68,53 +68,51 @@ namespace Questor.Storylines
                                {"Brand New Harvesters", new GenericCourier()},
                                {"Heart of the Rogue Drone", new GenericCourier()},
                                {"Their Secret Defense", new GenericCourier()},
-                               /* COURIER/DELIVERY - NEEDS SORTING */
-                               //{"On the Run", new GenericCourier()},
-                               //{"A Fathers Love", new GenericCourier()},
-
-                               /* COMBAT - ALL RACES */
+                               /* COURIER/DELIVERY - More Than One Race */
+                               
+                               /* COMBAT - ALL FACTIONS */
                                {"Covering Your Tracks", new GenericCombatStoryline()},
                                {"Evolution", new GenericCombatStoryline()},
                                {"Patient Zero", new GenericCombatStoryline()},
                                {"Record Cleaning", new GenericCombatStoryline()},
                                {"Shipyard Theft", new GenericCombatStoryline()},
-                               //{"Soothe the Salvage Beast", new GenericCombatStoryline()},
+                               {"Soothe the Salvage Beast", new GenericCombatStoryline()},
                                /* COMBAT - AMARR */
-                               //{"Blood Farm", new GenericCombatStoryline()},
+                               {"Blood Farm", new GenericCombatStoryline()},
                                {"Dissidents", new GenericCombatStoryline()},
-                               //{"Extract the Renegade", new GenericCombatStoryline()},
-                               //{"Gate to Nowhere", new GenericCombatStoryline()},
-                               //{"Racetrack Ruckus", new GenericCombatStoryline()},
+                               {"Extract the Renegade", new GenericCombatStoryline()},
+                               {"Gate to Nowhere", new GenericCombatStoryline()},
+                               {"Racetrack Ruckus", new GenericCombatStoryline()},
                                {"The Mouthy Merc", new GenericCombatStoryline()},
                                /* COMBAT - CALDARI */
                                {"Crowd Control", new GenericCombatStoryline()},
-                               //{"Forgotten Outpost", new GenericCombatStoryline()},
-                               //{"Illegal Mining", new GenericCombatStoryline()},
-                               //{"Innocents in the Crossfire", new GenericCombatStoryline()},
-                               //{"Jealous Rivals", new GenericCombatStoryline()},
-                               //{"Stem the Flow", new GenericCombatStoryline()},
+                               {"Forgotten Outpost", new GenericCombatStoryline()},
+                               {"Illegal Mining", new GenericCombatStoryline()},
+                               {"Innocents in the Crossfire", new GenericCombatStoryline()},
+                               {"Jealous Rivals", new GenericCombatStoryline()},
+                               {"Stem the Flow", new GenericCombatStoryline()},
                                /* COMBAT - GALLENTE */
-                               //{"A Force to Be Reckoned With", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - The Secret Meeting (7 of 10)", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - Retrieve the Prisoners (9 of 10)", new GenericCombatStoryline()},
-                               //{"Kidnappers Strike - The Final Battle (10 of 10)", new GenericCombatStoryline()},
-                               //{"Pirate Radio", new GenericCombatStoryline()},
-                               //{"Whispers in the Dark - First Contact (1 of 4)", new GenericCombatStoryline()},
-                               //{"Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline()},
-                               //{"Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline()},
                                /* COMBAT - MINMATAR */
-                               //{"Amarrian Excavators", new GenericCombatStoryline()},
-                               //{"Diplomatic Incident", new GenericCombatStoryline()},
-                               {"Matriarch", new GenericCombatStoryline()},
+                               {"Amarrian Excavators", new GenericCombatStoryline()},
+                               {"Diplomatic Incident", new GenericCombatStoryline()},
                                {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
                                {"Postmodern Primitives", new GenericCombatStoryline()},
-                               //{"Quota Season", new GenericCombatStoryline()},
+                               {"Quota Season", new GenericCombatStoryline()},
                                {"The Blood of Angry Men", new GenericCombatStoryline()},
                                /* COMBAT - NEEDS SORTING */
+                               {"A Force to Be Reckoned With", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - The Secret Meeting (7 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - Retrieve the Prisoners (9 of 10)", new GenericCombatStoryline()},
+                               {"Kidnappers Strike - The Final Battle (10 of 10)", new GenericCombatStoryline()},
+                               {"Whispers in the Dark - First Contact (1 of 4)", new GenericCombatStoryline()},
+                               {"Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline()},
+                               {"Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline()},
+                               {"Matriarch", new GenericCombatStoryline()},
+                               {"Pirate Radio", new GenericCombatStoryline()},
                             };
         }
 
