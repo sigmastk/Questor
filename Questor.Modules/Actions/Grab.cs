@@ -171,6 +171,7 @@ namespace Questor.Modules.Actions
                                 if (Cache.Instance.DirectEve.ActiveShip.ItemId == item.ItemId)
                                 {
                                     allItem.Remove(item);
+                                    continue;
                                 }
 
                                 double totalVolum = item.Quantity * item.Volume;
