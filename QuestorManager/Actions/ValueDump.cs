@@ -138,7 +138,15 @@ namespace QuestorManager.Actions
                     XDocument xdoc = new XDocument(new XElement("invtypes"));
                     foreach (InvType type in _form.InvTypesById.Values.OrderBy(i => i.Id))
                         if (xdoc.Root != null) xdoc.Root.Add(type.Save());
-                    xdoc.Save(InvTypesPath);
+                    try
+                    {
+                        xdoc.Save(InvTypesPath);
+                    }
+                    catch (Exception Ex)
+                    {
+                        Logging.Log("ValueDump", "Unable to save [" + InvTypesPath + "], is it a file permissions issue? Is the file open and locked?", Logging.orange);
+                    }
+                    
 
                     _States.CurrentValueDumpState = ValueDumpState.Idle;
                     break;
