@@ -54,7 +54,7 @@ namespace ValueDump
             InitializeComponent();
 
             InvTypesById = new Dictionary<int, InvTypeMarket>();
-            Logging.Log("Valuedump", "Load InvTypes.xml fromm [" + InvTypesPath + "]", Logging.white);
+            Logging.Log("Valuedump", "Load InvTypes.xml from [" + InvTypesPath + "]", Logging.white);
             try
             {
                 XDocument invTypes = XDocument.Load(InvTypesPath);
