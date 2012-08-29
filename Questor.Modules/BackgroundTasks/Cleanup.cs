@@ -637,6 +637,7 @@ namespace Questor.Modules.BackgroundTasks
                                 sayyes |= window.Html.Contains("objectives requiring a total capacity");
                                 sayyes |= window.Html.Contains("your ship only has space for");
                                 sayyes |= window.Html.Contains("Are you sure you want to remove location");
+                                sayyes |= window.Html.Contains("Repairing these items will cost");
 
                                 //
                                 // LP Store "Accept offer" dialog
