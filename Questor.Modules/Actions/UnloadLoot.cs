@@ -54,6 +54,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case UnloadLootState.Begin:
+                    if (!Cleanup.CloseInventoryWindows()) break;
                     if (!Cache.Instance.OpenCargoHold("UnloadLoot")) break;
                     if (DateTime.Now < _nextUnloadAction)
                     {
@@ -63,7 +64,7 @@ namespace Questor.Modules.Actions
                     if (Cache.Instance.CargoHold.Items.Count == 0 && Cache.Instance.CargoHold.IsValid)
                         _States.CurrentUnloadLootState = UnloadLootState.Done;
                     else
-                    _States.CurrentUnloadLootState = UnloadLootState.MoveCommonMissionCompletionItemsToAmmoHangar;
+                        _States.CurrentUnloadLootState = UnloadLootState.MoveCommonMissionCompletionItemsToAmmoHangar;
                     break;
 
                 case UnloadLootState.MoveCommonMissionCompletionItemsToAmmoHangar:
@@ -77,7 +78,7 @@ namespace Questor.Modules.Actions
 
                     if (Cache.Instance.AmmoHangar != null)
                         Cache.Instance.AmmoHangar.Add(itemsToMove);
- 
+
                     _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;
                     break;
 
@@ -98,7 +99,7 @@ namespace Questor.Modules.Actions
 
                     if (string.IsNullOrEmpty(Settings.Instance.LootHangar)) // if we do NOT have the loot hangar configured. 
                     {
-                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot","loothangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)",Logging.white);
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "loothangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.white);
                         // Move loot to the loot hangar
                         int roominHangar = (999 - Cache.Instance.LootHangar.Items.Count);
                         if (roominHangar > lootToMove.Count())
@@ -134,7 +135,7 @@ namespace Questor.Modules.Actions
 
                             if (somelootToMove.Any())
                             {
-                                Logging.Log("UnloadLoot", "Moving [" + somelootToMove.Count() + "]  of [" + lootToMove.Count() + "] items into the loot hangar",Logging.white);
+                                Logging.Log("UnloadLoot", "Moving [" + somelootToMove.Count() + "]  of [" + lootToMove.Count() + "] items into the loot hangar", Logging.white);
                                 Cache.Instance.LootHangar.Add(somelootToMove);
                             }
                             else
@@ -268,10 +269,10 @@ namespace Questor.Modules.Actions
                         break;
 
                     if (!Cache.Instance.StackAmmoHangar("UnloadLoot.StackAmmoHangar")) break;
- 
+
                     _States.CurrentUnloadLootState = UnloadLootState.WaitForAmmoHangarStacking;
                     break;
- 
+
                 case UnloadLootState.WaitForAmmoHangarStacking:
                     // Wait 5 seconds after stacking
                     if (DateTime.Now < _nextUnloadAction)

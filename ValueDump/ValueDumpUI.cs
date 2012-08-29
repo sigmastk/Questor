@@ -274,7 +274,7 @@ namespace ValueDump
 
                     XDocument xdoc = new XDocument(new XElement("invtypes"));
                     foreach (InvTypeMarket type in InvTypesById.Values.OrderBy(i => i.Id))
-                        xdoc.Root.Add(type.Save());
+                        if (xdoc.Root != null) xdoc.Root.Add(type.Save());
                     xdoc.Save(InvTypesXMLData);
 
                      _States.CurrentValueDumpState = ValueDumpState.Idle;

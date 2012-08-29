@@ -67,7 +67,7 @@ namespace Questor.Modules.Actions
                     {
                         if (!Cache.Instance.OpenShipsHangar("Drop")) return;
                         
-                        if (_hangar.Window == null || !_hangar.Window.IsReady)
+                        if (_hangar != null && (_hangar.Window == null || !_hangar.Window.IsReady))
                             break;
                     }
                     else if (Hangar != null)
@@ -175,11 +175,18 @@ namespace Questor.Modules.Actions
                                 }
 
                                 double totalVolum = item.Quantity * item.Volume;
-
+                                
                                 if (_freeCargoCapacity >= totalVolum)
                                 {
                                     Cache.Instance.CargoHold.Add(item);
                                     _freeCargoCapacity -= totalVolum;
+                                }
+                                else
+                                {
+                                    // we are out of room, should we do a partial item move?
+                                    double quantitywecanfit = _freeCargoCapacity / item.Volume;
+                                    Cache.Instance.CargoHold.Add(item, (int)quantitywecanfit);
+                                    //we are now "full" and should go "home" or "market" (how do we decide where to go ffs?)
                                 }
                             }
                             Logging.Log("Grab", "Moving items", Logging.white);
