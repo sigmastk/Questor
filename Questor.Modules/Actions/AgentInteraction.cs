@@ -176,7 +176,7 @@ namespace Questor.Modules.Actions
                 {
                     if (Purpose != AgentInteractionPurpose.StartMission)
                     {
-                        Logging.Log("Agentinteraction", "ReplyToAgent: Found acceopt button, Changing Purpose to StartMission", Logging.white);
+                        Logging.Log("Agentinteraction", "ReplyToAgent: Found accept button, Changing Purpose to StartMission", Logging.white);
                     _agentWindowTimeStamp = DateTime.Now;
                     Purpose = AgentInteractionPurpose.StartMission;
                     }
@@ -796,7 +796,16 @@ namespace Questor.Modules.Actions
                 Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
                 return;
             }
+            if (_States.CurrentStorylineState == StorylineState.DeclineMission)
+            {
+                Logging.Log("AgentInteraction", "Storyline: Declining mission.", Logging.yellow);
 
+                _States.CurrentStorylineState = StorylineState.Idle;
+                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
+                return;
+            }
             // Decline and request a new mission
             Logging.Log("AgentInteraction", "Saying [Decline]", Logging.yellow);
             decline.Say();

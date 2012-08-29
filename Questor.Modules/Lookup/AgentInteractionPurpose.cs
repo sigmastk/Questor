@@ -12,6 +12,7 @@ namespace Questor.Modules.Lookup
     public enum AgentInteractionPurpose
     {
         StartMission,
+        DeclineMission,
         CompleteMission,
         AmmoCheck
     }

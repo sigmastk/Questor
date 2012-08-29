@@ -59,7 +59,6 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]", Logging.white);
                         closestWreck.WarpTo();
-                        Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                     }
                 }
                 else
@@ -68,7 +67,6 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]", Logging.white);
                         closestWreck.Approach();
-                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     }
                 }
             }
@@ -76,7 +74,6 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (Cache.Instance.NextApproachAction < DateTime.Now)
                 {
-                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                     Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distance.SafeScoopRange + "] and we were approaching", Logging.white);
                 }

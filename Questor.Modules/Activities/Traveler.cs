@@ -150,7 +150,6 @@ namespace Questor.Modules.Activities
                     {
                         if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: approaching stargate", Logging.teal);
                         stargate.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
-                        Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         return;
                     }
                     if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: we are already approaching the stargate", Logging.teal);
@@ -166,7 +165,6 @@ namespace Questor.Modules.Activities
                                         "Warping to [" + Logging.yellow + locationName + Logging.green + "][" + Logging.yellow + 
                                         Math.Round((stargate.Distance / 1000) / 149598000, 2) + Logging.green + " AU away]", Logging.green);
                             stargate.WarpTo();
-                            Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             return;
                         }
                         return;

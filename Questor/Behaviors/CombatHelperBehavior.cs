@@ -568,7 +568,6 @@ namespace Questor.Behaviors
                         {
                             Logging.Log("CombatHelperBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                             station.WarpToAndDock();
-                            Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.GotoNearestStation) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
                             break;
                         }
@@ -580,14 +579,12 @@ namespace Questor.Behaviors
                                 {
                                     Logging.Log("CombatHelperBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                                     station.Dock();
-                                    Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(Time.Instance.DockingDelay_seconds);
                                 }
                             }
                             else
                             {
                                 if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
                                 {
-                                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                                     Logging.Log("CombatHelperBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                                     station.Approach();
                                 }

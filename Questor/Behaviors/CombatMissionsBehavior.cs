@@ -1280,7 +1280,6 @@ namespace Questor.Behaviors
                             // Move to the target
                             if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                             {
-                                Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                                 Logging.Log("CombatMissionsBehavior.Salvage", "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.white);
                                 closest.Approach();
                             }
@@ -1292,7 +1291,6 @@ namespace Questor.Behaviors
                             {
                                 Logging.Log("CombatMissionsBehavior.Salvage", "Warping to [" + closest.Name + "] which is [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.white);
                                 closest.WarpTo();
-                                Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             }
                         }
                     }
@@ -1415,7 +1413,6 @@ namespace Questor.Behaviors
                         {
                             Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                             station.WarpToAndDock();
-                            Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
                             break;
                         }
@@ -1427,14 +1424,12 @@ namespace Questor.Behaviors
                                 {
                                     Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                                     station.Dock();
-                                    Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(Time.Instance.DockingDelay_seconds);
                                 }
                             }
                             else
                             {
                                 if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
                                 {
-                                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                                     Logging.Log("CombatMissionsBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.white);
                                     station.Approach();
                                 }

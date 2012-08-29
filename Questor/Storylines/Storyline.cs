@@ -184,8 +184,16 @@ namespace Questor.Storylines
 
             var baseDestination = _traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
+            {
                 _traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
-
+                return;
+            }
+            if (!Cache.Instance.RouteIsAllHighSec())
+            {
+                Logging.Log("Storyline", "GotoAgent: Route to agent is through low-sec systems. Declining.", Logging.yellow);
+                _States.CurrentStorylineState = StorylineState.DeclineMission;
+                return;
+            }
             if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
                 Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.yellow);
@@ -264,6 +272,30 @@ namespace Questor.Storylines
                     //Logging.Log("Storyline: PreAcceptMission-!!");
                     _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                     _States.CurrentStorylineState = _storyline.PreAcceptMission(this);
+                    break;
+
+                case StorylineState.DeclineMission:
+                    if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
+                    {
+                        Logging.Log("Storyline.AgentInteraction", "Start conversation [Decline Mission]", Logging.yellow);
+
+                        _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
+                        AgentInteraction.Purpose = AgentInteractionPurpose.DeclineMission;
+                        _agentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
+
+                    }
+
+                    _agentInteraction.ProcessState();
+
+                    if (Settings.Instance.DebugStates)
+                        Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.white);
+
+                    if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
+                    {
+                        _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                        // If there is no mission anymore then we're done (we declined it)
+                        
+                    }
                     break;
 
                 case StorylineState.AcceptMission:

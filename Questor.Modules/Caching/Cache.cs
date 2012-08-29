@@ -1970,20 +1970,17 @@ namespace Questor.Modules.Caching
             //Directdestination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.AgentId, "Encounter"));
             //return List<long> destination;
         //}
-        public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
+        public bool RouteIsAllHighSec()
         {
             // Find the first waypoint
-            for (int i = currentDestination.Count - 1; i >= 0; i--)
+            List<long> currentPath = DirectEve.Navigation.GetDestinationPath();
+            for (int i = currentPath.Count - 1; i >= 0; i--)
             {
-                DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentDestination[i]];
+                DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
                 if (solarSystemInRoute.Security < 0.5)
                 {
                     //Bad bad bad
                     return false;
-                }
-                else
-                {
-                    //Good.
                 }
             }
             return true;

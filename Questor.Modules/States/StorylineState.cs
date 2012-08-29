@@ -6,6 +6,7 @@
         Arm,
         GotoAgent,
         PreAcceptMission,
+        DeclineMission,
         AcceptMission,
         ExecuteMission,
         CompleteMission,
