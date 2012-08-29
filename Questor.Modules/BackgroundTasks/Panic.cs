@@ -343,6 +343,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.InStation)
                     {
+                        if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
                         Logging.Log("Panic", "We're in a station, resume mission", Logging.red);
                         _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }

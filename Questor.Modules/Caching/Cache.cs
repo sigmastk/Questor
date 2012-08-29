@@ -852,6 +852,18 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextRepairItemsAction;
+
+        public DateTime NextRepairItemsAction
+        {
+            get { return _nextRepairItemsAction; }
+            set
+            {
+                _nextRepairItemsAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         public DateTime LastLocalWatchAction = DateTime.Now;
         public DateTime LastWalletCheck = DateTime.Now;
         public DateTime LastScheduleCheck = DateTime.Now;
@@ -3656,5 +3668,63 @@ namespace Questor.Modules.Caching
                 return true;
             }
         }
+
+        public bool RepairItems(string module)
+        {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace || DateTime.Now < _nextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                return false;
+
+            if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
+            {
+                Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existant repair facility.", Logging.orange);
+                return true;
+            }
+
+            if (Cache.Instance.InStation)
+            {
+                DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
+
+                if (repairWindow == null)
+                {
+                    Logging.Log(module, "Opening repairshop window", Logging.white);
+                    Cache.Instance.DirectEve.OpenRepairShop();
+
+                    _nextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                    return false;
+                }
+                else
+                {
+                    if (!Cache.Instance.OpenShipsHangar(module)) return false;
+                    if (!Cache.Instance.OpenItemsHangar(module)) return false;
+
+                    List<DirectItem> items = Cache.Instance.ShipHangar.Items;
+                    items.AddRange(Cache.Instance.ItemHangar.Items);
+
+                    if (items.Any())
+                    {
+                        if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
+                        {
+                            Logging.Log(module, "add Items to repair list", Logging.white);
+                            repairWindow.RepairItems(items);
+
+                            _nextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                            return false;
+                        }
+                        else
+                        {
+                            Logging.Log(module, "Repairing Items", Logging.white);
+                            repairWindow.RepairAll();
+                        }
+                    }
+                    else
+                        Logging.Log(module, "No items are damaged, nothing to repair.", Logging.orange);
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
     }
 }
