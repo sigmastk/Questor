@@ -473,23 +473,12 @@ namespace Questor.Modules.Actions
                     //
                     if (Cache.Instance.DamagedDrones != null && Cache.Instance.DamagedDrones.Any())
                     {
-                        int damagedDronesMoved = 0;
-                        foreach (
-                           DirectItem useddrone in
-                              Cache.Instance.DroneBay.Items.Where(
-                                 i => i.IsSingleton || i.TypeId != Settings.Instance.DroneTypeId))
+                        if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
+                        foreach (var damagedDrone in Cache.Instance.DamagedDrones.ToList())
                         {
-                            foreach (EntityCache damageddrone in Cache.Instance.DamagedDrones)
-                            {
-                                if (useddrone.ItemId == damageddrone.Id)
-                                {
-                                    //move this damaged drone out of the drone bay and somewhere we can repair it later.
-                                    Cache.Instance.LootHangar.Add(useddrone, 1);
-                                    damagedDronesMoved++;
-                                }
-                            }
+                            Cache.Instance.DamagedDrones.ToList().Remove(damagedDrone);
                         }
-                        Logging.Log("Arm", "Moved [" + damagedDronesMoved + "] drones to the loothangar to later (manual) repair", Logging.orange);
+                        break;
                     }
                     else
                     {
