@@ -54,7 +54,6 @@ namespace Questor.Modules.Actions
                     break;
 
                 case UnloadLootState.Begin:
-                    if (!Cleanup.CloseInventoryWindows()) break;
                     if (!Cache.Instance.OpenCargoHold("UnloadLoot")) break;
                     if (DateTime.Now < _nextUnloadAction)
                     {
