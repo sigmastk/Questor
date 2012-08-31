@@ -221,6 +221,7 @@ namespace Questor.Modules.Logging
             {
                 // Lost drone statistics
                 if (Settings.Instance.UseDrones && 
+                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Capsule &&
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && 
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Frigate && 
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && 
