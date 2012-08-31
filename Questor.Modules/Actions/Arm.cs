@@ -92,6 +92,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.Begin:
+                    if (!Cleanup.CloseInventoryWindows()) break;
                     //DefaultFittingChecked = false; //flag to check for the correct default fitting before using the fitting manager
                     //DefaultFittingFound = true; //Did we find the default fitting?
                     Cache.Instance.ArmLoadedCache = false;
