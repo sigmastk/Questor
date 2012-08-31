@@ -42,7 +42,7 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < 500) //default: 500ms
                 return;
             _lastPulse = DateTime.Now;
-            
+
             switch (_States.CurrentPanicState)
             {
                 case PanicState.Idle:
@@ -75,7 +75,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (DateTime.Now < Cache.Instance.LastSessionChange.AddSeconds(10))
                         return;
 
-                    if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait. 
+                    if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
                         return;
 
                     if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
@@ -232,7 +232,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                             {
                                 EntityCache warpscrambledby = Cache.Instance.PriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
-                                if (warpscrambledby != null && _nextWarpScrambledWarning > DateTime.Now)
+                                if (warpscrambledby != null && DateTime.Now > _nextWarpScrambledWarning)
                                 {
                                     _nextWarpScrambledWarning = DateTime.Now.AddSeconds(20);
                                     Logging.Log("Panic", "We are scrambled by: [" + Logging.white + warpscrambledby.Name + Logging.orange + "][" + Logging.white + Math.Round(warpscrambledby.Distance, 0) + Logging.orange + "][" + Logging.white + warpscrambledby.Id + Logging.orange + "]",
@@ -251,7 +251,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 else
                                 {
-                                    Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds,0) + "sec]", Logging.red);
+                                    Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.red);
                                 }
 
                                 if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
