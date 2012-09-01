@@ -322,7 +322,9 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
-                else //target is not in range...
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                
+                if (target.Distance > range) //target is not in range...
                 {
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
@@ -330,7 +332,6 @@ namespace Questor.Modules.Activities
                         if (!Combat.ReloadAll(target)) return;
                     }
                 }
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                 return;
             }
 
@@ -791,7 +792,8 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
-                else
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                if (target.Distance > Cache.Instance.MaxRange)
                 {
                     if (DateTime.Now > Cache.Instance.NextReload)
                     {
@@ -799,7 +801,7 @@ namespace Questor.Modules.Activities
                         if (!Combat.ReloadAll(target)) return;
                     }
                 }
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                
                 return;
             }
         }
