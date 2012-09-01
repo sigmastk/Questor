@@ -75,7 +75,7 @@ namespace Questor.Modules.Actions
                     if (!Cleanup.CloseInventoryWindows()) break;
                     _States.CurrentArmState = ArmState.Done;
                     break;
-                    
+
                 case ArmState.Done:
                     break;
 
@@ -92,6 +92,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.Begin:
+                    if (!Cleanup.CloseInventoryWindows()) break;
                     //DefaultFittingChecked = false; //flag to check for the correct default fitting before using the fitting manager
                     //DefaultFittingFound = true; //Did we find the default fitting?
                     Cache.Instance.ArmLoadedCache = false;
@@ -177,8 +178,8 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
-                                if (!Cache.Instance.OpenShipsHangar("Arm")) break; 
-                                
+                                if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
                                 {
@@ -232,8 +233,8 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
-                                if (!Cache.Instance.OpenShipsHangar("Arm")) break; 
-                                
+                                if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 var ship = ships.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == shipName);
                                 if (ship != null)
@@ -243,7 +244,6 @@ namespace Questor.Modules.Actions
                                     Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                                     if (TryMissionShip)
                                         UseMissionShip = true;
-
 
                                     if (TryMissionShip && !UseMissionShip)
                                     {
@@ -263,7 +263,7 @@ namespace Questor.Modules.Actions
                                     Logging.Log("Arm", "Could not find [" + shipName + "] ship!", Logging.red);
                                     return;
                                 }
-                            }                            
+                            }
                         }
 
                         if (TryMissionShip)
@@ -555,9 +555,9 @@ namespace Questor.Modules.Actions
                     {
                         AmmoToLoad = new List<Ammo>(Cache.Instance.MissionAmmo);
                     }
-                    foreach (DirectItem item in Cache.Instance.AmmoHangar.Items.OrderByDescending(i => i.Quantity))
+                    foreach (DirectItem item in Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).OrderBy(i => i.Quantity))
                     {
-                        if (item.ItemId <= 0 || item.IsSingleton || item.Volume == 0.00 || item.Quantity == 0)
+                        if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0)
                             continue;
 
                         Ammo ammo = AmmoToLoad.FirstOrDefault(a => a.TypeId == item.TypeId);
