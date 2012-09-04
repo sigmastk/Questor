@@ -188,7 +188,10 @@ namespace Questor.Storylines
                 _traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
                 return;
             }
-            if (!Cache.Instance.RouteIsAllHighSec())
+
+            if (!Cache.Instance.CheckifRouteIsAllHighSec()) return;
+
+            if (!Cache.Instance.RouteIsAllHighSecBool)
             {
                 Logging.Log("Storyline", "GotoAgent: Route to agent is through low-sec systems. Declining.", Logging.yellow);
                 _States.CurrentStorylineState = StorylineState.DeclineMission;

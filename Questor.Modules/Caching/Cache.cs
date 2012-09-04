@@ -256,6 +256,7 @@ namespace Questor.Modules.Caching
         public bool LootAlreadyUnloaded = false;
         public bool MissionLoot = false;
         public bool SalvageAll = false;
+        public bool RouteIsAllHighSecBool = false;
 
         public double Wealth { get; set; }
 
@@ -1982,19 +1983,25 @@ namespace Questor.Modules.Caching
             //Directdestination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.AgentId, "Encounter"));
             //return List<long> destination;
         //}
-        public bool RouteIsAllHighSec()
+
+        public bool CheckifRouteIsAllHighSec()
         {
+            Cache.Instance.RouteIsAllHighSecBool = false;
             // Find the first waypoint
             List<long> currentPath = DirectEve.Navigation.GetDestinationPath();
+            if (currentPath == null || !currentPath.Any()) return false;
+
             for (int i = currentPath.Count - 1; i >= 0; i--)
             {
                 DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
                 if (solarSystemInRoute.Security < 0.5)
                 {
                     //Bad bad bad
-                    return false;
+                    Cache.Instance.RouteIsAllHighSecBool = false;
+                    return true;
                 }
             }
+            Cache.Instance.RouteIsAllHighSecBool = true;
             return true;
         }
 
