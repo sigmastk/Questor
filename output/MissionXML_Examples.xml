@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
 <!-- Mission XML Examples -->
 <Missions>
-  <bring>Item</bring>
+  <bring>ItemA</bring>  <!-- will  bring an item, if item not avail, fail, halt -->
+  <bringquantity>2</bringquantity> <!-- optional, only needed if you want to bring more than 1 -->
+  <trytobring>ItemB</bring> <!-- will attempt to bring, if item not avail, continue -->
+  <trytobringquantity>3</bringquantity> <!-- optional, only needed if you want to bring more than 1 -->
   <usedrones>false</usedrones> <!-- turn drones off for this mission if needed: false == off, true == on-->
   <weaponGroupId></weaponGroupId> <!-- if you want to use a different weapongroupID for this mission (small fast frigate?) -->
   <killSentries>true</killSentries> <!-- if set to true questor's clearpocket action will not ignore sentries -->
