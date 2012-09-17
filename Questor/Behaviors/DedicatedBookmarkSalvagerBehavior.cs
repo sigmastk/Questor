@@ -59,7 +59,6 @@ namespace Questor.Behaviors
 //        public List<DirectBookmark> AfterMissionSalvageBookmarks;
         public List<DirectBookmark> BookmarksThatAreNotReadyYet;
 
-
         //DateTime _nextAction = DateTime.Now;
 
         public DedicatedBookmarkSalvagerBehavior()

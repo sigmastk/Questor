@@ -557,7 +557,7 @@ namespace Questor.Modules.Actions
                     }
                     foreach (DirectItem item in Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).OrderBy(i => i.Quantity))
                     {
-                        if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0)
+                        if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0) // || item.IsSingleton
                             continue;
 
                         Ammo ammo = AmmoToLoad.FirstOrDefault(a => a.TypeId == item.TypeId);

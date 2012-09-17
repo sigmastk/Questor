@@ -73,7 +73,7 @@ namespace QuestorManager
         private readonly Defense _defense;
         private readonly Cleanup _cleanup;
         private readonly ListItems _item;
-        
+
         private DateTime _lastAction;
 
         public string CharacterName { get; set; }
@@ -234,7 +234,7 @@ namespace QuestorManager
             // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
             //
             _cleanup.ProcessState();
-            
+
             if (Settings.Instance.DebugStates)
                 Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.white);
 
@@ -244,7 +244,6 @@ namespace QuestorManager
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InWarp)
                 return;
-
 
             InitializeTraveler();
 
@@ -426,8 +425,8 @@ namespace QuestorManager
 
                     if (DateTime.Now > _lastAction)
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Arm")) break; 
-                        
+                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+
                         List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName == txtNameShip.Text))
                         {
@@ -572,7 +571,7 @@ namespace QuestorManager
                         _traveler.Destination = travelerDestination;
 
                     _traveler.ProcessState();
-                    
+
                     // Record number of jumps
                     _jumps = Cache.Instance.DirectEve.Navigation.GetDestinationPath().Count;
 

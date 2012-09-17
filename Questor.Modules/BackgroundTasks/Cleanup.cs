@@ -367,12 +367,12 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (window.Name.Contains("_ShipDroneBay_") && window.Caption.Contains("Drone Bay") && window.Type.Contains("Inventory"))
                 {
-                    Logging.Log("Cleanup","CloseInventoryWindows: Closing Drone Bay Window",Logging.white);
+                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Drone Bay Window", Logging.white);
                     window.Close();
                     _lastCleanupAction = DateTime.Now;
                     return false;
                 }
-                if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))                 
+                if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Cargo Bay Window", Logging.white);
                     window.Close();
@@ -400,8 +400,8 @@ namespace Questor.Modules.BackgroundTasks
                     _lastCleanupAction = DateTime.Now;
                     return false;
                 }
-                // 
-                // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp. 
+                //
+                // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp.
                 //
             }
             Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(4);
@@ -543,7 +543,7 @@ namespace Questor.Modules.BackgroundTasks
                         return;
                     }
                     if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Checking Each window in Cache.Instance.Windows", Logging.teal);
-                    
+
                     foreach (DirectWindow window in Cache.Instance.Windows)
                     {
                         // Telecom messages are generally mission info messages: close them
@@ -606,7 +606,7 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("The Zbikoki's Hacker Card");
                                 close |= window.Html.Contains(" units free.");
                                 close |= window.Html.Contains("already full");
-                                //windows that can be disabled, but may not yet be disabled 
+                                //windows that can be disabled, but may not yet be disabled
                                 close |= window.Html.Contains("Are you sure you would like to decline this mission");
                                 close |= window.Html.Contains("You can decline a mission every four hours without penalty");
                                 //why are we reloading an already full weapon?
@@ -625,7 +625,7 @@ namespace Questor.Modules.BackgroundTasks
                                 restartharsh |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");	//CONNECTION LOST
                                 restartharsh |= window.Html.Contains("Your client has waited"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
                                 restartharsh |= window.Html.Contains("This could mean the server is very loaded"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
-                                
+
                                 //
                                 // restart the client if these are encountered
                                 //
@@ -662,7 +662,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cleanup.CloseQuestor();
                                 return;
                             }
-                            
+
                             if (restart)
                             {
                                 Logging.Log("Cleanup", "Restarting eve...", Logging.white);
@@ -677,7 +677,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cleanup.CloseQuestor();
                                 return;
                             }
-                            
+
                             if (sayyes)
                             {
                                 Logging.Log("Cleanup", "Found a window that needs 'yes' chosen...", Logging.white);
@@ -688,7 +688,7 @@ namespace Questor.Modules.BackgroundTasks
 
                             if (sayok)
                             {
-                                Logging.Log("Cleanup", "Saying OK to modal window for lpstore offer.", Logging.white); 
+                                Logging.Log("Cleanup", "Saying OK to modal window for lpstore offer.", Logging.white);
                                 window.AnswerModal("OK");
                                 continue;
                             }
@@ -761,11 +761,11 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
-                                if (Settings.Instance.UseDrones && 
-                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && 
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && 
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&  
-                                   _dronebayclosingattempts <= 1))
+                                if (Settings.Instance.UseDrones &&
+                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 &&
+                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 28 &&
+                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&
+                                    _dronebayclosingattempts <= 1))
                                 {
                                     _lastCleanupAction = DateTime.Now;
                                     _dronebayclosingattempts++;

@@ -257,7 +257,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("UnloadLoot", "Moving items timed out, clearing item locks", Logging.orange);
                         Cache.Instance.DirectEve.UnlockItems();
                         _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
+                        _States.CurrentUnloadLootState = UnloadLootState.StackAmmoHangar;
                         break;
                     }
                     break;
@@ -267,37 +267,9 @@ namespace Questor.Modules.Actions
                     if (DateTime.Now < _nextUnloadAction)
                         break;
 
-                    if (!Cache.Instance.StackAmmoHangar("UnloadLoot.StackAmmoHangar")) break;
+                    if (!Cache.Instance.StackAmmoHangar("UnloadLoot.StackHangars")) return;
+                    Cache.Instance.CloseCorpHangar("UnloadLoot.StackHangars", Settings.Instance.AmmoHangar);
 
-                    _States.CurrentUnloadLootState = UnloadLootState.WaitForAmmoHangarStacking;
-                    break;
-
-                case UnloadLootState.WaitForAmmoHangarStacking:
-                    // Wait 5 seconds after stacking
-                    if (DateTime.Now < _nextUnloadAction)
-                        break;
-
-                    if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
-                    {
-                        Logging.Log("UnloadLoot.AmmoHangarStacking", "Done stacking AmmoHangar", Logging.white);
-                        _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        _States.CurrentUnloadLootState = UnloadLootState.CloseAmmoHangar;
-                        break;
-                    }
-
-                    if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
-                    {
-                        Logging.Log("UnloadLoot", "Stacking items in AmmoHangar timed out, clearing item locks", Logging.orange);
-                        Cache.Instance.DirectEve.UnlockItems();
-
-                        Logging.Log("UnloadLoot", "Done stacking AmmoHangar", Logging.white);
-                        _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;
-                        break;
-                    }
-                    break;
-
-                case UnloadLootState.CloseAmmoHangar:
-                    if (!Cleanup.CloseInventoryWindows()) break;
                     _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
                     break;
 
@@ -306,42 +278,32 @@ namespace Questor.Modules.Actions
                     if (DateTime.Now < _nextUnloadAction)
                         break;
 
-                    if (!Cache.Instance.StackLootHangar("UnloadLoot.StackLootHangar"))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        _States.CurrentUnloadLootState = UnloadLootState.WaitForLootHangarStacking;
-                    }
+                    if (!Cache.Instance.StackLootHangar("UnloadLoot.StackHangars")) return;
+                    Cache.Instance.CloseCorpHangar("UnloadLoot.StackHangars", Settings.Instance.LootHangar);
+ 
+                    _States.CurrentUnloadLootState = UnloadLootState.WaitForStacking;
                     break;
 
-                case UnloadLootState.WaitForLootHangarStacking:
+                case UnloadLootState.WaitForStacking:
                     // Wait 5 seconds after stacking
                     if (DateTime.Now < _nextUnloadAction)
                         break;
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
-                        Logging.Log("UnloadLoot.LootHangarStacking", "Done, stacking LootHangar", Logging.white);
-                        _States.CurrentUnloadLootState = UnloadLootState.CloseLootHangar;
+                        Logging.Log("UnloadLoot", "Done", Logging.white);
+                        _States.CurrentUnloadLootState = UnloadLootState.Done;
                         break;
                     }
 
                     if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
                     {
-                        Logging.Log("UnloadLoot", "Stacking items in LootHangar timed out, clearing item locks", Logging.orange);
+                        Logging.Log("UnloadLoot", "Stacking items timed out, clearing item locks", Logging.orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        Logging.Log("UnloadLoot", "Done, stacking LootHangar", Logging.white);
-                        _States.CurrentUnloadLootState = UnloadLootState.CloseLootHangar;
+                        Logging.Log("UnloadLoot", "Done", Logging.white);
+                        _States.CurrentUnloadLootState = UnloadLootState.Done;
                         break;
                     }
-                    break;
-
-                case UnloadLootState.CloseLootHangar:
-                    if (!Cleanup.CloseInventoryWindows()) break;
-                    _States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
             }
         }

@@ -142,7 +142,7 @@ namespace Questor.Modules.Logging
                 {
 
                     objectline = thing.Name + ";";
-                    objectline += Math.Round(thing.Distance/1000, 0) + ";";
+                    objectline += Math.Round(thing.Distance / 1000, 0) + ";";
                     objectline += thing.TypeId + ";";
                     objectline += thing.GroupId + ";";
                     objectline += thing.CategoryId + ";";
@@ -152,15 +152,15 @@ namespace Questor.Modules.Logging
                     objectline += Math.Round(thing.Velocity, 0) + ";";
                     objectline += thing.Id + ";\r\n";
                     //
-                    // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kind of grid layout... 
+                    // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kind of grid layout...
                     // or at least know the distances between all the NPCs... thus be able to infer which NPCs were in which 'groups'
-                    // 
+                    //
 
                     //Logging.Log("Statistics", ";PocketObjectStatistics;" + objectline, Logging.white);
                     File.AppendAllText(Settings.Instance.PocketObjectStatisticsFile, objectline);
                 }
             }
-            return true; 
+            return true;
         }
 
         public static bool EntityStatistics(List<EntityCache> things)
@@ -170,7 +170,7 @@ namespace Questor.Modules.Logging
 
             if (!things.Any()) //if their are no entries, return
             {
-                Logging.Log("Statistics","EntityStatistics: No entries to log",Logging.white);
+                Logging.Log("Statistics", "EntityStatistics: No entries to log", Logging.white);
                 return true;
             }
 
@@ -185,14 +185,14 @@ namespace Questor.Modules.Logging
                 objectline += thing.IsNpc + ";";
                 objectline += thing.IsPlayer + ";";
                 objectline += thing.TargetValue + ";";
-                objectline += Math.Round(thing.Velocity,0) + ";";
+                objectline += Math.Round(thing.Velocity, 0) + ";";
                 objectline += thing.Id + ";\r\n";
                 //
-                // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kinda mission simulator... 
+                // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kinda mission simulator...
                 // or at least know the distances between all the NPCs... thus be able to infer which NPCs were in which 'groups'
-                // 
+                //
 
-                Logging.Log("Statistics",";EntityStatistics;" + objectline,Logging.white);
+                Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.white);
             }
             return true;
         }
@@ -220,9 +220,9 @@ namespace Questor.Modules.Logging
             if (Settings.Instance.DroneStatsLog && !Statistics.Instance.DroneLoggingCompleted)
             {
                 // Lost drone statistics
-                if (Settings.Instance.UseDrones && 
+                if (Settings.Instance.UseDrones &&
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Capsule &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && 
+                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle &&
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Frigate && 
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && 
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
@@ -232,7 +232,7 @@ namespace Questor.Modules.Logging
                     {
                         if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return false;
                         if (Cache.Instance.DroneBay.Window == null) return true; //if the drone window does not exist, assume we cant log any drone stats
-                        
+
                         InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
                         Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                         Logging.Log("Statistics: WriteDroneStatsLog", "Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString(CultureInfo.InvariantCulture), Logging.white);

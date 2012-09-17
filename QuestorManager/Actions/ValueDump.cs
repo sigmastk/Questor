@@ -233,7 +233,7 @@ namespace QuestorManager.Actions
                     break;
 
                 case ValueDumpState.StartQuickSell:
-                    if ((DateTime.Now.Subtract(_lastExecute).TotalSeconds < Cache.Instance.RandomNumber(1,3)) && _form.cbxSell.Checked)
+                    if ((DateTime.Now.Subtract(_lastExecute).TotalSeconds < Cache.Instance.RandomNumber(1, 3)) && _form.cbxSell.Checked)
                         break;
                     _lastExecute = DateTime.Now;
 

@@ -600,6 +600,8 @@ namespace Questor
 
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.white);
                         slot.Activate();
+                        //LavishScript.ExecuteCommand(String.Format("windowtaskbar on \"{0}\"", slot.CharName));
+                        //LavishScript.ExecuteCommand(String.Format("WindowText \"{0}\"", slot.CharName));
                         return;
                     }
                     Logging.Log("Startup", "Character id/name [" + _character + "] not found, retrying in 10 seconds", Logging.white);

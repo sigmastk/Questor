@@ -803,6 +803,7 @@ namespace Questor.Modules.Combat
             }
 
             // Do we have too many low value targets targeted?
+            // can we calculate how many priority targets we already hav targeted? This would eliminate false positives and some unecessary unlocking/relocking of frigates
             while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.PriorityTargets.Count(), 0))
             {
                 // Unlock any target

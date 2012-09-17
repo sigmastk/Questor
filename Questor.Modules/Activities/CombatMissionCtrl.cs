@@ -315,10 +315,15 @@ namespace Questor.Modules.Activities
                         {
                             //noop
                         }
-                        else
+                        else if (!Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
                         {
                             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Targeting [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.teal);
                             target.LockTarget();
+                        }
+
+                        if (!Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
+                        {
+                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We have attempted to target an NPC that is on the ignore list (why?) Name [" + target.Name + "][" + target.Id + "][" + target.Distance + "]",Logging.teal);
                         }
                     }
                 }
@@ -1469,7 +1474,7 @@ namespace Questor.Modules.Activities
 
                     Logging.Log("-", "-----------------------------------------------------------------", Logging.teal);
                     Logging.Log("-", "-----------------------------------------------------------------", Logging.teal);
-                    Logging.Log("CombatMissionCtrl", "Mission Timer Currently At: [" + Math.Round(DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + "]", Logging.teal);
+                    Logging.Log("CombatMissionCtrl", "Mission Timer Currently At: [" + Math.Round(DateTime.Now.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + "] min", Logging.teal);
                     //if (Cache.Instance.OptimalRange != 0)
                     //    Logging.Log("Optimal Range is set to: " + (Cache.Instance.OrbitDistance / 1000).ToString(CultureInfo.InvariantCulture) + "k");
                     Logging.Log("CombatMissionCtrl", "Max Range is currently: " + (Cache.Instance.MaxRange / 1000).ToString(CultureInfo.InvariantCulture) + "k", Logging.teal);

@@ -28,7 +28,7 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
             if (!Cache.Instance.OpenShipsHangar("Arm"))
                 return StorylineState.Arm;
-            
+
             // Are we in an industrial?  Yes, goto the agent
             //var directEve = Cache.Instance.DirectEve;
             //if (directEve.ActiveShip.TypeId == 648 || directEve.ActiveShip.TypeId == 649 || directEve.ActiveShip.TypeId == 650 || directEve.ActiveShip.TypeId == 651 || directEve.ActiveShip.TypeId == 652 || directEve.ActiveShip.TypeId == 653 || directEve.ActiveShip.TypeId == 654 || directEve.ActiveShip.TypeId == 655 || directEve.ActiveShip.TypeId == 656 || directEve.ActiveShip.TypeId == 657 || directEve.ActiveShip.TypeId == 1944 || directEve.ActiveShip.TypeId == 19744)
@@ -70,7 +70,7 @@ namespace Questor.Storylines
                     {
                         Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.white);
                         ship.ActivateShip();
-                        Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Modules.Lookup.Time.Instance.SwitchShipsDelay_seconds);
+                        Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Modules.Lookup.Time.Instance. SwitchShipsDelay_seconds);
                     }
                     return StorylineState.Arm;
                 }

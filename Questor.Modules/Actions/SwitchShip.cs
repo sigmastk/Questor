@@ -56,8 +56,8 @@ namespace Questor.Modules.Actions
                     {
                         if (DateTime.Now.Subtract(_lastSwitchShipAction).TotalSeconds > Time.Instance.SwitchShipsDelay_seconds)
                         {
-                            if (!Cache.Instance.OpenShipsHangar("Arm")) break; 
-                            
+                            if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+
                             List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                             foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
                             {

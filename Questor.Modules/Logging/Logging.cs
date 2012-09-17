@@ -18,6 +18,7 @@ namespace Questor.Modules.Logging
     using System;
     using InnerSpaceAPI;
     using System.IO;
+    using LavishScriptAPI;
 
     public static class Logging
     {
@@ -38,8 +39,8 @@ namespace Questor.Modules.Logging
         {
             string colorLogLine = line;
             //colorLogLine contains color and is for the InnerSpace console
-            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, Logging.orange + "[" + Logging.yellow + module + Logging.orange +  "] " + color + colorLogLine));                            //Innerspace Console Log
-            
+            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, Logging.orange + "[" + Logging.yellow + module + Logging.orange + "] " + color + colorLogLine));                            //Innerspace Console Log
+
             string plainLogLine = FilterColorsFromLogs(line);
             //plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
             Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "[" + module + "] " + plainLogLine + "\r\n");               //Questor GUI Console Log
@@ -53,6 +54,11 @@ namespace Questor.Modules.Logging
                     {
                         module = "Logging";
                         line = "Writing to Daily Console Log ";
+                        if (Settings.Instance.InnerspaceGeneratedConsoleLog) 
+                        {
+                            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
+                            LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
+                        }
                         InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.Now, Logging.orange + "[" + Logging.yellow + module + Logging.orange + "] " + color + colorLogLine));                            //Innerspace Console Log
                         Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.Now, plainLogLine + "\r\n");
 
@@ -86,14 +92,17 @@ namespace Questor.Modules.Logging
                     if (Settings.Instance.ConsoleLogFile != null)
                         File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog);               //Write In Memory Console log to File
                     Cache.Instance.ConsoleLog = null;
-                    
+
                     if (Settings.Instance.ConsoleLogFileRedacted != null)
                         File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
                     Cache.Instance.ConsoleLogRedacted = null;
                 }
             }
-    }
-         
+        }
+
+        //path = path.Replace(Environment.CommandLine, "");
+        //path = path.Replace(Environment.GetCommandLineArgs(), "");
+
         public static string FilterSensitiveInfo(string line)
         {
             if (line == null)
@@ -108,7 +117,7 @@ namespace Questor.Modules.Logging
             }
             //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
             //{
-            //    if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");  
+            //    if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");
             //    line = line.Replace(" " + Cache.Instance.CurrentAgent + " ", " _MyCurrentAgentRedacted_ ");
             //    line = line.Replace("[" + Cache.Instance.CurrentAgent + "]", "[_MyCurrentAgentRedacted_]");
             //}

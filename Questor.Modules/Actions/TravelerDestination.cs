@@ -378,7 +378,7 @@ namespace Questor.Modules.Actions
             }
             else
             {
-                bookmark.WarpTo();    
+                bookmark.WarpTo();
             }
             nextAction = DateTime.Now.AddSeconds(Time.Instance.TravelerInWarpedNextCommandDelay_seconds);
             return false;

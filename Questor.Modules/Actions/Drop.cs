@@ -40,7 +40,7 @@ namespace Questor.Modules.Actions
             else if ("Ship Hangar" == Hangar)
                 _hangar = Cache.Instance.ShipHangar;
             //else
-                //_hangar = Cache.Instance.DirectEve.GetCorporationHangar(Hangar); //this needs to be fixed
+            //_hangar = Cache.Instance.DirectEve.GetCorporationHangar(Hangar); //this needs to be fixed
 
             switch (_States.CurrentDropState)
             {

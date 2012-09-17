@@ -33,7 +33,6 @@ namespace BuyLPI
         private static DirectEve _directEve;
         private static DateTime _lastPulse;
         private static Cleanup _cleanup;
-        
 
         private static void Main(string[] args)
         {
@@ -117,15 +116,15 @@ namespace BuyLPI
 
             if (DateTime.Now < Cache.Instance.NextInSpaceorInStation)
                 return;
-            
+
             // Start _cleanup.ProcessState
             // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
             //
             _cleanup.ProcessState();
-            
+
             // Done
             // Cleanup State: ProcessState
- 
+
             if (DateTime.Now > _done)
                 return;
 
@@ -170,8 +169,7 @@ namespace BuyLPI
             DirectLoyaltyPointOffer offer = lpstore.Offers.FirstOrDefault(o => o.TypeId.ToString(CultureInfo.InvariantCulture) == _type || String.Compare(o.TypeName, _type, StringComparison.OrdinalIgnoreCase) == 0);
             if (offer == null)
             {
-                Logging.Log("BuyLPI"," Can't find offer with type name/id: [" + _type + "]",Logging.white);
-
+                Logging.Log("BuyLPI", " Can't find offer with type name/id: [" + _type + "]", Logging.white);
                 _done = DateTime.Now;
                 return;
             }

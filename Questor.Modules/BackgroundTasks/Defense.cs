@@ -75,7 +75,7 @@ namespace Questor.Modules.BackgroundTasks
                 module.Click();
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                 Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "] waiting [" + Math.Round(Cache.Instance.NextActivateSupportModules.Subtract(DateTime.Now).TotalSeconds, 0) + " sec]", Logging.white);
-                
+
                 continue;
             }
             ModuleNumber = 0;
@@ -190,9 +190,9 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (module.GroupId != (int)Group.Afterburner)
                     continue;
-                
+
                 ModuleNumber++;
-                
+
                 if (module.InLimboState)
                     continue;
 

@@ -7,26 +7,16 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
-namespace Questor.Modules.States
+namespace Questor.Modules.Lookup
 {
-    public enum UnloadLootState
+    public enum TypeID
     {
-        Idle,
-        Begin,
-        OpenHangars,
-        MoveCommonMissionCompletionitems,
-        MoveLoot,
-        WaitForMove,
-        StackItemsHangar,
-        StackAmmoHangar,
-        StackLootHangar,
-        CloseAmmoHangar,
-        CloseLootHangar,
-        WaitForStacking,
-        WaitForAmmoHangarStacking,
-        WaitForLootHangarStacking,
-        Done,
-        MoveAmmo,
-        MoveCommonMissionCompletionItemsToAmmoHangar
+        //Minmater Rookie Ship
+        //Amarr Rookie Ship
+        //Caldari Rookie Ship
+        //Gallente Rookie Ship
+        
+        //Polaris = 9856,
+        //Polaris = 9855 //wtf
     }
 }

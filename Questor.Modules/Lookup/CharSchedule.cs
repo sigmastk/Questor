@@ -130,7 +130,7 @@ namespace Questor.Modules.Lookup
                 }
                 else
                     StartTime2Specified = true;
-                
+
                 Start2 = startTime2;
             }
 
@@ -166,7 +166,7 @@ namespace Questor.Modules.Lookup
                 }
                 else
                     StartTime3Specified = true;
-                
+
                 Start3 = startTime3;
             }
 

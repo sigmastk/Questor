@@ -16,7 +16,7 @@ namespace Questor.Modules.BackgroundTasks
         public static DateTime AvoidBumpingThingsTimeStamp = Cache.Instance.StartTime;
         public static int SafeDistanceFromStructureMultiplier = 1;
         public static bool AvoidBumpoingThingsWarningSent = false;
-        
+
         public static void AvoidBumpingThings(EntityCache thisBigObject, string module)
         {
             //if It hasn't been at least 60 seconds since we last session changed do not do anything
@@ -53,7 +53,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                                 if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddMinutes(5) && !AvoidBumpoingThingsWarningSent)
                                 {
-                                    Logging.Log("NavigateOnGrid","We are stuck on a object and have been trying to orbit away from it for over 5 min", Logging.orange);
+                                    Logging.Log("NavigateOnGrid", "We are stuck on a object and have been trying to orbit away from it for over 5 min", Logging.orange);
                                     AvoidBumpoingThingsWarningSent = true;
                                 }
                                 if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddMinutes(15))
@@ -66,7 +66,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                             }
                             thisBigObject.Orbit((int)Distance.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier);
-                            Logging.Log(module, 
+                            Logging.Log(module,
                                        ": initiating Orbit of [" + thisBigObject.Name +
                                           "] orbiting at [" + ((int)Distance.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.white);
                         }
@@ -86,7 +86,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     Cache.Instance.OrbitDistance = 2000;
                 }
-                
+
                 if (target.Distance + (int)Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                 {
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.white);

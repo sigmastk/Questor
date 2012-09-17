@@ -178,7 +178,7 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Agentinteraction", "ReplyToAgent: Found accept button, Changing Purpose to StartMission", Logging.white);
                     _agentWindowTimeStamp = DateTime.Now;
-                    Purpose = AgentInteractionPurpose.StartMission;
+                        Purpose = AgentInteractionPurpose.StartMission;
                     }
                 }
 
@@ -773,7 +773,7 @@ namespace Questor.Modules.Actions
                     }
 
                     //add timer to current agent
-                    if (!Cache.Instance.IsAgentLoop && Settings.Instance.MultiAgentSupport)
+                    if (!Cache.Instance.AllAgentsStillInDeclineCoolDown && Settings.Instance.MultiAgentSupport)
                     {
                         if (currentAgent != null) currentAgent.DeclineTimer = DateTime.Now.AddSeconds(secondsToWait);
                         CloseConversation();
