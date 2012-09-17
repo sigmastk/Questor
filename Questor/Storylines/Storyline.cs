@@ -25,6 +25,9 @@ namespace Questor.Storylines
 
         private DateTime _nextAction = DateTime.Now;
         private DateTime _nextStoryLineAttempt = DateTime.Now;
+        private int highseccounter = 0;
+        private bool highsecchecked = false;
+        private bool setDestinationStation = false;
 
         public Storyline()
         {
@@ -57,6 +60,7 @@ namespace Questor.Storylines
                                {"Hunting Black Dog", new GenericCourier()},
                                {"Operation Doorstop", new GenericCourier()},
                                /* COURIER/DELIVERY - GALLENTE */
+                               {"A Fine Wine", new GenericCourier()},
                                {"On the Run", new GenericCourier()},
                                {"A Fathers Love", new GenericCourier()},
                                {"A Greener World", new GenericCourier()},
@@ -92,6 +96,7 @@ namespace Questor.Storylines
                                {"Jealous Rivals", new GenericCombatStoryline()},
                                {"Stem the Flow", new GenericCombatStoryline()},
                                /* COMBAT - GALLENTE */
+                               {"A Force to Be Reckoned With", new GenericCombatStoryline()},
                                {"Kidnappers Strike - Ambush In The Dark (1 of 10)", new GenericCombatStoryline()},
                                {"Kidnappers Strike - The Kidnapping (3 of 10)", new GenericCombatStoryline()},
                                {"Kidnappers Strike - Incriminating Evidence (5 of 10)", new GenericCombatStoryline()},
@@ -105,7 +110,7 @@ namespace Questor.Storylines
                                /* COMBAT - MINMATAR */
                                {"Amarrian Excavators", new GenericCombatStoryline()},
                                {"Diplomatic Incident", new GenericCombatStoryline()},
-                               {"Matriarch", new GenericCombatStoryline()},  
+                               {"Matriarch", new GenericCombatStoryline()},
                                {"Nine Tenths of the Wormhole", new GenericCombatStoryline()},
                                {"Postmodern Primitives", new GenericCombatStoryline()},
                                {"Quota Season", new GenericCombatStoryline()},
@@ -169,12 +174,16 @@ namespace Questor.Storylines
             Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.yellow);
             Cache.Instance.MissionName = currentStorylineMission.Name;
 
+            highsecchecked = false;
             _States.CurrentStorylineState = StorylineState.Arm;
             _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name)];
         }
 
         private void GotoAgent(StorylineState nextState)
         {
+            if (_nextAction > DateTime.Now)
+                return;
+
             DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(Cache.Instance.CurrentStorylineAgentId);
             if (storylineagent == null)
             {
@@ -189,14 +198,45 @@ namespace Questor.Storylines
                 return;
             }
 
-            if (!Cache.Instance.CheckifRouteIsAllHighSec()) return;
-
-            if (!Cache.Instance.RouteIsAllHighSecBool)
+            if (!highsecchecked)
             {
-                Logging.Log("Storyline", "GotoAgent: Route to agent is through low-sec systems. Declining.", Logging.yellow);
-                _States.CurrentStorylineState = StorylineState.DeclineMission;
-                return;
+                // if we haven't already done so, set Eve's autopilot
+                if (!setDestinationStation)
+                {
+                    if (!_traveler.SetStationDestination(storylineagent.StationId))
+                    {
+                        Logging.Log("Storyline", "GotoAgent: Unable to find route to storyline agent. Skipping.", Logging.yellow);
+                        _States.CurrentStorylineState = StorylineState.Done;
+                        return;
+                    }
+                    setDestinationStation = true;
+                    _nextAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    return;
+                }
+
+                // Make sure we've got a clear path to the agent
+                if (!Settings.Instance.LowSecMissionsInShuttles && !Cache.Instance.CheckifRouteIsAllHighSec())
+                {
+                    if (highseccounter < 5)
+                    {
+                        highseccounter++;
+                        return;
+                    }
+                    Logging.Log("Storyline", "GotoAgent: Unable to determine whether route is all highsec or not. Skipping.", Logging.yellow);
+                    _States.CurrentStorylineState = StorylineState.Done;
+                    highseccounter = 0;
+                    return;
+                }
+
+                if (!Cache.Instance.RouteIsAllHighSecBool)
+                {
+                    Logging.Log("Storyline", "GotoAgent: Route to agent is through low-sec systems. Skipping.", Logging.yellow);
+                    _States.CurrentStorylineState = StorylineState.Done;
+                    return;
+                }
+                highsecchecked = true;
             }
+
             if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
                 Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.yellow);
@@ -208,6 +248,7 @@ namespace Questor.Storylines
             {
                 _States.CurrentStorylineState = nextState;
                 _traveler.Destination = null;
+                setDestinationStation = false;
             }
 
             if (Settings.Instance.DebugStates)

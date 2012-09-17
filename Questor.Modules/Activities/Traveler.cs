@@ -46,6 +46,35 @@ namespace Questor.Modules.Activities
         }
 
         /// <summary>
+        ///   Set destination to a solar system
+        /// </summary>
+        /// <param name = "solarSystemId"></param>
+        public bool SetStationDestination(long stationId)
+        {
+            location = Cache.Instance.DirectEve.Navigation.GetLocation(stationId);
+            Logging.Log("Traveler", "Location = [" + Logging.yellow + Cache.Instance.DirectEve.Navigation.GetLocationName(stationId) + Logging.green + "]", Logging.green);
+            if (location.IsValid)
+            {
+                locationErrors = 0;
+                Logging.Log("Traveler", "Setting destination to [" + Logging.yellow + location.Name + Logging.green + "]", Logging.green);
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Setting destination to [" + Logging.yellow + location.Name + Logging.green + "]", Logging.teal);
+                location.SetDestination();
+                return true;
+            }
+            else
+            {
+                Logging.Log("Traveler", "Error setting solar system destination [" + Logging.yellow + stationId + Logging.green + "]", Logging.green);
+                locationErrors++;
+                if (locationErrors > 100)
+                {
+                    return false;
+                }
+                return false;
+            }
+
+        }
+
+        /// <summary>
         ///   Navigate to a solar system
         /// </summary>
         /// <param name = "solarSystemId"></param>
@@ -60,7 +89,7 @@ namespace Questor.Modules.Activities
             Cache.Instance.NextTravelerAction = DateTime.Now.AddSeconds(1);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem - Iterating- next iteration should be in no less than [1] second ", Logging.teal);
 
-                destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
+            destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
 
             if (destination.Count == 0 || !destination.Any(d => d == solarSystemId))
             {
@@ -121,8 +150,8 @@ namespace Questor.Modules.Activities
                 
                 // Find the first waypoint
                 long waypoint = destination.First();
-                    if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.teal);
-                    locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.teal);
+                locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
                 // Find the stargate associated with it
                 IEnumerable<EntityCache> stargates = Cache.Instance.EntitiesByName(locationName).Where(e => e.GroupId == (int)Group.Stargate).ToList();
                 if (!stargates.Any())

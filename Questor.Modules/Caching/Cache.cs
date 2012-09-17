@@ -1990,11 +1990,12 @@ namespace Questor.Modules.Caching
             // Find the first waypoint
             List<long> currentPath = DirectEve.Navigation.GetDestinationPath();
             if (currentPath == null || !currentPath.Any()) return false;
+            if (currentPath[0] == 0) return false; //No destination set - prevents exception if somehow we've got an invalid destination
 
             for (int i = currentPath.Count - 1; i >= 0; i--)
             {
                 DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
-                if (solarSystemInRoute.Security < 0.5)
+                if (solarSystemInRoute.Security < 0.45)
                 {
                     //Bad bad bad
                     Cache.Instance.RouteIsAllHighSecBool = false;
